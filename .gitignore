@@ -1,0 +1,18 @@
+/*
+
+# folders
+!/gradle
+!/src
+
+# files
+!/.gitignore
+!/README.md
+!/build.gradle
+!/build.properties
+!/gradlew
+!/gradlew.bat
+!/changelog.md
+
+# APIs and dependencies
+!/libs
+/libs/*
