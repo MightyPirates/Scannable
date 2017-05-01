@@ -12,6 +12,9 @@ import java.util.function.Consumer;
 /**
  * Interface for a scan result provider.
  * <p>
+ * Provide this as a capability in an item so that it can be installed in the
+ * scanner. Once installed, it will be queried when the scanner is used.
+ * <p>
  * This is essentially just a fancy {@link Iterator} with support for partial
  * advancement so as to allow distributing scan workload over multiple ticks.
  * <p>
@@ -20,13 +23,20 @@ import java.util.function.Consumer;
  * call.
  * <p>
  * Otherwise, the implementation should prepare for spread out collection of
- * results in {@link #initialize(EntityPlayer, Vec3d, float, int)}, over the
- * specified number of ticks. Each tick until the scan is complete,
+ * results in {@link #initialize(EntityPlayer, Collection, Vec3d, float, int)},
+ * over the specified number of ticks. Each tick until the scan is complete,
  * {@link #computeScanResults(Consumer)} will be called, in which the
  * implementation should add results collected this tick to the passed
  * collection. It is the responsibility of the implementation to ensure that
  * all results have been added by the end of the last tick's call to
  * {@link #computeScanResults(Consumer)}.
+ * <p>
+ * Note that all of the scanning behavior is <em>client side only</em>, none
+ * of these methods will ever be called on the server. However, the capability
+ * must also be <em>reported</em> as present on the server so that both sides
+ * can detect if there are any scan providers installed and ignore the scan if
+ * there are not. The capability does not in fact have to be gettable, the
+ * server only does a <code>hasCapability</code> check.
  */
 public interface ScanResultProvider {
     /**

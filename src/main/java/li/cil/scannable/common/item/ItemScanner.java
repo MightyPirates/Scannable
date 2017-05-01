@@ -2,9 +2,11 @@ package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.api.ScanManager;
+import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.gui.GuiId;
 import li.cil.scannable.common.inventory.ItemScannerInventory;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -21,6 +23,8 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ItemScanner extends Item {
     public ItemScanner() {
@@ -36,18 +40,47 @@ public final class ItemScanner extends Item {
     }
 
     @Override
+    public void addInformation(final ItemStack stack, final EntityPlayer playerIn, final List<String> tooltip, final boolean advanced) {
+        super.addInformation(stack, playerIn, tooltip, advanced);
+        tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER));
+    }
+
+    @Override
     public ActionResult<ItemStack> onItemRightClick(final World world, final EntityPlayer player, final EnumHand hand) {
         if (player.isSneaking()) {
             player.openGui(Scannable.instance, GuiId.SCANNER.id, world, hand.ordinal(), 0, 0);
         } else {
+            final IItemHandler scannerInventory = player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+            assert scannerInventory != null;
+            final List<ItemStack> modules = new ArrayList<>();
+            boolean hasProvider = false;
+            for (int slot = 0; slot < scannerInventory.getSlots(); slot++) {
+                final ItemStack stack = scannerInventory.getStackInSlot(slot);
+                if (stack.isEmpty()) {
+                    continue;
+                }
+
+                modules.add(stack);
+                if (stack.hasCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null)) {
+                    hasProvider = true;
+                }
+            }
+
+            if (!hasProvider) {
+                return new ActionResult<>(EnumActionResult.FAIL, player.getHeldItem(hand));
+            }
+
             player.setActiveHand(hand);
             if (world.isRemote) {
-                final IItemHandler scannerInventory = player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-                assert scannerInventory != null;
-                ScanManager.INSTANCE.beginScan(player, scannerInventory);
+                ScanManager.INSTANCE.beginScan(player, modules);
             }
         }
         return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+    }
+
+    @Override
+    public boolean shouldCauseReequipAnimation(final ItemStack oldStack, final ItemStack newStack, final boolean slotChanged) {
+        return false;
     }
 
     @Override

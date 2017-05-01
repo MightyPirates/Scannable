@@ -18,7 +18,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -64,25 +63,18 @@ public enum ScanManager {
 
     // --------------------------------------------------------------------- //
 
-    public void beginScan(final EntityPlayer player, final IItemHandler scannerInventory) {
+    public void beginScan(final EntityPlayer player, final List<ItemStack> modules) {
         cancelScan();
 
         float scanRadius = Constants.SCAN_RADIUS;
 
-        final List<ItemStack> modules = new ArrayList<>();
-        for (int slot = 0; slot < scannerInventory.getSlots(); slot++) {
-            final ItemStack stack = scannerInventory.getStackInSlot(slot);
-            if (stack.isEmpty()) {
-                continue;
-            }
-
-            modules.add(stack);
-            final ScanResultProvider provider = stack.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
+        for (final ItemStack module : modules) {
+            final ScanResultProvider provider = module.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
             if (provider != null) {
                 collectingProviders.add(provider);
             }
 
-            if (stack.getItem() instanceof ItemScannerModuleRange) {
+            if (module.getItem() instanceof ItemScannerModuleRange) {
                 scanRadius += Constants.MODULE_RANGE_RADIUS_INCREASE;
             }
         }

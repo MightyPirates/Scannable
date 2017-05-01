@@ -28,6 +28,17 @@ public final class Constants {
     public static final String CONFIG_ORES_BLACKLIST = "config.scannable.oresBlacklist";
 
     // --------------------------------------------------------------------- //
+    // GUI labels
+
+    public static final String GUI_SCANNER_TITLE = "gui.scannable.scanner.title";
+    public static final String GUI_SCANNER_MODULES = "gui.scannable.scanner.modules";
+
+    // --------------------------------------------------------------------- //
+    // Tooltips
+
+    public static final String TOOLTIP_SCANNER = "tooltip.scannable.scanner";
+
+    // --------------------------------------------------------------------- //
     // Scanner settings
 
     // The radius in which to collect scan results around the player.

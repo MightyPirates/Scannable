@@ -12,3 +12,6 @@ config.scannable.useEnergy=Use Energy
 config.scannable.oresCommon=Common Ores
 config.scannable.oresRare=Rare Ores
 config.scannable.oresBlacklist=Ore Blacklist
+
+gui.scannable.scanner.title=Scanner
+gui.scannable.scanner.modules=Modules
