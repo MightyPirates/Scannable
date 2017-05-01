@@ -2,7 +2,7 @@ package li.cil.scannable.client.renderer;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.api.ScanningAPIImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -146,7 +146,7 @@ public enum ScannerRenderer {
         }
 
         final Framebuffer framebuffer = mc.getFramebuffer();
-        final long adjustedDuration = Constants.SCAN_GROWTH_DURATION * mc.gameSettings.renderDistanceChunks / 12;
+        final long adjustedDuration = ScanningAPIImpl.computeScanGrowthDuration();
 
         if (framebufferDepthTexture == 0) {
             if (currentStart + adjustedDuration > System.currentTimeMillis()) {
@@ -178,14 +178,13 @@ public enum ScannerRenderer {
 
         final int width = framebuffer.framebufferTextureWidth;
         final int height = framebuffer.framebufferTextureHeight;
-        final float progress = (System.currentTimeMillis() - currentStart) / (float) adjustedDuration;
-        final float maxRange = (mc.gameSettings.renderDistanceChunks - 1) * 16;
+        final float radius = ScanningAPIImpl.computeRadius(currentStart, adjustedDuration);
         GlStateManager.bindTexture(framebufferDepthTexture);
 
         OpenGlHelper.glUseProgram(shaderProgram);
 
         setUniform(camPosUniform, viewer.getPositionEyes(event.getPartialTicks()));
-        setUniform(radiusUniform, 16 + progress * maxRange);
+        setUniform(radiusUniform, radius);
         OpenGlHelper.glUniform1i(depthTexUniform, 0);
 
         setupMatrices(width, height);
@@ -203,6 +202,8 @@ public enum ScannerRenderer {
 
         tessellator.draw();
 
+        restoreMatrices();
+
         OpenGlHelper.glUseProgram(0);
 
         GlStateManager.bindTexture(0);
@@ -217,17 +218,6 @@ public enum ScannerRenderer {
         GlStateManager.disableBlend();
         GlStateManager.depthMask(true);
     }
-
-//    @SubscribeEvent
-//    public void handleKeyEvent(final InputEvent.KeyInputEvent event) {
-//        if (Keyboard.isKeyDown(Keyboard.KEY_BACK)) {
-//            Scannable.getLog().info("Reloading shader.");
-//            init();
-//        }
-//        if (Keyboard.isKeyDown(Keyboard.KEY_INSERT)) {
-//            ping(Minecraft.getMinecraft().player.getPositionVector());
-//        }
-//    }
 
     // --------------------------------------------------------------------- //
 
@@ -323,12 +313,21 @@ public enum ScannerRenderer {
 
     private void setupMatrices(final int width, final int height) {
         GlStateManager.matrixMode(GL11.GL_PROJECTION);
+        GlStateManager.pushMatrix();
         GlStateManager.loadIdentity();
         GlStateManager.ortho(0, width, height, 0, 1000, 3000);
         GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+        GlStateManager.pushMatrix();
         GlStateManager.loadIdentity();
         GlStateManager.translate(0, 0, -2000);
         GlStateManager.viewport(0, 0, width, height);
+    }
+
+    private void restoreMatrices() {
+        GlStateManager.matrixMode(GL11.GL_PROJECTION);
+        GlStateManager.popMatrix();
+        GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+        GlStateManager.popMatrix();
     }
 
     private void getMatrix(final int matrix, final Matrix4f into) {

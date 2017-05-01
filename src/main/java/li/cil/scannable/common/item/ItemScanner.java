@@ -31,7 +31,7 @@ public class ItemScanner extends Item {
     @Override
     public void onUsingTick(final ItemStack stack, final EntityLivingBase entity, final int count) {
         if (entity.getEntityWorld().isRemote) {
-            ScanningAPIImpl.INSTANCE.updateScan(false);
+            ScanningAPIImpl.INSTANCE.updateScan(entity, false);
         }
 
         final Vec3d lookAtBase = entity.
@@ -57,7 +57,7 @@ public class ItemScanner extends Item {
     @Override
     public ItemStack onItemUseFinish(final ItemStack stack, final World world, final EntityLivingBase entity) {
         if (world.isRemote) {
-            ScanningAPIImpl.INSTANCE.updateScan(true);
+            ScanningAPIImpl.INSTANCE.updateScan(entity, true);
         }
         return stack;
     }

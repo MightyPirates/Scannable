@@ -5,10 +5,14 @@ import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.config.Constants;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -23,53 +27,67 @@ public enum ScanningAPIImpl implements ScanningAPI {
 
     // --------------------------------------------------------------------- //
 
+    public static long computeScanGrowthDuration() {
+        return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks / 12;
+    }
+
+    public static float computeRadius(final long start, final float adjustedDuration) {
+        final float progress = (System.currentTimeMillis() - start) / adjustedDuration;
+        return 16 + progress * Constants.SCAN_RADIUS;
+    }
+
+    // --------------------------------------------------------------------- //
+
     private final List<ScanResultProvider> providers = new ArrayList<>();
 
-    private long lastScan = -1;
+    // List for collecting results during an active scan.
+    private final List<ScanResult> collectingResults = new ArrayList<>();
+
+    // Results get copied from the collectingResults list in here when a scan
+    // completes. This is to avoid clearing active results by *starting* a scan.
+    private final List<ScanResult> pendingResults = new ArrayList<>();
+    private final List<ScanResult> renderingResults = new ArrayList<>();
+
+    private long currentStart = -1;
     @Nullable
     private Vec3d lastScanCenter;
-
-    private final List<ScanResult> pendingResults = new ArrayList<>();
-    private final List<ScanResult> diegeticResults = new ArrayList<>();
-    private final List<ScanResult> nonDiegeticResults = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
 
     public void beginScan(final EntityPlayer player) {
-        clear();
+        cancelScan();
 
-        lastScanCenter = player.getPositionVector();
+        final Vec3d center = player.getPositionVector();
         for (final ScanResultProvider provider : providers) {
-            provider.initialize(player, lastScanCenter, Constants.SCAN_RADIUS, Constants.SCAN_COMPUTE_DURATION);
+            provider.initialize(player, center, Constants.SCAN_RADIUS, Constants.SCAN_COMPUTE_DURATION);
         }
     }
 
-    public void updateScan(final boolean finish) {
-        if (lastScanCenter == null) {
-            throw new IllegalStateException("Called updateScan without calling beginScan first.");
-        }
-        if (lastScan >= 0) {
-            throw new IllegalStateException("Called updateScan after scan was completed.");
-        }
-
+    public void updateScan(final Entity entity, final boolean finish) {
         for (final ScanResultProvider provider : providers) {
-            provider.computeScanResults(pendingResults);
+            provider.computeScanResults(collectingResults);
             if (finish) {
                 provider.reset();
             }
         }
 
         if (finish) {
+            clear();
+
+            lastScanCenter = entity.getPositionVector();
+            currentStart = System.currentTimeMillis();
+
+            pendingResults.addAll(collectingResults);
             pendingResults.sort(Comparator.comparing(result -> -lastScanCenter.distanceTo(result.getPosition())));
 
             ScannerRenderer.INSTANCE.ping(lastScanCenter);
 
-            lastScan = System.currentTimeMillis();
+            cancelScan();
         }
     }
 
     public void cancelScan() {
-        clear();
+        collectingResults.clear();
     }
 
     @SubscribeEvent
@@ -78,12 +96,19 @@ public enum ScanningAPIImpl implements ScanningAPI {
             return;
         }
 
-        if (lastScanCenter == null || lastScan < 0) {
+        if (lastScanCenter == null || currentStart < 0) {
             return;
         }
 
-        if (lastScan + Constants.SCAN_STAY_DURATION < System.currentTimeMillis()) {
-            clear();
+        if (currentStart + Constants.SCAN_STAY_DURATION < System.currentTimeMillis()) {
+            pendingResults.clear();
+            synchronized (renderingResults) {
+                if (!renderingResults.isEmpty()) {
+                    renderingResults.remove(renderingResults.size() - 1);
+                } else {
+                    clear();
+                }
+            }
             return;
         }
 
@@ -91,21 +116,17 @@ public enum ScanningAPIImpl implements ScanningAPI {
             return;
         }
 
-        final float progress = MathHelper.clamp((System.currentTimeMillis() - lastScan) / Constants.SCAN_GROWTH_DURATION, 0, 1);
-        final float radius = progress * Constants.SCAN_RADIUS;
+        final long adjustedDuration = computeScanGrowthDuration();
+        final float radius = computeRadius(currentStart, adjustedDuration);
 
         while (pendingResults.size() > 0) {
             final ScanResult result = pendingResults.get(pendingResults.size() - 1);
             final Vec3d position = result.getPosition();
             if (lastScanCenter.distanceTo(position) <= radius) {
                 pendingResults.remove(pendingResults.size() - 1);
-                switch (result.getRenderType()) {
-                    case DIEGETIC:
-                        diegeticResults.add(result);
-                        break;
-                    case NON_DIEGETIC:
-                        nonDiegeticResults.add(result);
-                        break;
+                result.initialize();
+                synchronized (renderingResults) {
+                    renderingResults.add(result);
                 }
             } else {
                 break; // List is sorted, so nothing else is in range.
@@ -115,19 +136,30 @@ public enum ScanningAPIImpl implements ScanningAPI {
 
     @SubscribeEvent
     public void onRenderLast(final RenderWorldLastEvent event) {
-        for (ScanResult scanResult : diegeticResults) {
-            scanResult.renderDiegetic(event.getPartialTicks());
-        }
-    }
+        final Minecraft mc = Minecraft.getMinecraft();
 
-    @SubscribeEvent
-    public void onRenderOverlay(final RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
+        final Entity entity = mc.getRenderViewEntity();
+        if (entity == null) {
             return;
         }
+        final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * event.getPartialTicks();
+        final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * event.getPartialTicks();
+        final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * event.getPartialTicks();
+        final double entityYaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * event.getPartialTicks();
+        final double entityPitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * event.getPartialTicks();
+        final Vec3d entityPos = new Vec3d(posX, posY, posZ);
+        final Vec2f entityAngle = new Vec2f((float) entityYaw, (float) entityPitch);
 
-        for (ScanResult scanResult : nonDiegeticResults) {
-            scanResult.renderNonDiegetic(event.getPartialTicks());
+        final ICamera frustum = new Frustum();
+        frustum.setPosition(posX, posY, posZ);
+
+        synchronized (renderingResults) {
+            for (ScanResult scanResult : renderingResults) {
+                final AxisAlignedBB bounds = scanResult.getRenderBounds();
+                if (bounds == null || frustum.isBoundingBoxInFrustum(bounds)) {
+                    scanResult.render(entity, entityPos, entityAngle, event.getPartialTicks());
+                }
+            }
         }
     }
 
@@ -142,15 +174,14 @@ public enum ScanningAPIImpl implements ScanningAPI {
     // --------------------------------------------------------------------- //
 
     private void clear() {
-        pendingResults.forEach(ScanResult::dispose);
-        diegeticResults.forEach(ScanResult::dispose);
-        nonDiegeticResults.forEach(ScanResult::dispose);
-
         pendingResults.clear();
-        diegeticResults.clear();
-        nonDiegeticResults.clear();
+
+        synchronized (renderingResults) {
+            renderingResults.forEach(ScanResult::dispose);
+            renderingResults.clear();
+        }
 
         lastScanCenter = null;
-        lastScan = -1;
+        currentStart = -1;
     }
 }

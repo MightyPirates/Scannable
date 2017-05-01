@@ -17,10 +17,10 @@ public final class Constants {
     // Scanner settings
 
     // The radius in which to collect scan results around the player.
-    public static final float SCAN_RADIUS = 128f;
+    public static final float SCAN_RADIUS = 96f;
     // The number of ticks over which to compute scan results. Which is at the
     // same time the use time of the scanner item.
-    public static final int SCAN_COMPUTE_DURATION = 60;
+    public static final int SCAN_COMPUTE_DURATION = 40;
     // How long the ping takes to reach the end of the visible area at the
     // default visibility range of 12 chunks.
     public static final long SCAN_GROWTH_DURATION = 2000;

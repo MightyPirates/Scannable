@@ -1,7 +1,16 @@
 package li.cil.scannable.api.scanning;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
+
+/**
+ * Represents a single logical scan result, for which one single visualization
+ * is rendered.
+ */
 public interface ScanResult {
     /**
      * Get the in-world location of this scan result.
@@ -31,33 +40,25 @@ public interface ScanResult {
     void dispose();
 
     /**
-     * The render type of the scan result.
+     * A bounding box encompassing anything the result may render.
      * <p>
-     * This is used to determine into which render list the result will be put.
-     * Note that changing the type later on is not possible. It is only read
-     * once after the scan result was retrieved from its {@link ScanResultProvider}.
+     * May return <code>null</code> to ignore frustum culling.
      *
-     * @return the render type of this result.
+     * @return the render bounding box for the result.
      */
-    ScanResultRenderType getRenderType();
+    @Nullable
+    AxisAlignedBB getRenderBounds();
 
     /**
-     * Callback when rendering using {@link ScanResultRenderType#DIEGETIC} mode.
+     * Called when the result should render itself in the world.
      * <p>
      * This is purely for convenience, so implementors don't have to also
      * register to the corresponding event.
      *
+     * @param player       the entity we're rendering for. Usually the player.
+     * @param playerPos    the interpolated position of the entity.
+     * @param playerAngle  the interpolated entity yaw and pitch.
      * @param partialTicks partial ticks of the currently rendered frame.
      */
-    void renderDiegetic(final float partialTicks);
-
-    /**
-     * Callback when rendering using {@link ScanResultRenderType#NON_DIEGETIC} mode.
-     * <p>
-     * This is purely for convenience, so implementors don't have to also
-     * register to the corresponding event.
-     *
-     * @param partialTicks partial ticks of the currently rendered frame.
-     */
-    void renderNonDiegetic(final float partialTicks);
+    void render(final Entity player, final Vec3d playerPos, final Vec2f playerAngle, final float partialTicks);
 }

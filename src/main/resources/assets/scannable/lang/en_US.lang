@@ -1,0 +1,9 @@
+item.scannable.scanner.name=Scanner
+
+tooltip.architect.sketch.data=§7Size: (%s, %s, %s), %sm away
+
+key.architect.rotateBlueprint=Rotate Blueprint
+
+message.architect.grid_snapping.enabled=§aGrid snapping enabled.
+
+config.architect.enablePlacementGrid=Enable Placement Grid

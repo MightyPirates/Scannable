@@ -1,7 +1,9 @@
 package li.cil.scannable.client;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.api.ScanningAPI;
 import li.cil.scannable.client.renderer.ScannerRenderer;
+import li.cil.scannable.client.scanning.ScanResultProviderEntity;
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.api.ScanningAPIImpl;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -32,11 +34,14 @@ public final class ProxyClient extends ProxyCommon {
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(ScannerRenderer.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(ScanningAPIImpl.INSTANCE);
     }
 
     @Override
     public void onPostInit(final FMLPostInitializationEvent event) {
         super.onPostInit(event);
+
+        ScanningAPI.addScanResultProvider(new ScanResultProviderEntity());
 
         ScannerRenderer.INSTANCE.init();
     }
