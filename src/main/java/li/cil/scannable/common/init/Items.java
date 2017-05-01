@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public final class Items {
     public static Item scanner;
@@ -44,16 +45,39 @@ public final class Items {
 
     public static void addRecipes() {
         GameRegistry.addRecipe(new ShapedOreRecipe(
-                new ItemStack(scanner, 1),
-                "BIB",
-                "SQS",
-                "GRG",
+                new ItemStack(scanner),
+                "I I",
+                "BRB",
+                "GQG",
                 'B', Blocks.IRON_BARS,
                 'I', "ingotIron",
-                'S', "stickWood",
                 'Q', "gemQuartz",
                 'G', "ingotGold",
                 'R', "dustRedstone"));
+        GameRegistry.addRecipe(new ShapedOreRecipe(
+                new ItemStack(moduleBlank),
+                "GGG",
+                "CRC",
+                "CNC",
+                'G', "dyeGreen",
+                'C', net.minecraft.init.Items.CLAY_BALL,
+                'N', "nuggetGold",
+                'R', "dustRedstone"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleRange),
+                moduleBlank, "enderpearl"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleAnimal),
+                moduleBlank, "leather"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleMonster),
+                moduleBlank, "bone"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleOreCommon),
+                moduleBlank, net.minecraft.init.Items.COAL));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleOreRare),
+                moduleBlank, "gemDiamond"));
     }
 
     // --------------------------------------------------------------------- //
