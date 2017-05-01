@@ -1,10 +1,11 @@
 package li.cil.scannable.api.scanning;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 /**
  * Interface for a scan result provider.
@@ -13,23 +14,23 @@ import java.util.Iterator;
  * advancement so as to allow distributing scan workload over multiple ticks.
  * <p>
  * If your implementation is not that computationally expensive, it is fine to
- * just collect all scan results in the first {@link #computeScanResults(Collection)}
+ * just collect all scan results in the first {@link #computeScanResults(Consumer)}
  * call.
  * <p>
  * Otherwise, the implementation should prepare for spread out collection of
  * results in {@link #initialize(EntityPlayer, Vec3d, float, int)}, over the
  * specified number of ticks. Each tick until the scan is complete,
- * {@link #computeScanResults(Collection)} will be called, in which the
+ * {@link #computeScanResults(Consumer)} will be called, in which the
  * implementation should add results collected this tick to the passed
  * collection. It is the responsibility of the implementation to ensure that
  * all results have been added by the end of the last tick's call to
- * {@link #computeScanResults(Collection)}.
+ * {@link #computeScanResults(Consumer)}.
  */
 public interface ScanResultProvider {
     /**
      * Called each time a scan is started by the player.
      * <p>
-     * Prepare internal structures for incoming calls to {@link #computeScanResults(Collection)}.
+     * Prepare internal structures for incoming calls to {@link #computeScanResults(Consumer)}.
      *
      * @param player    the player that is scanning.
      * @param center    the center of the scanned sphere.
@@ -43,14 +44,33 @@ public interface ScanResultProvider {
      * tick to the passed list of results. Do <em>not</em> remove stuff from
      * the passed collection. Seriously!
      *
-     * @param results the collection to add results to.
+     * @param callback the callback to feed results to.
      */
-    void computeScanResults(final Collection<ScanResult> results);
+    void computeScanResults(final Consumer<ScanResult> callback);
+
+    /**
+     * Render the specified results.
+     * <p>
+     * This is delegated as a batch call to the provider to allow optimized
+     * rendering of large numbers of results. The provided results are
+     * guaranteed to have been produced by this provider via its
+     * {@link #computeScanResults(Consumer)} method.
+     * <p>
+     * The specified list has been frustum culled using the results' bounds
+     * provided from {@link ScanResult#getRenderBounds()}.
+     *
+     * @param results      the results to render.
+     * @param entity       the entity we're rendering for. Usually the player.
+     * @param partialTicks partial ticks of the currently rendered frame.
+     */
+    void render(final Entity entity, final Iterable<ScanResult> results, final float partialTicks);
 
     /**
      * Called when a scan is complete or is canceled.
      * <p>
-     * Use this to dispose internal structures to avoid memory leaks.
+     * Use this to dispose internal structures to avoid memory leaks. This is
+     * called after the scan is no longer being rendered, so this can be used
+     * to clean up rendering data as well.
      */
     void reset();
 }

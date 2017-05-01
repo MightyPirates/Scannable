@@ -4,6 +4,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.ScanningAPI;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.client.scanning.ScanResultProviderEntity;
+import li.cil.scannable.client.scanning.ScanResultProviderOre;
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.api.ScanningAPIImpl;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -42,6 +43,7 @@ public final class ProxyClient extends ProxyCommon {
         super.onPostInit(event);
 
         ScanningAPI.addScanResultProvider(new ScanResultProviderEntity());
+        ScanningAPI.addScanResultProvider(new ScanResultProviderOre());
 
         ScannerRenderer.INSTANCE.init();
     }

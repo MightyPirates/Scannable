@@ -17,7 +17,7 @@ public final class Constants {
     // Scanner settings
 
     // The radius in which to collect scan results around the player.
-    public static final float SCAN_RADIUS = 96f;
+    public static final float SCAN_RADIUS = 64f;
     // The number of ticks over which to compute scan results. Which is at the
     // same time the use time of the scanner item.
     public static final int SCAN_COMPUTE_DURATION = 40;
