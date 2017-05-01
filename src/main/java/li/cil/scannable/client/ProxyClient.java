@@ -5,7 +5,6 @@ import li.cil.scannable.client.gui.GuiHandlerClient;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.api.ScanManager;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;

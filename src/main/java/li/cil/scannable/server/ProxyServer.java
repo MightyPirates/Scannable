@@ -6,7 +6,7 @@ import li.cil.scannable.common.gui.GuiHandlerCommon;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-public class ProxyServer extends ProxyCommon {
+public final class ProxyServer extends ProxyCommon {
     @Override
     public void onInit(final FMLInitializationEvent event) {
         super.onInit(event);

@@ -1,8 +1,8 @@
 package li.cil.scannable.client.renderer;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.api.ScanManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -18,6 +18,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -31,6 +33,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
+@SideOnly(Side.CLIENT)
 public enum ScannerRenderer {
     INSTANCE;
 

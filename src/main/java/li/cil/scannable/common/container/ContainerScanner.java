@@ -10,17 +10,17 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class ContainerScanner extends Container {
+public final class ContainerScanner extends Container {
     private final EntityPlayer player;
     private final EnumHand hand;
-    private final IItemHandlerModifiable itemHandler;
 
     // --------------------------------------------------------------------- //
 
     public ContainerScanner(final EntityPlayer player, final EnumHand hand) {
         this.player = player;
         this.hand = hand;
-        this.itemHandler = (IItemHandlerModifiable) player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+
+        final IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         assert itemHandler != null;
 
         for (int slot = 0; slot < itemHandler.getSlots(); ++slot) {

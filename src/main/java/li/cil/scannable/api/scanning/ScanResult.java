@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 /**
  * Represents a single logical scan result, for which one single visualization
- * is rendered.
+ * is rendered using the provider that produced this result.
  */
 public interface ScanResult {
     /**

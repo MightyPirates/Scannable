@@ -1,7 +1,7 @@
 package li.cil.scannable.common.item;
 
+import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.api.ScanManager;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.gui.GuiId;
@@ -36,7 +36,7 @@ public final class ItemScanner extends Item {
 
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final NBTTagCompound nbt) {
-        return new ItemScannerInventory();
+        return new ItemScannerInventory(stack);
     }
 
     @Override

@@ -1,11 +1,11 @@
-package li.cil.scannable.common.api;
+package li.cil.scannable.client;
 
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.ItemScannerModuleRange;
+import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -18,6 +18,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SideOnly(Side.CLIENT)
 public enum ScanManager {
     INSTANCE;
 
@@ -74,7 +77,7 @@ public enum ScanManager {
                 collectingProviders.add(provider);
             }
 
-            if (module.getItem() instanceof ItemScannerModuleRange) {
+            if (module.getItem() == Items.moduleRange) {
                 scanRadius += Constants.MODULE_RANGE_RADIUS_INCREASE;
             }
         }

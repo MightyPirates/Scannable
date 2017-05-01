@@ -1,6 +1,5 @@
 package li.cil.scannable.client.scanning;
 
-import li.cil.scannable.api.prefab.AbstractScanResult;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
@@ -255,7 +254,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         }
     }
 
-    private class ScanResultOre extends AbstractScanResult {
+    private class ScanResultOre implements ScanResult {
         private AxisAlignedBB bounds;
         private final ItemStack stack;
 
