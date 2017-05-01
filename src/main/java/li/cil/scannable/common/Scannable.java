@@ -22,7 +22,7 @@ public final class Scannable {
     @Mod.Instance(API.MOD_ID)
     public static Scannable instance;
 
-    @SidedProxy(clientSide = Constants.PROXY_CLIENT, serverSide = Constants.PROXY_COMMON)
+    @SidedProxy(clientSide = Constants.PROXY_CLIENT, serverSide = Constants.PROXY_SERVER)
     public static ProxyCommon proxy;
 
     @Mod.EventHandler

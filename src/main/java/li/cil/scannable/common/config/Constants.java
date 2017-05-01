@@ -6,7 +6,7 @@ public final class Constants {
 
     public static final String MOD_NAME = "Scannable";
     public static final String PROXY_CLIENT = "li.cil.scannable.client.ProxyClient";
-    public static final String PROXY_COMMON = "li.cil.scannable.common.ProxyCommon";
+    public static final String PROXY_SERVER = "li.cil.scannable.server.ProxyServer";
 
     // --------------------------------------------------------------------- //
     // Block, item, entity and container names

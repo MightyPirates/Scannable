@@ -12,6 +12,14 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 public final class Items {
     public static Item scanner;
 
+    // --------------------------------------------------------------------- //
+
+    public static boolean isScanner(final ItemStack stack) {
+        return isItem(stack, scanner);
+    }
+
+    // --------------------------------------------------------------------- //
+
     public static void register(final ProxyCommon proxy) {
         scanner = proxy.registerItem(Constants.NAME_SCANNER, ItemScanner::new);
     }
@@ -29,6 +37,14 @@ public final class Items {
                 'G', "ingotGold",
                 'R', "dustRedstone"));
     }
+
+    // --------------------------------------------------------------------- //
+
+    private static boolean isItem(final ItemStack stack, final Item item) {
+        return !stack.isEmpty() && stack.getItem() == item;
+    }
+
+    // --------------------------------------------------------------------- //
 
     private Items() {
     }

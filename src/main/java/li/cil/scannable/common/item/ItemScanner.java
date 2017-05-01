@@ -1,24 +1,48 @@
 package li.cil.scannable.common.item;
 
+import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.api.ScanningAPIImpl;
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.gui.GuiId;
+import li.cil.scannable.common.inventory.ItemScannerInventory;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+
+import javax.annotation.Nullable;
 
 public class ItemScanner extends Item {
+    public ItemScanner() {
+        setMaxStackSize(1);
+    }
+
+    // --------------------------------------------------------------------- //
+    // Item
+
+    @Nullable
+    @Override
+    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final NBTTagCompound nbt) {
+        return new ItemScannerInventory();
+    }
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(final World world, final EntityPlayer player, final EnumHand hand) {
-        player.setActiveHand(hand);
-        if (world.isRemote) {
-            ScanningAPIImpl.INSTANCE.beginScan(player);
+        if (player.isSneaking()) {
+            player.openGui(Scannable.instance, GuiId.SCANNER.id, world, hand.ordinal(), 0, 0);
+        } else {
+            player.setActiveHand(hand);
+            if (world.isRemote) {
+                ScanningAPIImpl.INSTANCE.beginScan(player);
+            }
         }
         return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
     }

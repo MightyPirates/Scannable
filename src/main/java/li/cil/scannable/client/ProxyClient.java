@@ -2,10 +2,12 @@ package li.cil.scannable.client;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.api.ScanningAPI;
+import li.cil.scannable.client.gui.GuiHandlerClient;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.client.scanning.ScanResultProviderEntity;
 import li.cil.scannable.client.scanning.ScanResultProviderOre;
 import li.cil.scannable.common.ProxyCommon;
+import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.api.ScanningAPIImpl;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -18,6 +20,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.function.Supplier;
@@ -30,7 +33,8 @@ public final class ProxyClient extends ProxyCommon {
     public void onInit(final FMLInitializationEvent event) {
         super.onInit(event);
 
-        // Initialize API.
+        NetworkRegistry.INSTANCE.registerGuiHandler(Scannable.instance, new GuiHandlerClient());
+
         API.scanningAPI = ScanningAPIImpl.INSTANCE;
 
         MinecraftForge.EVENT_BUS.register(this);
