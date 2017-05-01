@@ -1,14 +1,11 @@
 package li.cil.scannable.client;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.api.ScanningAPI;
 import li.cil.scannable.client.gui.GuiHandlerClient;
 import li.cil.scannable.client.renderer.ScannerRenderer;
-import li.cil.scannable.client.scanning.ScanResultProviderEntity;
-import li.cil.scannable.client.scanning.ScanResultProviderOre;
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.api.ScanningAPIImpl;
+import li.cil.scannable.common.api.ScanManager;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -35,19 +32,14 @@ public final class ProxyClient extends ProxyCommon {
 
         NetworkRegistry.INSTANCE.registerGuiHandler(Scannable.instance, new GuiHandlerClient());
 
-        API.scanningAPI = ScanningAPIImpl.INSTANCE;
-
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(ScannerRenderer.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(ScanningAPIImpl.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(ScanManager.INSTANCE);
     }
 
     @Override
     public void onPostInit(final FMLPostInitializationEvent event) {
         super.onPostInit(event);
-
-        ScanningAPI.addScanResultProvider(new ScanResultProviderEntity());
-        ScanningAPI.addScanResultProvider(new ScanResultProviderOre());
 
         ScannerRenderer.INSTANCE.init();
     }

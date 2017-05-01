@@ -1,31 +1,36 @@
 package li.cil.scannable.common.api;
 
-import li.cil.scannable.api.detail.ScanningAPI;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
+import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.item.ItemScannerModuleRange;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public enum ScanningAPIImpl implements ScanningAPI {
+public enum ScanManager {
     INSTANCE;
 
     // --------------------------------------------------------------------- //
@@ -41,8 +46,8 @@ public enum ScanningAPIImpl implements ScanningAPI {
 
     // --------------------------------------------------------------------- //
 
-    private final List<ScanResultProvider> providers = new ArrayList<>();
-
+    // List of providers currently used to scan.
+    private final Set<ScanResultProvider> collectingProviders = new HashSet<>();
     // List for collecting results during an active scan.
     private final List<ScanResultWithProvider> collectingResults = new ArrayList<>();
 
@@ -50,6 +55,7 @@ public enum ScanningAPIImpl implements ScanningAPI {
     // completes. This is to avoid clearing active results by *starting* a scan.
     private final List<ScanResultWithProvider> pendingResults = new ArrayList<>();
     private final Map<ScanResultProvider, List<ScanResult>> renderingResults = new HashMap<>();
+    // Temporary, re-used list to collect visible results each frame.
     private final List<ScanResult> renderingList = new ArrayList<>();
 
     private long currentStart = -1;
@@ -58,17 +64,41 @@ public enum ScanningAPIImpl implements ScanningAPI {
 
     // --------------------------------------------------------------------- //
 
-    public void beginScan(final EntityPlayer player) {
+    public void beginScan(final EntityPlayer player, final IItemHandler scannerInventory) {
         cancelScan();
 
+        float scanRadius = Constants.SCAN_RADIUS;
+
+        final List<ItemStack> modules = new ArrayList<>();
+        for (int slot = 0; slot < scannerInventory.getSlots(); slot++) {
+            final ItemStack stack = scannerInventory.getStackInSlot(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            modules.add(stack);
+            final ScanResultProvider provider = stack.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
+            if (provider != null) {
+                collectingProviders.add(provider);
+            }
+
+            if (stack.getItem() instanceof ItemScannerModuleRange) {
+                scanRadius += Constants.MODULE_RANGE_RADIUS_INCREASE;
+            }
+        }
+
+        if (collectingProviders.isEmpty()) {
+            return;
+        }
+
         final Vec3d center = player.getPositionVector();
-        for (final ScanResultProvider provider : providers) {
-            provider.initialize(player, center, Constants.SCAN_RADIUS, Constants.SCAN_COMPUTE_DURATION);
+        for (final ScanResultProvider provider : collectingProviders) {
+            provider.initialize(player, modules, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
         }
     }
 
     public void updateScan(final Entity entity, final boolean finish) {
-        for (final ScanResultProvider provider : providers) {
+        for (final ScanResultProvider provider : collectingProviders) {
             provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
             if (finish) {
                 provider.reset();
@@ -91,6 +121,7 @@ public enum ScanningAPIImpl implements ScanningAPI {
     }
 
     public void cancelScan() {
+        collectingProviders.clear();
         collectingResults.clear();
     }
 
@@ -158,13 +189,10 @@ public enum ScanningAPIImpl implements ScanningAPI {
             return;
         }
 
+        final ICamera frustum = new Frustum();
         final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * event.getPartialTicks();
         final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * event.getPartialTicks();
         final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * event.getPartialTicks();
-        final double entityYaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * event.getPartialTicks();
-        final double entityPitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * event.getPartialTicks();
-
-        final ICamera frustum = new Frustum();
         frustum.setPosition(posX, posY, posZ);
 
         synchronized (renderingResults) {
@@ -186,14 +214,6 @@ public enum ScanningAPIImpl implements ScanningAPI {
                 renderingList.clear();
             }
         }
-    }
-
-    // --------------------------------------------------------------------- //
-    // ScanningAPI
-
-    @Override
-    public void addScanResultProvider(final ScanResultProvider provider) {
-        providers.add(provider);
     }
 
     // --------------------------------------------------------------------- //

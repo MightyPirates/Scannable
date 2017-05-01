@@ -2,7 +2,7 @@ package li.cil.scannable.client.renderer;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.api.ScanningAPIImpl;
+import li.cil.scannable.common.api.ScanManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -146,7 +146,7 @@ public enum ScannerRenderer {
         }
 
         final Framebuffer framebuffer = mc.getFramebuffer();
-        final long adjustedDuration = ScanningAPIImpl.computeScanGrowthDuration();
+        final long adjustedDuration = ScanManager.computeScanGrowthDuration();
 
         if (framebufferDepthTexture == 0) {
             if (currentStart + adjustedDuration > System.currentTimeMillis()) {
@@ -178,7 +178,7 @@ public enum ScannerRenderer {
 
         final int width = framebuffer.framebufferTextureWidth;
         final int height = framebuffer.framebufferTextureHeight;
-        final float radius = ScanningAPIImpl.computeRadius(currentStart, adjustedDuration);
+        final float radius = ScanManager.computeRadius(currentStart, adjustedDuration);
         GlStateManager.bindTexture(framebufferDepthTexture);
 
         OpenGlHelper.glUseProgram(shaderProgram);

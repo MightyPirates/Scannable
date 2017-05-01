@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package li.cil.scannable.api.detail;
+package li.cil.scannable.common.capabilities;
 
 import mcp.MethodsReturnNonnullByDefault;
 

@@ -13,9 +13,4 @@ public final class API {
      * The current version of the mod.
      */
     public static final String MOD_VERSION = "@VERSION@";
-
-    // --------------------------------------------------------------------- //
-
-    // Set in pre-init, prefer using static entry point classes instead.
-    public static li.cil.scannable.api.detail.ScanningAPI scanningAPI;
 }

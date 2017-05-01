@@ -5,8 +5,11 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collection;
 
 /**
  * Helper base class for scan result providers, providing some common functionality for
@@ -21,7 +24,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     // ScanResultProvider
 
     @Override
-    public void initialize(final EntityPlayer player, final Vec3d center, final float radius, final int scanTicks) {
+    public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         this.player = player;
         this.center = center;
         this.radius = radius;

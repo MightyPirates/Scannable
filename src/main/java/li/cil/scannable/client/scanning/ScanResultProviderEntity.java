@@ -3,35 +3,89 @@ package li.cil.scannable.client.scanning;
 import li.cil.scannable.api.Icons;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
+import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
+import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-public final class ScanResultProviderEntity extends AbstractScanResultProvider {
+public final class ScanResultProviderEntity extends AbstractScanResultProvider implements ICapabilityProvider {
+    public static final ScanResultProviderEntity INSTANCE = new ScanResultProviderEntity();
+
+    // --------------------------------------------------------------------- //
+
+    private boolean scanAnimal;
+    private boolean scanMonster;
     private List<EntityLivingBase> entities;
     private int entitiesPerTick;
     private int currentEntity;
 
     // --------------------------------------------------------------------- //
+
+    private ScanResultProviderEntity() {
+    }
+
+    // --------------------------------------------------------------------- //
+    // ICapabilityProvider
+
+    @Override
+    public boolean hasCapability(@Nonnull final Capability<?> capability, @Nullable final EnumFacing facing) {
+        return capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T> T getCapability(@Nonnull final Capability<T> capability, @Nullable final EnumFacing facing) {
+        if (capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY) {
+            return (T) this;
+        }
+        return null;
+    }
+
+    // --------------------------------------------------------------------- //
     // ScanResultProvider
 
     @Override
-    public void initialize(final EntityPlayer player, final Vec3d center, final float radius, final int scanTicks) {
-        super.initialize(player, center, radius, scanTicks);
+    public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+        super.initialize(player, modules, center, radius, scanTicks);
+
+        scanAnimal = false;
+        scanMonster = false;
+        for (final ItemStack module : modules) {
+            scanAnimal |= module.getItem() == Items.moduleAnimal;
+            scanMonster |= module.getItem() == Items.moduleMonster;
+        }
+
+        // TODO Spread this query over multiple ticks (reimplement inner loop).
         final AxisAlignedBB bounds = new AxisAlignedBB(center.xCoord - radius, center.yCoord - radius, center.zCoord - radius,
                                                        center.xCoord + radius, center.yCoord + radius, center.zCoord + radius);
-        // TODO Spread this query over multiple ticks (reimplement inner loop).
-        entities = player.getEntityWorld().getEntitiesWithinAABB(EntityLivingBase.class, bounds);
+        entities = player.getEntityWorld().getEntitiesWithinAABB(EntityLiving.class, bounds, this::FilterEntities);
         entitiesPerTick = MathHelper.ceil(entities.size() / (float) scanTicks);
         currentEntity = 0;
     }
@@ -117,6 +171,42 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     public void reset() {
         super.reset();
         entities = null;
+    }
+
+    // --------------------------------------------------------------------- //
+
+    private <T extends Entity> boolean FilterEntities(final T entity) {
+        if (scanAnimal) {
+            if (entity instanceof EntityAnimal) {
+                return true;
+            }
+            if (entity instanceof EntityBat) {
+                return true;
+            }
+            if (entity instanceof EntitySquid) {
+                return true;
+            }
+        }
+
+        if (scanMonster) {
+            if (entity instanceof EntityMob) {
+                return true;
+            }
+            if (entity instanceof EntitySlime) {
+                return true;
+            }
+            if (entity instanceof EntityGhast) {
+                return true;
+            }
+            if (entity instanceof EntityDragon) {
+                return true;
+            }
+            if (entity instanceof EntityGolem) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // --------------------------------------------------------------------- //

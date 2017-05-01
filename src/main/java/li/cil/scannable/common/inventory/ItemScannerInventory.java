@@ -1,5 +1,7 @@
 package li.cil.scannable.common.inventory;
 
+import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
+import li.cil.scannable.common.item.AbstractItemScannerModule;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -38,6 +40,15 @@ public final class ItemScannerInventory extends ItemStackHandler implements ICap
 
     @Override
     protected int getStackLimit(final int slot, @Nonnull final ItemStack stack) {
-        return 1;
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        if (stack.getItem() instanceof AbstractItemScannerModule) {
+            return 64;
+        }
+        if (stack.hasCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null)) {
+            return 64;
+        }
+        return 0;
     }
 }

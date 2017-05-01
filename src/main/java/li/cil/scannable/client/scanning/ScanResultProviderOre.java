@@ -3,6 +3,9 @@ package li.cil.scannable.client.scanning;
 import li.cil.scannable.api.prefab.AbstractScanResult;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
+import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
+import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.init.Items;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
@@ -12,35 +15,80 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-public final class ScanResultProviderOre extends AbstractScanResultProvider {
-    private final Map<IBlockState, ItemStack> ores = new HashMap<>();
+public final class ScanResultProviderOre extends AbstractScanResultProvider implements ICapabilityProvider {
+    public static final ScanResultProviderOre INSTANCE = new ScanResultProviderOre();
+
+    // --------------------------------------------------------------------- //
+
+    private final Map<IBlockState, ItemStack> oresCommon = new HashMap<>();
+    private final Map<IBlockState, ItemStack> oresRare = new HashMap<>();
+    private boolean scanCommon, scanRare;
     private int x, y, z;
     private BlockPos min, max;
     private int blocksPerTick;
     private Map<BlockPos, ScanResultOre> resultClusters = new HashMap<>();
 
-    public ScanResultProviderOre() {
+    // --------------------------------------------------------------------- //
+
+    private ScanResultProviderOre() {
         buildOreCache();
     }
 
+    // --------------------------------------------------------------------- //
+    // ICapabilityProvider
+
     @Override
-    public void initialize(final EntityPlayer player, final Vec3d center, final float radius, final int scanTicks) {
-        super.initialize(player, center, radius, scanTicks);
+    public boolean hasCapability(@Nonnull final Capability<?> capability, @Nullable final EnumFacing facing) {
+        return capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T> T getCapability(@Nonnull final Capability<T> capability, @Nullable final EnumFacing facing) {
+        if (capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY) {
+            return (T) this;
+        }
+        return null;
+    }
+
+    // --------------------------------------------------------------------- //
+    // ScanResultProvider
+
+    @Override
+    public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+        super.initialize(player, modules, center, radius, scanTicks);
+
+        scanCommon = false;
+        scanRare = false;
+        for (final ItemStack module : modules) {
+            scanCommon |= module.getItem() == Items.moduleOreCommon;
+            scanRare |= module.getItem() == Items.moduleOreRare;
+        }
+
         min = new BlockPos(center).add(-radius, -radius, -radius);
         max = new BlockPos(center).add(radius, radius, radius);
         x = min.getX();
@@ -58,9 +106,20 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider {
             if (!moveNext(world)) {
                 return;
             }
+
+            if (center.squareDistanceTo(x + 0.5, y + 0.5, z + 0.5) > radius * radius) {
+                continue;
+            }
+
             final BlockPos pos = new BlockPos(x, y, z);
             final IBlockState state = world.getBlockState(pos);
-            final ItemStack stack = ores.get(state);
+            ItemStack stack = null;
+            if (scanCommon) {
+                stack = oresCommon.get(state);
+            }
+            if (stack == null && scanRare) {
+                stack = oresRare.get(state);
+            }
             if (stack != null) {
                 if (!tryAddToCluster(pos, stack)) {
                     final ScanResultOre result = new ScanResultOre(pos, stack);
@@ -120,6 +179,8 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider {
         resultClusters.clear();
     }
 
+    // --------------------------------------------------------------------- //
+
     private boolean tryAddToCluster(final BlockPos pos, final ItemStack stack) {
         final BlockPos min = pos.add(-2, -2, -2);
         final BlockPos max = pos.add(2, 2, 2);
@@ -157,17 +218,37 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider {
     }
 
     private void buildOreCache() {
+        final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.oresBlacklist));
+        final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.oresCommon));
+        final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.oresRare));
+
         final Pattern pattern = Pattern.compile("^ore[A-Z].*$");
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
             for (final IBlockState state : block.getBlockState().getValidStates()) {
                 final ItemStack stack = new ItemStack(block, 1, block.damageDropped(state));
                 if (!stack.isEmpty()) {
                     final int[] ids = OreDictionary.getOreIDs(stack);
+                    boolean isRare = false;
+                    boolean isCommon = false;
                     for (final int id : ids) {
                         final String name = OreDictionary.getOreName(id);
-                        if (pattern.matcher(name).matches()) {
-                            ores.put(state, stack);
+                        if (oreNamesBlacklist.contains(name)) {
+                            isRare = false;
+                            isCommon = false;
+                            break;
                         }
+                        if (oreNamesRare.contains(name)) {
+                            isRare = true;
+                        }
+                        if (oreNamesCommon.contains(name) || pattern.matcher(name).matches()) {
+                            isCommon = true;
+                        }
+                    }
+
+                    if (isRare) {
+                        oresRare.put(state, stack);
+                    } else if (isCommon) {
+                        oresCommon.put(state, stack);
                     }
                 }
             }

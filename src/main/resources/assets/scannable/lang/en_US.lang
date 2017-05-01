@@ -1,9 +1,14 @@
 item.scannable.scanner.name=Scanner
+item.scannable.module_blank.name=Blank Scanner Module
+item.scannable.module_range.name=Scanner Module: Range Increase
+item.scannable.module_animal.name=Scanner Module: Animals
+item.scannable.module_monster.name=Scanner Module: Monsters
+item.scannable.module_ore_common.name=Scanner Module: Common Ores
+item.scannable.module_ore_rare.name=Scanner Module: Rare Ores
 
-tooltip.architect.sketch.data=§7Size: (%s, %s, %s), %sm away
+tooltip.scannable.scanner=§7Use to scan for nearby points of interest.
 
-key.architect.rotateBlueprint=Rotate Blueprint
-
-message.architect.grid_snapping.enabled=§aGrid snapping enabled.
-
-config.architect.enablePlacementGrid=Enable Placement Grid
+config.scannable.useEnergy=Use Energy
+config.scannable.oresCommon=Common Ores
+config.scannable.oresRare=Rare Ores
+config.scannable.oresBlacklist=Ore Blacklist

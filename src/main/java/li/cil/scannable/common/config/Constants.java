@@ -12,6 +12,20 @@ public final class Constants {
     // Block, item, entity and container names
 
     public static final String NAME_SCANNER = "scanner";
+    public static final String NAME_MODULE_BLANK = "module_blank";
+    public static final String NAME_MODULE_RANGE = "module_range";
+    public static final String NAME_MODULE_ANIMAL = "module_animal";
+    public static final String NAME_MODULE_MONSTER = "module_monster";
+    public static final String NAME_MODULE_ORE_COMMON = "module_ore_common";
+    public static final String NAME_MODULE_ORE_RARE = "module_ore_rare";
+
+    // --------------------------------------------------------------------- //
+    // Config
+
+    public static final String CONFIG_USE_ENERGY = "config.scannable.useEnergy";
+    public static final String CONFIG_ORES_COMMON = "config.scannable.oresCommon";
+    public static final String CONFIG_ORES_RARE = "config.scannable.oresRare";
+    public static final String CONFIG_ORES_BLACKLIST = "config.scannable.oresBlacklist";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
@@ -26,4 +40,7 @@ public final class Constants {
     public static final long SCAN_GROWTH_DURATION = 2000;
     // How long the results from a scan should remain visible.
     public static final long SCAN_STAY_DURATION = 10000;
+
+    // By how much the scan radius is increased by installing the range module.
+    public static final float MODULE_RANGE_RADIUS_INCREASE = 32;
 }

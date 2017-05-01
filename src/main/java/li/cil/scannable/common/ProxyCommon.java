@@ -1,7 +1,7 @@
 package li.cil.scannable.common;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.api.ScanningAPIImpl;
+import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -17,8 +17,8 @@ import java.util.function.Supplier;
  */
 public class ProxyCommon {
     public void onPreInit(final FMLPreInitializationEvent event) {
-        // Initialize API.
-        API.scanningAPI = ScanningAPIImpl.INSTANCE;
+        // Initialize capabilities.
+        CapabilityScanResultProvider.register();
 
         // Register blocks and items.
         Items.register(this);

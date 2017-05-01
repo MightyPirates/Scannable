@@ -1,7 +1,7 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.api.ScanningAPIImpl;
+import li.cil.scannable.common.api.ScanManager;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.gui.GuiId;
 import li.cil.scannable.common.inventory.ItemScannerInventory;
@@ -17,10 +17,12 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 
-public class ItemScanner extends Item {
+public final class ItemScanner extends Item {
     public ItemScanner() {
         setMaxStackSize(1);
     }
@@ -28,7 +30,6 @@ public class ItemScanner extends Item {
     // --------------------------------------------------------------------- //
     // Item
 
-    @Nullable
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final NBTTagCompound nbt) {
         return new ItemScannerInventory();
@@ -41,7 +42,9 @@ public class ItemScanner extends Item {
         } else {
             player.setActiveHand(hand);
             if (world.isRemote) {
-                ScanningAPIImpl.INSTANCE.beginScan(player);
+                final IItemHandler scannerInventory = player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+                assert scannerInventory != null;
+                ScanManager.INSTANCE.beginScan(player, scannerInventory);
             }
         }
         return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
@@ -55,7 +58,7 @@ public class ItemScanner extends Item {
     @Override
     public void onUsingTick(final ItemStack stack, final EntityLivingBase entity, final int count) {
         if (entity.getEntityWorld().isRemote) {
-            ScanningAPIImpl.INSTANCE.updateScan(entity, false);
+            ScanManager.INSTANCE.updateScan(entity, false);
         }
 
         final Vec3d lookAtBase = entity.
@@ -73,7 +76,7 @@ public class ItemScanner extends Item {
     @Override
     public void onPlayerStoppedUsing(final ItemStack stack, final World world, final EntityLivingBase entity, final int timeLeft) {
         if (world.isRemote) {
-            ScanningAPIImpl.INSTANCE.cancelScan();
+            ScanManager.INSTANCE.cancelScan();
         }
         super.onPlayerStoppedUsing(stack, world, entity, timeLeft);
     }
@@ -81,7 +84,7 @@ public class ItemScanner extends Item {
     @Override
     public ItemStack onItemUseFinish(final ItemStack stack, final World world, final EntityLivingBase entity) {
         if (world.isRemote) {
-            ScanningAPIImpl.INSTANCE.updateScan(entity, true);
+            ScanManager.INSTANCE.updateScan(entity, true);
         }
         return stack;
     }

@@ -2,8 +2,10 @@ package li.cil.scannable.api.scanning;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -33,11 +35,12 @@ public interface ScanResultProvider {
      * Prepare internal structures for incoming calls to {@link #computeScanResults(Consumer)}.
      *
      * @param player    the player that is scanning.
+     * @param modules   the modules installed in the scanner.
      * @param center    the center of the scanned sphere.
      * @param radius    the radius of the scanned sphere.
      * @param scanTicks the total number of ticks the scan will take.
      */
-    void initialize(final EntityPlayer player, final Vec3d center, final float radius, final int scanTicks);
+    void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks);
 
     /**
      * Called each tick during an ongoing scan. Add any results collected this
