@@ -78,7 +78,7 @@ public final class ItemScanner extends Item {
 
     @Override
     public boolean shouldCauseReequipAnimation(final ItemStack oldStack, final ItemStack newStack, final boolean slotChanged) {
-        return false;
+        return oldStack.getItem() != newStack.getItem() || slotChanged;
     }
 
     @Override

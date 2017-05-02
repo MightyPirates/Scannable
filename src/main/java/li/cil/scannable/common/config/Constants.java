@@ -49,7 +49,7 @@ public final class Constants {
     public static final int SCAN_COMPUTE_DURATION = 40;
     // How long the ping takes to reach the end of the visible area at the
     // default visibility range of 12 chunks.
-    public static final long SCAN_GROWTH_DURATION = 2000;
+    public static final long SCAN_GROWTH_DURATION = 4000;
     // How long the results from a scan should remain visible.
     public static final long SCAN_STAY_DURATION = 10000;
 
