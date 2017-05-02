@@ -6,6 +6,7 @@ import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
+import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.block.Block;
@@ -89,7 +90,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
 
     @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
-        super.initialize(player, modules, center, radius, scanTicks);
+        super.initialize(player, modules, center, radius * Constants.MODULE_ORE_RADIUS_MULTIPLIER, scanTicks);
 
         scanCommon = false;
         scanRare = false;
@@ -98,8 +99,8 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
             scanRare |= module.getItem() == Items.moduleOreRare;
         }
 
-        min = new BlockPos(center).add(-radius, -radius, -radius);
-        max = new BlockPos(center).add(radius, radius, radius);
+        min = new BlockPos(center).add(-this.radius, -this.radius, -this.radius);
+        max = new BlockPos(center).add(this.radius, this.radius, this.radius);
         x = min.getX();
         y = min.getY() - 1; // -1 for initial moveNext.
         z = min.getZ();

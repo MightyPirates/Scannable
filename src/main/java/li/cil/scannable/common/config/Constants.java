@@ -55,4 +55,6 @@ public final class Constants {
 
     // By how much the scan radius is increased by installing the range module.
     public static final float MODULE_RANGE_RADIUS_INCREASE = 32;
+    // By how much to scale the base scan range when scanning for ores.
+    public static final float MODULE_ORE_RADIUS_MULTIPLIER = 0.5f;
 }
