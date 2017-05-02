@@ -14,6 +14,7 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 public final class CapabilityScanResultProvider {
@@ -39,7 +40,7 @@ public final class CapabilityScanResultProvider {
         }
 
         @Override
-        public void render(final Entity entity, final Iterable<ScanResult> results, final float partialTicks) {
+        public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
         }
 
         @Override

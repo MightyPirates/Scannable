@@ -81,11 +81,29 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     }
 
     @SideOnly(Side.CLIENT)
+    protected static void drawCube(final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        drawPlaneNegX(minX, minY, maxY, minZ, maxZ, r, g, b, a, buffer);
+        drawPlanePosX(maxX, minY, maxY, minZ, maxZ, r, g, b, a, buffer);
+        drawPlaneNegY(minY, minX, maxX, minZ, maxZ, r, g, b, a, buffer);
+        drawPlanePosY(maxY, minX, maxX, minZ, maxZ, r, g, b, a, buffer);
+        drawPlaneNegZ(minZ, minX, maxX, minY, maxY, r, g, b, a, buffer);
+        drawPlanePosZ(maxZ, minX, maxX, minY, maxY, r, g, b, a, buffer);
+    }
+
+    @SideOnly(Side.CLIENT)
     protected static void drawPlaneNegX(final double x, final double minY, final double maxY, final double minZ, final double maxZ, final VertexBuffer buffer) {
         buffer.pos(x, minY, minZ).endVertex();
         buffer.pos(x, minY, maxZ).endVertex();
         buffer.pos(x, maxY, maxZ).endVertex();
         buffer.pos(x, maxY, minZ).endVertex();
+    }
+
+    @SideOnly(Side.CLIENT)
+    protected static void drawPlaneNegX(final double x, final double minY, final double maxY, final double minZ, final double maxZ, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        buffer.pos(x, minY, minZ).color(r, g, b, a).endVertex();
+        buffer.pos(x, minY, maxZ).color(r, g, b, a).endVertex();
+        buffer.pos(x, maxY, maxZ).color(r, g, b, a).endVertex();
+        buffer.pos(x, maxY, minZ).color(r, g, b, a).endVertex();
     }
 
     @SideOnly(Side.CLIENT)
@@ -97,11 +115,27 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     }
 
     @SideOnly(Side.CLIENT)
+    protected static void drawPlanePosX(final double x, final double minY, final double maxY, final double minZ, final double maxZ, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        buffer.pos(x, minY, minZ).color(r, g, b, a).endVertex();
+        buffer.pos(x, maxY, minZ).color(r, g, b, a).endVertex();
+        buffer.pos(x, maxY, maxZ).color(r, g, b, a).endVertex();
+        buffer.pos(x, minY, maxZ).color(r, g, b, a).endVertex();
+    }
+
+    @SideOnly(Side.CLIENT)
     protected static void drawPlaneNegY(final double y, final double minX, final double maxX, final double minZ, final double maxZ, final VertexBuffer buffer) {
         buffer.pos(minX, y, minZ).endVertex();
         buffer.pos(maxX, y, minZ).endVertex();
         buffer.pos(maxX, y, maxZ).endVertex();
         buffer.pos(minX, y, maxZ).endVertex();
+    }
+
+    @SideOnly(Side.CLIENT)
+    protected static void drawPlaneNegY(final double y, final double minX, final double maxX, final double minZ, final double maxZ, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        buffer.pos(minX, y, minZ).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, y, minZ).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, y, maxZ).color(r, g, b, a).endVertex();
+        buffer.pos(minX, y, maxZ).color(r, g, b, a).endVertex();
     }
 
     @SideOnly(Side.CLIENT)
@@ -113,6 +147,14 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     }
 
     @SideOnly(Side.CLIENT)
+    protected static void drawPlanePosY(final double y, final double minX, final double maxX, final double minZ, final double maxZ, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        buffer.pos(minX, y, minZ).color(r, g, b, a).endVertex();
+        buffer.pos(minX, y, maxZ).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, y, maxZ).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, y, minZ).color(r, g, b, a).endVertex();
+    }
+
+    @SideOnly(Side.CLIENT)
     protected static void drawPlaneNegZ(final double z, final double minX, final double maxX, final double minY, final double maxY, final VertexBuffer buffer) {
         buffer.pos(minX, minY, z).endVertex();
         buffer.pos(minX, maxY, z).endVertex();
@@ -121,10 +163,26 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     }
 
     @SideOnly(Side.CLIENT)
+    protected static void drawPlaneNegZ(final double z, final double minX, final double maxX, final double minY, final double maxY, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        buffer.pos(minX, minY, z).color(r, g, b, a).endVertex();
+        buffer.pos(minX, maxY, z).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, maxY, z).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, minY, z).color(r, g, b, a).endVertex();
+    }
+
+    @SideOnly(Side.CLIENT)
     protected static void drawPlanePosZ(final double z, final double minX, final double maxX, final double minY, final double maxY, final VertexBuffer buffer) {
         buffer.pos(minX, minY, z).endVertex();
         buffer.pos(maxX, minY, z).endVertex();
         buffer.pos(maxX, maxY, z).endVertex();
         buffer.pos(minX, maxY, z).endVertex();
+    }
+
+    @SideOnly(Side.CLIENT)
+    protected static void drawPlanePosZ(final double z, final double minX, final double maxX, final double minY, final double maxY, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
+        buffer.pos(minX, minY, z).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, minY, z).color(r, g, b, a).endVertex();
+        buffer.pos(maxX, maxY, z).color(r, g, b, a).endVertex();
+        buffer.pos(minX, maxY, z).color(r, g, b, a).endVertex();
     }
 }

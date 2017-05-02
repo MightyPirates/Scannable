@@ -11,7 +11,8 @@ tooltip.scannable.scanner=§7Use to scan for nearby points of interest.
 config.scannable.useEnergy=Use Energy
 config.scannable.oresCommon=Common Ores
 config.scannable.oresRare=Rare Ores
-config.scannable.oresBlacklist=Ore Blacklist
+config.scannable.oreColors=Ore Colors
+config.scannable.oreBlacklist=Ore Blacklist
 
 gui.scannable.scanner.title=Scanner
 gui.scannable.scanner.modules=Modules

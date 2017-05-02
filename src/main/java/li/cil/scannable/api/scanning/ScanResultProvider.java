@@ -7,6 +7,7 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -72,11 +73,11 @@ public interface ScanResultProvider {
      * The specified list has been frustum culled using the results' bounds
      * provided from {@link ScanResult#getRenderBounds()}.
      *
-     * @param results      the results to render.
      * @param entity       the entity we're rendering for. Usually the player.
+     * @param results      the results to render.
      * @param partialTicks partial ticks of the currently rendered frame.
      */
-    void render(final Entity entity, final Iterable<ScanResult> results, final float partialTicks);
+    void render(final Entity entity, final List<ScanResult> results, final float partialTicks);
 
     /**
      * Called when a scan is complete or is canceled.

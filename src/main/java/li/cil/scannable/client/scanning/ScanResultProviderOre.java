@@ -1,7 +1,10 @@
 package li.cil.scannable.client.scanning;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
+import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
@@ -32,9 +35,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class ScanResultProviderOre extends AbstractScanResultProvider implements ICapabilityProvider {
@@ -42,8 +48,12 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
 
     // --------------------------------------------------------------------- //
 
+    private static final int DEFAULT_COLOR = 0x4466CC;
+    private static final float BASE_ALPHA = 0.25f;
+
     private final Map<IBlockState, ItemStack> oresCommon = new HashMap<>();
     private final Map<IBlockState, ItemStack> oresRare = new HashMap<>();
+    private final TObjectIntMap<IBlockState> oreColors = new TObjectIntHashMap<>();
     private boolean scanCommon, scanRare;
     private int x, y, z;
     private BlockPos min, max;
@@ -120,8 +130,8 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
                 stack = oresRare.get(state);
             }
             if (stack != null) {
-                if (!tryAddToCluster(pos, stack)) {
-                    final ScanResultOre result = new ScanResultOre(pos, stack);
+                if (!tryAddToCluster(pos, state)) {
+                    final ScanResultOre result = new ScanResultOre(pos, stack, state);
                     callback.accept(result);
                     resultClusters.put(pos, result);
                 }
@@ -130,10 +140,13 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
     }
 
     @Override
-    public void render(final Entity entity, final Iterable<ScanResult> results, final float partialTicks) {
+    public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
         final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
         final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
         final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
+
+        final Vec3d lookVec = entity.getLook(partialTicks).normalize();
+        final Vec3d playerEyes = entity.getPositionEyes(partialTicks);
 
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
@@ -144,21 +157,38 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         GlStateManager.pushMatrix();
         GlStateManager.translate(-posX, -posY, -posZ);
 
-        GlStateManager.color(0.3f, 0.4f, 0.8f, 0.4f);
+        final Tessellator tessellator = Tessellator.getInstance();
+        final VertexBuffer buffer = tessellator.getBuffer();
 
-        final Tessellator t = Tessellator.getInstance();
-        final VertexBuffer buffer = t.getBuffer();
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-
+        final float colorNormalizer = 1 / 255f;
         for (final ScanResult result : results) {
             final ScanResultOre resultOre = (ScanResultOre) result;
+            final Vec3d toResult = resultOre.getPosition().subtract(playerEyes);
+            final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
+            final float sqLookDirDot = lookDirDot * lookDirDot;
+            final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
+            final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
+
+            final int color;
+            if (oreColors.containsKey(resultOre.state)) {
+                color = oreColors.get(resultOre.state);
+            } else {
+                color = DEFAULT_COLOR;
+            }
+
+            final float r = ((color >> 16) & 0xFF) * colorNormalizer;
+            final float g = ((color >> 8) & 0xFF) * colorNormalizer;
+            final float b = (color & 0xFF) * colorNormalizer;
+            final float a = BASE_ALPHA * focusScale;
+
             drawCube(resultOre.bounds.minX, resultOre.bounds.minY, resultOre.bounds.minZ,
                      resultOre.bounds.maxX, resultOre.bounds.maxY, resultOre.bounds.maxZ,
-                     buffer);
+                     r, g, b, a, buffer);
         }
 
-        t.draw();
+        tessellator.draw();
 
         GlStateManager.popMatrix();
 
@@ -180,7 +210,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
 
     // --------------------------------------------------------------------- //
 
-    private boolean tryAddToCluster(final BlockPos pos, final ItemStack stack) {
+    private boolean tryAddToCluster(final BlockPos pos, final IBlockState state) {
         final BlockPos min = pos.add(-2, -2, -2);
         final BlockPos max = pos.add(2, 2, 2);
         for (int y = min.getY(); y <= max.getY(); y++) {
@@ -188,7 +218,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
                 for (int z = min.getZ(); z <= max.getZ(); z++) {
                     final BlockPos clusterPos = new BlockPos(x, y, z);
                     final ScanResultOre cluster = resultClusters.get(clusterPos);
-                    if (cluster != null && cluster.add(pos, stack)) {
+                    if (cluster != null && cluster.add(pos, state)) {
                         resultClusters.put(pos, cluster);
                         return true;
                     }
@@ -217,6 +247,8 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
     }
 
     private void buildOreCache() {
+        final TObjectIntMap<String> oreColorsByOreName = buildOreColorTable();
+
         final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.oresBlacklist));
         final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.oresCommon));
         final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.oresRare));
@@ -238,9 +270,14 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
                         }
                         if (oreNamesRare.contains(name)) {
                             isRare = true;
-                        }
-                        if (oreNamesCommon.contains(name) || pattern.matcher(name).matches()) {
+                        } else if (oreNamesCommon.contains(name) || pattern.matcher(name).matches()) {
                             isCommon = true;
+                        } else {
+                            continue;
+                        }
+
+                        if (oreColorsByOreName.containsKey(name)) {
+                            oreColors.put(state, oreColorsByOreName.get(name));
                         }
                     }
 
@@ -254,17 +291,39 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         }
     }
 
+    private static TObjectIntMap<String> buildOreColorTable() {
+        final TObjectIntMap<String> oreColorsByOreName = new TObjectIntHashMap<>();
+
+        final Pattern pattern = Pattern.compile("^(?<name>[^\\s=]+)\\s*=\\s*0x(?<color>[a-fA-F0-9]+)$");
+        for (final String oreColor : Settings.oreColors) {
+            final Matcher matcher = pattern.matcher(oreColor.trim());
+            if (!matcher.matches()) {
+                Scannable.getLog().warn("Illegal ore color entry in settings: '{}'", oreColor.trim());
+                continue;
+            }
+
+            final String name = matcher.group("name");
+            final int color = Integer.parseInt(matcher.group("color"), 16);
+
+            oreColorsByOreName.put(name, color);
+        }
+
+        return oreColorsByOreName;
+    }
+
     private class ScanResultOre implements ScanResult {
         private AxisAlignedBB bounds;
         private final ItemStack stack;
+        private final IBlockState state;
 
-        ScanResultOre(final BlockPos pos, final ItemStack stack) {
+        ScanResultOre(final BlockPos pos, final ItemStack stack, final IBlockState state) {
             bounds = new AxisAlignedBB(pos);
             this.stack = stack;
+            this.state = state;
         }
 
-        boolean add(final BlockPos pos, final ItemStack stack) {
-            if (!ItemStack.areItemStacksEqual(this.stack, stack)) {
+        boolean add(final BlockPos pos, final IBlockState state) {
+            if (!Objects.equals(state, this.state)) {
                 return false;
             }
 

@@ -31,6 +31,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -107,7 +108,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
     }
 
     @Override
-    public void render(final Entity entity, final Iterable<ScanResult> results, final float partialTicks) {
+    public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
         GlStateManager.enableBlend();
@@ -124,11 +125,24 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
         final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
         final int height = fontRenderer.FONT_HEIGHT + 5;
 
+        // Order results by distance to center of screen (deviation from look
+        // vector) so that labels we're looking at are in front of others.
+        results.sort(Comparator.comparing(result -> {
+            final ScanResultEntity resultEntity = (ScanResultEntity) result;
+            final Vec3d entityEyes = resultEntity.entity.getPositionEyes(partialTicks);
+            final Vec3d toResult = entityEyes.subtract(playerEyes);
+            return lookVec.dotProduct(toResult.normalize());
+        }));
+
         for (final ScanResult result : results) {
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
             final Vec3d entityEyes = resultEntity.entity.getPositionEyes(partialTicks);
-            final Vec3d toEntity = entityEyes.subtract(playerEyes);
-            final float scale = (float) toEntity.lengthVector() * 0.005f;
+            final Vec3d toResult = entityEyes.subtract(playerEyes);
+            final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
+            final float sqLookDirDot = lookDirDot * lookDirDot;
+            final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
+            final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
+            final float scale = (float) toResult.lengthVector() * focusScale * 0.005f;
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(entityEyes.xCoord, entityEyes.yCoord, entityEyes.zCoord);
@@ -137,7 +151,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
             GlStateManager.rotate(entityPitch, 1, 0, 0);
             GlStateManager.scale(-scale, -scale, scale);
 
-            if (lookVec.dotProduct(toEntity.normalize()) > 0.999f) {
+            if (lookDirDot > 0.999f) {
                 final String text = resultEntity.entity.getName();
                 final int width = fontRenderer.getStringWidth(text) + 16;
 
