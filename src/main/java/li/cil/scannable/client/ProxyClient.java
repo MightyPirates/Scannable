@@ -2,6 +2,7 @@ package li.cil.scannable.client;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.client.gui.GuiHandlerClient;
+import li.cil.scannable.client.renderer.OverlayRenderer;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.Scannable;
@@ -33,6 +34,7 @@ public final class ProxyClient extends ProxyCommon {
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(ScannerRenderer.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(OverlayRenderer.INSTANCE);
         MinecraftForge.EVENT_BUS.register(ScanManager.INSTANCE);
     }
 

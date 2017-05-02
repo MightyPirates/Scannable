@@ -15,8 +15,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -93,17 +91,6 @@ public final class ItemScanner extends Item {
         if (entity.getEntityWorld().isRemote) {
             ScanManager.INSTANCE.updateScan(entity, false);
         }
-
-        final Vec3d lookAtBase = entity.
-                getPositionEyes(1).
-                add(entity.getLookVec());
-        final Vec3d speedBase = entity.
-                getLookVec();
-        for (int i = 0; i < 10; i++) {
-            final Vec3d lookAt = lookAtBase.addVector(itemRand.nextGaussian(), itemRand.nextGaussian(), itemRand.nextGaussian());
-            final Vec3d speed = speedBase.addVector(itemRand.nextGaussian(), itemRand.nextGaussian(), itemRand.nextGaussian());
-            entity.getEntityWorld().spawnParticle(EnumParticleTypes.PORTAL, lookAt.xCoord, lookAt.yCoord, lookAt.zCoord, speed.xCoord, speed.yCoord, speed.zCoord);
-        }
     }
 
     @Override
@@ -118,6 +105,10 @@ public final class ItemScanner extends Item {
     public ItemStack onItemUseFinish(final ItemStack stack, final World world, final EntityLivingBase entity) {
         if (world.isRemote) {
             ScanManager.INSTANCE.updateScan(entity, true);
+        }
+        if (entity instanceof EntityPlayer) {
+            final EntityPlayer player = (EntityPlayer) entity;
+            player.getCooldownTracker().setCooldown(this, 40);
         }
         return stack;
     }

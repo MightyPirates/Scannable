@@ -44,11 +44,14 @@ public interface ScanResultProvider {
      * Called each time a scan is started by the player.
      * <p>
      * Prepare internal structures for incoming calls to {@link #computeScanResults(Consumer)}.
+     * <p>
+     * Note that the radius should be treated as a <em>maximum</em> radius.
+     * Implementations are free to only scan smaller area if they so please.
      *
      * @param player    the player that is scanning.
      * @param modules   the modules installed in the scanner.
      * @param center    the center of the scanned sphere.
-     * @param radius    the radius of the scanned sphere.
+     * @param radius    the maximum radius of the scanned sphere.
      * @param scanTicks the total number of ticks the scan will take.
      */
     void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks);

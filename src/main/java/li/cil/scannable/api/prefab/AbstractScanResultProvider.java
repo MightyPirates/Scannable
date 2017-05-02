@@ -15,8 +15,8 @@ import org.lwjgl.opengl.GL11;
 import java.util.Collection;
 
 /**
- * Helper base class for scan result providers, providing some common functionality for
- * drawing result information.
+ * Helper base class for scan result providers, providing some common
+ * functionality for drawing result information.
  */
 public abstract class AbstractScanResultProvider implements ScanResultProvider {
     protected EntityPlayer player;
