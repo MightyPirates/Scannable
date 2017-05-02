@@ -104,7 +104,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         y = min.getY() - 1; // -1 for initial moveNext.
         z = min.getZ();
         final BlockPos size = max.subtract(min);
-        final int count = size.getX() * size.getY() * size.getZ();
+        final int count = (size.getX() + 1) * (size.getY() + 1) * (size.getZ() + 1);
         blocksPerTick = MathHelper.ceil(count / (float) scanTicks);
     }
 
@@ -122,21 +122,19 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
 
             final BlockPos pos = new BlockPos(x, y, z);
             final IBlockState state = world.getBlockState(pos);
-            ItemStack stack = null;
-            if (scanCommon) {
-                stack = oresCommon.get(state);
-            }
-            if (stack == null && scanRare) {
-                stack = oresRare.get(state);
-            }
-            if (stack != null) {
-                if (!tryAddToCluster(pos, state)) {
-                    final ScanResultOre result = new ScanResultOre(pos, stack, state);
-                    callback.accept(result);
-                    resultClusters.put(pos, result);
-                }
+            final boolean matches = (scanCommon && oresCommon.containsKey(state)) ||
+                                    (scanRare && oresRare.containsKey(state));
+            if (matches && !tryAddToCluster(pos, state)) {
+                final ScanResultOre result = new ScanResultOre(state, pos);
+                callback.accept(result);
+                resultClusters.put(pos, result);
             }
         }
+    }
+
+    @Override
+    public boolean isValid(final ScanResult result) {
+        return ((ScanResultOre) result).isRoot();
     }
 
     @Override
@@ -213,20 +211,32 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
     private boolean tryAddToCluster(final BlockPos pos, final IBlockState state) {
         final BlockPos min = pos.add(-2, -2, -2);
         final BlockPos max = pos.add(2, 2, 2);
+
+        ScanResultOre root = null;
         for (int y = min.getY(); y <= max.getY(); y++) {
             for (int x = min.getX(); x <= max.getX(); x++) {
                 for (int z = min.getZ(); z <= max.getZ(); z++) {
                     final BlockPos clusterPos = new BlockPos(x, y, z);
                     final ScanResultOre cluster = resultClusters.get(clusterPos);
-                    if (cluster != null && cluster.add(pos, state)) {
-                        resultClusters.put(pos, cluster);
-                        return true;
+                    if (cluster == null) {
+                        continue;
+                    }
+                    if (!Objects.equals(state, cluster.state)) {
+                        continue;
+                    }
+
+                    if (root == null) {
+                        root = cluster.getRoot();
+                        root.add(pos);
+                        resultClusters.put(pos, root);
+                    } else {
+                        cluster.setRoot(root);
                     }
                 }
             }
         }
 
-        return false;
+        return root != null;
     }
 
     private boolean moveNext(final World world) {
@@ -311,25 +321,50 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         return oreColorsByOreName;
     }
 
-    private class ScanResultOre implements ScanResult {
-        private AxisAlignedBB bounds;
-        private final ItemStack stack;
-        private final IBlockState state;
+    // --------------------------------------------------------------------- //
 
-        ScanResultOre(final BlockPos pos, final ItemStack stack, final IBlockState state) {
+    private class ScanResultOre implements ScanResult {
+        private final IBlockState state;
+        private AxisAlignedBB bounds;
+        @Nullable
+        private ScanResultOre parent;
+
+        ScanResultOre(final IBlockState state, final BlockPos pos) {
             bounds = new AxisAlignedBB(pos);
-            this.stack = stack;
             this.state = state;
         }
 
-        boolean add(final BlockPos pos, final IBlockState state) {
-            if (!Objects.equals(state, this.state)) {
-                return false;
+        boolean isRoot() {
+            return parent == null;
+        }
+
+        ScanResultOre getRoot() {
+            if (parent != null) {
+                return parent.getRoot();
+            }
+            return this;
+        }
+
+        void setRoot(final ScanResultOre root) {
+            if (parent != null) {
+                parent.setRoot(root);
+                return;
+            }
+            if (root == this) {
+                return;
             }
 
-            bounds = bounds.union(new AxisAlignedBB(pos));
-            return true;
+            root.bounds = root.bounds.union(bounds);
+            parent = root;
         }
+
+        void add(final BlockPos pos) {
+            assert parent == null : "Trying to add to non-root node.";
+            bounds = bounds.union(new AxisAlignedBB(pos));
+        }
+
+        // --------------------------------------------------------------------- //
+        // ScanResult
 
         @Nullable
         @Override

@@ -63,6 +63,19 @@ public interface ScanResultProvider {
     void computeScanResults(final Consumer<ScanResult> callback);
 
     /**
+     * Called to filter out invalid results when moving results to the active
+     * render list. Use this to filter out results that are no longer valid,
+     * either because the scanned object has become invalid in the meantime,
+     * or because the result has been merged into another one (e.g. the built-in
+     * ore scanner merges adjacent ore blocks into a single result for better
+     * render performance).
+     *
+     * @param result the result to filter.
+     * @return <code>true</code> if the result should be kept; <code>false</code> otherwise.
+     */
+    boolean isValid(final ScanResult result);
+
+    /**
      * Render the specified results.
      * <p>
      * This is delegated as a batch call to the provider to allow optimized

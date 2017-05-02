@@ -40,6 +40,11 @@ public final class CapabilityScanResultProvider {
         }
 
         @Override
+        public boolean isValid(final ScanResult result) {
+            return false;
+        }
+
+        @Override
         public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
         }
 

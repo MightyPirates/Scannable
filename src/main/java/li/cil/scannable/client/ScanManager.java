@@ -165,6 +165,9 @@ public enum ScanManager {
             final Vec3d position = entry.result.getPosition();
             if (lastScanCenter.distanceTo(position) <= radius) {
                 pendingResults.remove(pendingResults.size() - 1);
+                if (!entry.provider.isValid(entry.result)) {
+                    continue;
+                }
                 synchronized (renderingResults) {
                     final List<ScanResult> results = renderingResults.computeIfAbsent(entry.provider, provider -> new ArrayList<>());
                     results.add(entry.result);
@@ -234,4 +237,5 @@ public enum ScanManager {
             this.result = result;
         }
     }
+
 }

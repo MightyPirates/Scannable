@@ -1,5 +1,6 @@
 package li.cil.scannable.api.prefab;
 
+import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -30,6 +31,11 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
         this.player = player;
         this.center = center;
         this.radius = radius;
+    }
+
+    @Override
+    public boolean isValid(final ScanResult result) {
+        return true;
     }
 
     @Override
