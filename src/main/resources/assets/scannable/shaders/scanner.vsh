@@ -1,7 +1,7 @@
-#version 120
+#version 130
 
-varying out vec3 ray;
-varying out vec2 texCoord;
+out vec3 ray;
+out vec2 texCoord;
 
 void main() {
   ray = gl_Normal.xyz;
