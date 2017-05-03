@@ -32,7 +32,6 @@ public enum OverlayRenderer {
         final Minecraft mc = Minecraft.getMinecraft();
         final EntityPlayer player = mc.player;
 
-
         final ItemStack stack = player.getActiveItemStack();
         if (stack.isEmpty()) {
             return;
