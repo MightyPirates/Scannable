@@ -9,6 +9,7 @@ import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -135,7 +136,9 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
         final Vec3d lookVec = entity.getLook(partialTicks).normalize();
         final Vec3d playerEyes = entity.getPositionEyes(partialTicks);
 
-        final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        final Minecraft mc = Minecraft.getMinecraft();
+        final EntityPlayer player = mc.player;
+        final FontRenderer fontRenderer = mc.fontRenderer;
         final int height = fontRenderer.FONT_HEIGHT + 5;
 
         // Order results by distance to center of screen (deviation from look
@@ -151,11 +154,12 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
             final Vec3d entityEyes = resultEntity.entity.getPositionEyes(partialTicks);
             final Vec3d toResult = entityEyes.subtract(playerEyes);
+            final float distance = (float) toResult.lengthVector();
             final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
             final float sqLookDirDot = lookDirDot * lookDirDot;
             final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
             final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
-            final float scale = (float) toResult.lengthVector() * focusScale * 0.005f;
+            final float scale = distance * focusScale * 0.005f;
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(entityEyes.xCoord, entityEyes.yCoord, entityEyes.zCoord);
@@ -165,7 +169,14 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
             GlStateManager.scale(-scale, -scale, scale);
 
             if (lookDirDot > 0.999f) {
-                final String text = resultEntity.entity.getName();
+                final String name = resultEntity.entity.getName();
+                final String text;
+                if (player.isSneaking()) {
+                    text = I18n.format(Constants.GUI_OVERLAY_ENTITY_DETAILS, name, MathHelper.ceil(distance));
+                } else {
+                    text = name;
+                }
+
                 final int width = fontRenderer.getStringWidth(text) + 16;
 
                 GlStateManager.disableTexture2D();

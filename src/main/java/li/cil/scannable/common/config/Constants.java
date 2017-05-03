@@ -34,6 +34,7 @@ public final class Constants {
     public static final String GUI_SCANNER_TITLE = "gui.scannable.scanner.title";
     public static final String GUI_SCANNER_MODULES = "gui.scannable.scanner.modules";
     public static final String GUI_SCANNER_PROGRESS = "gui.scannable.scanner.progress";
+    public static final String GUI_OVERLAY_ENTITY_DETAILS = "gui.scannable.overlay.entity_details";
 
     // --------------------------------------------------------------------- //
     // Tooltips
