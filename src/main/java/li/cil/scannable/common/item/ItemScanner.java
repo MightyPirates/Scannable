@@ -113,7 +113,7 @@ public final class ItemScanner extends Item {
         if (player.isSneaking()) {
             player.openGui(Scannable.instance, GuiId.SCANNER.id, world, hand.ordinal(), 0, 0);
         } else {
-            if (!tryConsumeEnergy(stack, true)) {
+            if (!tryConsumeEnergy(player, stack, true)) {
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
             }
 
@@ -159,9 +159,13 @@ public final class ItemScanner extends Item {
 
     @Override
     public ItemStack onItemUseFinish(final ItemStack stack, final World world, final EntityLivingBase entity) {
+        if (!(entity instanceof EntityPlayer)) {
+            return stack;
+        }
+
         MinecraftForge.EVENT_BUS.register(this);
 
-        final boolean hasEnergy = tryConsumeEnergy(stack, false);
+        final boolean hasEnergy = tryConsumeEnergy((EntityPlayer) entity, stack, false);
         if (world.isRemote) {
             stopChargingSound();
 
@@ -173,10 +177,8 @@ public final class ItemScanner extends Item {
             }
         }
 
-        if (entity instanceof EntityPlayer) {
-            final EntityPlayer player = (EntityPlayer) entity;
-            player.getCooldownTracker().setCooldown(this, 40);
-        }
+        final EntityPlayer player = (EntityPlayer) entity;
+        player.getCooldownTracker().setCooldown(this, 40);
 
         return stack;
     }
@@ -208,8 +210,12 @@ public final class ItemScanner extends Item {
         Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SCANNER_ACTIVATE, 1));
     }
 
-    private boolean tryConsumeEnergy(final ItemStack stack, final boolean simulate) {
+    private boolean tryConsumeEnergy(final EntityPlayer player, final ItemStack stack, final boolean simulate) {
         if (!Settings.useEnergy) {
+            return true;
+        }
+
+        if (player.isCreative()) {
             return true;
         }
 
