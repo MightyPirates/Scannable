@@ -3,6 +3,7 @@ package li.cil.scannable.client.renderer;
 import li.cil.scannable.api.API;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
+import li.cil.scannable.integration.optifine.ProxyOptiFine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -52,6 +53,7 @@ public enum ScannerRenderer {
     private int zNearUniform, zFarUniform, aspectUniform;
     private int depthTexUniform;
     private int framebufferDepthTexture;
+    private boolean isOptiFineDepthTexture;
 
     // --------------------------------------------------------------------- //
     // Direct memory float buffers for setting uniforms, cached for alloc-free.
@@ -174,16 +176,19 @@ public enum ScannerRenderer {
         GlStateManager.pushMatrix();
         GlStateManager.pushAttrib();
 
-        // Activate original depth render buffer while we use the depth texture.
-        // Even though it's not written to typically drivers won't like reading
-        // from a sampler of a texture that's part of the current render target.
-        OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+        if (!isOptiFineDepthTexture) {
+            // Activate original depth render buffer while we use the depth texture.
+            // Even though it's not written to typically drivers won't like reading
+            // from a sampler of a texture that's part of the current render target.
+            OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+        }
 
         final int width = framebuffer.framebufferTextureWidth;
         final int height = framebuffer.framebufferTextureHeight;
         final float radius = ScanManager.computeRadius(currentStart, adjustedDuration);
         GlStateManager.bindTexture(framebufferDepthTexture);
 
+        final int oldProgram = GlStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         OpenGlHelper.glUseProgram(shaderProgram);
 
         setUniform(camPosUniform, viewer.getPositionEyes(event.getPartialTicks()));
@@ -207,12 +212,14 @@ public enum ScannerRenderer {
 
         restoreMatrices();
 
-        OpenGlHelper.glUseProgram(0);
+        OpenGlHelper.glUseProgram(oldProgram);
 
         GlStateManager.bindTexture(0);
 
-        // Swap back in our depth texture for that sweet, sweet depth info.
-        OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+        if (!isOptiFineDepthTexture) {
+            // Swap back in our depth texture for that sweet, sweet depth info.
+            OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+        }
 
         GlStateManager.popAttrib();
         GlStateManager.popMatrix();
@@ -274,6 +281,14 @@ public enum ScannerRenderer {
     }
 
     private void installDepthTexture(final Framebuffer framebuffer) {
+        if (ProxyOptiFine.INSTANCE.isShaderPackLoaded()) {
+            framebufferDepthTexture = ProxyOptiFine.INSTANCE.getDepthTexture();
+            isOptiFineDepthTexture = true;
+            return;
+        } else {
+            isOptiFineDepthTexture = false;
+        }
+
         framebufferDepthTexture = TextureUtil.glGenTextures();
         GlStateManager.bindTexture(framebufferDepthTexture);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
@@ -290,6 +305,11 @@ public enum ScannerRenderer {
     }
 
     private void uninstallDepthTexture(final Framebuffer framebuffer) {
+        if (isOptiFineDepthTexture) {
+            framebufferDepthTexture = 0;
+            return;
+        }
+
         OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebuffer.framebufferObject);
         OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
         TextureUtil.deleteTexture(framebufferDepthTexture);

@@ -13,9 +13,9 @@ in vec2 texCoord;
 
 const float width = 10;
 const float sharpness = 10;
-const vec4 outerColor = vec4(1.0, 1.0, 0.6, 1.0);
-const vec4 midColor = vec4(0.6, 1.0, 0.6, 1.0);
-const vec4 innerColor = vec4(0.1, 0.8, 0.4, 1.0);
+const vec4 outerColor = vec4(0.8, 1.0, 0.9, 1.0);
+const vec4 midColor = vec4(0.4, 0.5, 0.7, 1.0);
+const vec4 innerColor = vec4(0.1, 0.4, 0.9, 1.0);
 const vec4 scanlineColor = vec4(0.6, 1.0, 0.2, 1.0);
 
 float scanlines(vec2 uv) {

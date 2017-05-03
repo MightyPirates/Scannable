@@ -7,6 +7,7 @@ import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.Entity;
@@ -213,6 +214,9 @@ public enum ScanManager {
         final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * event.getPartialTicks();
         final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * event.getPartialTicks();
         frustum.setPosition(posX, posY, posZ);
+
+        GlStateManager.bindTexture(0);
+        GlStateManager.color(1, 1, 1, 1);
 
         synchronized (renderingResults) {
             // We render all results in batches, grouped by their provider.
