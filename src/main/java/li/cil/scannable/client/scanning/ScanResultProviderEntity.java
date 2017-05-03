@@ -4,6 +4,7 @@ import li.cil.scannable.api.Icons;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
+import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -73,14 +74,26 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
     // ScanResultProvider
 
     @Override
+    public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
+        if (Items.isModuleAnimal(module)) {
+            return Constants.ENERGY_COST_MODULE_ANIMAL;
+        }
+        if (Items.isModuleMonster(module)) {
+            return Constants.ENERGY_COST_MODULE_MONSTER;
+        }
+
+        throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
+    }
+
+    @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
 
         scanAnimal = false;
         scanMonster = false;
         for (final ItemStack module : modules) {
-            scanAnimal |= module.getItem() == Items.moduleAnimal;
-            scanMonster |= module.getItem() == Items.moduleMonster;
+            scanAnimal |= Items.isModuleAnimal(module);
+            scanMonster |= Items.isModuleMonster(module);
         }
 
         // TODO Spread this query over multiple ticks (reimplement inner loop).

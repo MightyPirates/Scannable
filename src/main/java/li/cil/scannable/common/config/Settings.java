@@ -8,7 +8,6 @@ public final class Settings {
     @Config.LangKey(Constants.CONFIG_USE_ENERGY)
     @Config.Comment("Whether to consume energy when performing a scan.\n" +
                     "Will make the scanner a chargeable item.")
-    @Config.RequiresWorldRestart
     public static boolean useEnergy;
 
     @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)

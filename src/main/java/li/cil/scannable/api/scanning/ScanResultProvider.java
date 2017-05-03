@@ -41,6 +41,20 @@ import java.util.function.Consumer;
  */
 public interface ScanResultProvider {
     /**
+     * Return the amount of energy this provider adds to the total cost of a
+     * scan when installed in a scanner.
+     * <p>
+     * Values should typically range between 25 and 100, for example, the
+     * built-in animal provider requires 25 energy whereas the rare ore scanner
+     * requires 100.
+     *
+     * @param player the player that is scanning.
+     * @param module the module to get the energy cost for.
+     * @return the energy cost contributed by this provider.
+     */
+    int getEnergyCost(final EntityPlayer player, final ItemStack module);
+
+    /**
      * Called each time a scan is started by the player.
      * <p>
      * Prepare internal structures for incoming calls to {@link #computeScanResults(Consumer)}.

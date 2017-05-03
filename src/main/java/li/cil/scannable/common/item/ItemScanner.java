@@ -1,12 +1,14 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.gui.GuiId;
+import li.cil.scannable.common.init.Items;
 import li.cil.scannable.common.inventory.ItemScannerCapabilityProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -65,26 +67,33 @@ public final class ItemScanner extends Item {
     @Override
     public void getSubItems(final Item item, final CreativeTabs tab, final NonNullList<ItemStack> subItems) {
         super.getSubItems(item, tab, subItems);
-        if (Settings.useEnergy) {
-            final ItemStack stack = new ItemStack(item);
-            final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-            if (energyStorage != null) {
-                energyStorage.receiveEnergy(energyStorage.getMaxEnergyStored(), false);
-                subItems.add(stack);
-            }
+
+        final ItemStack stack = new ItemStack(item);
+        final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
+        if (energyStorage == null) {
+            return;
         }
+
+        energyStorage.receiveEnergy(energyStorage.getMaxEnergyStored(), false);
+        subItems.add(stack);
     }
 
     @Override
     public void addInformation(final ItemStack stack, final EntityPlayer playerIn, final List<String> tooltip, final boolean advanced) {
         super.addInformation(stack, playerIn, tooltip, advanced);
+
         tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER));
-        if (Settings.useEnergy) {
-            final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-            if (energyStorage != null) {
-                tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER_ENERGY, energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored()));
-            }
+
+        if (!Settings.useEnergy) {
+            return;
         }
+
+        final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
+        if (energyStorage == null) {
+            return;
+        }
+
+        tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER_ENERGY, energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored()));
     }
 
     @Override
@@ -112,12 +121,12 @@ public final class ItemScanner extends Item {
         if (player.isSneaking()) {
             player.openGui(Scannable.instance, GuiId.SCANNER.id, world, hand.ordinal(), 0, 0);
         } else {
-            if (!tryConsumeEnergy(player, stack, true)) {
+            final List<ItemStack> modules = new ArrayList<>();
+            if (!collectModules(stack, modules)) {
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
             }
 
-            final List<ItemStack> modules = new ArrayList<>();
-            if (!collectModules(stack, modules)) {
+            if (!tryConsumeEnergy(player, stack, modules, true)) {
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
             }
 
@@ -164,7 +173,12 @@ public final class ItemScanner extends Item {
 
         MinecraftForge.EVENT_BUS.register(this);
 
-        final boolean hasEnergy = tryConsumeEnergy((EntityPlayer) entity, stack, false);
+        final List<ItemStack> modules = new ArrayList<>();
+        if (!collectModules(stack, modules)) {
+            return stack;
+        }
+
+        final boolean hasEnergy = tryConsumeEnergy((EntityPlayer) entity, stack, modules, false);
         if (world.isRemote) {
             SoundManager.INSTANCE.stopChargingSound();
 
@@ -193,7 +207,20 @@ public final class ItemScanner extends Item {
 
     // --------------------------------------------------------------------- //
 
-    private boolean tryConsumeEnergy(final EntityPlayer player, final ItemStack stack, final boolean simulate) {
+    static int getModuleEnergyCost(final EntityPlayer player, final ItemStack module) {
+        final ScanResultProvider provider = module.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
+        if (provider != null) {
+            return provider.getEnergyCost(player, module);
+        }
+
+        if (Items.isModuleRange(module)) {
+            return Constants.ENERGY_COST_MODULE_RANGE;
+        }
+
+        return 0;
+    }
+
+    private static boolean tryConsumeEnergy(final EntityPlayer player, final ItemStack stack, final List<ItemStack> modules, final boolean simulate) {
         if (!Settings.useEnergy) {
             return true;
         }
@@ -207,15 +234,20 @@ public final class ItemScanner extends Item {
             return false;
         }
 
-        final int extracted = energyStorage.extractEnergy(Constants.SCANNER_ENERGY_COST, simulate);
-        if (extracted < Constants.SCANNER_ENERGY_COST) {
+        int totalCost = 0;
+        for (final ItemStack module : modules) {
+            totalCost += getModuleEnergyCost(player, module);
+        }
+
+        final int extracted = energyStorage.extractEnergy(totalCost, simulate);
+        if (extracted < totalCost) {
             return false;
         }
 
         return true;
     }
 
-    private boolean collectModules(final ItemStack stack, final List<ItemStack> modules) {
+    private static boolean collectModules(final ItemStack stack, final List<ItemStack> modules) {
         boolean hasProvider = false;
         final IItemHandler scannerInventory = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         assert scannerInventory != null;

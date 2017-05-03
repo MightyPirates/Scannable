@@ -89,14 +89,26 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
     // ScanResultProvider
 
     @Override
+    public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
+        if (Items.isModuleOreCommon(module)) {
+            return Constants.ENERGY_COST_MODULE_ORE_COMMON;
+        }
+        if (Items.isModuleOreRare(module)) {
+            return Constants.ENERGY_COST_MODULE_ORE_RARE;
+        }
+
+        throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
+    }
+
+    @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius * Constants.MODULE_ORE_RADIUS_MULTIPLIER, scanTicks);
 
         scanCommon = false;
         scanRare = false;
         for (final ItemStack module : modules) {
-            scanCommon |= module.getItem() == Items.moduleOreCommon;
-            scanRare |= module.getItem() == Items.moduleOreRare;
+            scanCommon |= Items.isModuleOreCommon(module);
+            scanRare |= Items.isModuleOreRare(module);
         }
 
         min = new BlockPos(center).add(-this.radius, -this.radius, -this.radius);

@@ -32,6 +32,11 @@ public final class CapabilityScanResultProvider {
         INSTANCE;
 
         @Override
+        public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
+            return 0;
+        }
+
+        @Override
         public void initialize(final EntityPlayer player, Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         }
 

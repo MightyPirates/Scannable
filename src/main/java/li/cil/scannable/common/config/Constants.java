@@ -40,6 +40,7 @@ public final class Constants {
 
     public static final String TOOLTIP_SCANNER = "tooltip.scannable.scanner";
     public static final String TOOLTIP_SCANNER_ENERGY = "tooltip.scannable.scanner.energy";
+    public static final String TOOLTIP_MODULE_ENERGY_COST = "tooltip.scannable.module.energy_cost";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
@@ -66,12 +67,17 @@ public final class Constants {
 
     // Amount of energy that can be stored in a scanner.
     public static final int SCANNER_ENERGY_CAPACITY = 5000;
-    // Amount of energy consumed per scan.
-    public static final int SCANNER_ENERGY_COST = 100;
     // Number of modules that can be installed in a scanner.
     public static final int SCANNER_MAX_MODULE_COUNT = 3;
     // By how much the scan radius is increased by installing the range module.
     public static final float MODULE_RANGE_RADIUS_INCREASE = 32;
     // By how much to scale the base scan range when scanning for ores.
     public static final float MODULE_ORE_RADIUS_MULTIPLIER = 0.5f;
+
+    // Module energy costs
+    public static final int ENERGY_COST_MODULE_ANIMAL = 25;
+    public static final int ENERGY_COST_MODULE_MONSTER = 50;
+    public static final int ENERGY_COST_MODULE_ORE_COMMON = 75;
+    public static final int ENERGY_COST_MODULE_ORE_RARE = 100;
+    public static final int ENERGY_COST_MODULE_RANGE = 100;
 }

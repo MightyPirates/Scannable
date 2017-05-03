@@ -31,6 +31,26 @@ public final class Items {
         return isItem(stack, scanner);
     }
 
+    public static boolean isModuleAnimal(final ItemStack stack) {
+        return isItem(stack, moduleAnimal);
+    }
+
+    public static boolean isModuleMonster(final ItemStack stack) {
+        return isItem(stack, moduleMonster);
+    }
+
+    public static boolean isModuleOreCommon(final ItemStack stack) {
+        return isItem(stack, moduleOreCommon);
+    }
+
+    public static boolean isModuleOreRare(final ItemStack stack) {
+        return isItem(stack, moduleOreRare);
+    }
+
+    public static boolean isModuleRange(final ItemStack stack) {
+        return isItem(stack, moduleRange);
+    }
+
     // --------------------------------------------------------------------- //
 
     public static void register(final ProxyCommon proxy) {

@@ -100,7 +100,7 @@ public enum ScanManager {
                 collectingProviders.add(provider);
             }
 
-            if (module.getItem() == Items.moduleRange) {
+            if (Items.isModuleRange(module)) {
                 scanRadius += Constants.MODULE_RANGE_RADIUS_INCREASE;
             }
         }

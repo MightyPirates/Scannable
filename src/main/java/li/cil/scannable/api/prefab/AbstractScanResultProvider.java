@@ -27,6 +27,11 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     // ScanResultProvider
 
     @Override
+    public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
+        return 50;
+    }
+
+    @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         this.player = player;
         this.center = center;

@@ -25,14 +25,13 @@ public final class ItemScannerCapabilityProvider implements ICapabilityProvider 
     private static final String TAG_ENERGY = "energy";
 
     private final ItemHandlerScanner itemHandler;
-    @Nullable
     private final EnergyStorageScanner energyStorage;
 
     // --------------------------------------------------------------------- //
 
     public ItemScannerCapabilityProvider(final ItemStack container) {
         itemHandler = new ItemHandlerScanner(container);
-        energyStorage = Settings.useEnergy ? new EnergyStorageScanner(container) : null;
+        energyStorage = new EnergyStorageScanner(container);
     }
 
     // --------------------------------------------------------------------- //
@@ -61,7 +60,7 @@ public final class ItemScannerCapabilityProvider implements ICapabilityProvider 
             }
             return (T) itemHandler;
         }
-        if (energyStorage != null && capability == CapabilityEnergy.ENERGY) {
+        if (Settings.useEnergy && capability == CapabilityEnergy.ENERGY) {
             final NBTTagCompound nbt = itemHandler.container.getTagCompound();
             if (nbt != null && nbt.hasKey(TAG_ENERGY, NBT.TAG_INT)) {
                 energyStorage.deserializeNBT((NBTTagInt) nbt.getTag(TAG_ENERGY));
