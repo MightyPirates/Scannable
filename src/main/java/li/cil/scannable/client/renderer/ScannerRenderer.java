@@ -149,16 +149,16 @@ public enum ScannerRenderer {
         }
 
         final Framebuffer framebuffer = mc.getFramebuffer();
-        final long adjustedDuration = ScanManager.computeScanGrowthDuration();
+        final int adjustedDuration = ScanManager.computeScanGrowthDuration();
 
         if (framebufferDepthTexture == 0) {
-            if (currentStart + adjustedDuration > System.currentTimeMillis()) {
+            if (adjustedDuration > (int) (System.currentTimeMillis() - currentStart)) {
                 installDepthTexture(framebuffer);
             } else {
                 return;
             }
         } else {
-            if (currentStart + adjustedDuration < System.currentTimeMillis()) {
+            if (adjustedDuration < (int) (System.currentTimeMillis() - currentStart)) {
                 uninstallDepthTexture(framebuffer);
                 currentStart = -1; // for early exit
                 return;

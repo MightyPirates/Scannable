@@ -40,13 +40,39 @@ public enum ScanManager {
 
     // --------------------------------------------------------------------- //
 
-    public static long computeScanGrowthDuration() {
+    private static final int CHUNK_SIZE = 16; // Size of a chunk. Duh.
+    private static final int INITIAL_DISTANCE = 12; // Initial scan wave radius.
+    private static final int TIME_OFFSET = 200; // Scan wave growth time offset.
+
+    // --------------------------------------------------------------------- //
+
+    private static int computeTargetRadius() {
+        return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * CHUNK_SIZE - INITIAL_DISTANCE;
+    }
+
+    public static int computeScanGrowthDuration() {
         return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks / 12;
     }
 
-    public static float computeRadius(final long start, final float adjustedDuration) {
-        final float progress = (System.currentTimeMillis() - start) / adjustedDuration;
-        return 16 + progress * (Minecraft.getMinecraft().gameSettings.renderDistanceChunks - 1) * 16;
+    public static float computeRadius(final long start, final float duration) {
+        // Scan wave speeds up exponentially. To avoid the initial speed being
+        // near zero due to that we offset the time and adjust the remaining
+        // parameters accordingly. Base equation is:
+        //   r = a + (t + b)^2 * c
+        // with r := 0 and target radius and t := 0 and target time this yields:
+        //   c = r1/((t1 + b)^2 - b*b)
+        //   a = -r1*b*b/((t1 + b)^2 - b*b)
+
+        final float r1 = (float) computeTargetRadius();
+        final float t1 = duration;
+        final float b = TIME_OFFSET;
+        final float n = 1f / ((t1 + b) * (t1 + b) - b * b);
+        final float a = -r1 * b * b * n;
+        final float c = r1 * n;
+
+        final float t = (float) (System.currentTimeMillis() - start);
+
+        return INITIAL_DISTANCE + a + (t + b) * (t + b) * c;
     }
 
     // --------------------------------------------------------------------- //
@@ -147,7 +173,7 @@ public enum ScanManager {
             return;
         }
 
-        if (currentStart + Constants.SCAN_STAY_DURATION < System.currentTimeMillis()) {
+        if (Constants.SCAN_STAY_DURATION < (int) (System.currentTimeMillis() - currentStart)) {
             pendingResults.clear();
             synchronized (renderingResults) {
                 if (!renderingResults.isEmpty()) {
@@ -174,8 +200,7 @@ public enum ScanManager {
             return;
         }
 
-        final long adjustedDuration = computeScanGrowthDuration();
-        final float radius = computeRadius(currentStart, adjustedDuration);
+        final float radius = computeRadius(currentStart, computeScanGrowthDuration());
 
         while (pendingResults.size() > 0) {
             final ScanResultWithProvider entry = pendingResults.get(pendingResults.size() - 1);
