@@ -1,6 +1,7 @@
 package li.cil.scannable.client.renderer;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -8,6 +9,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -49,7 +51,8 @@ public enum OverlayRenderer {
         final int screenWidth = resolution.getScaledWidth();
         final int screenHeight = resolution.getScaledHeight();
 
-        GlStateManager.color(0.4f, 0.6f, 0.8f, 0.6f);
+        GlStateManager.enableBlend();
+        GlStateManager.color(0.66f, 0.8f, 0.93f, 0.66f);
         mc.getTextureManager().bindTexture(PROGRESS);
 
         final Tessellator tessellator = Tessellator.getInstance();
@@ -105,7 +108,7 @@ public enum OverlayRenderer {
                         buffer.pos(midX, midY, 0).tex(0.5, 0.5).endVertex();
 
                         final float y = (ty / tx + 1) * 0.5f;
-                        buffer.pos(left, top + y * height, 0).tex(0, 1-y).endVertex();
+                        buffer.pos(left, top + y * height, 0).tex(0, 1 - y).endVertex();
                     } else {
                         buffer.pos(midX, midY, 0).tex(0.5, 0.5).endVertex();
                         buffer.pos(left, top, 0).tex(0, 1).endVertex();
@@ -126,6 +129,8 @@ public enum OverlayRenderer {
         }
 
         tessellator.draw();
+
+        mc.fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_PROGRESS, MathHelper.floor(progress * 100)), right + 12, midY - mc.fontRenderer.FONT_HEIGHT / 2, 0xCCAACCEE, true);
 
         GlStateManager.bindTexture(0);
     }

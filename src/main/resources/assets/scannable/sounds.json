@@ -1,0 +1,8 @@
+{
+  "scanner_charge": {
+    "sounds": [ "scannable:scanner_charge" ]
+  },
+  "scanner_activate": {
+    "sounds": [ "scannable:scanner_activate" ]
+  }
+}

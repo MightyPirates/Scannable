@@ -17,3 +17,4 @@ config.scannable.oreBlacklist=Ore Blacklist
 
 gui.scannable.scanner.title=Scanner
 gui.scannable.scanner.modules=Modules
+gui.scannable.scanner.progress=Charging... %s%%
