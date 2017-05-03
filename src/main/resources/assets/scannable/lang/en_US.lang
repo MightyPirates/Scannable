@@ -1,3 +1,5 @@
+itemGroup.scannable=Scannable
+
 item.scannable.scanner.name=Scanner
 item.scannable.module_blank.name=Blank Scanner Module
 item.scannable.module_range.name=Scanner Module: Range Increase
