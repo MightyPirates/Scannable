@@ -5,7 +5,6 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -17,8 +16,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -40,18 +37,14 @@ public enum ScanManager {
 
     // --------------------------------------------------------------------- //
 
-    private static final int CHUNK_SIZE = 16; // Size of a chunk. Duh.
-    private static final int INITIAL_DISTANCE = 12; // Initial scan wave radius.
-    private static final int TIME_OFFSET = 200; // Scan wave growth time offset.
-
     // --------------------------------------------------------------------- //
 
     private static int computeTargetRadius() {
-        return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * CHUNK_SIZE - INITIAL_DISTANCE;
+        return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE - Constants.SCAN_INITIAL_RADIUS;
     }
 
     public static int computeScanGrowthDuration() {
-        return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks / 12;
+        return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks / Constants.REFERENCE_RENDER_DISTANCE;
     }
 
     public static float computeRadius(final long start, final float duration) {
@@ -65,14 +58,14 @@ public enum ScanManager {
 
         final float r1 = (float) computeTargetRadius();
         final float t1 = duration;
-        final float b = TIME_OFFSET;
+        final float b = Constants.SCAN_TIME_OFFSET;
         final float n = 1f / ((t1 + b) * (t1 + b) - b * b);
         final float a = -r1 * b * b * n;
         final float c = r1 * n;
 
         final float t = (float) (System.currentTimeMillis() - start);
 
-        return INITIAL_DISTANCE + a + (t + b) * (t + b) * c;
+        return Constants.SCAN_INITIAL_RADIUS + a + (t + b) * (t + b) * c;
     }
 
     // --------------------------------------------------------------------- //
@@ -121,7 +114,7 @@ public enum ScanManager {
         }
     }
 
-    public void updateScan(final Entity entity, final ItemStack stack, final boolean finish) {
+    public void updateScan(final Entity entity, final boolean finish) {
         for (final ScanResultProvider provider : collectingProviders) {
             provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
             if (finish) {
@@ -131,20 +124,6 @@ public enum ScanManager {
 
         if (finish) {
             clear();
-
-            if (Settings.useEnergy) {
-                final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-                if (energyStorage == null) {
-                    cancelScan();
-                    return;
-                }
-
-                final int extracted = energyStorage.extractEnergy(Constants.SCANNER_ENERGY_COST, false);
-                if (extracted < Constants.SCANNER_ENERGY_COST) {
-                    cancelScan();
-                    return;
-                }
-            }
 
             lastScanCenter = entity.getPositionVector();
             currentStart = System.currentTimeMillis();

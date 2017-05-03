@@ -98,7 +98,7 @@ public final class ItemScanner extends Item {
         if (player.isSneaking()) {
             player.openGui(Scannable.instance, GuiId.SCANNER.id, world, hand.ordinal(), 0, 0);
         } else {
-            if (!tryConsumeEnergy(stack)) {
+            if (!tryConsumeEnergy(stack, true)) {
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
             }
 
@@ -128,7 +128,7 @@ public final class ItemScanner extends Item {
     @Override
     public void onUsingTick(final ItemStack stack, final EntityLivingBase entity, final int count) {
         if (entity.getEntityWorld().isRemote) {
-            ScanManager.INSTANCE.updateScan(entity, stack, false);
+            ScanManager.INSTANCE.updateScan(entity, false);
         }
     }
 
@@ -142,19 +142,26 @@ public final class ItemScanner extends Item {
 
     @Override
     public ItemStack onItemUseFinish(final ItemStack stack, final World world, final EntityLivingBase entity) {
+        final boolean hasEnergy = tryConsumeEnergy(stack, false);
         if (world.isRemote) {
-            ScanManager.INSTANCE.updateScan(entity, stack, true);
+            if (hasEnergy) {
+                ScanManager.INSTANCE.updateScan(entity, true);
+            } else {
+                ScanManager.INSTANCE.cancelScan();
+            }
         }
+
         if (entity instanceof EntityPlayer) {
             final EntityPlayer player = (EntityPlayer) entity;
             player.getCooldownTracker().setCooldown(this, 40);
         }
+
         return stack;
     }
 
     // --------------------------------------------------------------------- //
 
-    private boolean tryConsumeEnergy(final ItemStack stack) {
+    private boolean tryConsumeEnergy(final ItemStack stack, final boolean simulate) {
         if (!Settings.useEnergy) {
             return true;
         }
@@ -164,7 +171,7 @@ public final class ItemScanner extends Item {
             return false;
         }
 
-        final int extracted = energyStorage.extractEnergy(Constants.SCANNER_ENERGY_COST, true);
+        final int extracted = energyStorage.extractEnergy(Constants.SCANNER_ENERGY_COST, simulate);
         if (extracted < Constants.SCANNER_ENERGY_COST) {
             return false;
         }
