@@ -6,7 +6,8 @@ item.scannable.module_monster.name=Scanner Module: Monsters
 item.scannable.module_ore_common.name=Scanner Module: Common Ores
 item.scannable.module_ore_rare.name=Scanner Module: Rare Ores
 
-tooltip.scannable.scanner=§7Use to scan for nearby points of interest.
+tooltip.scannable.scanner=§8Use to scan for nearby points of interest.
+tooltip.scannable.scanner.energy=§7Energy: §f%s/%s
 
 config.scannable.useEnergy=Use Energy
 config.scannable.oresCommon=Common Ores

@@ -5,6 +5,7 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -16,6 +17,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -92,7 +95,7 @@ public enum ScanManager {
         }
     }
 
-    public void updateScan(final Entity entity, final boolean finish) {
+    public void updateScan(final Entity entity, final ItemStack stack, final boolean finish) {
         for (final ScanResultProvider provider : collectingProviders) {
             provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
             if (finish) {
@@ -102,6 +105,20 @@ public enum ScanManager {
 
         if (finish) {
             clear();
+
+            if (Settings.useEnergy) {
+                final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
+                if (energyStorage == null) {
+                    cancelScan();
+                    return;
+                }
+
+                final int extracted = energyStorage.extractEnergy(Constants.SCANNER_ENERGY_COST, false);
+                if (extracted < Constants.SCANNER_ENERGY_COST) {
+                    cancelScan();
+                    return;
+                }
+            }
 
             lastScanCenter = entity.getPositionVector();
             currentStart = System.currentTimeMillis();

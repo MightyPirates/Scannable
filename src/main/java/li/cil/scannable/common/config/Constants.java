@@ -38,6 +38,7 @@ public final class Constants {
     // Tooltips
 
     public static final String TOOLTIP_SCANNER = "tooltip.scannable.scanner";
+    public static final String TOOLTIP_SCANNER_ENERGY = "tooltip.scannable.scanner.energy";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
@@ -53,6 +54,12 @@ public final class Constants {
     // How long the results from a scan should remain visible.
     public static final long SCAN_STAY_DURATION = 10000;
 
+    // Amount of energy that can be stored in a scanner.
+    public static final int SCANNER_ENERGY_CAPACITY = 5000;
+    // Amount of energy consumed per scan.
+    public static final int SCANNER_ENERGY_COST = 100;
+    // Number of modules that can be installed in a scanner.
+    public static final int SCANNER_MAX_MODULE_COUNT = 3;
     // By how much the scan radius is increased by installing the range module.
     public static final float MODULE_RANGE_RADIUS_INCREASE = 32;
     // By how much to scale the base scan range when scanning for ores.

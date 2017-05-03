@@ -3,7 +3,6 @@ package li.cil.scannable.common;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.init.Items;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -17,6 +16,9 @@ import java.util.function.Supplier;
  */
 public class ProxyCommon {
     public void onPreInit(final FMLPreInitializationEvent event) {
+        // Initialize API.
+        API.creativeTab = new CreativeTab();
+
         // Initialize capabilities.
         CapabilityScanResultProvider.register();
 
@@ -37,7 +39,7 @@ public class ProxyCommon {
     public Item registerItem(final String name, final Supplier<Item> constructor) {
         final Item item = constructor.get().
                 setUnlocalizedName(API.MOD_ID + "." + name).
-                setCreativeTab(CreativeTabs.TOOLS).
+                setCreativeTab(API.creativeTab).
                 setRegistryName(name);
         GameRegistry.register(item);
         return item;
