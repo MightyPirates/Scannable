@@ -3,21 +3,26 @@ package li.cil.scannable.common.config;
 import li.cil.scannable.api.API;
 import net.minecraftforge.common.config.Config;
 
+import javax.annotation.Nullable;
+
 @Config(modid = API.MOD_ID)
 public final class Settings {
     @Config.LangKey(Constants.CONFIG_USE_ENERGY)
     @Config.Comment("Whether to consume energy when performing a scan.\n" +
                     "Will make the scanner a chargeable item.")
+    @Config.RequiresWorldRestart
     public static boolean useEnergy;
 
     @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
     @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
+    @Config.RequiresWorldRestart
     public static String[] oreBlacklist = {
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_COMMON)
     @Config.Comment("Ore dictionary entries considered common ores, requiring the common ore scanner module.\n" +
                     "Use this to mark ores as common, as opposed to rare (see oresRare).")
+    @Config.RequiresWorldRestart
     public static String[] oresCommon = {
             // Minecraft
             "oreCoal",
@@ -44,6 +49,7 @@ public final class Settings {
                     "automatically considered a rare ore (as opposed to the other way around,\n" +
                     "to make missing entries less likely be a problem). Use this to add rare\n" +
                     "ores that do follow this pattern.")
+    @Config.RequiresWorldRestart
     public static String[] oresRare = {
     };
 
@@ -96,7 +102,11 @@ public final class Settings {
 
     // --------------------------------------------------------------------- //
 
-    public static ServerSettings serverSettings;
+    private static ServerSettings serverSettings;
+
+    public static void setServerSettings(@Nullable final ServerSettings serverSettings) {
+        Settings.serverSettings = serverSettings;
+    }
 
     // --------------------------------------------------------------------- //
 

@@ -31,6 +31,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
         return 50;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         this.player = player;
@@ -38,11 +39,13 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
         this.radius = radius;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public boolean isValid(final ScanResult result) {
         return true;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void reset() {
         player = null;

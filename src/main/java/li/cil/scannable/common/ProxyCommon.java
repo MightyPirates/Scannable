@@ -3,6 +3,7 @@ package li.cil.scannable.common;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.common.network.Network;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -29,6 +30,9 @@ public class ProxyCommon {
     public void onInit(final FMLInitializationEvent event) {
         // Hardcoded recipes!
         Items.addRecipes();
+
+        // Register network handler.
+        Network.INSTANCE.init();
     }
 
     public void onPostInit(final FMLPostInitializationEvent event) {

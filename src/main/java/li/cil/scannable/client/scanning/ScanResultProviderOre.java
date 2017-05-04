@@ -5,7 +5,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
@@ -18,19 +17,17 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +41,7 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ScanResultProviderOre extends AbstractScanResultProvider implements ICapabilityProvider {
+public final class ScanResultProviderOre extends AbstractScanResultProvider {
     public static final ScanResultProviderOre INSTANCE = new ScanResultProviderOre();
 
     // --------------------------------------------------------------------- //
@@ -64,7 +61,6 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
     // --------------------------------------------------------------------- //
 
     private ScanResultProviderOre() {
-        buildOreCache();
     }
 
     public void rebuildOreCache() {
@@ -73,24 +69,6 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         oresRare.clear();
 
         buildOreCache();
-    }
-
-    // --------------------------------------------------------------------- //
-    // ICapabilityProvider
-
-    @Override
-    public boolean hasCapability(@Nonnull final Capability<?> capability, @Nullable final EnumFacing facing) {
-        return capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    @Override
-    public <T> T getCapability(@Nonnull final Capability<T> capability, @Nullable final EnumFacing facing) {
-        if (capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY) {
-            return (T) this;
-        }
-        return null;
     }
 
     // --------------------------------------------------------------------- //
@@ -108,6 +86,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius * Constants.MODULE_ORE_RADIUS_MULTIPLIER, scanTicks);
@@ -129,6 +108,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         blocksPerTick = MathHelper.ceil(count / (float) scanTicks);
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void computeScanResults(final Consumer<ScanResult> callback) {
         final World world = player.getEntityWorld();
@@ -153,11 +133,13 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         }
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public boolean isValid(final ScanResult result) {
         return ((ScanResultOre) result).isRoot();
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
         final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
@@ -218,6 +200,7 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         GlStateManager.enableLighting();
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void reset() {
         super.reset();
@@ -305,9 +288,9 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
                         }
 
                         if (oreNamesCommon.contains(name)) {
-                            isRare = true;
-                        } else if (oreNamesRare.contains(name) || pattern.matcher(name).matches()) {
                             isCommon = true;
+                        } else if (oreNamesRare.contains(name) || pattern.matcher(name).matches()) {
+                            isRare = true;
                         } else {
                             continue;
                         }

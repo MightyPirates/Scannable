@@ -69,7 +69,6 @@ public final class CapabilityScanResultProvider {
 
         @Override
         public void readNBT(final Capability<ScanResultProvider> capability, final ScanResultProvider instance, final EnumFacing side, final NBTBase nbt) {
-
         }
     }
 }

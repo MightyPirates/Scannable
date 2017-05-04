@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -68,6 +70,7 @@ public interface ScanResultProvider {
      * @param radius    the maximum radius of the scanned sphere.
      * @param scanTicks the total number of ticks the scan will take.
      */
+    @SideOnly(Side.CLIENT)
     void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks);
 
     /**
@@ -77,6 +80,7 @@ public interface ScanResultProvider {
      *
      * @param callback the callback to feed results to.
      */
+    @SideOnly(Side.CLIENT)
     void computeScanResults(final Consumer<ScanResult> callback);
 
     /**
@@ -90,6 +94,7 @@ public interface ScanResultProvider {
      * @param result the result to filter.
      * @return <code>true</code> if the result should be kept; <code>false</code> otherwise.
      */
+    @SideOnly(Side.CLIENT)
     boolean isValid(final ScanResult result);
 
     /**
@@ -107,6 +112,7 @@ public interface ScanResultProvider {
      * @param results      the results to render.
      * @param partialTicks partial ticks of the currently rendered frame.
      */
+    @SideOnly(Side.CLIENT)
     void render(final Entity entity, final List<ScanResult> results, final float partialTicks);
 
     /**
@@ -116,5 +122,6 @@ public interface ScanResultProvider {
      * called after the scan is no longer being rendered, so this can be used
      * to clean up rendering data as well.
      */
+    @SideOnly(Side.CLIENT)
     void reset();
 }

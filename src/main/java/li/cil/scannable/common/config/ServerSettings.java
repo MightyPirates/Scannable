@@ -13,4 +13,11 @@ public final class ServerSettings {
         this.oresCommon = oresCommon;
         this.oresRare = oresRare;
     }
+
+    public ServerSettings() {
+        useEnergy = Settings.useEnergy;
+        oresBlacklist = Settings.oreBlacklist;
+        oresCommon = Settings.oresCommon;
+        oresRare = Settings.oresRare;
+    }
 }

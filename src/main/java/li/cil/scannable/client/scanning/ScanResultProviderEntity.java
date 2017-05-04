@@ -3,7 +3,6 @@ package li.cil.scannable.client.scanning;
 import li.cil.scannable.api.Icons;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
-import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
@@ -23,21 +22,18 @@ import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-public final class ScanResultProviderEntity extends AbstractScanResultProvider implements ICapabilityProvider {
+public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     public static final ScanResultProviderEntity INSTANCE = new ScanResultProviderEntity();
 
     // --------------------------------------------------------------------- //
@@ -51,24 +47,6 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
     // --------------------------------------------------------------------- //
 
     private ScanResultProviderEntity() {
-    }
-
-    // --------------------------------------------------------------------- //
-    // ICapabilityProvider
-
-    @Override
-    public boolean hasCapability(@Nonnull final Capability<?> capability, @Nullable final EnumFacing facing) {
-        return capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    @Override
-    public <T> T getCapability(@Nonnull final Capability<T> capability, @Nullable final EnumFacing facing) {
-        if (capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY) {
-            return (T) this;
-        }
-        return null;
     }
 
     // --------------------------------------------------------------------- //
@@ -86,6 +64,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
         throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
@@ -105,6 +84,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
         currentEntity = 0;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void computeScanResults(final Consumer<ScanResult> callback) {
         final int end = Math.min(entities.size(), currentEntity + entitiesPerTick);
@@ -121,6 +101,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
         }
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
         GlStateManager.disableLighting();
@@ -205,6 +186,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider i
         GlStateManager.enableLighting();
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void reset() {
         super.reset();
