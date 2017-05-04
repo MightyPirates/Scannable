@@ -63,41 +63,35 @@ public final class Settings {
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_COMMON)
-    @Config.Comment("Ore dictionary entries considered common ores.\n" +
-                    "Anything matching /ore[A-Z].*/ that isn't in the rare ore list is\n" +
-                    "automatically considered a common ore.")
+    @Config.Comment("Ore dictionary entries considered common ores, requiring the common ore scanner module.\n" +
+                    "Use this to mark ores as common, as opposed to rare (see oresRare).")
     public static String[] oresCommon = {
             // Minecraft
-            "glowstone"
+            "oreCoal",
+            "oreIron",
+            "oreRedstone",
+            "glowstone",
+
+            // Thermal Foundation
+            "oreCopper",
+            "oreTin",
+            "oreLead",
+
+            // Immersive Engineering
+            "oreAluminum",
+            "oreAluminium",
+
+            // Thaumcraft
+            "oreCinnabar"
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_RARE)
-    @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.")
+    @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.\n" +
+                    "Anything matching /ore[A-Z].*/ that isn't in the common ore list is\n" +
+                    "automatically considered a rare ore (as opposed to the other way around,\n" +
+                    "to make missing entries less likely be a problem). Use this to add rare\n" +
+                    "ores that do follow this pattern.")
     public static String[] oresRare = {
-            // Minecraft
-            "oreGold",
-            "oreDiamond",
-            "oreLapis",
-            "oreEmerald",
-
-            // Thermal Foundation
-            "oreSilver",
-            "oreNickel",
-            "orePlatinum",
-            "oreMithril",
-            "oreUranium",
-
-            // Tinker's Construct
-            "oreArdite",
-            "oreCobalt",
-
-            // Thaumcraft
-            "oreInfusedAir",
-            "oreInfusedFire",
-            "oreInfusedWater",
-            "oreInfusedEarth",
-            "oreInfusedOrder",
-            "oreInfusedEntropy"
     };
 
     // --------------------------------------------------------------------- //
