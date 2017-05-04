@@ -56,15 +56,13 @@ public final class ContainerScanner extends Container {
 
     @Override
     public ItemStack transferStackInSlot(final EntityPlayer player, final int index) {
-        ItemStack remainder = ItemStack.EMPTY;
-
         final Slot from = inventorySlots.get(index);
         if (from == null) {
-            return remainder;
+            return ItemStack.EMPTY;
         }
-        final ItemStack stack = from.getStack();
+        final ItemStack stack = from.getStack().copy();
         if (stack.isEmpty()) {
-            return remainder;
+            return ItemStack.EMPTY;
         }
 
         final boolean intoPlayerInventory = from.inventory != player.inventory;
@@ -139,6 +137,6 @@ public final class ContainerScanner extends Container {
             into.putStack(from.decrStackSize(itemsMoved));
         }
 
-        return remainder;
+        return from.getStack().getCount() < stack.getCount() ? from.getStack() : ItemStack.EMPTY;
     }
 }

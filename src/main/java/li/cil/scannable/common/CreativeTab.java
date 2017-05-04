@@ -6,7 +6,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 
 public final class CreativeTab extends CreativeTabs {
-    public CreativeTab() {
+    CreativeTab() {
         super(API.MOD_ID);
     }
 
