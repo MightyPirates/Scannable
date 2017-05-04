@@ -173,7 +173,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
                 fontRenderer.drawString(text, 12, -4, 0xFFFFFFFF, true);
             }
 
-            Minecraft.getMinecraft().getTextureManager().bindTexture(resultEntity.entity instanceof EntityMob ? Icons.WARNING : Icons.INFO);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(isMonster(resultEntity.entity) ? Icons.WARNING : Icons.INFO);
 
             GlStateManager.color(1, 1, 1, 1);
             renderQuad(16, 16);
@@ -196,36 +196,46 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     // --------------------------------------------------------------------- //
 
     private <T extends Entity> boolean FilterEntities(final T entity) {
-        if (scanAnimal) {
-            if (entity instanceof EntityAnimal) {
-                return true;
-            }
-            if (entity instanceof EntityBat) {
-                return true;
-            }
-            if (entity instanceof EntitySquid) {
-                return true;
-            }
+        if (scanAnimal && isAnimal(entity)) {
+            return true;
         }
 
-        if (scanMonster) {
-            if (entity instanceof EntityMob) {
-                return true;
-            }
-            if (entity instanceof EntitySlime) {
-                return true;
-            }
-            if (entity instanceof EntityGhast) {
-                return true;
-            }
-            if (entity instanceof EntityDragon) {
-                return true;
-            }
-            if (entity instanceof EntityGolem) {
-                return true;
-            }
+        if (scanMonster && isMonster(entity)) {
+            return true;
         }
 
+        return false;
+    }
+
+    private static boolean isAnimal(final Entity entity) {
+        if (entity instanceof EntityAnimal) {
+            return true;
+        }
+        if (entity instanceof EntityBat) {
+            return true;
+        }
+        if (entity instanceof EntitySquid) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isMonster(final Entity entity) {
+        if (entity instanceof EntityMob) {
+            return true;
+        }
+        if (entity instanceof EntitySlime) {
+            return true;
+        }
+        if (entity instanceof EntityGhast) {
+            return true;
+        }
+        if (entity instanceof EntityDragon) {
+            return true;
+        }
+        if (entity instanceof EntityGolem) {
+            return true;
+        }
         return false;
     }
 
