@@ -67,6 +67,14 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
         buildOreCache();
     }
 
+    public void rebuildOreCache() {
+        oreColors.clear();
+        oresCommon.clear();
+        oresRare.clear();
+
+        buildOreCache();
+    }
+
     // --------------------------------------------------------------------- //
     // ICapabilityProvider
 
@@ -270,11 +278,15 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
     }
 
     private void buildOreCache() {
+        Scannable.getLog().info("Building block state lookup table...");
+
+        final long start = System.currentTimeMillis();
+
         final TObjectIntMap<String> oreColorsByOreName = buildOreColorTable();
 
-        final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.oresBlacklist));
-        final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.oresCommon));
-        final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.oresRare));
+        final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.getOreBlacklist()));
+        final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.getCommonOres()));
+        final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.getRareOres()));
 
         final Pattern pattern = Pattern.compile("^ore[A-Z].*$");
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
@@ -291,9 +303,10 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
                             isCommon = false;
                             break;
                         }
-                        if (oreNamesRare.contains(name)) {
+
+                        if (oreNamesCommon.contains(name)) {
                             isRare = true;
-                        } else if (oreNamesCommon.contains(name) || pattern.matcher(name).matches()) {
+                        } else if (oreNamesRare.contains(name) || pattern.matcher(name).matches()) {
                             isCommon = true;
                         } else {
                             continue;
@@ -304,21 +317,23 @@ public final class ScanResultProviderOre extends AbstractScanResultProvider impl
                         }
                     }
 
-                    if (isRare) {
-                        oresRare.put(state, stack);
-                    } else if (isCommon) {
+                    if (isCommon) {
                         oresCommon.put(state, stack);
+                    } else if (isRare) {
+                        oresRare.put(state, stack);
                     }
                 }
             }
         }
+
+        Scannable.getLog().info("Built    block state lookup table in {} ms.", System.currentTimeMillis() - start);
     }
 
     private static TObjectIntMap<String> buildOreColorTable() {
         final TObjectIntMap<String> oreColorsByOreName = new TObjectIntHashMap<>();
 
         final Pattern pattern = Pattern.compile("^(?<name>[^\\s=]+)\\s*=\\s*0x(?<color>[a-fA-F0-9]+)$");
-        for (final String oreColor : Settings.oreColors) {
+        for (final String oreColor : Settings.getOreColors()) {
             final Matcher matcher = pattern.matcher(oreColor.trim());
             if (!matcher.matches()) {
                 Scannable.getLog().warn("Illegal ore color entry in settings: '{}'", oreColor.trim());

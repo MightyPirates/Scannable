@@ -79,7 +79,7 @@ public final class ItemScanner extends Item {
 
         tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER));
 
-        if (!Settings.useEnergy) {
+        if (!Settings.useEnergy()) {
             return;
         }
 
@@ -93,12 +93,12 @@ public final class ItemScanner extends Item {
 
     @Override
     public boolean showDurabilityBar(final ItemStack stack) {
-        return Settings.useEnergy;
+        return Settings.useEnergy();
     }
 
     @Override
     public double getDurabilityForDisplay(final ItemStack stack) {
-        if (!Settings.useEnergy) {
+        if (!Settings.useEnergy()) {
             return 0;
         }
 
@@ -224,7 +224,7 @@ public final class ItemScanner extends Item {
     }
 
     private static boolean tryConsumeEnergy(final EntityPlayer player, final ItemStack stack, final List<ItemStack> modules, final boolean simulate) {
-        if (!Settings.useEnergy) {
+        if (!Settings.useEnergy()) {
             return true;
         }
 

@@ -32,7 +32,7 @@ public final class CapabilityProviderItemScanner implements ICapabilityProvider 
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return true;
         }
-        if (Settings.useEnergy && capability == CapabilityEnergy.ENERGY) {
+        if (Settings.useEnergy() && capability == CapabilityEnergy.ENERGY) {
             return true;
         }
 
@@ -47,7 +47,7 @@ public final class CapabilityProviderItemScanner implements ICapabilityProvider 
             itemHandler.updateFromNBT();
             return (T) itemHandler;
         }
-        if (Settings.useEnergy && capability == CapabilityEnergy.ENERGY) {
+        if (Settings.useEnergy() && capability == CapabilityEnergy.ENERGY) {
             energyStorage.updateFromNBT();
             return (T) energyStorage;
         }

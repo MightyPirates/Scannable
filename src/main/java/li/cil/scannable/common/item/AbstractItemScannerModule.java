@@ -18,7 +18,7 @@ public abstract class AbstractItemScannerModule extends Item {
     public void addInformation(final ItemStack stack, final EntityPlayer player, final List<String> tooltip, final boolean advanced) {
         super.addInformation(stack, player, tooltip, advanced);
 
-        if (!Settings.useEnergy) {
+        if (!Settings.useEnergy()) {
             return;
         }
 

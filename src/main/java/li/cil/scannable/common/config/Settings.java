@@ -12,7 +12,39 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
     @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
-    public static String[] oresBlacklist = {
+    public static String[] oreBlacklist = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_ORES_COMMON)
+    @Config.Comment("Ore dictionary entries considered common ores, requiring the common ore scanner module.\n" +
+                    "Use this to mark ores as common, as opposed to rare (see oresRare).")
+    public static String[] oresCommon = {
+            // Minecraft
+            "oreCoal",
+            "oreIron",
+            "oreRedstone",
+            "glowstone",
+
+            // Thermal Foundation
+            "oreCopper",
+            "oreTin",
+            "oreLead",
+
+            // Immersive Engineering
+            "oreAluminum",
+            "oreAluminium",
+
+            // Thaumcraft
+            "oreCinnabar"
+    };
+
+    @Config.LangKey(Constants.CONFIG_ORES_RARE)
+    @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.\n" +
+                    "Anything matching /ore[A-Z].*/ that isn't in the common ore list is\n" +
+                    "automatically considered a rare ore (as opposed to the other way around,\n" +
+                    "to make missing entries less likely be a problem). Use this to add rare\n" +
+                    "ores that do follow this pattern.")
+    public static String[] oresRare = {
     };
 
     @Config.LangKey(Constants.CONFIG_ORE_COLORS)
@@ -62,37 +94,31 @@ public final class Settings {
             "oreInfusedEntropy=0x545476"
     };
 
-    @Config.LangKey(Constants.CONFIG_ORES_COMMON)
-    @Config.Comment("Ore dictionary entries considered common ores, requiring the common ore scanner module.\n" +
-                    "Use this to mark ores as common, as opposed to rare (see oresRare).")
-    public static String[] oresCommon = {
-            // Minecraft
-            "oreCoal",
-            "oreIron",
-            "oreRedstone",
-            "glowstone",
+    // --------------------------------------------------------------------- //
 
-            // Thermal Foundation
-            "oreCopper",
-            "oreTin",
-            "oreLead",
+    public static ServerSettings serverSettings;
 
-            // Immersive Engineering
-            "oreAluminum",
-            "oreAluminium",
+    // --------------------------------------------------------------------- //
 
-            // Thaumcraft
-            "oreCinnabar"
-    };
+    public static boolean useEnergy() {
+        return serverSettings != null ? serverSettings.useEnergy : useEnergy;
+    }
 
-    @Config.LangKey(Constants.CONFIG_ORES_RARE)
-    @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.\n" +
-                    "Anything matching /ore[A-Z].*/ that isn't in the common ore list is\n" +
-                    "automatically considered a rare ore (as opposed to the other way around,\n" +
-                    "to make missing entries less likely be a problem). Use this to add rare\n" +
-                    "ores that do follow this pattern.")
-    public static String[] oresRare = {
-    };
+    public static String[] getOreBlacklist() {
+        return serverSettings != null ? serverSettings.oresBlacklist : oreBlacklist;
+    }
+
+    public static String[] getCommonOres() {
+        return serverSettings != null ? serverSettings.oresCommon : oresCommon;
+    }
+
+    public static String[] getRareOres() {
+        return serverSettings != null ? serverSettings.oresRare : oresRare;
+    }
+
+    public static String[] getOreColors() {
+        return oreColors;
+    }
 
     // --------------------------------------------------------------------- //
 

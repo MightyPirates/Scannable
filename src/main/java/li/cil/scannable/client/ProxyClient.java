@@ -4,6 +4,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.client.gui.GuiHandlerClient;
 import li.cil.scannable.client.renderer.OverlayRenderer;
 import li.cil.scannable.client.renderer.ScannerRenderer;
+import li.cil.scannable.client.scanning.ScanResultProviderOre;
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.Scannable;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -63,6 +64,7 @@ public final class ProxyClient extends ProxyCommon {
         }
 
         ConfigManager.sync(API.MOD_ID, Config.Type.INSTANCE);
+        ScanResultProviderOre.INSTANCE.rebuildOreCache();
     }
 
     // --------------------------------------------------------------------- //
