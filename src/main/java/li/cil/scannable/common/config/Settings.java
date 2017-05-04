@@ -36,6 +36,7 @@ public final class Settings {
                     "Anything matching /ore[A-Z].*/ that isn't in the rare ore list is\n" +
                     "automatically considered a common ore.")
     public static String[] oresCommon = {
+            "glowstone"
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_RARE)
@@ -44,7 +45,26 @@ public final class Settings {
             "oreGold",
             "oreDiamond",
             "oreLapis",
-            "oreEmerald"
+            "oreEmerald",
+
+            // Thermal Foundation
+            "oreSilver",
+            "oreNickel",
+            "orePlatinum",
+            "oreMithril",
+            "oreUranium",
+
+            // Tinker's Construct
+            "oreArdite",
+            "oreCobalt",
+
+            // Thaumcraft
+            "oreInfusedAir",
+            "oreInfusedFire",
+            "oreInfusedWater",
+            "oreInfusedEarth",
+            "oreInfusedOrder",
+            "oreInfusedEntropy"
     };
 
     // --------------------------------------------------------------------- //
