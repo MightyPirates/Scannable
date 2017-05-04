@@ -21,14 +21,45 @@ public final class Settings {
                     "key being the ore dictionary name and the value being the hexadecimal\n" +
                     "RGB value of the color.")
     public static String[] oreColors = {
-            "oreCoal=0x666666",
-            "oreIron=0xCCCC99",
-            "oreGold=0xFFFF66",
-            "oreLapis=0x3399FF",
-            "oreDiamond=0x99FFFF",
-            "oreRedstone=0xFF6633",
-            "oreEmerald=0x33CC33",
-            "oreQuartz=0xCCCCCC"
+            // Minecraft
+            "oreCoal=0x635F5C",
+            "oreIron=0xA17951",
+            "oreGold=0xF4F71F",
+            "oreLapis=0x4863F0",
+            "oreDiamond=0x48E2F0",
+            "oreRedstone=0xE61E1E",
+            "oreEmerald=0x12BA16",
+            "oreQuartz=0xB3D9D2",
+            "glowstone=0xE9E68E",
+
+            // Thermal Foundation
+            "oreCopper=0xE4A020",
+            "oreLead=0x8187C3",
+            "oreMithril=0x97D5FE",
+            "oreNickel=0xD0D3AC",
+            "orePlatinum=0x7AC0FD",
+            "oreSilver=0xE8F2FB",
+            "oreTin=0xCCE4FE",
+
+            // Misc.
+            "oreAluminum=0xCBE4E2",
+            "oreAluminium=0xCBE4E2",
+            "orePlutonium=0x9DE054",
+            "oreUranium=0x9DE054",
+            "oreYellorium=0xD8E054",
+
+            // Tinker's Construct
+            "oreArdite=0xB77E11",
+            "oreCobalt=0x413BB8",
+
+            // Thaumcraft
+            "oreCinnabar=0xF5DA25",
+            "oreInfusedAir=0xF7E677",
+            "oreInfusedFire=0xDC7248",
+            "oreInfusedWater=0x9595D5",
+            "oreInfusedEarth=0x49B45A",
+            "oreInfusedOrder=0x9FF2DE",
+            "oreInfusedEntropy=0x545476"
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_COMMON)
@@ -36,12 +67,14 @@ public final class Settings {
                     "Anything matching /ore[A-Z].*/ that isn't in the rare ore list is\n" +
                     "automatically considered a common ore.")
     public static String[] oresCommon = {
+            // Minecraft
             "glowstone"
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_RARE)
     @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.")
     public static String[] oresRare = {
+            // Minecraft
             "oreGold",
             "oreDiamond",
             "oreLapis",
