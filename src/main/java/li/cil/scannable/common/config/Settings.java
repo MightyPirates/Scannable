@@ -1,6 +1,7 @@
 package li.cil.scannable.common.config;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.client.scanning.ScanResultProviderOre;
 import net.minecraftforge.common.config.Config;
 
 import javax.annotation.Nullable;
@@ -106,6 +107,7 @@ public final class Settings {
 
     public static void setServerSettings(@Nullable final ServerSettings serverSettings) {
         Settings.serverSettings = serverSettings;
+        ScanResultProviderOre.INSTANCE.rebuildOreCache();
     }
 
     // --------------------------------------------------------------------- //

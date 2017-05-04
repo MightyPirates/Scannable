@@ -38,8 +38,6 @@ public enum ScanManager {
 
     // --------------------------------------------------------------------- //
 
-    // --------------------------------------------------------------------- //
-
     private static int computeTargetRadius() {
         return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE - Constants.SCAN_INITIAL_RADIUS;
     }
@@ -74,11 +72,11 @@ public enum ScanManager {
     // List of providers currently used to scan.
     private final Set<ScanResultProvider> collectingProviders = new HashSet<>();
     // List for collecting results during an active scan.
-    private final List<ScanResultWithProvider> collectingResults = new ArrayList<>();
+    private final Map<ScanResultProvider, List<ScanResult>> collectingResults = new HashMap<>();
 
     // Results get copied from the collectingResults list in here when a scan
     // completes. This is to avoid clearing active results by *starting* a scan.
-    private final List<ScanResultWithProvider> pendingResults = new ArrayList<>();
+    private final Map<ScanResultProvider, List<ScanResult>> pendingResults = new HashMap<>();
     private final Map<ScanResultProvider, List<ScanResult>> renderingResults = new HashMap<>();
     // Temporary, re-used list to collect visible results each frame.
     private final List<ScanResult> renderingList = new ArrayList<>();
@@ -125,7 +123,7 @@ public enum ScanManager {
             }
 
             for (final ScanResultProvider provider : collectingProviders) {
-                provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
+                provider.computeScanResults(result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             }
 
             ++scanningTicks;
@@ -135,7 +133,7 @@ public enum ScanManager {
 
         for (int i = 0; i < remaining; i++) {
             for (final ScanResultProvider provider : collectingProviders) {
-                provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
+                provider.computeScanResults(result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             }
         }
 
@@ -148,8 +146,8 @@ public enum ScanManager {
         lastScanCenter = entity.getPositionVector();
         currentStart = System.currentTimeMillis();
 
-        pendingResults.addAll(collectingResults);
-        pendingResults.sort(Comparator.comparing(entry -> -lastScanCenter.distanceTo(entry.result.getPosition())));
+        pendingResults.putAll(collectingResults);
+        pendingResults.values().forEach(list -> list.sort(Comparator.comparing(result -> -lastScanCenter.distanceTo(result.getPosition()))));
 
         ScannerRenderer.INSTANCE.ping(lastScanCenter);
 
@@ -201,20 +199,30 @@ public enum ScanManager {
 
         final float radius = computeRadius(currentStart, computeScanGrowthDuration());
 
-        while (pendingResults.size() > 0) {
-            final ScanResultWithProvider entry = pendingResults.get(pendingResults.size() - 1);
-            final Vec3d position = entry.result.getPosition();
-            if (lastScanCenter.distanceTo(position) <= radius) {
-                pendingResults.remove(pendingResults.size() - 1);
-                if (!entry.provider.isValid(entry.result)) {
-                    continue;
+        final Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = pendingResults.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
+            final ScanResultProvider provider = entry.getKey();
+            final List<ScanResult> results = entry.getValue();
+
+            while (results.size() > 0) {
+                final ScanResult result = results.get(results.size() - 1);
+                final Vec3d position = result.getPosition();
+                if (lastScanCenter.distanceTo(position) <= radius) {
+                    results.remove(results.size() - 1);
+                    if (!provider.isValid(result)) {
+                        continue;
+                    }
+                    synchronized (renderingResults) {
+                        renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
+                    }
+                } else {
+                    break; // List is sorted, so nothing else is in range.
                 }
-                synchronized (renderingResults) {
-                    final List<ScanResult> results = renderingResults.computeIfAbsent(entry.provider, provider -> new ArrayList<>());
-                    results.add(entry.result);
-                }
-            } else {
-                break; // List is sorted, so nothing else is in range.
+            }
+
+            if (results.size() == 0) {
+                iterator.remove();
             }
         }
     }
@@ -271,15 +279,4 @@ public enum ScanManager {
         lastScanCenter = null;
         currentStart = -1;
     }
-
-    private static final class ScanResultWithProvider {
-        final ScanResultProvider provider;
-        final ScanResult result;
-
-        private ScanResultWithProvider(final ScanResultProvider provider, final ScanResult result) {
-            this.provider = provider;
-            this.result = result;
-        }
-    }
-
 }
