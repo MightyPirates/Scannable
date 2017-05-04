@@ -61,7 +61,7 @@ public final class Settings {
                     "RGB value of the color.")
     public static String[] oreColors = {
             // Minecraft
-            "oreCoal=0x635F5C",
+            "oreCoal=0x433E3B",
             "oreIron=0xA17951",
             "oreGold=0xF4F71F",
             "oreLapis=0x4863F0",
