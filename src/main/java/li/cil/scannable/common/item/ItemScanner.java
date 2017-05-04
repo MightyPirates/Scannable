@@ -4,12 +4,12 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
+import li.cil.scannable.common.capabilities.CapabilityProviderItemScanner;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.gui.GuiId;
 import li.cil.scannable.common.init.Items;
-import li.cil.scannable.common.inventory.ItemScannerCapabilityProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;
@@ -56,7 +56,7 @@ public final class ItemScanner extends Item {
 
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final NBTTagCompound nbt) {
-        return new ItemScannerCapabilityProvider(stack);
+        return new CapabilityProviderItemScanner(stack);
     }
 
     @Override
