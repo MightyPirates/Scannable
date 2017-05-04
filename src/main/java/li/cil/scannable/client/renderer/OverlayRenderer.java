@@ -44,7 +44,7 @@ public enum OverlayRenderer {
         final int total = stack.getMaxItemUseDuration();
         final int remaining = player.getItemInUseCount();
 
-        final float progress = 1 - (remaining - event.getPartialTicks()) / (float) total;
+        final float progress = MathHelper.clamp(1 - (remaining - event.getPartialTicks()) / (float) total, 0, 1);
 
         final ScaledResolution resolution = event.getResolution();
         final int screenWidth = resolution.getScaledWidth();

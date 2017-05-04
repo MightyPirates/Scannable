@@ -83,6 +83,7 @@ public enum ScanManager {
     // Temporary, re-used list to collect visible results each frame.
     private final List<ScanResult> renderingList = new ArrayList<>();
 
+    private int scanningTicks = -1;
     private long currentStart = -1;
     @Nullable
     private Vec3d lastScanCenter;
@@ -116,31 +117,49 @@ public enum ScanManager {
     }
 
     public void updateScan(final Entity entity, final boolean finish) {
-        for (final ScanResultProvider provider : collectingProviders) {
-            provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
-            if (finish) {
-                provider.reset();
+        final int remaining = Constants.SCAN_COMPUTE_DURATION - scanningTicks;
+
+        if (!finish) {
+            if (remaining <= 0) {
+                return;
+            }
+
+            for (final ScanResultProvider provider : collectingProviders) {
+                provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
+            }
+
+            ++scanningTicks;
+
+            return;
+        }
+
+        for (int i = 0; i < remaining; i++) {
+            for (final ScanResultProvider provider : collectingProviders) {
+                provider.computeScanResults(result -> collectingResults.add(new ScanResultWithProvider(provider, result)));
             }
         }
 
-        if (finish) {
-            clear();
-
-            lastScanCenter = entity.getPositionVector();
-            currentStart = System.currentTimeMillis();
-
-            pendingResults.addAll(collectingResults);
-            pendingResults.sort(Comparator.comparing(entry -> -lastScanCenter.distanceTo(entry.result.getPosition())));
-
-            ScannerRenderer.INSTANCE.ping(lastScanCenter);
-
-            cancelScan();
+        for (final ScanResultProvider provider : collectingProviders) {
+            provider.reset();
         }
+
+        clear();
+
+        lastScanCenter = entity.getPositionVector();
+        currentStart = System.currentTimeMillis();
+
+        pendingResults.addAll(collectingResults);
+        pendingResults.sort(Comparator.comparing(entry -> -lastScanCenter.distanceTo(entry.result.getPosition())));
+
+        ScannerRenderer.INSTANCE.ping(lastScanCenter);
+
+        cancelScan();
     }
 
     public void cancelScan() {
         collectingProviders.clear();
         collectingResults.clear();
+        scanningTicks = 0;
     }
 
     @SubscribeEvent
