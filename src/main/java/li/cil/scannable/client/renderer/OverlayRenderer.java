@@ -3,6 +3,7 @@ package li.cil.scannable.client.renderer;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -33,7 +34,7 @@ public enum OverlayRenderer {
         final EntityPlayer player = mc.player;
 
         final ItemStack stack = player.getActiveItemStack();
-        if (stack.isEmpty()) {
+        if (ItemStackUtils.isEmpty(stack)) {
             return;
         }
 
@@ -129,7 +130,7 @@ public enum OverlayRenderer {
 
         tessellator.draw();
 
-        mc.fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_PROGRESS, MathHelper.floor(progress * 100)), right + 12, midY - mc.fontRenderer.FONT_HEIGHT / 2, 0xCCAACCEE, true);
+        mc.fontRendererObj.drawString(I18n.format(Constants.GUI_SCANNER_PROGRESS, MathHelper.floor(progress * 100)), right + 12, midY - mc.fontRendererObj.FONT_HEIGHT / 2, 0xCCAACCEE, true);
 
         GlStateManager.bindTexture(0);
     }

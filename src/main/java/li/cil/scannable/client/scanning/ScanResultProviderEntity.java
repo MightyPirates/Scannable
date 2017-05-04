@@ -119,7 +119,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
         final Minecraft mc = Minecraft.getMinecraft();
         final EntityPlayer player = mc.player;
-        final FontRenderer fontRenderer = mc.fontRenderer;
+        final FontRenderer fontRenderer = mc.fontRendererObj;
         final int height = fontRenderer.FONT_HEIGHT + 5;
 
         // Order results by distance to center of screen (deviation from look

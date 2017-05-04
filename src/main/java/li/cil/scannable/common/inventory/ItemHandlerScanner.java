@@ -3,6 +3,7 @@ package li.cil.scannable.common.inventory;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.AbstractItemScannerModule;
+import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.ItemStackHandler;
@@ -31,7 +32,7 @@ public final class ItemHandlerScanner extends ItemStackHandler {
 
     @Override
     protected int getStackLimit(final int slot, @Nonnull final ItemStack stack) {
-        if (stack.isEmpty()) {
+        if (ItemStackUtils.isEmpty(stack)) {
             return 0;
         }
         if (stack.getItem() instanceof AbstractItemScannerModule) {

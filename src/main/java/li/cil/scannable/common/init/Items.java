@@ -9,12 +9,15 @@ import li.cil.scannable.common.item.ItemScannerModuleMonster;
 import li.cil.scannable.common.item.ItemScannerModuleOreCommon;
 import li.cil.scannable.common.item.ItemScannerModuleOreRare;
 import li.cil.scannable.common.item.ItemScannerModuleRange;
+import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+
+import javax.annotation.Nullable;
 
 public final class Items {
     public static Item scanner;
@@ -27,27 +30,27 @@ public final class Items {
 
     // --------------------------------------------------------------------- //
 
-    public static boolean isScanner(final ItemStack stack) {
+    public static boolean isScanner(@Nullable final ItemStack stack) {
         return isItem(stack, scanner);
     }
 
-    public static boolean isModuleAnimal(final ItemStack stack) {
+    public static boolean isModuleAnimal(@Nullable final ItemStack stack) {
         return isItem(stack, moduleAnimal);
     }
 
-    public static boolean isModuleMonster(final ItemStack stack) {
+    public static boolean isModuleMonster(@Nullable final ItemStack stack) {
         return isItem(stack, moduleMonster);
     }
 
-    public static boolean isModuleOreCommon(final ItemStack stack) {
+    public static boolean isModuleOreCommon(@Nullable final ItemStack stack) {
         return isItem(stack, moduleOreCommon);
     }
 
-    public static boolean isModuleOreRare(final ItemStack stack) {
+    public static boolean isModuleOreRare(@Nullable final ItemStack stack) {
         return isItem(stack, moduleOreRare);
     }
 
-    public static boolean isModuleRange(final ItemStack stack) {
+    public static boolean isModuleRange(@Nullable final ItemStack stack) {
         return isItem(stack, moduleRange);
     }
 
@@ -102,8 +105,8 @@ public final class Items {
 
     // --------------------------------------------------------------------- //
 
-    private static boolean isItem(final ItemStack stack, final Item item) {
-        return !stack.isEmpty() && stack.getItem() == item;
+    private static boolean isItem(@Nullable final ItemStack stack, final Item item) {
+        return !ItemStackUtils.isEmpty(stack) && stack.getItem() == item;
     }
 
     // --------------------------------------------------------------------- //

@@ -32,9 +32,9 @@ public class GuiScanner extends GuiContainer {
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        this.fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_TITLE), 8, 6, 0x404040);
-        this.fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_MODULES), 8, 23, 0x404040);
-        this.fontRenderer.drawString(container.getPlayer().inventory.getDisplayName().getUnformattedText(), 8, ySize - 96 + 2, 0x404040);
+        this.fontRendererObj.drawString(I18n.format(Constants.GUI_SCANNER_TITLE), 8, 6, 0x404040);
+        this.fontRendererObj.drawString(I18n.format(Constants.GUI_SCANNER_MODULES), 8, 23, 0x404040);
+        this.fontRendererObj.drawString(container.getPlayer().inventory.getDisplayName().getUnformattedText(), 8, ySize - 96 + 2, 0x404040);
     }
 
     @Override

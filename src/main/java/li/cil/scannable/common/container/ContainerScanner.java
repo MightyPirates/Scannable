@@ -1,6 +1,7 @@
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
@@ -58,12 +59,13 @@ public final class ContainerScanner extends Container {
     public ItemStack transferStackInSlot(final EntityPlayer player, final int index) {
         final Slot from = inventorySlots.get(index);
         if (from == null) {
-            return ItemStack.EMPTY;
+            return null;
         }
-        final ItemStack stack = from.getStack().copy();
-        if (stack.isEmpty()) {
-            return ItemStack.EMPTY;
+        final ItemStack stack = from.getStack();
+        if (ItemStackUtils.isEmpty(stack)) {
+            return null;
         }
+        final ItemStack copy = stack.copy();
 
         final boolean intoPlayerInventory = from.inventory != player.inventory;
         final ItemStack fromStack = from.getStack();
@@ -85,7 +87,7 @@ public final class ContainerScanner extends Container {
                 }
 
                 final ItemStack intoStack = into.getStack();
-                if (intoStack.isEmpty()) {
+                if (ItemStackUtils.isEmpty(intoStack)) {
                     continue;
                 }
 
@@ -95,27 +97,27 @@ public final class ContainerScanner extends Container {
                 }
 
                 final int maxSizeInSlot = Math.min(fromStack.getMaxStackSize(), into.getItemStackLimit(stack));
-                final int spaceInSlot = maxSizeInSlot - intoStack.getCount();
+                final int spaceInSlot = maxSizeInSlot - intoStack.stackSize;
                 if (spaceInSlot <= 0) {
                     continue;
                 }
 
-                final int itemsMoved = Math.min(spaceInSlot, fromStack.getCount());
+                final int itemsMoved = Math.min(spaceInSlot, fromStack.stackSize);
                 if (itemsMoved <= 0) {
                     continue;
                 }
 
-                intoStack.grow(from.decrStackSize(itemsMoved).getCount());
+                intoStack.stackSize += from.decrStackSize(itemsMoved).stackSize;
                 into.onSlotChanged();
 
-                if (from.getStack().isEmpty()) {
+                if (ItemStackUtils.isEmpty(from.getStack())) {
                     break;
                 }
             }
         }
 
         for (int i = begin; i >= 0 && i < inventorySlots.size(); i += step) {
-            if (from.getStack().isEmpty()) {
+            if (ItemStackUtils.isEmpty(from.getStack())) {
                 break;
             }
 
@@ -133,10 +135,10 @@ public final class ContainerScanner extends Container {
             }
 
             final int maxSizeInSlot = Math.min(fromStack.getMaxStackSize(), into.getItemStackLimit(fromStack));
-            final int itemsMoved = Math.min(maxSizeInSlot, fromStack.getCount());
+            final int itemsMoved = Math.min(maxSizeInSlot, fromStack.stackSize);
             into.putStack(from.decrStackSize(itemsMoved));
         }
 
-        return from.getStack().getCount() < stack.getCount() ? from.getStack() : ItemStack.EMPTY;
+        return from.getStack() != null && from.getStack().stackSize < copy.stackSize ? from.getStack() : null;
     }
 }

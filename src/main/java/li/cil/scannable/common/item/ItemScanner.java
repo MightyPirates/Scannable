@@ -10,6 +10,7 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.gui.GuiId;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;
@@ -23,7 +24,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -60,7 +60,7 @@ public final class ItemScanner extends Item {
     }
 
     @Override
-    public void getSubItems(final Item item, final CreativeTabs tab, final NonNullList<ItemStack> subItems) {
+    public void getSubItems(final Item item, final CreativeTabs tab, final List<ItemStack> subItems) {
         super.getSubItems(item, tab, subItems);
 
         final ItemStack stack = new ItemStack(item);
@@ -111,8 +111,7 @@ public final class ItemScanner extends Item {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(final World world, final EntityPlayer player, final EnumHand hand) {
-        final ItemStack stack = player.getHeldItem(hand);
+    public ActionResult<ItemStack> onItemRightClick(final ItemStack stack, final World world, final EntityPlayer player, final EnumHand hand) {
         if (player.isSneaking()) {
             player.openGui(Scannable.instance, GuiId.SCANNER.id, world, hand.ordinal(), 0, 0);
         } else {
@@ -256,7 +255,7 @@ public final class ItemScanner extends Item {
         assert scannerInventory != null;
         for (int slot = 0; slot < scannerInventory.getSlots(); slot++) {
             final ItemStack module = scannerInventory.getStackInSlot(slot);
-            if (module.isEmpty()) {
+            if (ItemStackUtils.isEmpty(module)) {
                 continue;
             }
 
