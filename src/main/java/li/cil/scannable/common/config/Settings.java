@@ -12,7 +12,7 @@ public final class Settings {
     @Config.Comment("Whether to consume energy when performing a scan.\n" +
                     "Will make the scanner a chargeable item.")
     @Config.RequiresWorldRestart
-    public static boolean useEnergy;
+    public static boolean useEnergy = true;
 
     @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
     @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
