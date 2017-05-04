@@ -12,13 +12,16 @@ tooltip.scannable.scanner=§8Use to scan for nearby points of interest.
 tooltip.scannable.scanner.energy=§7Energy: §f%s/%s
 tooltip.scannable.module.energy_cost=§7Energy cost: §a%s
 
+gui.scannable.scanner.title=Scanner
+gui.scannable.scanner.modules=Modules
+gui.scannable.scanner.progress=Charging... %s%%
+gui.scannable.overlay.entity_details=%s (%sm)
+
+message.scannable.no_scan_modules=§cNo scanning module installed.
+message.scannable.not_enough_energy=§cNot enough energy.
+
 config.scannable.useEnergy=Use Energy
 config.scannable.oresCommon=Common Ores
 config.scannable.oresRare=Rare Ores
 config.scannable.oreColors=Ore Colors
 config.scannable.oreBlacklist=Ore Blacklist
-
-gui.scannable.scanner.title=Scanner
-gui.scannable.scanner.modules=Modules
-gui.scannable.scanner.progress=Charging... %s%%
-gui.scannable.overlay.entity_details=%s (%sm)

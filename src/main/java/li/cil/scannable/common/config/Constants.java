@@ -1,5 +1,7 @@
 package li.cil.scannable.common.config;
 
+import li.cil.scannable.api.API;
+
 public final class Constants {
     // --------------------------------------------------------------------- //
     // Mod data
@@ -35,6 +37,13 @@ public final class Constants {
     public static final String GUI_SCANNER_MODULES = "gui.scannable.scanner.modules";
     public static final String GUI_SCANNER_PROGRESS = "gui.scannable.scanner.progress";
     public static final String GUI_OVERLAY_ENTITY_DETAILS = "gui.scannable.overlay.entity_details";
+
+    // --------------------------------------------------------------------- //
+    // Chat messages
+
+    public static final int CHAT_LINE_ID = 1000000000 + API.MOD_ID.hashCode() % 1000000000; // This should make collisions unlikely enough, right? Right?!
+    public static final String MESSAGE_NO_SCAN_MODULES = "message.scannable.no_scan_modules";
+    public static final String MESSAGE_NOT_ENOUGH_ENERGY = "message.scannable.not_enough_energy";
 
     // --------------------------------------------------------------------- //
     // Tooltips

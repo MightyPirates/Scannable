@@ -17,7 +17,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,6 +26,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -57,11 +57,6 @@ public final class ItemScanner extends Item {
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final NBTTagCompound nbt) {
         return new CapabilityProviderItemScanner(stack);
-    }
-
-    @Override
-    public EnumAction getItemUseAction(final ItemStack stack) {
-        return EnumAction.BLOCK;
     }
 
     @Override
@@ -123,10 +118,18 @@ public final class ItemScanner extends Item {
         } else {
             final List<ItemStack> modules = new ArrayList<>();
             if (!collectModules(stack, modules)) {
+                if (world.isRemote) {
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentTranslation(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
+                }
+                player.getCooldownTracker().setCooldown(this, 10);
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
             }
 
             if (!tryConsumeEnergy(player, stack, modules, true)) {
+                if (world.isRemote) {
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentTranslation(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
+                }
+                player.getCooldownTracker().setCooldown(this, 10);
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
             }
 
