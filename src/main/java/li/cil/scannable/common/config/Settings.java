@@ -22,43 +22,36 @@ public final class Settings {
     @Config.LangKey(Constants.CONFIG_ENERGY_CAPACITY_SCANNER)
     @Config.Comment("Amount of energy that can be stored in a scanner.")
     @Config.RangeInt(min = 0, max = 1000000)
-    @Config.RequiresWorldRestart
     public static int energyCapacityScanner = 5000;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_RANGE)
     @Config.Comment("Amount of energy used by the range module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleRange = 100;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ANIMAL)
     @Config.Comment("Amount of energy used by the animal module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleAnimal = 25;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_MONSTER)
     @Config.Comment("Amount of energy used by the monster module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleMonster = 50;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_COMMON)
     @Config.Comment("Amount of energy used by the common ore module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleOreCommon = 75;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_RARE)
     @Config.Comment("Amount of energy used by the rare ore module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleOreRare = 100;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_BLOCK)
     @Config.Comment("Amount of energy used by the block module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleBlock = 100;
 
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
@@ -68,7 +61,6 @@ public final class Settings {
                     "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
                     "Range modules will boost the range by half this value.")
     @Config.RangeInt(min = 16, max = 128)
-    @Config.RequiresWorldRestart
     public static int baseScanRadius = 64;
 
     @Config.LangKey(Constants.CONFIG_BLOCK_BLACKLIST)
@@ -78,7 +70,6 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
     @Config.Comment("Registry names of blocks that will never be scanned.")
-    @Config.RequiresWorldRestart
     public static String[] blockBlacklist = {
             "minecraft:command_block"
     };

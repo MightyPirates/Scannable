@@ -81,7 +81,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
             final Item item = Item.getItemFromBlock(state.getBlock());
-            if (item != net.minecraft.init.Items.AIR) {
+            if (item != null) {
                 final ItemStack blockStack = new ItemStack(item, 1, state.getBlock().damageDropped(state));
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, blockStack.getDisplayName()));
             } else {
@@ -97,7 +97,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
     }
 
     @Override
-    public EnumActionResult onItemUse(final EntityPlayer player, final World world, final BlockPos pos, final EnumHand hand, final EnumFacing facing, final float hitX, final float hitY, final float hitZ) {
+    public EnumActionResult onItemUse(final ItemStack stack, final EntityPlayer player, final World world, final BlockPos pos, final EnumHand hand, final EnumFacing facing, final float hitX, final float hitY, final float hitZ) {
         if (!world.isBlockLoaded(pos)) {
             return EnumActionResult.PASS;
         }
@@ -105,7 +105,6 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return EnumActionResult.PASS;
         }
 
-        final ItemStack stack = player.getHeldItem(hand);
         final IBlockState state = world.getBlockState(pos);
 
         if (Settings.getBlockBlacklistSet().contains(state.getBlock())) {
