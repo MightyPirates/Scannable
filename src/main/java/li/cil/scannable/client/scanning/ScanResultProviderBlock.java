@@ -78,13 +78,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     @Override
     public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
         if (Items.isModuleOreCommon(module)) {
-            return Constants.ENERGY_COST_MODULE_ORE_COMMON;
+            return Settings.getEnergyCostModuleOreCommon();
         }
         if (Items.isModuleOreRare(module)) {
-            return Constants.ENERGY_COST_MODULE_ORE_RARE;
+            return Settings.getEnergyCostModuleOreRare();
         }
         if (Items.isModuleBlock(module)) {
-            return Constants.ENERGY_COST_MODULE_BLOCK;
+            return Settings.getEnergyCostModuleBlock();
         }
 
         throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));

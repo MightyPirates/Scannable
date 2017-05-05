@@ -26,6 +26,14 @@ public final class Constants {
     // Config
 
     public static final String CONFIG_USE_ENERGY = "config.scannable.useEnergy";
+    public static final String CONFIG_ENERGY_CAPACITY_SCANNER = "config.scannable.energyCapacityScanner";
+    public static final String CONFIG_ENERGY_MODULE_RANGE = "config.scannable.energyCostModuleRange";
+    public static final String CONFIG_ENERGY_MODULE_ANIMAL = "config.scannable.energyCostModuleAnimal";
+    public static final String CONFIG_ENERGY_MODULE_MONSTER = "config.scannable.energyCostModuleMonster";
+    public static final String CONFIG_ENERGY_MODULE_ORE_COMMON = "config.scannable.energyCostModuleOreCommon";
+    public static final String CONFIG_ENERGY_MODULE_ORE_RARE = "config.scannable.energyCostModuleOreRare";
+    public static final String CONFIG_ENERGY_MODULE_BLOCK = "config.scannable.energyCostModuleBlock";
+    public static final String CONFIG_BASE_SCAN_RADIUS = "config.scannable.baseScanRadius";
     public static final String CONFIG_BLOCK_BLACKLIST = "config.scannable.blockBlacklist";
     public static final String CONFIG_ORE_BLACKLIST = "config.scannable.oreBlacklist";
     public static final String CONFIG_ORE_COLORS = "config.scannable.oreColors";
@@ -60,8 +68,6 @@ public final class Constants {
     // --------------------------------------------------------------------- //
     // Scanner settings
 
-    // The radius in which to collect scan results around the player.
-    public static final float SCAN_RADIUS = 64f;
     // The number of ticks over which to compute scan results. Which is at the
     // same time the use time of the scanner item.
     public static final int SCAN_COMPUTE_DURATION = 40;
@@ -79,22 +85,10 @@ public final class Constants {
     // Size of a chunk. Duh.
     public static final int CHUNK_SIZE = 16;
 
-    // Amount of energy that can be stored in a scanner.
-    public static final int SCANNER_ENERGY_CAPACITY = 5000;
     // Number of modules that can be installed in a scanner.
     public static final int SCANNER_MAX_MODULE_COUNT = 3;
-    // By how much the scan radius is increased by installing the range module.
-    public static final float MODULE_RANGE_RADIUS_INCREASE = 32;
     // By how much to scale the base scan range when scanning for ores.
     public static final float MODULE_ORE_RADIUS_MULTIPLIER = 0.25f;
     // By how much to scale the base scan range when scanning for specific blocks.
     public static final float MODULE_BLOCK_RADIUS_MULTIPLIER = 0.5f;
-
-    // Module energy costs
-    public static final int ENERGY_COST_MODULE_RANGE = 100;
-    public static final int ENERGY_COST_MODULE_ANIMAL = 25;
-    public static final int ENERGY_COST_MODULE_MONSTER = 50;
-    public static final int ENERGY_COST_MODULE_ORE_COMMON = 75;
-    public static final int ENERGY_COST_MODULE_ORE_RARE = 100;
-    public static final int ENERGY_COST_MODULE_BLOCK = 100;
 }
