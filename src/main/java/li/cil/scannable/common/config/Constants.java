@@ -26,6 +26,7 @@ public final class Constants {
     // Config
 
     public static final String CONFIG_USE_ENERGY = "config.scannable.useEnergy";
+    public static final String CONFIG_BLOCK_BLACKLIST = "config.scannable.blockBlacklist";
     public static final String CONFIG_ORE_BLACKLIST = "config.scannable.oreBlacklist";
     public static final String CONFIG_ORE_COLORS = "config.scannable.oreColors";
     public static final String CONFIG_ORES_COMMON = "config.scannable.oresCommon";

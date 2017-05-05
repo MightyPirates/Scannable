@@ -20,7 +20,7 @@ public final class Settings {
     @Config.RequiresWorldRestart
     public static boolean useEnergy = true;
 
-    @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
+    @Config.LangKey(Constants.CONFIG_BLOCK_BLACKLIST)
     @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
     @Config.RequiresWorldRestart
     public static String[] oreBlacklist = {

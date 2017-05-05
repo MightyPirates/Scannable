@@ -25,7 +25,8 @@ message.scannable.not_enough_energy=§cNot enough energy.
 message.scannable.block_blacklisted=§cBlock is blacklisted.
 
 config.scannable.useEnergy=Use Energy
+config.scannable.blockBlacklist=Block Blacklist
+config.scannable.oreBlacklist=Ore Blacklist
 config.scannable.oresCommon=Common Ores
 config.scannable.oresRare=Rare Ores
 config.scannable.oreColors=Ore Colors
-config.scannable.oreBlacklist=Ore Blacklist
