@@ -4,6 +4,7 @@ import li.cil.scannable.api.Icons;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -55,10 +56,10 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     @Override
     public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
         if (Items.isModuleAnimal(module)) {
-            return Constants.ENERGY_COST_MODULE_ANIMAL;
+            return Settings.getEnergyCostModuleAnimal();
         }
         if (Items.isModuleMonster(module)) {
-            return Constants.ENERGY_COST_MODULE_MONSTER;
+            return Settings.getEnergyCostModuleMonster();
         }
 
         throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));

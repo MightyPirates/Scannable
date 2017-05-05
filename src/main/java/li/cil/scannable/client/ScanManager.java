@@ -5,6 +5,7 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,14 +24,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SideOnly(Side.CLIENT)
 public enum ScanManager {
@@ -91,7 +85,7 @@ public enum ScanManager {
     public void beginScan(final EntityPlayer player, final List<ItemStack> modules) {
         cancelScan();
 
-        float scanRadius = Constants.SCAN_RADIUS;
+        float scanRadius = Settings.getBaseScanRadius();
 
         for (final ItemStack module : modules) {
             final ScanResultProvider provider = module.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
@@ -100,7 +94,7 @@ public enum ScanManager {
             }
 
             if (Items.isModuleRange(module)) {
-                scanRadius += Constants.MODULE_RANGE_RADIUS_INCREASE;
+                scanRadius += MathHelper.ceil(Settings.getBaseScanRadius() / 2f);
             }
         }
 

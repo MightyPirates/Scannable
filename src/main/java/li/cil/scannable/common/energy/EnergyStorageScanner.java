@@ -1,6 +1,6 @@
 package li.cil.scannable.common.energy;
 
-import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Settings;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -13,7 +13,7 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
     private final ItemStack container;
 
     public EnergyStorageScanner(final ItemStack container) {
-        super(Constants.SCANNER_ENERGY_CAPACITY);
+        super(Settings.getEnergyCapacityScanner());
         this.container = container;
     }
 

@@ -1,0 +1,8 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "scannable:items/module_blank",
+        "layer1": "scannable:items/module_slot",
+        "layer2": "scannable:items/module_block"
+    }
+}

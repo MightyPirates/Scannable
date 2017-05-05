@@ -1,10 +1,16 @@
 package li.cil.scannable.common.config;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.client.scanning.ScanResultProviderOre;
+import li.cil.scannable.client.scanning.ScanResultProviderBlock;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Config(modid = API.MOD_ID)
 public final class Settings {
@@ -13,9 +19,68 @@ public final class Settings {
                     "Will make the scanner a chargeable item.")
     public static boolean useEnergy = true;
 
-    @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
+    @Config.LangKey(Constants.CONFIG_ENERGY_CAPACITY_SCANNER)
+    @Config.Comment("Amount of energy that can be stored in a scanner.")
+    @Config.RangeInt(min = 0, max = 1000000)
+    @Config.RequiresWorldRestart
+    public static int energyCapacityScanner = 5000;
+
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_RANGE)
+    @Config.Comment("Amount of energy used by the range module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleRange = 100;
+
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ANIMAL)
+    @Config.Comment("Amount of energy used by the animal module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleAnimal = 25;
+
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_MONSTER)
+    @Config.Comment("Amount of energy used by the monster module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleMonster = 50;
+
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_COMMON)
+    @Config.Comment("Amount of energy used by the common ore module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleOreCommon = 75;
+
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_RARE)
+    @Config.Comment("Amount of energy used by the rare ore module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleOreRare = 100;
+
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_BLOCK)
+    @Config.Comment("Amount of energy used by the block module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleBlock = 100;
+
+    @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
+    @Config.Comment("The basic scan radius without range modules.\n" +
+                    "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
+                    "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
+                    "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
+                    "Range modules will boost the range by half this value.")
+    @Config.RangeInt(min = 16, max = 128)
+    @Config.RequiresWorldRestart
+    public static int baseScanRadius = 64;
+
+    @Config.LangKey(Constants.CONFIG_BLOCK_BLACKLIST)
     @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
     public static String[] oreBlacklist = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
+    @Config.Comment("Registry names of blocks that will never be scanned.")
+    @Config.RequiresWorldRestart
+    public static String[] blockBlacklist = {
+            "minecraft:command_block"
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_COMMON)
@@ -100,16 +165,66 @@ public final class Settings {
     // --------------------------------------------------------------------- //
 
     private static ServerSettings serverSettings;
+    private static final Set<Block> blockBlacklistSet = new HashSet<>();
 
     public static void setServerSettings(@Nullable final ServerSettings serverSettings) {
         Settings.serverSettings = serverSettings;
-        ScanResultProviderOre.INSTANCE.rebuildOreCache();
+
+        ScanResultProviderBlock.INSTANCE.rebuildOreCache();
+
+        blockBlacklistSet.clear();
+        for (final String blockName : getBlockBlacklist()) {
+            final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
+            if (block != null && block != Blocks.AIR) {
+                blockBlacklistSet.add(block);
+            }
+        }
+    }
+
+    public static Set<Block> getBlockBlacklistSet() {
+        return blockBlacklistSet;
     }
 
     // --------------------------------------------------------------------- //
 
     public static boolean useEnergy() {
         return serverSettings != null ? serverSettings.useEnergy : useEnergy;
+    }
+
+    public static int getEnergyCapacityScanner() {
+        return serverSettings != null ? serverSettings.energyCapacityScanner : energyCapacityScanner;
+    }
+
+    public static int getEnergyCostModuleRange() {
+        return serverSettings != null ? serverSettings.energyCostModuleRange : energyCostModuleRange;
+    }
+
+    public static int getEnergyCostModuleAnimal() {
+        return serverSettings != null ? serverSettings.energyCostModuleAnimal : energyCostModuleAnimal;
+    }
+
+    public static int getEnergyCostModuleMonster() {
+        return serverSettings != null ? serverSettings.energyCostModuleMonster : energyCostModuleMonster;
+    }
+
+    public static int getEnergyCostModuleOreCommon() {
+        return serverSettings != null ? serverSettings.energyCostModuleOreCommon : energyCostModuleOreCommon;
+    }
+
+    public static int getEnergyCostModuleOreRare() {
+        return serverSettings != null ? serverSettings.energyCostModuleOreRare : energyCostModuleOreRare;
+    }
+
+    public static int getEnergyCostModuleBlock() {
+        return serverSettings != null ? serverSettings.energyCostModuleBlock : energyCostModuleBlock;
+    }
+
+    public static int getBaseScanRadius() {
+        return serverSettings != null ? serverSettings.baseScanRadius : baseScanRadius;
+    }
+
+    public static String[] getBlockBlacklist() {
+        return serverSettings != null ? serverSettings.blockBlacklist : blockBlacklist;
     }
 
     public static String[] getOreBlacklist() {
