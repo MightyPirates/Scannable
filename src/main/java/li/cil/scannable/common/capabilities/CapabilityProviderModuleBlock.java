@@ -1,6 +1,6 @@
 package li.cil.scannable.common.capabilities;
 
-import li.cil.scannable.client.scanning.ScanResultProviderOre;
+import li.cil.scannable.client.scanning.ScanResultProviderBlock;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -8,7 +8,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public enum CapabilityProviderModuleOre implements ICapabilityProvider {
+public enum CapabilityProviderModuleBlock implements ICapabilityProvider {
     INSTANCE;
 
     // --------------------------------------------------------------------- //
@@ -24,7 +24,7 @@ public enum CapabilityProviderModuleOre implements ICapabilityProvider {
     @Override
     public <T> T getCapability(@Nonnull final Capability<T> capability, @Nullable final EnumFacing facing) {
         if (capability == CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY) {
-            return (T) ScanResultProviderOre.INSTANCE;
+            return (T) ScanResultProviderBlock.INSTANCE;
         }
         return null;
     }

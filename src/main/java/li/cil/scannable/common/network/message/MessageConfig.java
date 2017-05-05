@@ -23,39 +23,11 @@ public final class MessageConfig implements IMessage {
 
     @Override
     public void fromBytes(final ByteBuf buf) {
-        final PacketBuffer packet = new PacketBuffer(buf);
-        final boolean useEnergy = packet.readBoolean();
-        final String[] oresBlacklist = readStringArray(packet);
-        final String[] oresCommon = readStringArray(packet);
-        final String[] oresRare = readStringArray(packet);
-
-        settings = new ServerSettings(useEnergy, oresBlacklist, oresCommon, oresRare);
+        settings = new ServerSettings(new PacketBuffer(buf));
     }
 
     @Override
     public void toBytes(final ByteBuf buf) {
-        final PacketBuffer packet = new PacketBuffer(buf);
-        packet.writeBoolean(settings.useEnergy);
-        writeStringArray(packet, settings.oresBlacklist);
-        writeStringArray(packet, settings.oresCommon);
-        writeStringArray(packet, settings.oresRare);
-    }
-
-    // --------------------------------------------------------------------- //
-
-    private String[] readStringArray(final PacketBuffer packet) {
-        final int length = packet.readInt();
-        final String[] array = new String[length];
-        for (int i = 0; i < length; i++) {
-            array[i] = packet.readString(256);
-        }
-        return array;
-    }
-
-    private static void writeStringArray(final PacketBuffer buffer, final String[] array) {
-        buffer.writeInt(array.length);
-        for (final String element : array) {
-            buffer.writeString(element);
-        }
+        settings.writeToBuffer(new PacketBuffer(buf));
     }
 }

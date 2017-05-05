@@ -20,6 +20,7 @@ public final class Constants {
     public static final String NAME_MODULE_MONSTER = "module_monster";
     public static final String NAME_MODULE_ORE_COMMON = "module_ore_common";
     public static final String NAME_MODULE_ORE_RARE = "module_ore_rare";
+    public static final String NAME_MODULE_BLOCK = "module_block";
 
     // --------------------------------------------------------------------- //
     // Config
@@ -44,6 +45,7 @@ public final class Constants {
     public static final int CHAT_LINE_ID = 1000000000 + API.MOD_ID.hashCode() % 1000000000; // This should make collisions unlikely enough, right? Right?!
     public static final String MESSAGE_NO_SCAN_MODULES = "message.scannable.no_scan_modules";
     public static final String MESSAGE_NOT_ENOUGH_ENERGY = "message.scannable.not_enough_energy";
+    public static final String MESSAGE_BLOCK_BLACKLISTED = "message.scannable.block_blacklisted";
 
     // --------------------------------------------------------------------- //
     // Tooltips
@@ -51,6 +53,8 @@ public final class Constants {
     public static final String TOOLTIP_SCANNER = "tooltip.scannable.scanner";
     public static final String TOOLTIP_SCANNER_ENERGY = "tooltip.scannable.scanner.energy";
     public static final String TOOLTIP_MODULE_ENERGY_COST = "tooltip.scannable.module.energy_cost";
+    public static final String TOOLTIP_MODULE_BLOCK = "tooltip.scannable.module.block";
+    public static final String TOOLTIP_MODULE_BLOCK_NAME = "tooltip.scannable.module.block.name";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
@@ -64,8 +68,7 @@ public final class Constants {
     public static final int SCAN_INITIAL_RADIUS = 12;
     // Scan wave growth time offset to avoid super slow start speed.
     public static final int SCAN_TIME_OFFSET = 200;
-    // How long the ping takes to reach the end of the visible area at the
-    // default visibility range of 12 chunks.
+    // How long the ping takes to reach the end of the visible area.
     public static final int SCAN_GROWTH_DURATION = 2000;
     // How long the results from a scan should remain visible.
     public static final int SCAN_STAY_DURATION = 10000;
@@ -83,11 +86,14 @@ public final class Constants {
     public static final float MODULE_RANGE_RADIUS_INCREASE = 32;
     // By how much to scale the base scan range when scanning for ores.
     public static final float MODULE_ORE_RADIUS_MULTIPLIER = 0.25f;
+    // By how much to scale the base scan range when scanning for specific blocks.
+    public static final float MODULE_BLOCK_RADIUS_MULTIPLIER = 0.5f;
 
     // Module energy costs
+    public static final int ENERGY_COST_MODULE_RANGE = 100;
     public static final int ENERGY_COST_MODULE_ANIMAL = 25;
     public static final int ENERGY_COST_MODULE_MONSTER = 50;
     public static final int ENERGY_COST_MODULE_ORE_COMMON = 75;
     public static final int ENERGY_COST_MODULE_ORE_RARE = 100;
-    public static final int ENERGY_COST_MODULE_RANGE = 100;
+    public static final int ENERGY_COST_MODULE_BLOCK = 100;
 }

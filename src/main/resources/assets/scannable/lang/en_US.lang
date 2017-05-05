@@ -7,10 +7,13 @@ item.scannable.module_animal.name=Scanner Module: Animals
 item.scannable.module_monster.name=Scanner Module: Monsters
 item.scannable.module_ore_common.name=Scanner Module: Common Ores
 item.scannable.module_ore_rare.name=Scanner Module: Rare Ores
+item.scannable.module_block.name=Scanner Module: Block
 
 tooltip.scannable.scanner=§8Use to scan for nearby points of interest.
 tooltip.scannable.scanner.energy=§7Energy: §f%s/%s
 tooltip.scannable.module.energy_cost=§7Energy cost: §a%s
+tooltip.scannable.module.block=§7Use on a block to configure the module.
+tooltip.scannable.module.block.name=§7Configured block: §f%s
 
 gui.scannable.scanner.title=Scanner
 gui.scannable.scanner.modules=Modules
@@ -19,6 +22,7 @@ gui.scannable.overlay.entity_details=%s (%sm)
 
 message.scannable.no_scan_modules=§cNo scanning module installed.
 message.scannable.not_enough_energy=§cNot enough energy.
+message.scannable.block_blacklisted=§cBlock is blacklisted.
 
 config.scannable.useEnergy=Use Energy
 config.scannable.oresCommon=Common Ores

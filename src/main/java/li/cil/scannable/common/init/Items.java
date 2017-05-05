@@ -2,13 +2,7 @@ package li.cil.scannable.common.init;
 
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.ItemScanner;
-import li.cil.scannable.common.item.ItemScannerModuleAnimal;
-import li.cil.scannable.common.item.ItemScannerModuleBlank;
-import li.cil.scannable.common.item.ItemScannerModuleMonster;
-import li.cil.scannable.common.item.ItemScannerModuleOreCommon;
-import li.cil.scannable.common.item.ItemScannerModuleOreRare;
-import li.cil.scannable.common.item.ItemScannerModuleRange;
+import li.cil.scannable.common.item.*;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,11 +18,16 @@ public final class Items {
     public static Item moduleMonster;
     public static Item moduleOreCommon;
     public static Item moduleOreRare;
+    public static Item moduleBlock;
 
     // --------------------------------------------------------------------- //
 
     public static boolean isScanner(final ItemStack stack) {
         return isItem(stack, scanner);
+    }
+
+    public static boolean isModuleRange(final ItemStack stack) {
+        return isItem(stack, moduleRange);
     }
 
     public static boolean isModuleAnimal(final ItemStack stack) {
@@ -47,8 +46,8 @@ public final class Items {
         return isItem(stack, moduleOreRare);
     }
 
-    public static boolean isModuleRange(final ItemStack stack) {
-        return isItem(stack, moduleRange);
+    public static boolean isModuleBlock(final ItemStack stack) {
+        return isItem(stack, moduleBlock);
     }
 
     // --------------------------------------------------------------------- //
@@ -59,8 +58,9 @@ public final class Items {
         moduleRange = proxy.registerItem(Constants.NAME_MODULE_RANGE, ItemScannerModuleRange::new);
         moduleAnimal = proxy.registerItem(Constants.NAME_MODULE_ANIMAL, ItemScannerModuleAnimal::new);
         moduleMonster = proxy.registerItem(Constants.NAME_MODULE_MONSTER, ItemScannerModuleMonster::new);
-        moduleOreCommon = proxy.registerItem(Constants.NAME_MODULE_ORE_COMMON, ItemScannerModuleOreCommon::new);
-        moduleOreRare = proxy.registerItem(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleOreRare::new);
+        moduleOreCommon = proxy.registerItem(Constants.NAME_MODULE_ORE_COMMON, ItemScannerModuleBlockOreCommon::new);
+        moduleOreRare = proxy.registerItem(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleBlockOreRare::new);
+        moduleBlock = proxy.registerItem(Constants.NAME_MODULE_BLOCK, ItemScannerModuleBlockConfigurable::new);
     }
 
     public static void addRecipes() {
@@ -98,6 +98,9 @@ public final class Items {
         GameRegistry.addRecipe(new ShapelessOreRecipe(
                 new ItemStack(moduleOreRare),
                 moduleBlank, "gemDiamond"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleBlock),
+                moduleBlank, Blocks.STONE));
     }
 
     // --------------------------------------------------------------------- //

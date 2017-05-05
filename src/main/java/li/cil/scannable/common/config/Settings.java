@@ -1,10 +1,16 @@
 package li.cil.scannable.common.config;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.client.scanning.ScanResultProviderOre;
+import li.cil.scannable.client.scanning.ScanResultProviderBlock;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Config(modid = API.MOD_ID)
 public final class Settings {
@@ -18,6 +24,13 @@ public final class Settings {
     @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
     @Config.RequiresWorldRestart
     public static String[] oreBlacklist = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
+    @Config.Comment("Registry names of blocks that will never be scanned.")
+    @Config.RequiresWorldRestart
+    public static String[] blockBlacklist = {
+            "minecraft:command_block"
     };
 
     @Config.LangKey(Constants.CONFIG_ORES_COMMON)
@@ -104,16 +117,34 @@ public final class Settings {
     // --------------------------------------------------------------------- //
 
     private static ServerSettings serverSettings;
+    private static final Set<Block> blockBlacklistSet = new HashSet<>();
 
     public static void setServerSettings(@Nullable final ServerSettings serverSettings) {
         Settings.serverSettings = serverSettings;
-        ScanResultProviderOre.INSTANCE.rebuildOreCache();
+
+        ScanResultProviderBlock.INSTANCE.rebuildOreCache();
+
+        blockBlacklistSet.clear();
+        for (final String blockName : getBlockBlacklist()) {
+            final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
+            if (block != null && block != Blocks.AIR) {
+                blockBlacklistSet.add(block);
+            }
+        }
+    }
+
+    public static Set<Block> getBlockBlacklistSet() {
+        return blockBlacklistSet;
     }
 
     // --------------------------------------------------------------------- //
 
     public static boolean useEnergy() {
         return serverSettings != null ? serverSettings.useEnergy : useEnergy;
+    }
+
+    public static String[] getBlockBlacklist() {
+        return serverSettings != null ? serverSettings.blockBlacklist : blockBlacklist;
     }
 
     public static String[] getOreBlacklist() {
