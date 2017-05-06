@@ -153,7 +153,7 @@ public final class Settings {
             "oreInfusedEntropy=0x545476"
     };
 
-    @Config.LangKey(Constants.CONFIG_USE_ENERGY)
+    @Config.LangKey(Constants.CONFIG_INJECT_DEPTH_TEXTURE)
     @Config.Comment("Whether to try to inject a depth texture into Minecraft's FBO when rendering the\n" +
                     "scan wave effect. This is much faster as it will not have to re-render the world\n" +
                     "geometry to retrieve the depth information required for the effect. However, it\n" +

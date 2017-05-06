@@ -43,3 +43,4 @@ config.scannable.oreBlacklist=Blacklist: Ores
 config.scannable.oresCommon=Ores: Common
 config.scannable.oresRare=Ores: Rare
 config.scannable.oreColors=Ore Colors
+config.scannable.injectDepthTexture=Inject Depth Texture
