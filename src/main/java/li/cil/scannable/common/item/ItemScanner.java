@@ -169,7 +169,7 @@ public final class ItemScanner extends Item {
             return stack;
         }
 
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(SoundCanceler.INSTANCE);
 
         final List<ItemStack> modules = new ArrayList<>();
         if (!collectModules(stack, modules)) {
@@ -192,15 +192,6 @@ public final class ItemScanner extends Item {
         player.getCooldownTracker().setCooldown(this, 40);
 
         return stack;
-    }
-
-    @SubscribeEvent
-    public void onPlaySoundAtEntityEvent(final PlaySoundAtEntityEvent event) {
-        // Suppress the re-equip sound after finishing a scan.
-        if (event.getSound() == SoundEvents.ITEM_ARMOR_EQUIP_GENERIC) {
-            event.setCanceled(true);
-        }
-        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     // --------------------------------------------------------------------- //
@@ -264,6 +255,19 @@ public final class ItemScanner extends Item {
     }
 
     // --------------------------------------------------------------------- //
+
+    private enum SoundCanceler {
+        INSTANCE;
+
+        @SubscribeEvent
+        public void onPlaySoundAtEntityEvent(final PlaySoundAtEntityEvent event) {
+            // Suppress the re-equip sound after finishing a scan.
+            if (event.getSound() == SoundEvents.ITEM_ARMOR_EQUIP_GENERIC) {
+                event.setCanceled(true);
+            }
+            MinecraftForge.EVENT_BUS.unregister(this);
+        }
+    }
 
     @SideOnly(Side.CLIENT)
     private enum SoundManager {
