@@ -153,6 +153,15 @@ public final class Settings {
             "oreInfusedEntropy=0x545476"
     };
 
+    @Config.LangKey(Constants.CONFIG_USE_ENERGY)
+    @Config.Comment("Whether to try to inject a depth texture into Minecraft's FBO when rendering the\n" +
+                    "scan wave effect. This is much faster as it will not have to re-render the world\n" +
+                    "geometry to retrieve the depth information required for the effect. However, it\n" +
+                    "appears that on some systems this doesn't work. The mod tries to detect that and\n" +
+                    "will fall back to re-rendering automatically, but you can force re-rendering by\n" +
+                    "setting this to false, e.g. for debugging or just to avoid the one logged warning.")
+    public static boolean injectDepthTexture = true;
+
     // --------------------------------------------------------------------- //
 
     private static ServerSettings serverSettings;

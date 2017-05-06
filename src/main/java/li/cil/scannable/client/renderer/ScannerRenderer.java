@@ -3,6 +3,7 @@ package li.cil.scannable.client.renderer;
 import li.cil.scannable.api.API;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
+import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.integration.optifine.ProxyOptiFine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -53,8 +55,13 @@ public enum ScannerRenderer {
     private int camPosUniform, centerUniform, radiusUniform;
     private int zNearUniform, zFarUniform, aspectUniform;
     private int depthTexUniform;
+
+    // --------------------------------------------------------------------- //
+    // Framebuffer and depth texture IDs.
+
+    private Mode mode;
+    private int framebufferObject;
     private int framebufferDepthTexture;
-    private boolean isOptiFineDepthTexture;
 
     // --------------------------------------------------------------------- //
     // Direct memory float buffers for setting uniforms, cached for alloc-free.
@@ -155,10 +162,20 @@ public enum ScannerRenderer {
             return;
         }
 
-        checkError("Pre rendering");
+        if (ProxyOptiFine.INSTANCE.isShaderPackLoaded()) {
+            mode = Mode.OPTIFINE;
+        } else if (mode == Mode.OPTIFINE || mode == null) {
+            mode = Settings.injectDepthTexture ? Mode.INJECT : Mode.RENDER;
+        }
 
         final Framebuffer framebuffer = mc.getFramebuffer();
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
+
+        if (checkError("Pre rendering") && mode == Mode.INJECT) {
+            Scannable.getLog().info("Huh, looks like our injected depth texture broke something maybe? Falling back to re-rendering.");
+            uninstallDepthTexture(framebuffer);
+            mode = Mode.RENDER;
+        }
 
         if (framebufferDepthTexture == 0) {
             if (adjustedDuration > (int) (System.currentTimeMillis() - currentStart)) {
@@ -174,6 +191,22 @@ public enum ScannerRenderer {
             }
         }
 
+        if (mode == Mode.RENDER) {
+            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+
+            GlStateManager.clear(GL11.GL_DEPTH_BUFFER_BIT);
+            GlStateManager.disableTexture2D();
+
+            mc.renderGlobal.renderBlockLayer(BlockRenderLayer.SOLID, event.getPartialTicks(), 0, mc.getRenderViewEntity());
+            mc.renderGlobal.renderBlockLayer(BlockRenderLayer.CUTOUT_MIPPED, event.getPartialTicks(), 0, mc.getRenderViewEntity());
+
+            GlStateManager.enableTexture2D();
+
+            OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebuffer.framebufferObject);
+
+            checkError("Render depth");
+        }
+
         setupCorners();
 
         GlStateManager.depthMask(false);
@@ -183,7 +216,7 @@ public enum ScannerRenderer {
         GlStateManager.pushMatrix();
         GlStateManager.pushAttrib();
 
-        if (!isOptiFineDepthTexture) {
+        if (mode == Mode.INJECT) {
             // Activate original depth render buffer while we use the depth texture.
             // Even though it's not written to typically drivers won't like reading
             // from a sampler of a texture that's part of the current render target.
@@ -224,7 +257,7 @@ public enum ScannerRenderer {
 
         GlStateManager.bindTexture(0);
 
-        if (!isOptiFineDepthTexture) {
+        if (mode == Mode.INJECT) {
             // Swap back in our depth texture for that sweet, sweet depth info.
             OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
             checkError("Swap out depth buffer");
@@ -291,23 +324,61 @@ public enum ScannerRenderer {
         }
     }
 
-    private static void checkError(final String context) {
+    private static boolean checkError(final String context) {
         final int error = GL11.glGetError();
         if (error != 0) {
             final String errorMessage = GLU.gluErrorString(error);
             Scannable.getLog().warn("[OpenGL Error: {}] {}: {}", error, context, errorMessage);
+            return true;
         }
+
+        return false;
     }
 
     private void installDepthTexture(final Framebuffer framebuffer) {
-        if (ProxyOptiFine.INSTANCE.isShaderPackLoaded()) {
-            framebufferDepthTexture = ProxyOptiFine.INSTANCE.getDepthTexture();
-            isOptiFineDepthTexture = true;
-            return;
-        } else {
-            isOptiFineDepthTexture = false;
+        switch (mode) {
+            case INJECT:
+                framebufferObject = framebuffer.framebufferObject;
+                createDepthTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight);
+                OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+                break;
+            case RENDER:
+                framebufferObject = OpenGlHelper.glGenFramebuffers();
+                createDepthTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight);
+                OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+                break;
+            case OPTIFINE:
+                framebufferDepthTexture = ProxyOptiFine.INSTANCE.getDepthTexture();
+                break;
         }
 
+        checkError("Install Depth Texture");
+    }
+
+    private void uninstallDepthTexture(final Framebuffer framebuffer) {
+        switch (mode) {
+            case INJECT:
+                OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                TextureUtil.deleteTexture(framebufferDepthTexture);
+                break;
+            case RENDER:
+                OpenGlHelper.glDeleteFramebuffers(framebufferObject);
+                TextureUtil.deleteTexture(framebufferDepthTexture);
+                break;
+            case OPTIFINE:
+                break;
+        }
+
+        framebufferObject = 0;
+        framebufferDepthTexture = 0;
+
+        checkError("Uninstall Depth Texture");
+    }
+
+    private void createDepthTexture(final int width, final int height) {
         framebufferDepthTexture = TextureUtil.glGenTextures();
         GlStateManager.bindTexture(framebufferDepthTexture);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
@@ -317,26 +388,8 @@ public enum ScannerRenderer {
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_DEPTH_TEXTURE_MODE, GL11.GL_LUMINANCE);
 //        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL14.GL_COMPARE_R_TO_TEXTURE);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_LEQUAL);
-        GlStateManager.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT24, framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_UNSIGNED_BYTE, null);
+        GlStateManager.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT24, width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_UNSIGNED_BYTE, null);
         GlStateManager.bindTexture(0);
-        OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebuffer.framebufferObject);
-        OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
-
-        checkError("Install Depth Texture");
-    }
-
-    private void uninstallDepthTexture(final Framebuffer framebuffer) {
-        if (isOptiFineDepthTexture) {
-            framebufferDepthTexture = 0;
-            return;
-        }
-
-        OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebuffer.framebufferObject);
-        OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
-        TextureUtil.deleteTexture(framebufferDepthTexture);
-        framebufferDepthTexture = 0;
-
-        checkError("Uninstall Depth Texture");
     }
 
     private void setupCorners() {
@@ -397,5 +450,11 @@ public enum ScannerRenderer {
         float3Buffer.put((float) value.zCoord);
         float3Buffer.rewind();
         OpenGlHelper.glUniform3(uniform, float3Buffer);
+    }
+
+    private enum Mode {
+        INJECT,
+        RENDER,
+        OPTIFINE
     }
 }

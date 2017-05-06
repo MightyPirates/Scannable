@@ -77,7 +77,7 @@ public final class Constants {
     // same time the use time of the scanner item.
     public static final int SCAN_COMPUTE_DURATION = 40;
     // Initial radius of the scan wave.
-    public static final int SCAN_INITIAL_RADIUS = 8;
+    public static final int SCAN_INITIAL_RADIUS = 10;
     // Scan wave growth time offset to avoid super slow start speed.
     public static final int SCAN_TIME_OFFSET = 200;
     // How long the ping takes to reach the end of the visible area.
