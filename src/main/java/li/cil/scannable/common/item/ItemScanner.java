@@ -1,6 +1,5 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
@@ -10,8 +9,8 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.gui.GuiId;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.util.SoundManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -20,7 +19,10 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,8 +31,6 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -39,9 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ItemScanner extends Item {
-    private static final SoundEvent SCANNER_CHARGE = new SoundEvent(new ResourceLocation(API.MOD_ID, "scanner_charge"));
-    private static final SoundEvent SCANNER_ACTIVATE = new SoundEvent(new ResourceLocation(API.MOD_ID, "scanner_activate"));
-
     public ItemScanner() {
         setMaxStackSize(1);
     }
@@ -266,30 +263,6 @@ public final class ItemScanner extends Item {
                 event.setCanceled(true);
             }
             MinecraftForge.EVENT_BUS.unregister(this);
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    private enum SoundManager {
-        INSTANCE;
-
-        @Nullable
-        private PositionedSoundRecord currentChargingSound;
-
-        void playChargingSound() {
-            currentChargingSound = PositionedSoundRecord.getMasterRecord(SCANNER_CHARGE, 1);
-            Minecraft.getMinecraft().getSoundHandler().playSound(currentChargingSound);
-        }
-
-        void stopChargingSound() {
-            if (currentChargingSound != null) {
-                Minecraft.getMinecraft().getSoundHandler().stopSound(currentChargingSound);
-                currentChargingSound = null;
-            }
-        }
-
-        void playActivateSound() {
-            Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SCANNER_ACTIVATE, 1));
         }
     }
 }
