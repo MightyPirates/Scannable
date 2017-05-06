@@ -171,11 +171,7 @@ public enum ScannerRenderer {
         final Framebuffer framebuffer = mc.getFramebuffer();
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
 
-        if (checkError("Pre rendering") && mode == Mode.INJECT) {
-            Scannable.getLog().info("Huh, looks like our injected depth texture broke something maybe? Falling back to re-rendering.");
-            uninstallDepthTexture(framebuffer);
-            mode = Mode.RENDER;
-        }
+        final boolean hadErrors = checkError("Pre rendering");
 
         if (framebufferDepthTexture == 0) {
             if (adjustedDuration > (int) (System.currentTimeMillis() - currentStart)) {
@@ -183,12 +179,15 @@ public enum ScannerRenderer {
             } else {
                 return;
             }
-        } else {
-            if (adjustedDuration < (int) (System.currentTimeMillis() - currentStart)) {
-                uninstallDepthTexture(framebuffer);
-                currentStart = -1; // for early exit
-                return;
-            }
+        } else if (adjustedDuration < (int) (System.currentTimeMillis() - currentStart)) {
+            uninstallDepthTexture(framebuffer);
+            currentStart = -1; // for early exit
+            return;
+        } else if (hadErrors && mode == Mode.INJECT) {
+            Scannable.getLog().info("Huh, looks like our injected depth texture broke something maybe? Falling back to re-rendering.");
+            uninstallDepthTexture(framebuffer);
+            mode = Mode.RENDER;
+            installDepthTexture(framebuffer);
         }
 
         if (mode == Mode.RENDER) {
@@ -197,8 +196,8 @@ public enum ScannerRenderer {
             GlStateManager.clear(GL11.GL_DEPTH_BUFFER_BIT);
             GlStateManager.disableTexture2D();
 
-            mc.renderGlobal.renderBlockLayer(BlockRenderLayer.SOLID, event.getPartialTicks(), 0, mc.getRenderViewEntity());
-            mc.renderGlobal.renderBlockLayer(BlockRenderLayer.CUTOUT_MIPPED, event.getPartialTicks(), 0, mc.getRenderViewEntity());
+            mc.renderGlobal.renderBlockLayer(BlockRenderLayer.SOLID, event.getPartialTicks(), 0, viewer);
+            mc.renderGlobal.renderBlockLayer(BlockRenderLayer.CUTOUT_MIPPED, event.getPartialTicks(), 0, viewer);
 
             GlStateManager.enableTexture2D();
 
