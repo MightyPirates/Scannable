@@ -10,61 +10,50 @@ import net.minecraft.nbt.NBTTagCompound;
  * @author King Lemming
  */
 public class ItemEnergyContainer extends Item implements IEnergyContainerItem {
-
 	protected int capacity;
 	protected int maxReceive;
 	protected int maxExtract;
 
 	public ItemEnergyContainer() {
-
 	}
 
 	public ItemEnergyContainer(int capacity) {
-
 		this(capacity, capacity, capacity);
 	}
 
 	public ItemEnergyContainer(int capacity, int maxTransfer) {
-
 		this(capacity, maxTransfer, maxTransfer);
 	}
 
 	public ItemEnergyContainer(int capacity, int maxReceive, int maxExtract) {
-
 		this.capacity = capacity;
 		this.maxReceive = maxReceive;
 		this.maxExtract = maxExtract;
 	}
 
 	public ItemEnergyContainer setCapacity(int capacity) {
-
 		this.capacity = capacity;
 		return this;
 	}
 
 	public ItemEnergyContainer setMaxTransfer(int maxTransfer) {
-
 		setMaxReceive(maxTransfer);
 		setMaxExtract(maxTransfer);
 		return this;
 	}
 
 	public ItemEnergyContainer setMaxReceive(int maxReceive) {
-
 		this.maxReceive = maxReceive;
 		return this;
 	}
 
 	public ItemEnergyContainer setMaxExtract(int maxExtract) {
-
 		this.maxExtract = maxExtract;
 		return this;
 	}
 
-	/* IEnergyContainerItem */
 	@Override
 	public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate) {
-
 		if (!container.hasTagCompound()) {
 			container.setTagCompound(new NBTTagCompound());
 		}
@@ -80,7 +69,6 @@ public class ItemEnergyContainer extends Item implements IEnergyContainerItem {
 
 	@Override
 	public int extractEnergy(ItemStack container, int maxExtract, boolean simulate) {
-
 		if (container.getTagCompound() == null || !container.getTagCompound().hasKey("Energy")) {
 			return 0;
 		}
@@ -96,7 +84,6 @@ public class ItemEnergyContainer extends Item implements IEnergyContainerItem {
 
 	@Override
 	public int getEnergyStored(ItemStack container) {
-
 		if (container.getTagCompound() == null || !container.getTagCompound().hasKey("Energy")) {
 			return 0;
 		}
@@ -105,8 +92,6 @@ public class ItemEnergyContainer extends Item implements IEnergyContainerItem {
 
 	@Override
 	public int getMaxEnergyStored(ItemStack container) {
-
 		return capacity;
 	}
-
 }

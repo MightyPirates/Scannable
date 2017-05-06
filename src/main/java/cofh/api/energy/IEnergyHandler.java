@@ -12,15 +12,7 @@ import net.minecraft.util.EnumFacing;
  * @author King Lemming
  */
 public interface IEnergyHandler extends IEnergyConnection {
-
-	/**
-	 * Returns the amount of energy currently stored.
-	 */
 	int getEnergyStored(EnumFacing from);
 
-	/**
-	 * Returns the maximum amount of energy that can be stored.
-	 */
 	int getMaxEnergyStored(EnumFacing from);
-
 }
