@@ -1,17 +1,26 @@
 package li.cil.scannable.api.prefab;
 
+import com.google.common.base.Strings;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
+import li.cil.scannable.common.config.Constants;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
@@ -71,6 +80,71 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
         drawTexturedQuad(width, height, buffer);
 
         t.draw();
+    }
+
+    /**
+     * Renders an icon with a label that is only shown when looked at. This is
+     * what's used to render the entity labels for example.
+     *
+     * @param posX            the interpolated X position of the viewer.
+     * @param posY            the interpolated Y position of the viewer.
+     * @param posZ            the interpolated Z position of the viewer.
+     * @param yaw             the interpolated yaw of the viewer.
+     * @param pitch           the interpolated pitch of the viewer.
+     * @param lookVec         the look vector of the viewer.
+     * @param viewerEyes      the eye position of the viewer.
+     * @param displayDistance the distance to show in the label. Zero or negative to hide.
+     * @param resultPos       the interpolated position of the result.
+     * @param icon            the icon to display.
+     * @param label           the label text. May be null.
+     */
+    @SideOnly(Side.CLIENT)
+    protected static void renderIconLabel(final double posX, final double posY, final double posZ, final float yaw, final float pitch, final Vec3d lookVec, final Vec3d viewerEyes, final float displayDistance, final Vec3d resultPos, final ResourceLocation icon, @Nullable final String label) {
+        final Vec3d toResult = resultPos.subtract(viewerEyes);
+        final float distance = (float) toResult.lengthVector();
+        final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
+        final float sqLookDirDot = lookDirDot * lookDirDot;
+        final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
+        final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
+        final float scale = distance * focusScale * 0.005f;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(resultPos.xCoord, resultPos.yCoord, resultPos.zCoord);
+        GlStateManager.translate(-posX, -posY, -posZ);
+        GlStateManager.rotate(-yaw, 0, 1, 0);
+        GlStateManager.rotate(pitch, 1, 0, 0);
+        GlStateManager.scale(-scale, -scale, scale);
+
+        if (lookDirDot > 0.999f && !Strings.isNullOrEmpty(label)) {
+            final String text;
+            if (displayDistance > 0) {
+                text = I18n.format(Constants.GUI_OVERLAY_LABEL_DISTANCE, label, MathHelper.ceil(displayDistance));
+            } else {
+                text = label;
+            }
+
+            final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+            final int width = fontRenderer.getStringWidth(text) + 16;
+
+            GlStateManager.disableTexture2D();
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(width / 2, 0, 0);
+
+            GlStateManager.color(0, 0, 0, 0.6f);
+            renderQuad(width, fontRenderer.FONT_HEIGHT + 5);
+
+            GlStateManager.popMatrix();
+            GlStateManager.enableTexture2D();
+
+            fontRenderer.drawString(text, 12, -4, 0xFFFFFFFF, true);
+        }
+
+        Minecraft.getMinecraft().getTextureManager().bindTexture(icon);
+
+        GlStateManager.color(1, 1, 1, 1);
+        renderQuad(16, 16);
+
+        GlStateManager.popMatrix();
     }
 
     // --------------------------------------------------------------------- //

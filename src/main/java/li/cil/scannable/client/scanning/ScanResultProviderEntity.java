@@ -3,13 +3,9 @@ package li.cil.scannable.client.scanning;
 import li.cil.scannable.api.Icons;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
-import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -23,6 +19,7 @@ import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -112,74 +109,30 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
         final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
         final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        final float entityYaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
-        final float entityPitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
+        final float yaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
+        final float pitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
 
         final Vec3d lookVec = entity.getLook(partialTicks).normalize();
-        final Vec3d playerEyes = entity.getPositionEyes(partialTicks);
+        final Vec3d viewerEyes = entity.getPositionEyes(partialTicks);
 
-        final Minecraft mc = Minecraft.getMinecraft();
-        final EntityPlayer player = mc.player;
-        final FontRenderer fontRenderer = mc.fontRendererObj;
-        final int height = fontRenderer.FONT_HEIGHT + 5;
+        final boolean showDistance = entity.isSneaking();
 
         // Order results by distance to center of screen (deviation from look
         // vector) so that labels we're looking at are in front of others.
         results.sort(Comparator.comparing(result -> {
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
             final Vec3d entityEyes = resultEntity.entity.getPositionEyes(partialTicks);
-            final Vec3d toResult = entityEyes.subtract(playerEyes);
+            final Vec3d toResult = entityEyes.subtract(viewerEyes);
             return lookVec.dotProduct(toResult.normalize());
         }));
 
         for (final ScanResult result : results) {
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
-            final Vec3d entityEyes = resultEntity.entity.getPositionEyes(partialTicks);
-            final Vec3d toResult = entityEyes.subtract(playerEyes);
-            final float distance = (float) toResult.lengthVector();
-            final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
-            final float sqLookDirDot = lookDirDot * lookDirDot;
-            final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
-            final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
-            final float scale = distance * focusScale * 0.005f;
-
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(entityEyes.xCoord, entityEyes.yCoord, entityEyes.zCoord);
-            GlStateManager.translate(-posX, -posY, -posZ);
-            GlStateManager.rotate(-entityYaw, 0, 1, 0);
-            GlStateManager.rotate(entityPitch, 1, 0, 0);
-            GlStateManager.scale(-scale, -scale, scale);
-
-            if (lookDirDot > 0.999f) {
-                final String name = resultEntity.entity.getName();
-                final String text;
-                if (player.isSneaking()) {
-                    text = I18n.format(Constants.GUI_OVERLAY_ENTITY_DETAILS, name, MathHelper.ceil(distance));
-                } else {
-                    text = name;
-                }
-
-                final int width = fontRenderer.getStringWidth(text) + 16;
-
-                GlStateManager.disableTexture2D();
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(width / 2, 0, 0);
-
-                GlStateManager.color(0, 0, 0, 0.6f);
-                renderQuad(width, height);
-
-                GlStateManager.popMatrix();
-                GlStateManager.enableTexture2D();
-
-                fontRenderer.drawString(text, 12, -4, 0xFFFFFFFF, true);
-            }
-
-            Minecraft.getMinecraft().getTextureManager().bindTexture(isMonster(resultEntity.entity) ? Icons.WARNING : Icons.INFO);
-
-            GlStateManager.color(1, 1, 1, 1);
-            renderQuad(16, 16);
-
-            GlStateManager.popMatrix();
+            final String name = resultEntity.entity.getName();
+            final ResourceLocation icon = isMonster(resultEntity.entity) ? Icons.WARNING : Icons.INFO;
+            final Vec3d resultPos = resultEntity.entity.getPositionEyes(partialTicks);
+            final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).lengthVector() : 0f;
+            renderIconLabel(posX, posY, posZ, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
         }
 
         GlStateManager.disableBlend();
@@ -191,7 +144,10 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     @Override
     public void reset() {
         super.reset();
+        scanAnimal = scanMonster = false;
         entities = null;
+        entitiesPerTick = 0;
+        currentEntity = 0;
     }
 
     // --------------------------------------------------------------------- //
