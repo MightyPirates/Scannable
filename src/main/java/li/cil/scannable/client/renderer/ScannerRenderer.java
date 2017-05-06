@@ -164,7 +164,7 @@ public enum ScannerRenderer {
 
         if (ProxyOptiFine.INSTANCE.isShaderPackLoaded()) {
             mode = Mode.OPTIFINE;
-        } else if (mode == Mode.OPTIFINE) {
+        } else if (mode == Mode.OPTIFINE || mode == null) {
             mode = Settings.injectDepthTexture ? Mode.INJECT : Mode.RENDER;
         }
 
