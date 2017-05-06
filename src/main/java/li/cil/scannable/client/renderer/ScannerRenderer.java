@@ -105,6 +105,10 @@ public enum ScannerRenderer {
     }
 
     public void ping(final Vec3d pos) {
+        if (shaderProgram == 0) {
+            return;
+        }
+
         if (!OpenGlHelper.isFramebufferEnabled()) {
             return;
         }
