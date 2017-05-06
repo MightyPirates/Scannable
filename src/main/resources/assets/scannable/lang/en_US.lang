@@ -49,3 +49,4 @@ config.scannable.oresCommon=Ores: Common
 config.scannable.oresRare=Ores: Rare
 config.scannable.oreColors=Ore Colors
 config.scannable.structures=Structures
+config.scannable.injectDepthTexture=Inject Depth Texture

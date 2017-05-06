@@ -42,6 +42,7 @@ public final class Constants {
     public static final String CONFIG_ORES_COMMON = "config.scannable.oresCommon";
     public static final String CONFIG_ORES_RARE = "config.scannable.oresRare";
     public static final String CONFIG_STRUCTURES = "config.scannable.structures";
+    public static final String CONFIG_INJECT_DEPTH_TEXTURE = "config.scannable.injectDepthTexture";
 
     // --------------------------------------------------------------------- //
     // GUI labels
