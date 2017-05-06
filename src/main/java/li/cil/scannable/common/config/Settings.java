@@ -62,6 +62,12 @@ public final class Settings {
     @Config.RequiresWorldRestart
     public static int energyCostModuleBlock = 100;
 
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_STRUCTURE)
+    @Config.Comment("Amount of energy used by the structure module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleStructure = 150;
+
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
     @Config.Comment("The basic scan radius without range modules.\n" +
                     "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
@@ -166,6 +172,20 @@ public final class Settings {
             "oreInfusedEntropy=0x545476"
     };
 
+    @Config.LangKey(Constants.CONFIG_STRUCTURES)
+    @Config.Comment("The list of structures the structure module scans for.")
+    @Config.RequiresWorldRestart
+    public static String[] structures = {
+            "EndCity",
+            "Fortress",
+            "Mansion",
+            "Mineshaft",
+            "Monument",
+            "Stronghold",
+            "Temple",
+            "Village"
+    };
+
     // --------------------------------------------------------------------- //
 
     private static ServerSettings serverSettings;
@@ -223,6 +243,10 @@ public final class Settings {
         return serverSettings != null ? serverSettings.energyCostModuleBlock : energyCostModuleBlock;
     }
 
+    public static int getEnergyCostModuleStructure() {
+        return serverSettings != null ? serverSettings.energyCostModuleStructure : energyCostModuleStructure;
+    }
+
     public static int getBaseScanRadius() {
         return serverSettings != null ? serverSettings.baseScanRadius : baseScanRadius;
     }
@@ -245,6 +269,10 @@ public final class Settings {
 
     public static String[] getOreColors() {
         return oreColors;
+    }
+
+    public static String[] getStructures() {
+        return serverSettings != null ? serverSettings.structures : structures;
     }
 
     // --------------------------------------------------------------------- //

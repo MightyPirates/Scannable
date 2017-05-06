@@ -2,8 +2,12 @@ package li.cil.scannable.common.network;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.client.network.handler.MessageHandlerConfig;
+import li.cil.scannable.client.network.handler.MessageHandlerStructureResponse;
 import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.network.handler.MessageHandlerStructureRequest;
 import li.cil.scannable.common.network.message.MessageConfig;
+import li.cil.scannable.common.network.message.MessageStructureRequest;
+import li.cil.scannable.common.network.message.MessageStructureResponse;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -20,6 +24,8 @@ public enum Network {
 
     private enum Messages {
         Config,
+        StructureRequest,
+        StructureResponse,
     }
 
     // --------------------------------------------------------------------- //
@@ -28,6 +34,8 @@ public enum Network {
         wrapper = NetworkRegistry.INSTANCE.newSimpleChannel(API.MOD_ID);
 
         wrapper.registerMessage(MessageHandlerConfig.class, MessageConfig.class, Messages.Config.ordinal(), Side.CLIENT);
+        wrapper.registerMessage(MessageHandlerStructureRequest.class, MessageStructureRequest.class, Messages.StructureRequest.ordinal(), Side.SERVER);
+        wrapper.registerMessage(MessageHandlerStructureResponse.class, MessageStructureResponse.class, Messages.StructureResponse.ordinal(), Side.CLIENT);
 
         MinecraftForge.EVENT_BUS.register(this);
     }

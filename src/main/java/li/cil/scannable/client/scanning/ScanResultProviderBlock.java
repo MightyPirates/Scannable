@@ -267,6 +267,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     @Override
     public void reset() {
         super.reset();
+        scanCommon = scanRare = false;
+        scanState = null;
+        stateComparator.clear();
+        sqRadius = sqOreRadius = 0;
         x = y = z = 0;
         min = max = null;
         blocksPerTick = 0;

@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 public final class MessageHandlerConfig implements IMessageHandler<MessageConfig, IMessage> {
     @Nullable
     @Override
-    public IMessage onMessage(final MessageConfig message, final MessageContext ctx) {
+    public IMessage onMessage(final MessageConfig message, final MessageContext context) {
         Settings.setServerSettings(message.getSettings());
 
         return null;

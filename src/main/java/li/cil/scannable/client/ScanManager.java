@@ -192,6 +192,7 @@ public enum ScanManager {
         }
 
         final float radius = computeRadius(currentStart, computeScanGrowthDuration());
+        final float sqRadius = radius * radius;
 
         final Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = pendingResults.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -202,7 +203,7 @@ public enum ScanManager {
             while (results.size() > 0) {
                 final ScanResult result = results.get(results.size() - 1);
                 final Vec3d position = result.getPosition();
-                if (lastScanCenter.distanceTo(position) <= radius) {
+                if (lastScanCenter.squareDistanceTo(position) <= sqRadius) {
                     results.remove(results.size() - 1);
                     if (!provider.isValid(result)) {
                         continue;
@@ -253,9 +254,10 @@ public enum ScanManager {
                     }
                 }
 
-                entry.getKey().render(entity, renderingList, event.getPartialTicks());
-
-                renderingList.clear();
+                if (!renderingList.isEmpty()) {
+                    entry.getKey().render(entity, renderingList, event.getPartialTicks());
+                    renderingList.clear();
+                }
             }
         }
     }

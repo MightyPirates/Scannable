@@ -52,7 +52,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         return block.getStateFromMeta(blockMeta);
     }
 
-    public static void setBlockState(final ItemStack stack, final IBlockState state) {
+    private static void setBlockState(final ItemStack stack, final IBlockState state) {
         final NBTTagCompound nbt;
         if (!stack.hasTagCompound()) {
             stack.setTagCompound(nbt = new NBTTagCompound());
