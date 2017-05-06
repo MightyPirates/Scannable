@@ -123,7 +123,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
                 text = label;
             }
 
-            final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+            final FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
             final int width = fontRenderer.getStringWidth(text) + 16;
 
             GlStateManager.disableTexture2D();

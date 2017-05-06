@@ -21,7 +21,6 @@ public final class Constants {
     public static final String NAME_MODULE_ORE_COMMON = "module_ore_common";
     public static final String NAME_MODULE_ORE_RARE = "module_ore_rare";
     public static final String NAME_MODULE_BLOCK = "module_block";
-    public static final String NAME_MODULE_STRUCTURE = "module_structure";
 
     // --------------------------------------------------------------------- //
     // Config
@@ -34,14 +33,12 @@ public final class Constants {
     public static final String CONFIG_ENERGY_MODULE_ORE_COMMON = "config.scannable.energyCostModuleOreCommon";
     public static final String CONFIG_ENERGY_MODULE_ORE_RARE = "config.scannable.energyCostModuleOreRare";
     public static final String CONFIG_ENERGY_MODULE_BLOCK = "config.scannable.energyCostModuleBlock";
-    public static final String CONFIG_ENERGY_MODULE_STRUCTURE = "config.scannable.energyCostModuleStructure";
     public static final String CONFIG_BASE_SCAN_RADIUS = "config.scannable.baseScanRadius";
     public static final String CONFIG_BLOCK_BLACKLIST = "config.scannable.blockBlacklist";
     public static final String CONFIG_ORE_BLACKLIST = "config.scannable.oreBlacklist";
     public static final String CONFIG_ORE_COLORS = "config.scannable.oreColors";
     public static final String CONFIG_ORES_COMMON = "config.scannable.oresCommon";
     public static final String CONFIG_ORES_RARE = "config.scannable.oresRare";
-    public static final String CONFIG_STRUCTURES = "config.scannable.structures";
 
     // --------------------------------------------------------------------- //
     // GUI labels
@@ -72,9 +69,6 @@ public final class Constants {
     public static final String TOOLTIP_MODULE_ORE_RARE = "tooltip.scannable.module_ore_rare";
     public static final String TOOLTIP_MODULE_BLOCK = "tooltip.scannable.module_block";
     public static final String TOOLTIP_MODULE_BLOCK_NAME = "tooltip.scannable.module_block.name";
-    public static final String TOOLTIP_MODULE_STRUCTURE = "tooltip.scannable.module_structure";
-    public static final String TOOLTIP_MODULE_STRUCTURE_SHOW_EXPLORED = "tooltip.scannable.module_structure.show_explored";
-    public static final String TOOLTIP_MODULE_STRUCTURE_HIDE_EXPLORED = "tooltip.scannable.module_structure.hide_explored";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
@@ -102,6 +96,4 @@ public final class Constants {
     public static final float MODULE_ORE_RADIUS_MULTIPLIER = 0.25f;
     // By how much to scale the base scan range when scanning for specific blocks.
     public static final float MODULE_BLOCK_RADIUS_MULTIPLIER = 0.5f;
-    // By how much to scale the base scan range when scanning for structures.
-    public static final float MODULE_STRUCTURE_RADIUS_MULTIPLIER = 5.0f;
 }

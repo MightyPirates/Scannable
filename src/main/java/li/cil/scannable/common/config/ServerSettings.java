@@ -12,13 +12,11 @@ public final class ServerSettings {
     final int energyCostModuleOreCommon;
     final int energyCostModuleOreRare;
     final int energyCostModuleBlock;
-    final int energyCostModuleStructure;
     final int baseScanRadius;
     final String[] blockBlacklist;
     final String[] oresBlacklist;
     final String[] oresCommon;
     final String[] oresRare;
-    final String[] structures;
 
     public ServerSettings(final PacketBuffer packet) {
         useEnergy = packet.readBoolean();
@@ -29,13 +27,11 @@ public final class ServerSettings {
         energyCostModuleOreCommon = packet.readInt();
         energyCostModuleOreRare = packet.readInt();
         energyCostModuleBlock = packet.readInt();
-        energyCostModuleStructure = packet.readInt();
         baseScanRadius = packet.readInt();
         blockBlacklist = readStringArray(packet);
         oresBlacklist = readStringArray(packet);
         oresCommon = readStringArray(packet);
         oresRare = readStringArray(packet);
-        structures = readStringArray(packet);
     }
 
     public ServerSettings() {
@@ -47,13 +43,11 @@ public final class ServerSettings {
         energyCostModuleOreCommon = Settings.energyCostModuleOreCommon;
         energyCostModuleOreRare = Settings.energyCostModuleOreRare;
         energyCostModuleBlock = Settings.energyCostModuleBlock;
-        energyCostModuleStructure = Settings.energyCostModuleStructure;
         baseScanRadius = Settings.baseScanRadius;
         blockBlacklist = Settings.blockBlacklist;
         oresBlacklist = Settings.oreBlacklist;
         oresCommon = Settings.oresCommon;
         oresRare = Settings.oresRare;
-        structures = Settings.structures;
     }
 
     public void writeToBuffer(final PacketBuffer packet) {
@@ -65,13 +59,11 @@ public final class ServerSettings {
         packet.writeInt(energyCostModuleOreCommon);
         packet.writeInt(energyCostModuleOreRare);
         packet.writeInt(energyCostModuleBlock);
-        packet.writeInt(energyCostModuleStructure);
         packet.writeInt(baseScanRadius);
         writeStringArray(packet, blockBlacklist);
         writeStringArray(packet, oresBlacklist);
         writeStringArray(packet, oresCommon);
         writeStringArray(packet, oresRare);
-        writeStringArray(packet, structures);
     }
 
     // --------------------------------------------------------------------- //

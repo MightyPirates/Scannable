@@ -22,7 +22,6 @@ public final class Items {
     public static Item moduleOreCommon;
     public static Item moduleOreRare;
     public static Item moduleBlock;
-    public static Item moduleStructure;
 
     // --------------------------------------------------------------------- //
 
@@ -54,10 +53,6 @@ public final class Items {
         return isItem(stack, moduleBlock);
     }
 
-    public static boolean isModuleStructure(final ItemStack stack) {
-        return isItem(stack, moduleStructure);
-    }
-
     // --------------------------------------------------------------------- //
 
     public static void register(final ProxyCommon proxy) {
@@ -69,7 +64,6 @@ public final class Items {
         moduleOreCommon = proxy.registerItem(Constants.NAME_MODULE_ORE_COMMON, ItemScannerModuleBlockOreCommon::new);
         moduleOreRare = proxy.registerItem(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleBlockOreRare::new);
         moduleBlock = proxy.registerItem(Constants.NAME_MODULE_BLOCK, ItemScannerModuleBlockConfigurable::new);
-        moduleStructure = proxy.registerItem(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
     }
 
     public static void addRecipes() {
@@ -110,9 +104,6 @@ public final class Items {
         GameRegistry.addRecipe(new ShapelessOreRecipe(
                 new ItemStack(moduleBlock),
                 moduleBlank, Blocks.STONE));
-        GameRegistry.addRecipe(new ShapelessOreRecipe(
-                new ItemStack(moduleStructure),
-                moduleBlank, "gemEmerald"));
     }
 
     // --------------------------------------------------------------------- //
