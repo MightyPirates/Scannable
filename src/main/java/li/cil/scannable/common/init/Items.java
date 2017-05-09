@@ -2,7 +2,16 @@ package li.cil.scannable.common.init;
 
 import li.cil.scannable.common.ProxyCommon;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.*;
+import li.cil.scannable.common.item.ItemScanner;
+import li.cil.scannable.common.item.ItemScannerModuleAnimal;
+import li.cil.scannable.common.item.ItemScannerModuleBlank;
+import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
+import li.cil.scannable.common.item.ItemScannerModuleBlockFluid;
+import li.cil.scannable.common.item.ItemScannerModuleBlockOreCommon;
+import li.cil.scannable.common.item.ItemScannerModuleBlockOreRare;
+import li.cil.scannable.common.item.ItemScannerModuleMonster;
+import li.cil.scannable.common.item.ItemScannerModuleRange;
+import li.cil.scannable.common.item.ItemScannerModuleStructure;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,6 +29,7 @@ public final class Items {
     public static Item moduleOreRare;
     public static Item moduleBlock;
     public static Item moduleStructure;
+    public static Item moduleFluid;
 
     // --------------------------------------------------------------------- //
 
@@ -55,6 +65,10 @@ public final class Items {
         return isItem(stack, moduleStructure);
     }
 
+    public static boolean isModuleFluid(final ItemStack stack) {
+        return isItem(stack, moduleFluid);
+    }
+
     // --------------------------------------------------------------------- //
 
     public static void register(final ProxyCommon proxy) {
@@ -67,6 +81,7 @@ public final class Items {
         moduleOreRare = proxy.registerItem(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleBlockOreRare::new);
         moduleBlock = proxy.registerItem(Constants.NAME_MODULE_BLOCK, ItemScannerModuleBlockConfigurable::new);
         moduleStructure = proxy.registerItem(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
+        moduleFluid = proxy.registerItem(Constants.NAME_MODULE_FLUID, ItemScannerModuleBlockFluid::new);
     }
 
     public static void addRecipes() {
@@ -110,6 +125,9 @@ public final class Items {
         GameRegistry.addRecipe(new ShapelessOreRecipe(
                 new ItemStack(moduleStructure),
                 moduleBlank, "gemEmerald"));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleFluid),
+                moduleBlank, net.minecraft.init.Items.WATER_BUCKET));
     }
 
     // --------------------------------------------------------------------- //

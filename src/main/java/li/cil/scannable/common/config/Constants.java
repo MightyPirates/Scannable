@@ -22,6 +22,7 @@ public final class Constants {
     public static final String NAME_MODULE_ORE_RARE = "module_ore_rare";
     public static final String NAME_MODULE_BLOCK = "module_block";
     public static final String NAME_MODULE_STRUCTURE = "module_structure";
+    public static final String NAME_MODULE_FLUID = "module_fluid";
 
     // --------------------------------------------------------------------- //
     // Config
@@ -35,6 +36,7 @@ public final class Constants {
     public static final String CONFIG_ENERGY_MODULE_ORE_RARE = "config.scannable.energyCostModuleOreRare";
     public static final String CONFIG_ENERGY_MODULE_BLOCK = "config.scannable.energyCostModuleBlock";
     public static final String CONFIG_ENERGY_MODULE_STRUCTURE = "config.scannable.energyCostModuleStructure";
+    public static final String CONFIG_ENERGY_MODULE_FLUID = "config.scannable.energyCostModuleFluid";
     public static final String CONFIG_BASE_SCAN_RADIUS = "config.scannable.baseScanRadius";
     public static final String CONFIG_BLOCK_BLACKLIST = "config.scannable.blockBlacklist";
     public static final String CONFIG_ORE_BLACKLIST = "config.scannable.oreBlacklist";
@@ -43,6 +45,8 @@ public final class Constants {
     public static final String CONFIG_ORES_RARE = "config.scannable.oresRare";
     public static final String CONFIG_STRUCTURES = "config.scannable.structures";
     public static final String CONFIG_INJECT_DEPTH_TEXTURE = "config.scannable.injectDepthTexture";
+    public static final String CONFIG_FLUID_BLACKLIST = "config.scannable.fluidBlacklist";
+    public static final String CONFIG_FLUID_COLORS = "config.scannable.fluidColors";
 
     // --------------------------------------------------------------------- //
     // GUI labels
@@ -76,6 +80,7 @@ public final class Constants {
     public static final String TOOLTIP_MODULE_STRUCTURE = "tooltip.scannable.module_structure";
     public static final String TOOLTIP_MODULE_STRUCTURE_SHOW_EXPLORED = "tooltip.scannable.module_structure.show_explored";
     public static final String TOOLTIP_MODULE_STRUCTURE_HIDE_EXPLORED = "tooltip.scannable.module_structure.hide_explored";
+    public static final String TOOLTIP_MODULE_FLUID = "tooltip.scannable.module_fluid";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
