@@ -21,6 +21,7 @@ public final class Constants {
     public static final String NAME_MODULE_ORE_COMMON = "module_ore_common";
     public static final String NAME_MODULE_ORE_RARE = "module_ore_rare";
     public static final String NAME_MODULE_BLOCK = "module_block";
+    public static final String NAME_MODULE_FLUID = "module_fluid";
 
     // --------------------------------------------------------------------- //
     // Config
@@ -33,6 +34,7 @@ public final class Constants {
     public static final String CONFIG_ENERGY_MODULE_ORE_COMMON = "config.scannable.energyCostModuleOreCommon";
     public static final String CONFIG_ENERGY_MODULE_ORE_RARE = "config.scannable.energyCostModuleOreRare";
     public static final String CONFIG_ENERGY_MODULE_BLOCK = "config.scannable.energyCostModuleBlock";
+    public static final String CONFIG_ENERGY_MODULE_FLUID = "config.scannable.energyCostModuleFluid";
     public static final String CONFIG_BASE_SCAN_RADIUS = "config.scannable.baseScanRadius";
     public static final String CONFIG_BLOCK_BLACKLIST = "config.scannable.blockBlacklist";
     public static final String CONFIG_ORE_BLACKLIST = "config.scannable.oreBlacklist";
@@ -40,6 +42,8 @@ public final class Constants {
     public static final String CONFIG_ORES_COMMON = "config.scannable.oresCommon";
     public static final String CONFIG_ORES_RARE = "config.scannable.oresRare";
     public static final String CONFIG_INJECT_DEPTH_TEXTURE = "config.scannable.injectDepthTexture";
+    public static final String CONFIG_FLUID_BLACKLIST = "config.scannable.fluidBlacklist";
+    public static final String CONFIG_FLUID_COLORS = "config.scannable.fluidColors";
 
     // --------------------------------------------------------------------- //
     // GUI labels
@@ -70,6 +74,7 @@ public final class Constants {
     public static final String TOOLTIP_MODULE_ORE_RARE = "tooltip.scannable.module_ore_rare";
     public static final String TOOLTIP_MODULE_BLOCK = "tooltip.scannable.module_block";
     public static final String TOOLTIP_MODULE_BLOCK_NAME = "tooltip.scannable.module_block.name";
+    public static final String TOOLTIP_MODULE_FLUID = "tooltip.scannable.module_fluid";
 
     // --------------------------------------------------------------------- //
     // Scanner settings

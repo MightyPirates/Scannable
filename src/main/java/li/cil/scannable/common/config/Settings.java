@@ -54,6 +54,11 @@ public final class Settings {
     @Config.RangeInt(min = 0, max = 5000)
     public static int energyCostModuleBlock = 100;
 
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_FLUID)
+    @Config.Comment("Amount of energy used by the fluid module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    public static int energyCostModuleFluid = 50;
+
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
     @Config.Comment("The basic scan radius without range modules.\n" +
                     "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
@@ -153,6 +158,19 @@ public final class Settings {
             "oreInfusedEntropy=0x545476"
     };
 
+    @Config.LangKey(Constants.CONFIG_FLUID_BLACKLIST)
+    @Config.Comment("Fluid names of fluids that should be ignored.")
+    public static String[] fluidBlacklist = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_FLUID_COLORS)
+    @Config.Comment("The colors for fluids used when rendering their result bounding box.\n" +
+                    "See `oreColors` for format entries have to be in.")
+    public static String[] fluidColors = {
+            "water=0x4275DC",
+            "lava=0xE26723"
+    };
+
     @Config.LangKey(Constants.CONFIG_INJECT_DEPTH_TEXTURE)
     @Config.Comment("Whether to try to inject a depth texture into Minecraft's FBO when rendering the\n" +
                     "scan wave effect. This is much faster as it will not have to re-render the world\n" +
@@ -219,6 +237,10 @@ public final class Settings {
         return serverSettings != null ? serverSettings.energyCostModuleBlock : energyCostModuleBlock;
     }
 
+    public static int getEnergyCostModuleFluid() {
+        return serverSettings != null ? serverSettings.energyCostModuleFluid : energyCostModuleFluid;
+    }
+
     public static int getBaseScanRadius() {
         return serverSettings != null ? serverSettings.baseScanRadius : baseScanRadius;
     }
@@ -239,8 +261,8 @@ public final class Settings {
         return serverSettings != null ? serverSettings.oresRare : oresRare;
     }
 
-    public static String[] getOreColors() {
-        return oreColors;
+    public static String[] getFluidBlacklist() {
+        return serverSettings != null ? serverSettings.fluidBlacklist : fluidBlacklist;
     }
 
     // --------------------------------------------------------------------- //

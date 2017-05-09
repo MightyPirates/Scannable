@@ -1,6 +1,8 @@
 package li.cil.scannable.client.scanning;
 
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
@@ -25,6 +27,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -32,7 +36,16 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,10 +59,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private static final float BASE_ALPHA = 0.25f;
     private static final float STATE_SCANNED_ALPHA = 0.7f;
 
-    private final Map<IBlockState, ItemStack> oresCommon = new HashMap<>();
-    private final Map<IBlockState, ItemStack> oresRare = new HashMap<>();
-    private final TObjectIntMap<IBlockState> oreColors = new TObjectIntHashMap<>();
-    private boolean scanCommon, scanRare;
+    private final TIntIntMap blockColors = new TIntIntHashMap();
+    private final BitSet oresCommon = new BitSet();
+    private final BitSet oresRare = new BitSet();
+    private final BitSet fluids = new BitSet();
+    private boolean scanCommon, scanRare, scanFluids;
     @Nullable
     private IBlockState scanState;
     private final List<IProperty> stateComparator = new ArrayList<>();
@@ -58,6 +72,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private BlockPos min, max;
     private int blocksPerTick;
     private Map<BlockPos, ScanResultOre> resultClusters = new HashMap<>();
+    private List<ScanResultOre> nonCulledResults = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
 
@@ -66,9 +81,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     @SideOnly(Side.CLIENT)
     public void rebuildOreCache() {
-        oreColors.clear();
+        blockColors.clear();
         oresCommon.clear();
         oresRare.clear();
+        fluids.clear();
 
         buildOreCache();
     }
@@ -87,6 +103,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         if (Items.isModuleBlock(module)) {
             return Settings.getEnergyCostModuleBlock();
         }
+        if (Items.isModuleFluid(module)) {
+            return Settings.getEnergyCostModuleFluid();
+        }
 
         throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
     }
@@ -98,11 +117,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         scanCommon = false;
         scanRare = false;
+        scanFluids = false;
         scanState = null;
         stateComparator.clear();
         for (final ItemStack module : modules) {
             scanCommon |= Items.isModuleOreCommon(module);
             scanRare |= Items.isModuleOreRare(module);
+            scanFluids |= Items.isModuleFluid(module);
             if (Items.isModuleBlock(module)) {
                 scanState = ItemScannerModuleBlockConfigurable.getBlockState(module);
                 if (scanState != null) {
@@ -151,16 +172,17 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 continue;
             }
 
+            final int stateId = Block.getStateId(state);
             if (scanState != null) {
-                if (stateMatches(state) && !tryAddToCluster(pos, state)) {
-                    final ScanResultOre result = new ScanResultOre(state, pos, STATE_SCANNED_ALPHA);
+                if (stateMatches(state) && !tryAddToCluster(pos, stateId)) {
+                    final ScanResultOre result = new ScanResultOre(stateId, pos, STATE_SCANNED_ALPHA);
                     callback.accept(result);
                     resultClusters.put(pos, result);
                     continue;
                 }
             }
 
-            if (!scanCommon && !scanRare) {
+            if (!scanCommon && !scanRare && !scanFluids) {
                 continue;
             }
 
@@ -168,9 +190,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 continue;
             }
 
-            final boolean matches = (scanCommon && oresCommon.containsKey(state)) || (scanRare && oresRare.containsKey(state));
-            if (matches && !tryAddToCluster(pos, state)) {
-                final ScanResultOre result = new ScanResultOre(state, pos);
+            final boolean matches = (scanCommon && oresCommon.get(stateId)) || (scanRare && oresRare.get(stateId)) || (scanFluids && fluids.get(stateId));
+            if (matches && !tryAddToCluster(pos, stateId)) {
+                final ScanResultOre result = new ScanResultOre(stateId, pos);
                 callback.accept(result);
                 resultClusters.put(pos, result);
             }
@@ -211,7 +233,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
 
         final Vec3d lookVec = entity.getLook(partialTicks).normalize();
-        final Vec3d playerEyes = entity.getPositionEyes(partialTicks);
+        final Vec3d viewerEyes = entity.getPositionEyes(partialTicks);
 
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
@@ -230,15 +252,21 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final float colorNormalizer = 1 / 255f;
         for (final ScanResult result : results) {
             final ScanResultOre resultOre = (ScanResultOre) result;
-            final Vec3d toResult = resultOre.getPosition().subtract(playerEyes);
+
+            if (resultOre.bounds.isVecInside(viewerEyes)) {
+                nonCulledResults.add(resultOre);
+                continue;
+            }
+
+            final Vec3d toResult = resultOre.getPosition().subtract(viewerEyes);
             final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
             final float sqLookDirDot = lookDirDot * lookDirDot;
             final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
             final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
 
             final int color;
-            if (oreColors.containsKey(resultOre.state)) {
-                color = oreColors.get(resultOre.state);
+            if (blockColors.containsKey(resultOre.stateId)) {
+                color = blockColors.get(resultOre.stateId);
             } else {
                 color = DEFAULT_COLOR;
             }
@@ -255,6 +283,42 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         tessellator.draw();
 
+        if (!nonCulledResults.isEmpty()) {
+            GlStateManager.disableCull();
+
+            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+
+            for (final ScanResultOre resultOre : nonCulledResults) {
+                final Vec3d toResult = resultOre.getPosition().subtract(viewerEyes);
+                final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
+                final float sqLookDirDot = lookDirDot * lookDirDot;
+                final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
+                final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
+
+                final int color;
+                if (blockColors.containsKey(resultOre.stateId)) {
+                    color = blockColors.get(resultOre.stateId);
+                } else {
+                    color = DEFAULT_COLOR;
+                }
+
+                final float r = ((color >> 16) & 0xFF) * colorNormalizer;
+                final float g = ((color >> 8) & 0xFF) * colorNormalizer;
+                final float b = (color & 0xFF) * colorNormalizer;
+                final float a = Math.max(BASE_ALPHA, resultOre.getAlphaOverride()) * focusScale;
+
+                drawCube(resultOre.bounds.minX, resultOre.bounds.minY, resultOre.bounds.minZ,
+                         resultOre.bounds.maxX, resultOre.bounds.maxY, resultOre.bounds.maxZ,
+                         r, g, b, a, buffer);
+            }
+
+            tessellator.draw();
+
+            GlStateManager.enableCull();
+        }
+
+        nonCulledResults.clear();
+
         GlStateManager.popMatrix();
 
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -268,7 +332,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     @Override
     public void reset() {
         super.reset();
-        scanCommon = scanRare = false;
+        scanCommon = scanRare = scanFluids = false;
         scanState = null;
         stateComparator.clear();
         sqRadius = sqOreRadius = 0;
@@ -301,9 +365,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     }
 
     @SideOnly(Side.CLIENT)
-    private boolean tryAddToCluster(final BlockPos pos, final IBlockState state) {
-        final BlockPos min = pos.add(-2, -2, -2);
-        final BlockPos max = pos.add(2, 2, 2);
+    private boolean tryAddToCluster(final BlockPos pos, final int stateId) {
+        final BlockPos min = pos.add(-1, -1, -1);
+        final BlockPos max = pos.add(1, 1, 1);
 
         ScanResultOre root = null;
         for (int y = min.getY(); y <= max.getY(); y++) {
@@ -314,7 +378,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     if (cluster == null) {
                         continue;
                     }
-                    if (!Objects.equals(state, cluster.state)) {
+                    if (stateId != cluster.stateId) {
                         continue;
                     }
 
@@ -356,15 +420,18 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         final long start = System.currentTimeMillis();
 
-        final TObjectIntMap<String> oreColorsByOreName = buildOreColorTable();
+        final TObjectIntMap<String> oreColorsByOreName = buildColorTable(Settings.oreColors);
+        final TObjectIntMap<String> fluidColorsByFluidName = buildColorTable(Settings.fluidColors);
 
         final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.getOreBlacklist()));
         final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.getCommonOres()));
         final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.getRareOres()));
+        final Set<String> fluidBlacklist = new HashSet<>(Arrays.asList(Settings.getFluidBlacklist()));
 
         final Pattern pattern = Pattern.compile("^ore[A-Z].*$");
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
             for (final IBlockState state : block.getBlockState().getValidStates()) {
+                final int stateId = Block.getStateId(state);
                 final ItemStack stack = new ItemStack(block, 1, block.damageDropped(state));
                 if (!ItemStackUtils.isEmpty(stack)) {
                     final int[] ids = OreDictionary.getOreIDs(stack);
@@ -387,60 +454,84 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         }
 
                         if (oreColorsByOreName.containsKey(name)) {
-                            oreColors.put(state, oreColorsByOreName.get(name));
+                            blockColors.put(stateId, oreColorsByOreName.get(name));
                         }
                     }
 
                     if (isCommon) {
-                        oresCommon.put(state, stack);
+                        oresCommon.set(stateId);
                     } else if (isRare) {
-                        oresRare.put(state, stack);
+                        oresRare.set(stateId);
                     }
                 }
             }
+        }
+
+        for (final Map.Entry<String, Fluid> entry : FluidRegistry.getRegisteredFluids().entrySet()) {
+            final String fluidName = entry.getKey();
+            if (fluidBlacklist.contains(fluidName)) {
+                continue;
+            }
+
+            final Fluid fluid = entry.getValue();
+            final Block block = fluid.getBlock();
+            if (block == null) {
+                continue;
+            }
+
+            final IBlockState state = block.getDefaultState();
+            final int stateId = Block.getStateId(state);
+
+            if (fluidColorsByFluidName.containsKey(fluidName)) {
+                blockColors.put(stateId, fluidColorsByFluidName.get(fluidName));
+            } else {
+                blockColors.put(stateId, fluid.getColor());
+            }
+
+            fluids.set(stateId);
         }
 
         Scannable.getLog().info("Built    block state lookup table in {} ms.", System.currentTimeMillis() - start);
     }
 
     @SideOnly(Side.CLIENT)
-    private static TObjectIntMap<String> buildOreColorTable() {
-        final TObjectIntMap<String> oreColorsByOreName = new TObjectIntHashMap<>();
+    private static TObjectIntMap<String> buildColorTable(final String[] colorConfigs) {
+        final TObjectIntMap<String> colors = new TObjectIntHashMap<>();
 
         final Pattern pattern = Pattern.compile("^(?<name>[^\\s=]+)\\s*=\\s*0x(?<color>[a-fA-F0-9]+)$");
-        for (final String oreColor : Settings.getOreColors()) {
-            final Matcher matcher = pattern.matcher(oreColor.trim());
+        for (final String colorConfig : colorConfigs) {
+            final Matcher matcher = pattern.matcher(colorConfig.trim());
             if (!matcher.matches()) {
-                Scannable.getLog().warn("Illegal ore color entry in settings: '{}'", oreColor.trim());
+                Scannable.getLog().warn("Illegal color entry in settings: '{}'", colorConfig.trim());
                 continue;
             }
 
             final String name = matcher.group("name");
             final int color = Integer.parseInt(matcher.group("color"), 16);
 
-            oreColorsByOreName.put(name, color);
+            colors.put(name, color);
         }
 
-        return oreColorsByOreName;
+        return colors;
     }
 
     // --------------------------------------------------------------------- //
 
     private class ScanResultOre implements ScanResult {
-        private final IBlockState state;
+        private final int stateId;
         private AxisAlignedBB bounds;
         @Nullable
         private ScanResultOre parent;
         private float alphaOverride;
 
-        ScanResultOre(final IBlockState state, final BlockPos pos, final float alphaOverride) {
+        ScanResultOre(final int stateId, final BlockPos pos, final float alphaOverride) {
             bounds = new AxisAlignedBB(pos);
-            this.state = state;
+            this.stateId = stateId;
             this.alphaOverride = alphaOverride;
         }
 
-        ScanResultOre(final IBlockState state, final BlockPos pos) {
-            this(state, pos, 0f);
+        ScanResultOre(final int stateId, final BlockPos pos) {
+            this(stateId, pos, 0f);
         }
 
         float getAlphaOverride() {
