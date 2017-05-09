@@ -111,20 +111,20 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             if (!moveNext()) {
                 return;
             }
-        }
 
-        world.getChunkFromChunkCoords(x, z).getEntitiesOfTypeWithinAAAB(EntityLiving.class, bounds, entities, this::FilterEntities);
-        for (final EntityLivingBase entity : entities) {
-            if (entity.isDead) {
-                continue;
-            }
+            world.getChunkFromChunkCoords(x, z).getEntitiesOfTypeWithinAAAB(EntityLiving.class, bounds, entities, this::FilterEntities);
+            for (final EntityLivingBase entity : entities) {
+                if (entity.isDead) {
+                    continue;
+                }
 
-            final Vec3d position = entity.getPositionVector();
-            if (center.distanceTo(position) < radius) {
-                callback.accept(new ScanResultEntity(entity));
+                final Vec3d position = entity.getPositionVector();
+                if (center.distanceTo(position) < radius) {
+                    callback.accept(new ScanResultEntity(entity));
+                }
             }
+            entities.clear();
         }
-        entities.clear();
     }
 
     @SideOnly(Side.CLIENT)
