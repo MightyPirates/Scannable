@@ -59,6 +59,12 @@ public final class Settings {
     @Config.RangeInt(min = 0, max = 5000)
     public static int energyCostModuleFluid = 50;
 
+    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ENTITY)
+    @Config.Comment("Amount of energy used by the entity module per scan.")
+    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RequiresWorldRestart
+    public static int energyCostModuleEntity = 75;
+
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
     @Config.Comment("The basic scan radius without range modules.\n" +
                     "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
@@ -239,6 +245,10 @@ public final class Settings {
 
     public static int getEnergyCostModuleFluid() {
         return serverSettings != null ? serverSettings.energyCostModuleFluid : energyCostModuleFluid;
+    }
+
+    public static int getEnergyCostModuleEntity() {
+        return serverSettings != null ? serverSettings.energyCostModuleEntity : energyCostModuleEntity;
     }
 
     public static int getBaseScanRadius() {

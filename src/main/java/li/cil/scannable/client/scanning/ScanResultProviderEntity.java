@@ -5,8 +5,10 @@ import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.common.item.ItemScannerModuleEntity;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragon;
@@ -23,12 +25,15 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class ScanResultProviderEntity extends AbstractScanResultProvider {
@@ -38,9 +43,12 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
     private boolean scanAnimal;
     private boolean scanMonster;
-    private List<EntityLivingBase> entities;
-    private int entitiesPerTick;
-    private int currentEntity;
+    private String scanEntity;
+    private AxisAlignedBB bounds;
+    private int minX, maxX, minZ, maxZ;
+    private int chunksPerTick;
+    private int x, z;
+    private final List<EntityLivingBase> entities = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
 
@@ -58,6 +66,9 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         if (Items.isModuleMonster(module)) {
             return Settings.getEnergyCostModuleMonster();
         }
+        if (Items.isModuleEntity(module)) {
+            return Settings.getEnergyCostModuleEntity();
+        }
 
         throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
     }
@@ -69,25 +80,41 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
         scanAnimal = false;
         scanMonster = false;
+        scanEntity = null;
         for (final ItemStack module : modules) {
             scanAnimal |= Items.isModuleAnimal(module);
             scanMonster |= Items.isModuleMonster(module);
+            if (Items.isModuleEntity(module)) {
+                scanEntity = ItemScannerModuleEntity.getEntity(module);
+            }
         }
 
-        // TODO Spread this query over multiple ticks (reimplement inner loop).
-        final AxisAlignedBB bounds = new AxisAlignedBB(center.xCoord - radius, center.yCoord - radius, center.zCoord - radius,
-                                                       center.xCoord + radius, center.yCoord + radius, center.zCoord + radius);
-        entities = player.getEntityWorld().getEntitiesWithinAABB(EntityLiving.class, bounds, this::FilterEntities);
-        entitiesPerTick = MathHelper.ceil(entities.size() / (float) scanTicks);
-        currentEntity = 0;
+        bounds = new AxisAlignedBB(center.xCoord - radius, center.yCoord - radius, center.zCoord - radius,
+                                   center.xCoord + radius, center.yCoord + radius, center.zCoord + radius);
+
+        minX = MathHelper.floor((bounds.minX - World.MAX_ENTITY_RADIUS) / 16f);
+        maxX = MathHelper.ceil((bounds.maxX + World.MAX_ENTITY_RADIUS) / 16f);
+        minZ = MathHelper.floor((bounds.minZ - World.MAX_ENTITY_RADIUS) / 16f);
+        maxZ = MathHelper.ceil((bounds.maxZ + World.MAX_ENTITY_RADIUS) / 16f);
+        x = minX - 1; // -1 for initial moveNext.
+        z = minZ;
+
+        final int count = (maxX - minX + 1) * (maxZ - minZ + 1);
+        chunksPerTick = MathHelper.ceil(count / (float) scanTicks);
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public void computeScanResults(final Consumer<ScanResult> callback) {
-        final int end = Math.min(entities.size(), currentEntity + entitiesPerTick);
-        for (; currentEntity < end; currentEntity++) {
-            final Entity entity = entities.get(currentEntity);
+        final World world = player.getEntityWorld();
+        for (int i = 0; i < chunksPerTick; i++) {
+            if (!moveNext()) {
+                return;
+            }
+        }
+
+        world.getChunkFromChunkCoords(x, z).getEntitiesOfTypeWithinAAAB(EntityLiving.class, bounds, entities, this::FilterEntities);
+        for (final EntityLivingBase entity : entities) {
             if (entity.isDead) {
                 continue;
             }
@@ -97,6 +124,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
                 callback.accept(new ScanResultEntity(entity));
             }
         }
+        entities.clear();
     }
 
     @SideOnly(Side.CLIENT)
@@ -145,14 +173,34 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     public void reset() {
         super.reset();
         scanAnimal = scanMonster = false;
-        entities = null;
-        entitiesPerTick = 0;
-        currentEntity = 0;
+        bounds = null;
+        minX = maxX = minZ = maxZ = 0;
+        chunksPerTick = 0;
+        x = z = 0;
+        entities.clear();
     }
 
     // --------------------------------------------------------------------- //
 
+    @SideOnly(Side.CLIENT)
+    private boolean moveNext() {
+        x++;
+        if (x > maxX) {
+            x = minX;
+            z++;
+            if (z > maxZ) {
+                chunksPerTick = 0;
+                return false;
+            }
+        }
+        return true;
+    }
+
     private <T extends Entity> boolean FilterEntities(final T entity) {
+        if (scanEntity != null && Objects.equals(scanEntity, EntityList.getEntityString(entity))) {
+            return true;
+        }
+
         if (scanAnimal && isAnimal(entity)) {
             return true;
         }
