@@ -170,10 +170,10 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
 
     @SideOnly(Side.CLIENT)
     protected static void drawCube(final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ, final float r, final float g, final float b, final float a, final VertexBuffer buffer) {
-        drawPlaneNegX(minX, minY, maxY, minZ, maxZ, r, g, b, a, buffer);
-        drawPlanePosX(maxX, minY, maxY, minZ, maxZ, r, g, b, a, buffer);
-        drawPlaneNegY(minY, minX, maxX, minZ, maxZ, r, g, b, a, buffer);
-        drawPlanePosY(maxY, minX, maxX, minZ, maxZ, r, g, b, a, buffer);
+        drawPlaneNegX(minX, minY, maxY, minZ, maxZ, r, g, b, a * 0.9f, buffer);
+        drawPlanePosX(maxX, minY, maxY, minZ, maxZ, r, g, b, a * 0.9f, buffer);
+        drawPlaneNegY(minY, minX, maxX, minZ, maxZ, r, g, b, a * 0.8f, buffer);
+        drawPlanePosY(maxY, minX, maxX, minZ, maxZ, r, g, b, a * 1.1f, buffer);
         drawPlaneNegZ(minZ, minX, maxX, minY, maxY, r, g, b, a, buffer);
         drawPlanePosZ(maxZ, minX, maxX, minY, maxY, r, g, b, a, buffer);
     }

@@ -71,6 +71,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private BlockPos min, max;
     private int blocksPerTick;
     private Map<BlockPos, ScanResultOre> resultClusters = new HashMap<>();
+    private List<ScanResultOre> nonCulledResults = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
 
@@ -231,7 +232,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
 
         final Vec3d lookVec = entity.getLook(partialTicks).normalize();
-        final Vec3d playerEyes = entity.getPositionEyes(partialTicks);
+        final Vec3d viewerEyes = entity.getPositionEyes(partialTicks);
 
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
@@ -250,7 +251,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final float colorNormalizer = 1 / 255f;
         for (final ScanResult result : results) {
             final ScanResultOre resultOre = (ScanResultOre) result;
-            final Vec3d toResult = resultOre.getPosition().subtract(playerEyes);
+
+            if (resultOre.bounds.isVecInside(viewerEyes)) {
+                nonCulledResults.add(resultOre);
+                continue;
+            }
+
+            final Vec3d toResult = resultOre.getPosition().subtract(viewerEyes);
             final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
             final float sqLookDirDot = lookDirDot * lookDirDot;
             final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
@@ -274,6 +281,42 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         tessellator.draw();
+
+        if (!nonCulledResults.isEmpty()) {
+            GlStateManager.disableCull();
+
+            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+
+            for (final ScanResultOre resultOre : nonCulledResults) {
+                final Vec3d toResult = resultOre.getPosition().subtract(viewerEyes);
+                final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
+                final float sqLookDirDot = lookDirDot * lookDirDot;
+                final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
+                final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
+
+                final int color;
+                if (blockColors.containsKey(resultOre.stateId)) {
+                    color = blockColors.get(resultOre.stateId);
+                } else {
+                    color = DEFAULT_COLOR;
+                }
+
+                final float r = ((color >> 16) & 0xFF) * colorNormalizer;
+                final float g = ((color >> 8) & 0xFF) * colorNormalizer;
+                final float b = (color & 0xFF) * colorNormalizer;
+                final float a = Math.max(BASE_ALPHA, resultOre.getAlphaOverride()) * focusScale;
+
+                drawCube(resultOre.bounds.minX, resultOre.bounds.minY, resultOre.bounds.minZ,
+                         resultOre.bounds.maxX, resultOre.bounds.maxY, resultOre.bounds.maxZ,
+                         r, g, b, a, buffer);
+            }
+
+            tessellator.draw();
+
+            GlStateManager.enableCull();
+        }
+
+        nonCulledResults.clear();
 
         GlStateManager.popMatrix();
 
@@ -322,8 +365,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     @SideOnly(Side.CLIENT)
     private boolean tryAddToCluster(final BlockPos pos, final int stateId) {
-        final BlockPos min = pos.add(-2, -2, -2);
-        final BlockPos max = pos.add(2, 2, 2);
+        final BlockPos min = pos.add(-1, -1, -1);
+        final BlockPos max = pos.add(1, 1, 1);
 
         ScanResultOre root = null;
         for (int y = min.getY(); y <= max.getY(); y++) {
