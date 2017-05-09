@@ -62,7 +62,6 @@ public final class Settings {
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ENTITY)
     @Config.Comment("Amount of energy used by the entity module per scan.")
     @Config.RangeInt(min = 0, max = 5000)
-    @Config.RequiresWorldRestart
     public static int energyCostModuleEntity = 75;
 
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
