@@ -67,9 +67,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private IBlockState scanState;
     private final List<IProperty> stateComparator = new ArrayList<>();
     private float sqRadius, sqOreRadius;
-    private int x, y, z;
     private BlockPos min, max;
     private int blocksPerTick;
+    private int x, y, z;
     private Map<BlockPos, ScanResultOre> resultClusters = new HashMap<>();
     private List<ScanResultOre> nonCulledResults = new ArrayList<>();
 
@@ -335,9 +335,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         scanState = null;
         stateComparator.clear();
         sqRadius = sqOreRadius = 0;
-        x = y = z = 0;
         min = max = null;
         blocksPerTick = 0;
+        x = y = z = 0;
         resultClusters.clear();
     }
 

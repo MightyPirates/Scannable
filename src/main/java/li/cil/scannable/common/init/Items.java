@@ -9,6 +9,7 @@ import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
 import li.cil.scannable.common.item.ItemScannerModuleBlockFluid;
 import li.cil.scannable.common.item.ItemScannerModuleBlockOreCommon;
 import li.cil.scannable.common.item.ItemScannerModuleBlockOreRare;
+import li.cil.scannable.common.item.ItemScannerModuleEntity;
 import li.cil.scannable.common.item.ItemScannerModuleMonster;
 import li.cil.scannable.common.item.ItemScannerModuleRange;
 import li.cil.scannable.common.item.ItemScannerModuleStructure;
@@ -30,6 +31,7 @@ public final class Items {
     public static Item moduleBlock;
     public static Item moduleStructure;
     public static Item moduleFluid;
+    public static Item moduleEntity;
 
     // --------------------------------------------------------------------- //
 
@@ -69,6 +71,10 @@ public final class Items {
         return isItem(stack, moduleFluid);
     }
 
+    public static boolean isModuleEntity(final ItemStack stack) {
+        return isItem(stack, moduleEntity);
+    }
+
     // --------------------------------------------------------------------- //
 
     public static void register(final ProxyCommon proxy) {
@@ -82,6 +88,7 @@ public final class Items {
         moduleBlock = proxy.registerItem(Constants.NAME_MODULE_BLOCK, ItemScannerModuleBlockConfigurable::new);
         moduleStructure = proxy.registerItem(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
         moduleFluid = proxy.registerItem(Constants.NAME_MODULE_FLUID, ItemScannerModuleBlockFluid::new);
+        moduleEntity = proxy.registerItem(Constants.NAME_MODULE_ENTITY, ItemScannerModuleEntity::new);
     }
 
     public static void addRecipes() {
@@ -128,6 +135,9 @@ public final class Items {
         GameRegistry.addRecipe(new ShapelessOreRecipe(
                 new ItemStack(moduleFluid),
                 moduleBlank, net.minecraft.init.Items.WATER_BUCKET));
+        GameRegistry.addRecipe(new ShapelessOreRecipe(
+                new ItemStack(moduleEntity),
+                moduleBlank, net.minecraft.init.Items.LEAD));
     }
 
     // --------------------------------------------------------------------- //
