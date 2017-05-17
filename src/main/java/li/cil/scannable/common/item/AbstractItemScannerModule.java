@@ -2,6 +2,7 @@ package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -22,7 +23,7 @@ public abstract class AbstractItemScannerModule extends Item {
             return;
         }
 
-        if (stack.isEmpty()) {
+        if (ItemStackUtils.isEmpty(stack)) {
             return;
         }
 
