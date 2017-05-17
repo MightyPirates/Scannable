@@ -22,6 +22,10 @@ public abstract class AbstractItemScannerModule extends Item {
             return;
         }
 
+        if (stack.isEmpty()) {
+            return;
+        }
+
         final int cost = ItemScanner.getModuleEnergyCost(player, stack);
         if (cost <= 0) {
             return;
