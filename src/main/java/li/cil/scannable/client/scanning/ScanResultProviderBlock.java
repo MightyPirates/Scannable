@@ -210,6 +210,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         for (final IProperty property : stateComparator) {
+            if (!state.getPropertyKeys().contains(property)) {
+                continue;
+            }
             if (!Objects.equals(state.getValue(property), scanState.getValue(property))) {
                 return false;
             }
