@@ -9,6 +9,7 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.gui.GuiId;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.common.inventory.ItemHandlerScanner;
 import li.cil.scannable.util.SoundManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -235,10 +236,11 @@ public final class ItemScanner extends Item {
 
     private static boolean collectModules(final ItemStack stack, final List<ItemStack> modules) {
         boolean hasProvider = false;
-        final IItemHandler scannerInventory = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        assert scannerInventory != null;
-        for (int slot = 0; slot < scannerInventory.getSlots(); slot++) {
-            final ItemStack module = scannerInventory.getStackInSlot(slot);
+        final IItemHandler itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        assert itemHandler instanceof ItemHandlerScanner;
+        final IItemHandler activeModules = ((ItemHandlerScanner) itemHandler).getActiveModules();
+        for (int slot = 0; slot < activeModules.getSlots(); slot++) {
+            final ItemStack module = activeModules.getStackInSlot(slot);
             if (module.isEmpty()) {
                 continue;
             }

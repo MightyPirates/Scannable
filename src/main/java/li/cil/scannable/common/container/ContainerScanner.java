@@ -1,12 +1,14 @@
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.common.inventory.ItemHandlerScanner;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -21,20 +23,26 @@ public final class ContainerScanner extends Container {
         this.hand = hand;
 
         final IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        assert itemHandler != null;
+        assert itemHandler instanceof ItemHandlerScanner;
 
-        for (int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-            addSlotToContainer(new SlotItemHandler(itemHandler, slot, 62 + slot * 18, 20));
+        final IItemHandler activeModules = ((ItemHandlerScanner) itemHandler).getActiveModules();
+        for (int slot = 0; slot < activeModules.getSlots(); ++slot) {
+            addSlotToContainer(new SlotItemHandler(activeModules, slot, 62 + slot * 18, 20));
+        }
+
+        final IItemHandler storedModules = ((ItemHandlerScanner) itemHandler).getInactiveModules();
+        for (int slot = 0; slot < storedModules.getSlots(); ++slot) {
+            addSlotToContainer(new SlotItemHandler(storedModules, slot, 62 + slot * 18, 46));
         }
 
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                addSlotToContainer(new Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, row * 18 + 51));
+                addSlotToContainer(new Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, row * 18 + 77));
             }
         }
 
         for (int slot = 0; slot < 9; ++slot) {
-            addSlotToContainer(new Slot(player.inventory, slot, 8 + slot * 18, 109));
+            addSlotToContainer(new Slot(player.inventory, slot, 8 + slot * 18, 135));
         }
     }
 

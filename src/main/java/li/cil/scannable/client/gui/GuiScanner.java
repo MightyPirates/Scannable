@@ -24,17 +24,30 @@ public class GuiScanner extends GuiContainer {
     public GuiScanner(final ContainerScanner container) {
         super(container);
         this.container = container;
-        ySize = 133;
+        ySize = 159;
         allowUserInput = false;
     }
 
     // --------------------------------------------------------------------- //
 
     @Override
+    public void drawScreen(final int mouseX, final int mouseY, final float partialTicks) {
+        super.drawScreen(mouseX, mouseY, partialTicks);
+
+        if (isPointInRegion(8, 23, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES)), fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
+            drawHoveringText(I18n.format(Constants.GUI_SCANNER_MODULES_TOOLTIP), mouseX, mouseY);
+        }
+        if (isPointInRegion(8, 49, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE)), fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
+            drawHoveringText(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE_TOOLTIP), mouseX, mouseY);
+        }
+    }
+
+    @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        this.fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_TITLE), 8, 6, 0x404040);
-        this.fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_MODULES), 8, 23, 0x404040);
-        this.fontRenderer.drawString(container.getPlayer().inventory.getDisplayName().getUnformattedText(), 8, ySize - 96 + 2, 0x404040);
+        fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_TITLE), 8, 6, 0x404040);
+        fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_MODULES), 8, 23, 0x404040);
+        fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE), 8, 49, 0x404040);
+        fontRenderer.drawString(container.getPlayer().inventory.getDisplayName().getUnformattedText(), 8, 65, 0x404040);
     }
 
     @Override

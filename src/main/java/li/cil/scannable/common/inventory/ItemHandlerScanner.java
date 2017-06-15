@@ -5,9 +5,14 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.AbstractItemScannerModule;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.RangedWrapper;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ItemHandlerScanner extends ItemStackHandler {
     private static final String TAG_ITEMS = "items";
@@ -15,15 +20,31 @@ public final class ItemHandlerScanner extends ItemStackHandler {
     private final ItemStack container;
 
     public ItemHandlerScanner(final ItemStack container) {
-        super(Constants.SCANNER_MAX_MODULE_COUNT);
+        super(Constants.SCANNER_TOTAL_MODULE_COUNT);
         this.container = container;
     }
 
     public void updateFromNBT() {
         final NBTTagCompound nbt = container.getTagCompound();
-        if (nbt != null && nbt.hasKey(TAG_ITEMS, net.minecraftforge.common.util.Constants.NBT.TAG_COMPOUND)) {
+        if (nbt != null && nbt.hasKey(TAG_ITEMS, NBT.TAG_COMPOUND)) {
             deserializeNBT((NBTTagCompound) nbt.getTag(TAG_ITEMS));
+            if (stacks.size() != Constants.SCANNER_TOTAL_MODULE_COUNT) {
+                final List<ItemStack> oldStacks = new ArrayList<>(stacks);
+                setSize(Constants.SCANNER_TOTAL_MODULE_COUNT);
+                final int count = Math.min(Constants.SCANNER_TOTAL_MODULE_COUNT, oldStacks.size());
+                for (int slot = 0; slot < count; slot++) {
+                    stacks.set(slot, oldStacks.get(slot));
+                }
+            }
         }
+    }
+
+    public IItemHandler getActiveModules() {
+        return new RangedWrapper(this, 0, Constants.SCANNER_ACTIVE_MODULE_COUNT);
+    }
+
+    public IItemHandler getInactiveModules() {
+        return new RangedWrapper(this, Constants.SCANNER_ACTIVE_MODULE_COUNT, Constants.SCANNER_TOTAL_MODULE_COUNT);
     }
 
     // --------------------------------------------------------------------- //
