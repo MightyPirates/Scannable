@@ -5,9 +5,9 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -55,7 +55,7 @@ public enum OverlayRenderer {
         mc.getTextureManager().bindTexture(PROGRESS);
 
         final Tessellator tessellator = Tessellator.getInstance();
-        final VertexBuffer buffer = tessellator.getBuffer();
+        final BufferBuilder buffer = tessellator.getBuffer();
 
         buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX);
 

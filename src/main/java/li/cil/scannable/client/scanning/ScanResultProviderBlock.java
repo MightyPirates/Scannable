@@ -14,9 +14,9 @@ import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -248,7 +248,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         GlStateManager.translate(-posX, -posY, -posZ);
 
         final Tessellator tessellator = Tessellator.getInstance();
-        final VertexBuffer buffer = tessellator.getBuffer();
+        final BufferBuilder buffer = tessellator.getBuffer();
 
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
@@ -256,7 +256,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         for (final ScanResult result : results) {
             final ScanResultOre resultOre = (ScanResultOre) result;
 
-            if (resultOre.bounds.isVecInside(viewerEyes)) {
+            if (resultOre.bounds.contains(viewerEyes)) {
                 nonCulledResults.add(resultOre);
                 continue;
             }

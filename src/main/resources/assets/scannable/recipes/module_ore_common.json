@@ -1,0 +1,16 @@
+{
+  "type": "forge:ore_shapeless",
+  "group": "modules",
+  "ingredients": [
+    {
+      "item": "scannable:module_blank"
+    },
+    {
+      "item": "minecraft:coal",
+      "data": 0
+    }
+  ],
+  "result": {
+    "item": "scannable:module_ore_common"
+  }
+}

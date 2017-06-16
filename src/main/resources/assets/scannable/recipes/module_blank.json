@@ -1,0 +1,28 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "GGG",
+    "CRC",
+    "CNC"
+  ],
+  "key": {
+    "G": {
+      "type": "forge:ore_dict",
+      "ore": "dyeGreen"
+    },
+    "C": {
+      "item": "minecraft:clay_ball"
+    },
+    "R": {
+      "type": "forge:ore_dict",
+      "ore": "dustRedstone"
+    },
+    "N": {
+      "type": "forge:ore_dict",
+      "ore": "nuggetGold"
+    }
+  },
+  "result": {
+    "item": "scannable:module_blank"
+  }
+}

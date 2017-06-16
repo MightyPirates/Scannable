@@ -13,6 +13,7 @@ import li.cil.scannable.common.inventory.ItemHandlerScanner;
 import li.cil.scannable.util.SoundManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -53,22 +54,22 @@ public final class ItemScanner extends Item {
     }
 
     @Override
-    public void getSubItems(final Item item, final CreativeTabs tab, final NonNullList<ItemStack> subItems) {
-        super.getSubItems(item, tab, subItems);
+    public void getSubItems(final CreativeTabs tab, final NonNullList<ItemStack> items) {
+        super.getSubItems(tab, items);
 
-        final ItemStack stack = new ItemStack(item);
+        final ItemStack stack = new ItemStack(this);
         final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
         if (energyStorage == null) {
             return;
         }
 
         energyStorage.receiveEnergy(energyStorage.getMaxEnergyStored(), false);
-        subItems.add(stack);
+        items.add(stack);
     }
 
     @Override
-    public void addInformation(final ItemStack stack, final EntityPlayer playerIn, final List<String> tooltip, final boolean advanced) {
-        super.addInformation(stack, playerIn, tooltip, advanced);
+    public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip, final ITooltipFlag flag) {
+        super.addInformation(stack, world, tooltip, flag);
 
         tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER));
 

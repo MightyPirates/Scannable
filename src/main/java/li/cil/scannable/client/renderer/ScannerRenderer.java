@@ -6,10 +6,10 @@ import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.integration.optifine.ProxyOptiFine;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.IResource;
@@ -238,7 +238,7 @@ public enum ScannerRenderer {
         setupMatrices(width, height);
 
         final Tessellator tessellator = Tessellator.getInstance();
-        final VertexBuffer buffer = tessellator.getBuffer();
+        final BufferBuilder buffer = tessellator.getBuffer();
 
         // Use the normal to pass along the ray direction for each corner.
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_NORMAL);
@@ -444,9 +444,9 @@ public enum ScannerRenderer {
 
     private void setUniform(final int uniform, final Vec3d value) {
         float3Buffer.clear();
-        float3Buffer.put((float) value.xCoord);
-        float3Buffer.put((float) value.yCoord);
-        float3Buffer.put((float) value.zCoord);
+        float3Buffer.put((float) value.x);
+        float3Buffer.put((float) value.y);
+        float3Buffer.put((float) value.z);
         float3Buffer.rewind();
         OpenGlHelper.glUniform3(uniform, float3Buffer);
     }

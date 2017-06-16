@@ -1,0 +1,16 @@
+{
+  "type": "forge:ore_shapeless",
+  "group": "modules",
+  "ingredients": [
+    {
+      "item": "scannable:module_blank"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "stone"
+    }
+  ],
+  "result": {
+    "item": "scannable:module_block"
+  }
+}

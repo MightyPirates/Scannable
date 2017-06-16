@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -75,7 +76,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
     // Item
 
     @Override
-    public void addInformation(final ItemStack stack, final EntityPlayer player, final List<String> tooltip, final boolean advanced) {
+    public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip, final ITooltipFlag flag) {
         final IBlockState state = getBlockState(stack);
         if (state == null) {
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK));
@@ -88,7 +89,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, state.getBlock().getLocalizedName()));
             }
         }
-        super.addInformation(stack, player, tooltip, advanced);
+        super.addInformation(stack, world, tooltip, flag);
     }
 
     @Override

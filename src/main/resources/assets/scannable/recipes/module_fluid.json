@@ -1,0 +1,15 @@
+{
+  "type": "forge:ore_shapeless",
+  "group": "modules",
+  "ingredients": [
+    {
+      "item": "scannable:module_blank"
+    },
+    {
+      "item": "minecraft:water_bucket"
+    }
+  ],
+  "result": {
+    "item": "scannable:module_fluid"
+  }
+}

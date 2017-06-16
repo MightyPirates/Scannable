@@ -89,8 +89,8 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             }
         }
 
-        bounds = new AxisAlignedBB(center.xCoord - radius, center.yCoord - radius, center.zCoord - radius,
-                                   center.xCoord + radius, center.yCoord + radius, center.zCoord + radius);
+        bounds = new AxisAlignedBB(center.x - radius, center.y - radius, center.z - radius,
+                                   center.x + radius, center.y + radius, center.z + radius);
 
         minX = MathHelper.floor((bounds.minX - World.MAX_ENTITY_RADIUS) / 16f);
         maxX = MathHelper.ceil((bounds.maxX + World.MAX_ENTITY_RADIUS) / 16f);
@@ -112,7 +112,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
                 return;
             }
 
-            world.getChunkFromChunkCoords(x, z).getEntitiesOfTypeWithinAAAB(EntityLiving.class, bounds, entities, this::FilterEntities);
+            world.getChunkFromChunkCoords(x, z).getEntitiesOfTypeWithinAABB(EntityLiving.class, bounds, entities, this::FilterEntities);
             for (final EntityLivingBase entity : entities) {
                 if (entity.isDead) {
                     continue;

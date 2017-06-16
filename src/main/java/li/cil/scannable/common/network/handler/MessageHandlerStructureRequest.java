@@ -46,7 +46,7 @@ public final class MessageHandlerStructureRequest implements IMessageHandler<Mes
         final List<ScanResultProviderStructure.StructureLocation> structures = new ArrayList<>();
         final float sqRadius = radius * radius;
         for (final String name : Settings.getStructures()) {
-            final BlockPos pos = world.getChunkProvider().getStrongholdGen(world, name, center, hideExplored);
+            final BlockPos pos = world.getChunkProvider().getNearestStructurePos(world, name, center, hideExplored);
             if (pos != null && center.distanceSq(pos) <= sqRadius) {
                 structures.add(new ScanResultProviderStructure.StructureLocation(name, pos));
             }

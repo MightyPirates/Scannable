@@ -4,6 +4,7 @@ import li.cil.scannable.common.capabilities.CapabilityProviderModuleStructure;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,14 +53,14 @@ public final class ItemScannerModuleStructure extends AbstractItemScannerModule 
     }
 
     @Override
-    public void addInformation(final ItemStack stack, final EntityPlayer player, final List<String> tooltip, final boolean advanced) {
+    public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip, final ITooltipFlag flag) {
         tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_STRUCTURE));
         if (hideExplored(stack)) {
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_STRUCTURE_HIDE_EXPLORED));
         } else {
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_STRUCTURE_SHOW_EXPLORED));
         }
-        super.addInformation(stack, player, tooltip, advanced);
+        super.addInformation(stack, world, tooltip, flag);
     }
 
     @Override

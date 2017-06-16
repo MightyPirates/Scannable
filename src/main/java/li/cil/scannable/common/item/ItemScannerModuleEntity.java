@@ -3,6 +3,7 @@ package li.cil.scannable.common.item;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.init.Items;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 
 import javax.annotation.Nullable;
@@ -51,14 +53,14 @@ public final class ItemScannerModuleEntity extends AbstractItemScannerModuleEnti
     // Item
 
     @Override
-    public void addInformation(final ItemStack stack, final EntityPlayer player, final List<String> tooltip, final boolean advanced) {
+    public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip, final ITooltipFlag flag) {
         final String entity = getEntity(stack);
         if (entity == null) {
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_ENTITY));
         } else {
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_ENTITY_NAME, entity));
         }
-        super.addInformation(stack, player, tooltip, advanced);
+        super.addInformation(stack, world, tooltip, flag);
     }
 
     @Override
