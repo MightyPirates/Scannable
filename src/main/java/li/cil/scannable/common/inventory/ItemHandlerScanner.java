@@ -6,9 +6,13 @@ import li.cil.scannable.common.item.AbstractItemScannerModule;
 import li.cil.scannable.util.ItemStackUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.RangedWrapper;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 
 public final class ItemHandlerScanner extends ItemStackHandler {
     private static final String TAG_ITEMS = "items";
@@ -16,15 +20,29 @@ public final class ItemHandlerScanner extends ItemStackHandler {
     private final ItemStack container;
 
     public ItemHandlerScanner(final ItemStack container) {
-        super(Constants.SCANNER_MAX_MODULE_COUNT);
+        super(Constants.SCANNER_TOTAL_MODULE_COUNT);
         this.container = container;
     }
 
     public void updateFromNBT() {
         final NBTTagCompound nbt = container.getTagCompound();
-        if (nbt != null && nbt.hasKey(TAG_ITEMS, net.minecraftforge.common.util.Constants.NBT.TAG_COMPOUND)) {
+        if (nbt != null && nbt.hasKey(TAG_ITEMS, NBT.TAG_COMPOUND)) {
             deserializeNBT((NBTTagCompound) nbt.getTag(TAG_ITEMS));
+            if (stacks.length != Constants.SCANNER_TOTAL_MODULE_COUNT) {
+                final ItemStack[] oldStacks = Arrays.copyOf(stacks, stacks.length);
+                setSize(Constants.SCANNER_TOTAL_MODULE_COUNT);
+                final int count = Math.min(Constants.SCANNER_TOTAL_MODULE_COUNT, oldStacks.length);
+                System.arraycopy(oldStacks, 0, stacks, 0, count);
+            }
         }
+    }
+
+    public IItemHandler getActiveModules() {
+        return new RangedWrapper(this, 0, Constants.SCANNER_ACTIVE_MODULE_COUNT);
+    }
+
+    public IItemHandler getInactiveModules() {
+        return new RangedWrapper(this, Constants.SCANNER_ACTIVE_MODULE_COUNT, Constants.SCANNER_TOTAL_MODULE_COUNT);
     }
 
     // --------------------------------------------------------------------- //

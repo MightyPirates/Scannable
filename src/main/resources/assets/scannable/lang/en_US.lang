@@ -27,6 +27,9 @@ tooltip.scannable.module_entity.name=§7Configured entity: §f%s
 
 gui.scannable.scanner.title=Scanner
 gui.scannable.scanner.modules=Modules
+gui.scannable.scanner.modules.tooltip=These are the active modules which are used when performing a scan.
+gui.scannable.scanner.modules_inactive=Inactive
+gui.scannable.scanner.modules_inactive.tooltip=These are convenience slots for storing additional modules. They are not used when performing a scan.
 gui.scannable.scanner.progress=Charging... %s%%
 gui.scannable.overlay.entity_details=%s (%sm)
 

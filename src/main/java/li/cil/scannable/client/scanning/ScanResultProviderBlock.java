@@ -435,7 +435,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
             for (final IBlockState state : block.getBlockState().getValidStates()) {
                 final int stateId = Block.getStateId(state);
-                final ItemStack stack = new ItemStack(block, 1, block.damageDropped(state));
+                final ItemStack stack = new ItemStack(block);
                 if (!ItemStackUtils.isEmpty(stack)) {
                     final int[] ids = OreDictionary.getOreIDs(stack);
                     boolean isRare = false;

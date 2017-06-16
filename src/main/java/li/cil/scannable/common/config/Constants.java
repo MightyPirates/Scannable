@@ -52,6 +52,9 @@ public final class Constants {
 
     public static final String GUI_SCANNER_TITLE = "gui.scannable.scanner.title";
     public static final String GUI_SCANNER_MODULES = "gui.scannable.scanner.modules";
+    public static final String GUI_SCANNER_MODULES_TOOLTIP = "gui.scannable.scanner.modules.tooltip";
+    public static final String GUI_SCANNER_MODULES_INACTIVE = "gui.scannable.scanner.modules_inactive";
+    public static final String GUI_SCANNER_MODULES_INACTIVE_TOOLTIP = "gui.scannable.scanner.modules_inactive.tooltip";
     public static final String GUI_SCANNER_PROGRESS = "gui.scannable.scanner.progress";
     public static final String GUI_OVERLAY_LABEL_DISTANCE = "gui.scannable.overlay.entity_details";
 
@@ -100,8 +103,12 @@ public final class Constants {
     // Size of a chunk. Duh.
     public static final int CHUNK_SIZE = 16;
 
-    // Number of modules that can be installed in a scanner.
-    public static final int SCANNER_MAX_MODULE_COUNT = 3;
+    // Number of modules that can be active in a scanner.
+    public static final int SCANNER_ACTIVE_MODULE_COUNT = 3;
+    // Number of additional modules that can be stored in a scanner.
+    public static final int SCANNER_INACTIVE_MODULE_COUNT = 6;
+    // Total number of modules that can be placed in a scanner.
+    public static final int SCANNER_TOTAL_MODULE_COUNT = SCANNER_ACTIVE_MODULE_COUNT + SCANNER_INACTIVE_MODULE_COUNT;
     // By how much to scale the base scan range when scanning for ores.
     public static final float MODULE_ORE_RADIUS_MULTIPLIER = 0.25f;
     // By how much to scale the base scan range when scanning for specific blocks.
