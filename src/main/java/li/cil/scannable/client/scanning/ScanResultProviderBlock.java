@@ -56,6 +56,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     private static final int DEFAULT_COLOR = 0x4466CC;
     private static final float BASE_ALPHA = 0.25f;
+    private static final float MIN_ALPHA = 0.13f; // Slightly > 0.1f/0.8f
     private static final float STATE_SCANNED_ALPHA = 0.7f;
 
     private final TIntIntMap blockColors = new TIntIntHashMap();
@@ -276,7 +277,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final float r = ((color >> 16) & 0xFF) * colorNormalizer;
             final float g = ((color >> 8) & 0xFF) * colorNormalizer;
             final float b = (color & 0xFF) * colorNormalizer;
-            final float a = Math.max(BASE_ALPHA, resultOre.getAlphaOverride()) * focusScale;
+            final float a = Math.max(MIN_ALPHA, Math.max(BASE_ALPHA, resultOre.getAlphaOverride()) * focusScale);
 
             drawCube(resultOre.bounds.minX, resultOre.bounds.minY, resultOre.bounds.minZ,
                      resultOre.bounds.maxX, resultOre.bounds.maxY, resultOre.bounds.maxZ,
@@ -307,7 +308,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 final float r = ((color >> 16) & 0xFF) * colorNormalizer;
                 final float g = ((color >> 8) & 0xFF) * colorNormalizer;
                 final float b = (color & 0xFF) * colorNormalizer;
-                final float a = Math.max(BASE_ALPHA, resultOre.getAlphaOverride()) * focusScale;
+                final float a = Math.max(MIN_ALPHA, Math.max(BASE_ALPHA, resultOre.getAlphaOverride()) * focusScale);
 
                 drawCube(resultOre.bounds.minX, resultOre.bounds.minY, resultOre.bounds.minZ,
                          resultOre.bounds.maxX, resultOre.bounds.maxY, resultOre.bounds.maxZ,
