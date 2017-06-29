@@ -40,10 +40,13 @@ public class GuiScanner extends GuiContainer {
         if (isPointInRegion(8, 49, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE)), fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
             drawHoveringText(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE_TOOLTIP), mouseX, mouseY);
         }
+
+        this.renderHoveredToolTip(mouseX, mouseY);
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
         fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_TITLE), 8, 6, 0x404040);
         fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_MODULES), 8, 23, 0x404040);
         fontRenderer.drawString(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE), 8, 49, 0x404040);
