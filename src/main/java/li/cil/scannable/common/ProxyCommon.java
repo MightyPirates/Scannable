@@ -5,16 +5,17 @@ import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.init.Items;
 import li.cil.scannable.common.network.Network;
 import net.minecraft.item.Item;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-
-import java.util.function.Supplier;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * Takes care of common setup.
  */
+@Mod.EventBusSubscriber
 public class ProxyCommon {
     public void onPreInit(final FMLPreInitializationEvent event) {
         // Initialize API.
@@ -22,9 +23,6 @@ public class ProxyCommon {
 
         // Initialize capabilities.
         CapabilityScanResultProvider.register();
-
-        // Register blocks and items.
-        Items.register(this);
     }
 
     public void onInit(final FMLInitializationEvent event) {
@@ -37,12 +35,8 @@ public class ProxyCommon {
 
     // --------------------------------------------------------------------- //
 
-    public Item registerItem(final String name, final Supplier<Item> constructor) {
-        final Item item = constructor.get().
-                setUnlocalizedName(API.MOD_ID + "." + name).
-                setCreativeTab(API.creativeTab).
-                setRegistryName(name);
-        GameRegistry.register(item);
-        return item;
+    @SubscribeEvent
+    public static void handleRegisterItemsEvent(final RegistryEvent.Register<Item> event) {
+        Items.register(event.getRegistry());
     }
 }

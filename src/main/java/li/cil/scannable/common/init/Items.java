@@ -1,6 +1,6 @@
 package li.cil.scannable.common.init;
 
-import li.cil.scannable.common.ProxyCommon;
+import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.ItemScanner;
 import li.cil.scannable.common.item.ItemScannerModuleAnimal;
@@ -15,19 +15,53 @@ import li.cil.scannable.common.item.ItemScannerModuleRange;
 import li.cil.scannable.common.item.ItemScannerModuleStructure;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+
+@GameRegistry.ObjectHolder(API.MOD_ID)
 public final class Items {
-    public static Item scanner;
-    public static Item moduleBlank;
-    public static Item moduleRange;
-    public static Item moduleAnimal;
-    public static Item moduleMonster;
-    public static Item moduleOreCommon;
-    public static Item moduleOreRare;
-    public static Item moduleBlock;
-    public static Item moduleStructure;
-    public static Item moduleFluid;
-    public static Item moduleEntity;
+    @GameRegistry.ObjectHolder(Constants.NAME_SCANNER)
+    public static final Item scanner = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_BLANK)
+    public static final Item moduleBlank = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_RANGE)
+    public static final Item moduleRange = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_ANIMAL)
+    public static final Item moduleAnimal = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_MONSTER)
+    public static final Item moduleMonster = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_ORE_COMMON)
+    public static final Item moduleOreCommon = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_ORE_RARE)
+    public static final Item moduleOreRare = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_BLOCK)
+    public static final Item moduleBlock = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_STRUCTURE)
+    public static final Item moduleStructure = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_FLUID)
+    public static final Item moduleFluid = null;
+    @GameRegistry.ObjectHolder(Constants.NAME_MODULE_ENTITY)
+    public static final Item moduleEntity = null;
+
+    public static List<Item> getAllItems() {
+        return Arrays.asList(
+                scanner,
+                moduleBlank,
+                moduleRange,
+                moduleAnimal,
+                moduleMonster,
+                moduleOreCommon,
+                moduleOreRare,
+                moduleBlock,
+                moduleStructure,
+                moduleFluid,
+                moduleEntity
+        );
+    }
 
     // --------------------------------------------------------------------- //
 
@@ -73,23 +107,30 @@ public final class Items {
 
     // --------------------------------------------------------------------- //
 
-    public static void register(final ProxyCommon proxy) {
-        scanner = proxy.registerItem(Constants.NAME_SCANNER, ItemScanner::new);
-        moduleBlank = proxy.registerItem(Constants.NAME_MODULE_BLANK, ItemScannerModuleBlank::new);
-        moduleRange = proxy.registerItem(Constants.NAME_MODULE_RANGE, ItemScannerModuleRange::new);
-        moduleAnimal = proxy.registerItem(Constants.NAME_MODULE_ANIMAL, ItemScannerModuleAnimal::new);
-        moduleMonster = proxy.registerItem(Constants.NAME_MODULE_MONSTER, ItemScannerModuleMonster::new);
-        moduleOreCommon = proxy.registerItem(Constants.NAME_MODULE_ORE_COMMON, ItemScannerModuleBlockOreCommon::new);
-        moduleOreRare = proxy.registerItem(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleBlockOreRare::new);
-        moduleBlock = proxy.registerItem(Constants.NAME_MODULE_BLOCK, ItemScannerModuleBlockConfigurable::new);
-        moduleStructure = proxy.registerItem(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
-        moduleFluid = proxy.registerItem(Constants.NAME_MODULE_FLUID, ItemScannerModuleBlockFluid::new);
-        moduleEntity = proxy.registerItem(Constants.NAME_MODULE_ENTITY, ItemScannerModuleEntity::new);
+    public static void register(final IForgeRegistry<Item> registry) {
+        registerItem(registry, new ItemScanner(), Constants.NAME_SCANNER);
+        registerItem(registry, new ItemScannerModuleBlank(), Constants.NAME_MODULE_BLANK);
+        registerItem(registry, new ItemScannerModuleRange(), Constants.NAME_MODULE_RANGE);
+        registerItem(registry, new ItemScannerModuleAnimal(), Constants.NAME_MODULE_ANIMAL);
+        registerItem(registry, new ItemScannerModuleMonster(), Constants.NAME_MODULE_MONSTER);
+        registerItem(registry, new ItemScannerModuleBlockOreCommon(), Constants.NAME_MODULE_ORE_COMMON);
+        registerItem(registry, new ItemScannerModuleBlockOreRare(), Constants.NAME_MODULE_ORE_RARE);
+        registerItem(registry, new ItemScannerModuleBlockConfigurable(), Constants.NAME_MODULE_BLOCK);
+        registerItem(registry, new ItemScannerModuleStructure(), Constants.NAME_MODULE_STRUCTURE);
+        registerItem(registry, new ItemScannerModuleBlockFluid(), Constants.NAME_MODULE_FLUID);
+        registerItem(registry, new ItemScannerModuleEntity(), Constants.NAME_MODULE_ENTITY);
     }
 
     // --------------------------------------------------------------------- //
 
-    private static boolean isItem(final ItemStack stack, final Item item) {
+    private static void registerItem(final IForgeRegistry<Item> registry, final Item item, final String name) {
+        registry.register(item.
+                setUnlocalizedName(API.MOD_ID + "." + name).
+                setCreativeTab(API.creativeTab).
+                setRegistryName(name));
+    }
+
+    private static boolean isItem(final ItemStack stack, @Nullable final Item item) {
         return !stack.isEmpty() && stack.getItem() == item;
     }
 
