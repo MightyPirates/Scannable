@@ -23,6 +23,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -75,6 +77,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
     // --------------------------------------------------------------------- //
     // Item
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip, final ITooltipFlag flag) {
         final IBlockState state = getBlockState(stack);
