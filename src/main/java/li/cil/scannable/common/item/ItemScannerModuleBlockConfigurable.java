@@ -85,7 +85,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         if (state == null) {
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
-            final ItemStack blockStack = getItemStackFromState(state, player);
+            final ItemStack blockStack = getItemStackFromState(state, world);
             if (blockStack != null) {
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, blockStack.getDisplayName()));
             } else {
@@ -128,8 +128,8 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
     // --------------------------------------------------------------------- //
 
     @Nullable
-    private static ItemStack getItemStackFromState(final IBlockState state, final EntityPlayer player) {
-        final ItemStack picked = state.getBlock().getPickBlock(state, null, player.world, BlockPos.ORIGIN, player);
+    private static ItemStack getItemStackFromState(final IBlockState state, @Nullable final World world) {
+        final ItemStack picked = world != null ? state.getBlock().getPickBlock(state, null, world, BlockPos.ORIGIN, null) : null;
         if (picked != null) {
             return picked;
         }
