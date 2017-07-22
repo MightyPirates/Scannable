@@ -57,6 +57,10 @@ public final class ItemScanner extends Item {
     public void getSubItems(final CreativeTabs tab, final NonNullList<ItemStack> items) {
         super.getSubItems(tab, items);
 
+        if (!isInCreativeTab(tab)) {
+            return;
+        }
+
         final ItemStack stack = new ItemStack(this);
         final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
         if (energyStorage == null) {
