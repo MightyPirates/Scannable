@@ -130,7 +130,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         }
 
         final Item item = Item.getItemFromBlock(state.getBlock());
-        if (item == null) {
+        if (item == null || item == net.minecraft.init.Items.AIR) {
             return null;
         }
 
