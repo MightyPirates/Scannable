@@ -142,6 +142,7 @@ public final class Settings {
                     "Each entry must be a key-value pair separated by a `=`, with the.\n" +
                     "key being the ore dictionary name and the value being the hexadecimal\n" +
                     "RGB value of the color.")
+    @Config.RequiresWorldRestart
     public static String[] oreColors = {
             // Minecraft
             "oreCoal=0x433E3B",
@@ -207,6 +208,7 @@ public final class Settings {
     @Config.LangKey(Constants.CONFIG_FLUID_COLORS)
     @Config.Comment("The colors for fluids used when rendering their result bounding box.\n" +
                     "See `oreColors` for format entries have to be in.")
+    @Config.RequiresWorldRestart
     public static String[] fluidColors = {
             "water=0x4275DC",
             "lava=0xE26723"
