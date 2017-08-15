@@ -1,6 +1,5 @@
 package li.cil.scannable.common.item;
 
-import cofh.api.energy.IEnergyContainerItem;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.common.Scannable;
@@ -40,7 +39,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ItemScanner extends Item implements IEnergyContainerItem {
+public final class ItemScanner extends Item {
     public ItemScanner() {
         setMaxStackSize(1);
     }
@@ -190,65 +189,6 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
         player.getCooldownTracker().setCooldown(this, 40);
 
         return stack;
-    }
-
-    // --------------------------------------------------------------------- //
-    // IEnergyContainerItem
-
-    @Override
-    public int receiveEnergy(final ItemStack stack, final int maxReceive, final boolean simulate) {
-        if (!Settings.useEnergy()) {
-            return 0;
-        }
-
-        final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        if (energyStorage == null) {
-            return 0;
-        }
-
-        return energyStorage.receiveEnergy(maxReceive, simulate);
-    }
-
-    @Override
-    public int extractEnergy(final ItemStack stack, final int maxExtract, final boolean simulate) {
-        if (!Settings.useEnergy()) {
-            return 0;
-        }
-
-        final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        if (energyStorage == null) {
-            return 0;
-        }
-
-        return energyStorage.extractEnergy(maxExtract, simulate);
-    }
-
-    @Override
-    public int getEnergyStored(final ItemStack stack) {
-        if (!Settings.useEnergy()) {
-            return 0;
-        }
-
-        final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        if (energyStorage == null) {
-            return 0;
-        }
-
-        return energyStorage.getEnergyStored();
-    }
-
-    @Override
-    public int getMaxEnergyStored(final ItemStack stack) {
-        if (!Settings.useEnergy()) {
-            return 0;
-        }
-
-        final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        if (energyStorage == null) {
-            return 0;
-        }
-
-        return energyStorage.getMaxEnergyStored();
     }
 
     // --------------------------------------------------------------------- //
