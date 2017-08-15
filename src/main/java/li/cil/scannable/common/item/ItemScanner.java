@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Optional.Interface(iface = "cofh.api.energy.IEnergyContainerItem", modid = ModIDs.RedstoneFlux)
+@Optional.Interface(iface = "cofh.redstoneflux.api.IEnergyContainerItem", modid = ModIDs.RedstoneFlux)
 public final class ItemScanner extends Item implements IEnergyContainerItem {
     public ItemScanner() {
         setMaxStackSize(1);
