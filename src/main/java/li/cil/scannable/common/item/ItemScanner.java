@@ -278,37 +278,57 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
 
     @Override
     public int receiveEnergy(final ItemStack stack, final int maxReceive, final boolean simulate) {
+        if (!Settings.useEnergy()) {
+            return 0;
+        }
+
         final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
         if (energyStorage == null) {
             return 0;
         }
+
         return energyStorage.receiveEnergy(maxReceive, simulate);
     }
 
     @Override
     public int extractEnergy(final ItemStack stack, final int maxExtract, final boolean simulate) {
+        if (!Settings.useEnergy()) {
+            return 0;
+        }
+
         final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
         if (energyStorage == null) {
             return 0;
         }
+
         return energyStorage.extractEnergy(maxExtract, simulate);
     }
 
     @Override
     public int getEnergyStored(final ItemStack stack) {
+        if (!Settings.useEnergy()) {
+            return 0;
+        }
+
         final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
         if (energyStorage == null) {
             return 0;
         }
+
         return energyStorage.getEnergyStored();
     }
 
     @Override
     public int getMaxEnergyStored(final ItemStack stack) {
+        if (!Settings.useEnergy()) {
+            return 0;
+        }
+
         final IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
         if (energyStorage == null) {
             return 0;
         }
+
         return energyStorage.getMaxEnergyStored();
     }
 }

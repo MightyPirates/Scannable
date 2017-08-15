@@ -29,19 +29,29 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
 
     @Override
     public int receiveEnergy(final int maxReceive, final boolean simulate) {
+        if (!Settings.useEnergy()) {
+            return 0;
+        }
+
         final int energyReceived = super.receiveEnergy(maxReceive, simulate);
         if (!simulate && energyReceived != 0) {
             container.setTagInfo(TAG_ENERGY, serializeNBT());
         }
+
         return energyReceived;
     }
 
     @Override
     public int extractEnergy(final int maxExtract, final boolean simulate) {
+        if (!Settings.useEnergy()) {
+            return 0;
+        }
+
         final int energyExtracted = super.extractEnergy(maxExtract, simulate);
         if (!simulate && energyExtracted != 0) {
             container.setTagInfo(TAG_ENERGY, serializeNBT());
         }
+
         return energyExtracted;
     }
 
