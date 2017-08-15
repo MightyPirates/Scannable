@@ -4,6 +4,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.init.Items;
 import li.cil.scannable.common.network.Network;
+import li.cil.scannable.integration.Integration;
 import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -23,14 +24,22 @@ public class ProxyCommon {
 
         // Initialize capabilities.
         CapabilityScanResultProvider.register();
+
+        // Mod integration.
+        Integration.preInit(event);
     }
 
     public void onInit(final FMLInitializationEvent event) {
         // Register network handler.
         Network.INSTANCE.init();
+
+        // Mod integration.
+        Integration.init(event);
     }
 
     public void onPostInit(final FMLPostInitializationEvent event) {
+        // Mod integration.
+        Integration.postInit(event);
     }
 
     // --------------------------------------------------------------------- //
