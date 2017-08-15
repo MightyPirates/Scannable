@@ -58,11 +58,13 @@ minecraft {
 repositories {
     maven { url "http://dvs1.progwml6.com/files/maven" }
     maven { url = "http://maven.ic2.player.to/" }
+    maven { url = "http://maven.covers1624.net" }
 }
 
 dependencies {
     deobfCompile "mezz.jei:jei_${config.minecraft.version}:${config.jei.version}"
     deobfCompile "net.industrial-craft:industrialcraft-2:${config.ic2.version}"
+    deobfCompile "cofh:RedstoneFlux:${config.minecraft.version}-${config.rf.version}:universal"
 }
 
 processResources {
