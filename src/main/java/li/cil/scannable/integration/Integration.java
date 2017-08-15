@@ -1,5 +1,6 @@
 package li.cil.scannable.integration;
 
+import li.cil.scannable.integration.industrialcraft2.ModProxyIndustrialCraft2;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -13,6 +14,7 @@ public enum Integration {
     private static final List<ModProxy> proxies = new ArrayList<>();
 
     static {
+        proxies.add(ModProxyIndustrialCraft2.INSTANCE);
     }
 
     // --------------------------------------------------------------------- //
