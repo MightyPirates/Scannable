@@ -166,7 +166,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             }
 
             final BlockPos pos = new BlockPos(x, y, z);
-            final IBlockState state = world.getBlockState(pos);
+            IBlockState state = world.getBlockState(pos);
+
+            if (blacklist.contains(state.getBlock())) {
+                continue;
+            }
+
+            state = state.getActualState(world, pos);
 
             if (blacklist.contains(state.getBlock())) {
                 continue;

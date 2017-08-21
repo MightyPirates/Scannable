@@ -130,7 +130,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
     @Nullable
     private static ItemStack getItemStackFromState(final IBlockState state, @Nullable final World world) {
         final ItemStack picked = world != null ? state.getBlock().getPickBlock(state, null, world, BlockPos.ORIGIN, null) : null;
-        if (picked != null) {
+        if (picked != null && !picked.isEmpty()) {
             return picked;
         }
 
