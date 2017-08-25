@@ -22,61 +22,61 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_ENERGY_CAPACITY_SCANNER)
     @Config.Comment("Amount of energy that can be stored in a scanner.")
-    @Config.RangeInt(min = 0, max = 1000000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCapacityScanner = 5000;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_RANGE)
     @Config.Comment("Amount of energy used by the range module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleRange = 100;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ANIMAL)
     @Config.Comment("Amount of energy used by the animal module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleAnimal = 25;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_MONSTER)
     @Config.Comment("Amount of energy used by the monster module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleMonster = 50;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_COMMON)
     @Config.Comment("Amount of energy used by the common ore module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleOreCommon = 75;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_RARE)
     @Config.Comment("Amount of energy used by the rare ore module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleOreRare = 100;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_BLOCK)
     @Config.Comment("Amount of energy used by the block module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleBlock = 100;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_STRUCTURE)
     @Config.Comment("Amount of energy used by the structure module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleStructure = 150;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_FLUID)
     @Config.Comment("Amount of energy used by the fluid module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleFluid = 50;
 
     @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ENTITY)
     @Config.Comment("Amount of energy used by the entity module per scan.")
-    @Config.RangeInt(min = 0, max = 5000)
+    @Config.RangeInt(min = 0)
     @Config.RequiresWorldRestart
     public static int energyCostModuleEntity = 75;
 
@@ -135,6 +135,20 @@ public final class Settings {
                     "ores that do follow this pattern.")
     @Config.RequiresWorldRestart
     public static String[] oresRare = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_STATES_COMMON)
+    @Config.Comment("Block states considered common ores, requiring the common ore scanner module.\n" +
+                     "Use this to mark arbitrary block states as common ores.")
+    @Config.RequiresWorldRestart
+    public static String[] statesCommon = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_STATES_RARE)
+    @Config.Comment("Block states considered rare ores, requiring the rare ore scanner module.\n" +
+                    "Use this to mark arbitrary block states as rare ores.")
+    @Config.RequiresWorldRestart
+    public static String[] statesRare = {
     };
 
     @Config.LangKey(Constants.CONFIG_ORE_COLORS)
@@ -310,6 +324,14 @@ public final class Settings {
 
     public static String[] getRareOres() {
         return serverSettings != null ? serverSettings.oresRare : oresRare;
+    }
+
+    public static String[] getCommonStates() {
+        return serverSettings != null ? serverSettings.statesCommon : statesCommon;
+    }
+
+    public static String[] getRareStates() {
+        return serverSettings != null ? serverSettings.statesRare : statesRare;
     }
 
     public static String[] getStructures() {

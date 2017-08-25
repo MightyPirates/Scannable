@@ -45,6 +45,8 @@ public final class Constants {
     public static final String CONFIG_ORE_COLORS = "config.scannable.oreColors";
     public static final String CONFIG_ORES_COMMON = "config.scannable.oresCommon";
     public static final String CONFIG_ORES_RARE = "config.scannable.oresRare";
+    public static final String CONFIG_STATES_COMMON = "config.scannable.statesCommon";
+    public static final String CONFIG_STATES_RARE = "config.scannable.statesRare";
     public static final String CONFIG_STRUCTURES = "config.scannable.structures";
     public static final String CONFIG_INJECT_DEPTH_TEXTURE = "config.scannable.injectDepthTexture";
     public static final String CONFIG_FLUID_BLACKLIST = "config.scannable.fluidBlacklist";
