@@ -20,7 +20,9 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -58,6 +60,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private static final float BASE_ALPHA = 0.25f;
     private static final float MIN_ALPHA = 0.13f; // Slightly > 0.1f/0.8f
     private static final float STATE_SCANNED_ALPHA = 0.7f;
+    private static final Pattern STATE_DESC_PATTERN = Pattern.compile("(?<name>[^\\[]+)(?:\\[(?<properties>(?:[^,=\\]]+)=(?:[^,=\\]]+)(?:,(?:[^,=\\]]+)=(?:[^,=\\]]+))*)])?");
 
     private final TIntIntMap blockColors = new TIntIntHashMap();
     private final BitSet oresCommon = new BitSet();
@@ -409,6 +412,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.getOreBlacklist()));
         final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.getCommonOres()));
         final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.getRareOres()));
+        final Set<String> stateDescsCommon = new HashSet<>(Arrays.asList(Settings.getCommonStates()));
+        final Set<String> stateDescsRare = new HashSet<>(Arrays.asList(Settings.getRareStates()));
         final Set<String> fluidBlacklist = new HashSet<>(Arrays.asList(Settings.getFluidBlacklist()));
 
         final Pattern pattern = Pattern.compile("^ore[A-Z].*$");
@@ -449,6 +454,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 }
             }
         }
+
+        registerStates(stateDescsCommon, oresCommon);
+        registerStates(stateDescsRare, oresRare);
 
         for (final Map.Entry<String, Fluid> entry : FluidRegistry.getRegisteredFluids().entrySet()) {
             final String fluidName = entry.getKey();
@@ -496,6 +504,63 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         return colors;
+    }
+
+    private static void registerStates(final Set<String> stateDescs, final BitSet states) {
+        for (final String stateDesc : stateDescs) {
+            final IBlockState state = parseStateDesc(stateDesc);
+            if (state != null) {
+                final int stateId = Block.getStateId(state);
+                states.set(stateId);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private static IBlockState parseStateDesc(final String stateDesc) {
+        final Matcher matcher = STATE_DESC_PATTERN.matcher(stateDesc);
+        if (!matcher.matches()) {
+            Scannable.getLog().warn("Failed parsing block state: {}", stateDesc);
+            return null;
+        }
+
+        final String name = matcher.group("name").trim();
+        final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name));
+        if (block == null || block == Blocks.AIR) {
+            return null;
+        }
+
+        IBlockState state = block.getDefaultState();
+
+        final String serializedProperties = matcher.group("properties");
+        if (serializedProperties != null) {
+            final Collection<IProperty<?>> blockProperties = state.getPropertyKeys();
+            outer:
+            for (final String serializedProperty : serializedProperties.split(",")) {
+                final String[] keyValuePair = serializedProperty.split("=");
+                assert keyValuePair.length == 2;
+                final String serializedKey = keyValuePair[0].trim();
+                final String serializedValue = keyValuePair[1].trim();
+                for (final IProperty property : blockProperties) {
+                    if (Objects.equals(property.getName(), serializedKey)) {
+                        final Comparable originalValue = state.getValue(property);
+                        do {
+                            if (Objects.equals(property.getName(state.getValue(property)), serializedValue)) {
+                                continue outer;
+                            }
+                            state = state.cycleProperty(property);
+                        }
+                        while (!Objects.equals(state.getValue(property), originalValue));
+                        Scannable.getLog().warn("Cannot parse property value '{}' for property '{}' of block {}.", serializedValue, serializedKey, name);
+                        continue outer;
+                    }
+                }
+                Scannable.getLog().warn("Block {} has no property '{}'.", name, serializedKey);
+            }
+        }
+
+        return state;
     }
 
     // --------------------------------------------------------------------- //

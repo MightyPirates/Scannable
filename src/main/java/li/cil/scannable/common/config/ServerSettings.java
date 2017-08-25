@@ -2,7 +2,8 @@ package li.cil.scannable.common.config;
 
 import net.minecraft.network.PacketBuffer;
 
-// Mirror of Settings, but with authoritative server settings.
+// Same as Settings, but with authoritative server settings.
+// TODO Automatically handle those fields via reflection or so...
 public final class ServerSettings {
     final boolean useEnergy;
     final int energyCapacityScanner;
@@ -20,6 +21,8 @@ public final class ServerSettings {
     final String[] oresBlacklist;
     final String[] oresCommon;
     final String[] oresRare;
+    final String[] statesCommon;
+    final String[] statesRare;
     final String[] structures;
     final String[] fluidBlacklist;
 
@@ -40,6 +43,8 @@ public final class ServerSettings {
         oresBlacklist = readStringArray(packet);
         oresCommon = readStringArray(packet);
         oresRare = readStringArray(packet);
+        statesCommon = readStringArray(packet);
+        statesRare = readStringArray(packet);
         structures = readStringArray(packet);
         fluidBlacklist = readStringArray(packet);
     }
@@ -61,6 +66,8 @@ public final class ServerSettings {
         oresBlacklist = Settings.oreBlacklist;
         oresCommon = Settings.oresCommon;
         oresRare = Settings.oresRare;
+        statesCommon = Settings.statesCommon;
+        statesRare = Settings.statesRare;
         structures = Settings.structures;
         fluidBlacklist = Settings.fluidBlacklist;
     }
@@ -82,6 +89,8 @@ public final class ServerSettings {
         writeStringArray(packet, oresBlacklist);
         writeStringArray(packet, oresCommon);
         writeStringArray(packet, oresRare);
+        writeStringArray(packet, statesCommon);
+        writeStringArray(packet, statesRare);
         writeStringArray(packet, structures);
         writeStringArray(packet, fluidBlacklist);
     }

@@ -137,6 +137,20 @@ public final class Settings {
     public static String[] oresRare = {
     };
 
+    @Config.LangKey(Constants.CONFIG_STATES_COMMON)
+    @Config.Comment("Block states considered common ores, requiring the common ore scanner module.\n" +
+                     "Use this to mark arbitrary block states as common ores.")
+    @Config.RequiresWorldRestart
+    public static String[] statesCommon = {
+    };
+
+    @Config.LangKey(Constants.CONFIG_STATES_RARE)
+    @Config.Comment("Block states considered rare ores, requiring the rare ore scanner module.\n" +
+                    "Use this to mark arbitrary block states as rare ores.")
+    @Config.RequiresWorldRestart
+    public static String[] statesRare = {
+    };
+
     @Config.LangKey(Constants.CONFIG_ORE_COLORS)
     @Config.Comment("The colors for ores used when rendering their result bounding box.\n" +
                     "Each entry must be a key-value pair separated by a `=`, with the.\n" +
@@ -310,6 +324,14 @@ public final class Settings {
 
     public static String[] getRareOres() {
         return serverSettings != null ? serverSettings.oresRare : oresRare;
+    }
+
+    public static String[] getCommonStates() {
+        return serverSettings != null ? serverSettings.statesCommon : statesCommon;
+    }
+
+    public static String[] getRareStates() {
+        return serverSettings != null ? serverSettings.statesRare : statesRare;
     }
 
     public static String[] getStructures() {
