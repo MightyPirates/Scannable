@@ -21,7 +21,9 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -59,15 +61,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private static final float BASE_ALPHA = 0.25f;
     private static final float MIN_ALPHA = 0.13f; // Slightly > 0.1f/0.8f
     private static final float STATE_SCANNED_ALPHA = 0.7f;
+    private static final Pattern STATE_DESC_PATTERN = Pattern.compile("(?<name>[^\\[]+)(?:\\[(?<properties>(?:[^,=\\]]+)=(?:[^,=\\]]+)(?:,(?:[^,=\\]]+)=(?:[^,=\\]]+))*)])?");
 
     private final TIntIntMap blockColors = new TIntIntHashMap();
     private final BitSet oresCommon = new BitSet();
     private final BitSet oresRare = new BitSet();
     private final BitSet fluids = new BitSet();
     private boolean scanCommon, scanRare, scanFluids;
-    @Nullable
-    private IBlockState scanState;
-    private final List<IProperty> stateComparator = new ArrayList<>();
+    private final List<ScanFilter> scanFilters = new ArrayList<>();
     private float sqRadius, sqOreRadius;
     private BlockPos min, max;
     private int blocksPerTick;
@@ -119,22 +120,15 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         scanCommon = false;
         scanRare = false;
         scanFluids = false;
-        scanState = null;
-        stateComparator.clear();
+        scanFilters.clear();
         for (final ItemStack module : modules) {
             scanCommon |= Items.isModuleOreCommon(module);
             scanRare |= Items.isModuleOreRare(module);
             scanFluids |= Items.isModuleFluid(module);
             if (Items.isModuleBlock(module)) {
-                scanState = ItemScannerModuleBlockConfigurable.getBlockState(module);
-                if (scanState != null) {
-                    // TODO Filter for configurable properties (configurable in the module).
-                    for (final IProperty<?> property : scanState.getPropertyKeys()) {
-                        if (Objects.equals(property.getName(), "variant") ||
-                            Objects.equals(property.getName(), "type")) {
-                            stateComparator.add(property);
-                        }
-                    }
+                final IBlockState state = ItemScannerModuleBlockConfigurable.getBlockState(module);
+                if (state != null) {
+                    scanFilters.add(new ScanFilter(state));
                 }
             }
         }
@@ -180,13 +174,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             }
 
             final int stateId = Block.getStateId(state);
-            if (scanState != null) {
-                if (stateMatches(state) && !tryAddToCluster(pos, stateId)) {
-                    final ScanResultOre result = new ScanResultOre(stateId, pos, STATE_SCANNED_ALPHA);
-                    callback.accept(result);
-                    resultClusters.put(pos, result);
-                    continue;
-                }
+            if (anyFilterMatches(state) && !tryAddToCluster(pos, stateId)) {
+                final ScanResultOre result = new ScanResultOre(stateId, pos, STATE_SCANNED_ALPHA);
+                callback.accept(result);
+                resultClusters.put(pos, result);
+                continue;
             }
 
             if (!scanCommon && !scanRare && !scanFluids) {
@@ -206,27 +198,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean stateMatches(final IBlockState state) {
-        assert scanState != null;
-        if (scanState.getBlock() != state.getBlock()) {
-            return false;
-        }
-
-        if (stateComparator.isEmpty()) {
-            return true;
-        }
-
-        for (final IProperty property : stateComparator) {
-            if (!state.getPropertyKeys().contains(property)) {
-                continue;
-            }
-            if (!Objects.equals(state.getValue(property), scanState.getValue(property))) {
-                return false;
+    private boolean anyFilterMatches(final IBlockState state) {
+        for (final ScanFilter filter : scanFilters) {
+            if (filter.matches(state)) {
+                return true;
             }
         }
-
-        return true;
+        return false;
     }
 
     @SideOnly(Side.CLIENT)
@@ -343,8 +321,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     public void reset() {
         super.reset();
         scanCommon = scanRare = scanFluids = false;
-        scanState = null;
-        stateComparator.clear();
+        scanFilters.clear();
         sqRadius = sqOreRadius = 0;
         min = max = null;
         blocksPerTick = 0;
@@ -436,6 +413,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final Set<String> oreNamesBlacklist = new HashSet<>(Arrays.asList(Settings.getOreBlacklist()));
         final Set<String> oreNamesCommon = new HashSet<>(Arrays.asList(Settings.getCommonOres()));
         final Set<String> oreNamesRare = new HashSet<>(Arrays.asList(Settings.getRareOres()));
+        final Set<String> stateDescsCommon = new HashSet<>(Arrays.asList(Settings.getCommonStates()));
+        final Set<String> stateDescsRare = new HashSet<>(Arrays.asList(Settings.getRareStates()));
         final Set<String> fluidBlacklist = new HashSet<>(Arrays.asList(Settings.getFluidBlacklist()));
 
         final Pattern pattern = Pattern.compile("^ore[A-Z].*$");
@@ -476,6 +455,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 }
             }
         }
+
+        registerStates(stateDescsCommon, oresCommon);
+        registerStates(stateDescsRare, oresRare);
 
         for (final Map.Entry<String, Fluid> entry : FluidRegistry.getRegisteredFluids().entrySet()) {
             final String fluidName = entry.getKey();
@@ -525,9 +507,104 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         return colors;
     }
 
+    private static void registerStates(final Set<String> stateDescs, final BitSet states) {
+        for (final String stateDesc : stateDescs) {
+            final IBlockState state = parseStateDesc(stateDesc);
+            if (state != null) {
+                final int stateId = Block.getStateId(state);
+                states.set(stateId);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private static IBlockState parseStateDesc(final String stateDesc) {
+        final Matcher matcher = STATE_DESC_PATTERN.matcher(stateDesc);
+        if (!matcher.matches()) {
+            Scannable.getLog().warn("Failed parsing block state: {}", stateDesc);
+            return null;
+        }
+
+        final String name = matcher.group("name").trim();
+        final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name));
+        if (block == null || block == Blocks.AIR) {
+            return null;
+        }
+
+        IBlockState state = block.getDefaultState();
+
+        final String serializedProperties = matcher.group("properties");
+        if (serializedProperties != null) {
+            final Collection<IProperty<?>> blockProperties = state.getPropertyKeys();
+            outer:
+            for (final String serializedProperty : serializedProperties.split(",")) {
+                final String[] keyValuePair = serializedProperty.split("=");
+                assert keyValuePair.length == 2;
+                final String serializedKey = keyValuePair[0].trim();
+                final String serializedValue = keyValuePair[1].trim();
+                for (final IProperty property : blockProperties) {
+                    if (Objects.equals(property.getName(), serializedKey)) {
+                        final Comparable originalValue = state.getValue(property);
+                        do {
+                            if (Objects.equals(property.getName(state.getValue(property)), serializedValue)) {
+                                continue outer;
+                            }
+                            state = state.cycleProperty(property);
+                        }
+                        while (!Objects.equals(state.getValue(property), originalValue));
+                        Scannable.getLog().warn("Cannot parse property value '{}' for property '{}' of block {}.", serializedValue, serializedKey, name);
+                        continue outer;
+                    }
+                }
+                Scannable.getLog().warn("Block {} has no property '{}'.", name, serializedKey);
+            }
+        }
+
+        return state;
+    }
+
     // --------------------------------------------------------------------- //
 
-    private class ScanResultOre implements ScanResult {
+    private static final class ScanFilter {
+        private final IBlockState reference;
+        private final List<IProperty> properties = new ArrayList<>();
+
+        private ScanFilter(final IBlockState state) {
+            this.reference = state;
+            // TODO Filter for configurable properties (configurable in the block module).
+            for (final IProperty<?> property : state.getPropertyKeys()) {
+                if (Objects.equals(property.getName(), "variant") ||
+                    Objects.equals(property.getName(), "type")) {
+                    properties.add(property);
+                }
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        boolean matches(final IBlockState state) {
+            if (reference.getBlock() != state.getBlock()) {
+                return false;
+            }
+
+            if (properties.isEmpty()) {
+                return true;
+            }
+
+            for (final IProperty property : properties) {
+                if (!state.getPropertyKeys().contains(property)) {
+                    continue;
+                }
+                if (!Objects.equals(state.getValue(property), reference.getValue(property))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    private static final class ScanResultOre implements ScanResult {
         private final int stateId;
         private AxisAlignedBB bounds;
         @Nullable
