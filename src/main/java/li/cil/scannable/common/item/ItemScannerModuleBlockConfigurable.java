@@ -110,7 +110,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         }
 
         final ItemStack stack = player.getHeldItem(hand);
-        final IBlockState state = world.getBlockState(pos);
+        final IBlockState state = world.getBlockState(pos).getActualState(world, pos);
 
         if (Settings.getBlockBlacklistSet().contains(state.getBlock())) {
             if (world.isRemote) {
