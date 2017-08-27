@@ -573,8 +573,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             this.reference = state;
             // TODO Filter for configurable properties (configurable in the block module).
             for (final IProperty<?> property : state.getPropertyKeys()) {
-                if (Objects.equals(property.getName(), "variant") ||
-                    Objects.equals(property.getName(), "type")) {
+                if (Objects.equals(property.getName(), "variant") || // Vanilla Minecraft.
+                    Objects.equals(property.getName(), "type") || // E.g. ThermalFoundation, TiCon, IC2, Immersive Engineering.
+                    Objects.equals(property.getName(), "ore") || // E.g. BigReactors.
+                    Objects.equals(property.getName(), "oretype")) { // E.g. DeepResonance.
                     properties.add(property);
                 }
             }
