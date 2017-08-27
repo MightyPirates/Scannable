@@ -105,7 +105,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return EnumActionResult.PASS;
         }
 
-        final IBlockState state = world.getBlockState(pos);
+        final IBlockState state = world.getBlockState(pos).getActualState(world, pos);
 
         if (Settings.getBlockBlacklistSet().contains(state.getBlock())) {
             if (world.isRemote) {
