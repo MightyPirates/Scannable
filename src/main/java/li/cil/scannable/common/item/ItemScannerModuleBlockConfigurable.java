@@ -1,5 +1,6 @@
 package li.cil.scannable.common.item;
 
+import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
@@ -10,7 +11,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
@@ -25,11 +25,17 @@ import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public final class ItemScannerModuleBlockConfigurable extends AbstractItemScannerModuleBlock {
     private static final String TAG_BLOCK = "block";
     private static final String TAG_METADATA = "meta";
+
+    private static final Set<IBlockState> loggedWarningFor = Collections.synchronizedSet(new HashSet<>());
 
     @SuppressWarnings("deprecation")
     @Nullable
@@ -82,7 +88,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
             final ItemStack blockStack = getItemStackFromState(state, player);
-            if (blockStack != null) {
+            if (!blockStack.isEmpty()) {
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, blockStack.getDisplayName()));
             } else {
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, state.getBlock().getLocalizedName()));
@@ -122,30 +128,30 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
 
     // --------------------------------------------------------------------- //
 
-    @Nullable
+    @SuppressWarnings("deprecation")
     private static ItemStack getItemStackFromState(final IBlockState state, final EntityPlayer player) {
-        final ItemStack picked = state.getBlock().getPickBlock(state, null, player.world, BlockPos.ORIGIN, player);
-        if (picked != null) {
-            return picked;
+        final Block block = state.getBlock();
+        try {
+            return block.getPickBlock(state, null, player.getEntityWorld(), BlockPos.ORIGIN, null);
+        } catch (final Throwable t) {
+            try {
+                final Item item = Item.getItemFromBlock(block);
+                final int damage = block.damageDropped(state);
+                final ItemStack stack = new ItemStack(item, 1, damage);
+                final int meta = item.getMetadata(stack);
+                if (Objects.equals(block.getStateFromMeta(meta), state)) {
+                    return stack;
+                } else {
+                    throw new Exception("Block/Item implementation does not allow round-trip via Block.damageDropped/Item.getMetadata/Block.getStateFromMeta: " + block.toString() + ", " + item.toString());
+                }
+            } catch (final Throwable t2) {
+                if (loggedWarningFor.add(state)) {
+                    // Log twice to get both stack traces. Don't log first trace if second lookup succeeds.
+                    Scannable.getLog().warn("Failed determining dropped block for " + state.toString() + " via getPickBlock, trying to resolve via meta.", t);
+                    Scannable.getLog().error("Failed determining dropped block for " + state.toString() + " via meta, clearing bedrock ore.", t2);
+                }
+            }
         }
-
-        final Item item = Item.getItemFromBlock(state.getBlock());
-        if (item == null) {
-            return null;
-        }
-
-        final int damage = state.getBlock().damageDropped(state);
-        if (!(item instanceof ItemBlock)) {
-            return new ItemStack(item, 1, damage);
-        }
-
-        final ItemBlock itemBlock = (ItemBlock) item;
-        final int meta = itemBlock.getMetadata(damage);
-        if (meta == damage) {
-            return new ItemStack(item, 1, damage);
-        }
-
-        // Block doesn't drop itself. Fail.
-        return null;
+        return ItemStack.EMPTY;
     }
 }
