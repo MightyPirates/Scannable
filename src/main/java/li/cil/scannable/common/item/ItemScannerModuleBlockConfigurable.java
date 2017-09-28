@@ -88,7 +88,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
             final ItemStack blockStack = getItemStackFromState(state, player);
-            if (!blockStack.isEmpty()) {
+            if (blockStack != null) {
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, blockStack.getDisplayName()));
             } else {
                 tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_BLOCK_NAME, state.getBlock().getLocalizedName()));
@@ -129,6 +129,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
     // --------------------------------------------------------------------- //
 
     @SuppressWarnings("deprecation")
+    @Nullable
     private static ItemStack getItemStackFromState(final IBlockState state, final EntityPlayer player) {
         final Block block = state.getBlock();
         try {
@@ -152,6 +153,6 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
                 }
             }
         }
-        return ItemStack.EMPTY;
+        return null;
     }
 }
