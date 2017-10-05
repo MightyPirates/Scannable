@@ -181,7 +181,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         ScanResultStructure(final StructureLocation structure, final Vec3d renderCenter) {
             this.structure = structure;
             this.center = renderCenter;
-            this.bounds = new AxisAlignedBB(new BlockPos(renderCenter)).expand(8, 8, 8);
+            this.bounds = new AxisAlignedBB(new BlockPos(renderCenter)).grow(8, 8, 8);
         }
 
         @Override
