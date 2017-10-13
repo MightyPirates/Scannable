@@ -31,6 +31,9 @@ tooltip.scannable.module_entity.name=§7Gesuchtes Lebewesen: §f%s
 
 gui.scannable.scanner.title=Scanner
 gui.scannable.scanner.modules=Module
+gui.scannable.scanner.modules.tooltip=Dies sind aktive Module, welche bei Scans verwendet werden.
+gui.scannable.scanner.modules_inactive=Inaktiv
+gui.scannable.scanner.modules_inactive.tooltip=Hier können zusätzliche Module gelagert werden. Sie werden bei Scans nicht verwendet.
 gui.scannable.scanner.progress=Lade... %s%%
 gui.scannable.overlay.entity_details=%s (%sm)
 
