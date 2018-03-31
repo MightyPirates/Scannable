@@ -11,6 +11,7 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
 import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
+import li.cil.scannable.util.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
@@ -420,7 +421,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
             for (final IBlockState state : block.getBlockState().getValidStates()) {
                 final int stateId = Block.getStateId(state);
-                final ItemStack stack = new ItemStack(block);
+                final ItemStack stack = BlockUtils.getItemStackFromState(state, null);
                 if (!stack.isEmpty()) {
                     final int[] ids = OreDictionary.getOreIDs(stack);
                     boolean isRare = false;
