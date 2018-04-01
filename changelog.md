@@ -1,1 +1,1 @@
-* Changed the way ore dictionary lookup is built for improved compatibility with some mods.
+* Fixes potential crashes/issues due to some mods still using null instead of ItemStack.EMPTY.
