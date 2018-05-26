@@ -51,6 +51,7 @@ public final class Constants {
     public static final String CONFIG_INJECT_DEPTH_TEXTURE = "config.scannable.injectDepthTexture";
     public static final String CONFIG_FLUID_BLACKLIST = "config.scannable.fluidBlacklist";
     public static final String CONFIG_FLUID_COLORS = "config.scannable.fluidColors";
+    public static final String CONFIG_LOG_BLOCK_DROP_LOOKUP_FAILURES = "config.scannable.logBlockDropLookupFailures";
 
     // --------------------------------------------------------------------- //
     // GUI labels

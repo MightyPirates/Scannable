@@ -1,1 +1,1 @@
-* Fixes potential crashes/issues due to some mods still using null instead of ItemStack.EMPTY.
+* Disable debug logging of failed item lookups by default, add config to allow enabling it.
