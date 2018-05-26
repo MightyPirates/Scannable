@@ -1,1 +1,1 @@
-* Changed the way ore dictionary lookup is built for improved compatibility with some mods.
+* Disable debug logging of failed item lookups by default, add config to allow enabling it.

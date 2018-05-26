@@ -64,3 +64,4 @@ config.scannable.structures=Strukturen
 config.scannable.injectDepthTexture=Tiefentexture injizieren
 config.scannable.fluidBlacklist=Schwarze Liste: Flüssigkeiten
 config.scannable.fluidColors=Flüssigkeitenfarben
+config.scannable.logBlockDropLookupFailures=Item Lookup Fehler loggen

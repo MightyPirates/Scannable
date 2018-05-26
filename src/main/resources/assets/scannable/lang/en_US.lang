@@ -58,3 +58,4 @@ config.scannable.oreColors=Ore Colors
 config.scannable.injectDepthTexture=Inject Depth Texture
 config.scannable.fluidBlacklist=Blacklist: Fluids
 config.scannable.fluidColors=Fluid Colors
+config.scannable.logBlockDropLookupFailures=Log item lookup failures

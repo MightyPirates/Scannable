@@ -20,7 +20,12 @@ public final class BlockUtils {
     public static ItemStack getItemStackFromState(final IBlockState state, @Nullable final World world) {
         final Block block = state.getBlock();
         try {
-            return block.getPickBlock(state, null, world, BlockPos.ORIGIN, null);
+            ItemStack stack = block.getPickBlock(state, null, world, BlockPos.ORIGIN, null);
+            if (stack == null) {
+                Scannable.getLog().warn("Some mod returns null from Block.getPickBlock, should return ItemStack.EMPTY at this point. Block in question: {}", block.toString());
+                return ItemStack.EMPTY;
+            }
+            return stack;
         } catch (final Throwable t) {
             try {
                 final Item item = Item.getItemFromBlock(block);
