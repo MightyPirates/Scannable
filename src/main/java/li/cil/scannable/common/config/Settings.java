@@ -139,14 +139,24 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_STATES_COMMON)
     @Config.Comment("Block states considered common ores, requiring the common ore scanner module.\n" +
-                     "Use this to mark arbitrary block states as common ores.")
+                    "Use this to mark arbitrary block states as common ores. Format is as follows:\n" +
+                    "  mod_id:block_name\n" +
+                    "or with block properties:\n" +
+                    "  mod_id:block_name[property1=value1,property2=value2]\n" +
+                    "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
+                    "in the bottom right.")
     @Config.RequiresWorldRestart
     public static String[] statesCommon = {
     };
 
     @Config.LangKey(Constants.CONFIG_STATES_RARE)
     @Config.Comment("Block states considered rare ores, requiring the rare ore scanner module.\n" +
-                    "Use this to mark arbitrary block states as rare ores.")
+                    "Use this to mark arbitrary block states as rare ores. Format is as follows:\n" +
+                    "  mod_id:block_name\n" +
+                    "or with block properties:\n" +
+                    "  mod_id:block_name[property1=value1,property2=value2]\n" +
+                    "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
+                    "in the bottom right.")
     @Config.RequiresWorldRestart
     public static String[] statesRare = {
     };
@@ -236,6 +246,20 @@ public final class Settings {
                     "will fall back to re-rendering automatically, but you can force re-rendering by\n" +
                     "setting this to false, e.g. for debugging or just to avoid the one logged warning.")
     public static boolean injectDepthTexture = true;
+
+    @Config.LangKey(Constants.CONFIG_LOG_BLOCK_DROP_LOOKUP_FAILURES)
+    @Config.Comment("Whether to log out failure to determine the item stack dropped by a block.\n" +
+                    "Scannable needs to find the item stack representation of a block to get the\n" +
+                    "ore dictionary name(s) of blocks, as well as to show a more accurate tooltip\n" +
+                    "of the currently bound block in the block module. Scannable attempts to find\n" +
+                    "the item stack representation by calling Block.getPickBlock (which is allowed\n" +
+                    "to fail, as some blocks require a valid world state) and alternatively by using\n " +
+                    "Item.getItemFromBlock+Block.damageDropped, the latter being verified using the\n" +
+                    "roundtrip through Block.damageDropped/Item.getMetadata/Block.getStateFromMeta.\n" +
+                    "Sadly this fails for a lot of modded blocks because people rarely implement\n" +
+                    "Block.damageDropped. As a workaround you can add blocks for which this fails to\n" +
+                    "the `statesCommon` and `statesRare` lists.")
+    public static boolean logBlockDropLookupFailures = false;
 
     // --------------------------------------------------------------------- //
 
