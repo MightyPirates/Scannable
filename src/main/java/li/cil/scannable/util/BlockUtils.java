@@ -1,6 +1,7 @@
 package li.cil.scannable.util;
 
 import li.cil.scannable.common.Scannable;
+import li.cil.scannable.common.config.Settings;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
@@ -37,7 +38,7 @@ public final class BlockUtils {
                     throw new Exception("Block/Item implementation does not allow round-trip via Block.damageDropped/Item.getMetadata/Block.getStateFromMeta: " + block.toString() + ", " + item.toString());
                 }
             } catch (final Throwable t2) {
-                if (loggedWarningFor.add(state)) {
+                if (Settings.logBlockDropLookupFailures && loggedWarningFor.add(state)) {
                     // Log twice to get both stack traces. Don't log first trace if second lookup succeeds.
                     Scannable.getLog().debug("Failed determining dropped block for " + state.toString() + " via getPickBlock, trying to resolve via meta.", t);
                     Scannable.getLog().debug("Failed determining dropped block for " + state.toString() + " via meta.", t2);
