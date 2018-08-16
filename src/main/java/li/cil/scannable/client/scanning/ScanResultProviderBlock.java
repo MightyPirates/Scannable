@@ -73,8 +73,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private BlockPos min, max;
     private int blocksPerTick;
     private int x, y, z;
-    private Map<BlockPos, ScanResultOre> resultClusters = new HashMap<>();
-    private List<ScanResultOre> nonCulledResults = new ArrayList<>();
+    private final Map<BlockPos, ScanResultOre> resultClusters = new HashMap<>();
+    private final List<ScanResultOre> nonCulledResults = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
 
@@ -611,7 +611,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         private AxisAlignedBB bounds;
         @Nullable
         private ScanResultOre parent;
-        private float alphaOverride;
+        private final float alphaOverride;
 
         ScanResultOre(final int stateId, final BlockPos pos, final float alphaOverride) {
             bounds = new AxisAlignedBB(pos);

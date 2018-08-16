@@ -33,7 +33,7 @@ public abstract class AbstractItemScannerModule extends Item {
         }
 
         final Minecraft mc = Minecraft.getMinecraft();
-        if (mc == null) {
+        if (mc == null || mc.player == null) {
             return;
         }
 

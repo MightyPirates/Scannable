@@ -48,7 +48,6 @@ public final class ItemScannerModuleStructure extends AbstractItemScannerModule 
     // --------------------------------------------------------------------- //
     // Item
 
-    @Nullable
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final NBTTagCompound nbt) {
         return CapabilityProviderModuleStructure.INSTANCE;
