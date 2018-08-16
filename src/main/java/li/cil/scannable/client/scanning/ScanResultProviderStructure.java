@@ -147,7 +147,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
             }
             final String name = resultStructure.structure.name;
             final ResourceLocation icon = Icons.INFO;
-            final float distance = showDistance ? (float) structureCenter.subtract(viewerEyes).lengthVector() : 0f;
+            final float distance = showDistance ? (float) structureCenter.subtract(viewerEyes).length() : 0f;
             renderIconLabel(posX, posY, posZ, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
         }
 

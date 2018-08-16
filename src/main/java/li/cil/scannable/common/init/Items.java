@@ -125,7 +125,7 @@ public final class Items {
 
     private static void registerItem(final IForgeRegistry<Item> registry, final Item item, final String name) {
         registry.register(item.
-                setUnlocalizedName(API.MOD_ID + "." + name).
+                setTranslationKey(API.MOD_ID + "." + name).
                 setCreativeTab(API.creativeTab).
                 setRegistryName(name));
     }

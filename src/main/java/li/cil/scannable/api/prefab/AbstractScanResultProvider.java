@@ -101,7 +101,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     @SideOnly(Side.CLIENT)
     protected static void renderIconLabel(final double posX, final double posY, final double posZ, final float yaw, final float pitch, final Vec3d lookVec, final Vec3d viewerEyes, final float displayDistance, final Vec3d resultPos, final ResourceLocation icon, @Nullable final String label) {
         final Vec3d toResult = resultPos.subtract(viewerEyes);
-        final float distance = (float) toResult.lengthVector();
+        final float distance = (float) toResult.length();
         final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
         final float sqLookDirDot = lookDirDot * lookDirDot;
         final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;

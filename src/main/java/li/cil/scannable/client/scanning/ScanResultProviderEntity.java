@@ -112,7 +112,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
                 return;
             }
 
-            world.getChunkFromChunkCoords(x, z).getEntitiesOfTypeWithinAABB(EntityLiving.class, bounds, entities, this::FilterEntities);
+            world.getChunk(x, z).getEntitiesOfTypeWithinAABB(EntityLiving.class, bounds, entities, this::FilterEntities);
             for (final EntityLivingBase entity : entities) {
                 if (entity.isDead) {
                     continue;
@@ -159,7 +159,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             final String name = resultEntity.entity.getName();
             final ResourceLocation icon = isMonster(resultEntity.entity) ? Icons.WARNING : Icons.INFO;
             final Vec3d resultPos = resultEntity.entity.getPositionEyes(partialTicks);
-            final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).lengthVector() : 0f;
+            final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).length() : 0f;
             renderIconLabel(posX, posY, posZ, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
         }
 
