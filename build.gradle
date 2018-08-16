@@ -70,7 +70,7 @@ repositories {
 dependencies {
     deobfCompile "mezz.jei:jei_${config.minecraft.version}:${config.jei.version}"
     deobfCompile "net.industrial-craft:industrialcraft-2:${config.ic2.version}"
-    deobfCompile "cofh:RedstoneFlux:${config.minecraft.version}-${config.rf.version}:universal"
+    deobfCompile "cofh:RedstoneFlux:${config.rf.version}:universal"
 }
 
 processResources {
@@ -126,8 +126,6 @@ curseforge {
         changelogType = "markdown"
         changelog = file("changelog.md")
         addGameVersion config.minecraft.version
-        addGameVersion "1.12.1"
-        addGameVersion "1.12.2"
         addGameVersion "Java 8"
     }
 }
