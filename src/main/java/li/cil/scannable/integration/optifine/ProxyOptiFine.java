@@ -15,7 +15,7 @@ public enum ProxyOptiFine {
 
     ProxyOptiFine() {
         try {
-            final Class<?> clazz = Class.forName("shadersmod.client.Shaders");
+            final Class<?> clazz = Class.forName("net.optifine.shaders.Shaders");
 
             final Field depthTexturesField = clazz.getDeclaredField("dfbDepthTextures");
             depthTexturesField.setAccessible(true);
