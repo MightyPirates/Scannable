@@ -1,1 +1,1 @@
-* Disable debug logging of failed item lookups by default, add config to allow enabling it.
+* Improved OptiFine shader compatibility, effect and block results should look correct regardless of used shaders now.

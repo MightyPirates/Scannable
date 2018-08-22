@@ -7,6 +7,7 @@ import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.init.Items;
+import li.cil.scannable.integration.optifine.ProxyOptiFine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -17,11 +18,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -224,6 +227,53 @@ public enum ScanManager {
 
     @SubscribeEvent
     public void onRenderLast(final RenderWorldLastEvent event) {
+        final boolean isUsingShaders = ProxyOptiFine.INSTANCE.isShaderPackLoaded();
+        if (isUsingShaders) {
+            return;
+        }
+
+        synchronized (renderingResults) {
+            if (renderingResults.isEmpty()) {
+                return;
+            }
+
+            render(event.getPartialTicks());
+        }
+    }
+
+    @SubscribeEvent
+    public void onPreRenderGameOverlay(final RenderGameOverlayEvent.Pre event) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
+            return;
+        }
+
+        final boolean isUsingShaders = ProxyOptiFine.INSTANCE.isShaderPackLoaded();
+        if (!isUsingShaders) {
+            return;
+        }
+
+        synchronized (renderingResults) {
+            if (renderingResults.isEmpty()) {
+                return;
+            }
+
+            // Using shaders so we render as game overlay; restore matrices as used for world rendering.
+            GlStateManager.matrixMode(GL11.GL_PROJECTION);
+            GlStateManager.pushMatrix();
+            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+            GlStateManager.pushMatrix();
+
+            Minecraft.getMinecraft().entityRenderer.setupCameraTransform(event.getPartialTicks(), 2);
+            render(event.getPartialTicks());
+
+            GlStateManager.matrixMode(GL11.GL_PROJECTION);
+            GlStateManager.popMatrix();
+            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+            GlStateManager.popMatrix();
+        }
+    }
+
+    private void render(final float partialTicks) {
         final Minecraft mc = Minecraft.getMinecraft();
 
         final Entity entity = mc.getRenderViewEntity();
@@ -232,32 +282,30 @@ public enum ScanManager {
         }
 
         final ICamera frustum = new Frustum();
-        final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * event.getPartialTicks();
-        final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * event.getPartialTicks();
-        final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * event.getPartialTicks();
+        final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
+        final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
+        final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
         frustum.setPosition(posX, posY, posZ);
 
         GlStateManager.bindTexture(0);
         GlStateManager.color(1, 1, 1, 1);
 
-        synchronized (renderingResults) {
-            // We render all results in batches, grouped by their provider.
-            // This allows providers to do more optimized rendering, in e.g.
-            // setting up the render state once before rendering all visuals,
-            // or even set up display lists or VBOs.
-            for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
-                // Quick and dirty frustum culling.
-                for (ScanResult result : entry.getValue()) {
-                    final AxisAlignedBB bounds = result.getRenderBounds();
-                    if (bounds == null || frustum.isBoundingBoxInFrustum(bounds)) {
-                        renderingList.add(result);
-                    }
+        // We render all results in batches, grouped by their provider.
+        // This allows providers to do more optimized rendering, in e.g.
+        // setting up the render state once before rendering all visuals,
+        // or even set up display lists or VBOs.
+        for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
+            // Quick and dirty frustum culling.
+            for (ScanResult result : entry.getValue()) {
+                final AxisAlignedBB bounds = result.getRenderBounds();
+                if (bounds == null || frustum.isBoundingBoxInFrustum(bounds)) {
+                    renderingList.add(result);
                 }
+            }
 
-                if (!renderingList.isEmpty()) {
-                    entry.getKey().render(entity, renderingList, event.getPartialTicks());
-                    renderingList.clear();
-                }
+            if (!renderingList.isEmpty()) {
+                entry.getKey().render(entity, renderingList, partialTicks);
+                renderingList.clear();
             }
         }
     }
