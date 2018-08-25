@@ -1,1 +1,1 @@
-* Improved OptiFine shader compatibility, effect and block results should look correct regardless of used shaders now.
+* Fixed stencil buffer state while rendering effect.

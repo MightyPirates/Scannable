@@ -31,7 +31,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
@@ -228,8 +227,6 @@ public enum ScannerRenderer {
         final Framebuffer framebuffer = mc.getFramebuffer();
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
 
-        final boolean hadErrors = checkError("Pre rendering");
-
         if (framebufferDepthTexture == 0) {
             if (adjustedDuration > (int) (System.currentTimeMillis() - currentStart)) {
                 installDepthTexture(framebuffer);
@@ -237,7 +234,7 @@ public enum ScannerRenderer {
         } else if (adjustedDuration < (int) (System.currentTimeMillis() - currentStart)) {
             uninstallDepthTexture(framebuffer);
             currentStart = -1; // for early exit
-        } else if (hadErrors && mode == Mode.INJECT) {
+        } else if (mode == Mode.INJECT && GL11.glGetError() != 0) {
             Scannable.getLog().info("Huh, looks like our injected depth texture broke something maybe? Falling back to re-rendering.");
             uninstallDepthTexture(framebuffer);
             mode = Mode.RENDER;
@@ -283,8 +280,6 @@ public enum ScannerRenderer {
         GlStateManager.bindTexture(0);
 
         OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, oldFramebuffer);
-
-        checkError("Copy Depth Texture");
     }
 
     private void render(final float partialTicks) {
@@ -317,8 +312,6 @@ public enum ScannerRenderer {
             GlStateManager.enableTexture2D();
 
             OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, oldFramebuffer);
-
-            checkError("Render depth");
         }
 
         setupCorners();
@@ -343,8 +336,12 @@ public enum ScannerRenderer {
                 // Activate original depth render buffer while we use the depth texture.
                 // Even though it's not written to typically drivers won't like reading
                 // from a sampler of a texture that's part of the current render target.
-                OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
-                checkError("Swap in depth buffer");
+                if (framebuffer.isStencilEnabled()) {
+                    OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                    OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, GL30.GL_STENCIL_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                } else {
+                    OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                }
             }
 
             GlStateManager.bindTexture(framebufferDepthTexture);
@@ -379,8 +376,11 @@ public enum ScannerRenderer {
 
         if (mode == Mode.INJECT && copyFramebufferDepthTexture == 0) {
             // Swap back in our depth texture for that sweet, sweet depth info.
-            OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
-            checkError("Swap out depth buffer");
+            if (framebuffer.isStencilEnabled()) {
+                OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, GL30.GL_DEPTH_STENCIL_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+            } else {
+                OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+            }
         }
 
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -389,8 +389,6 @@ public enum ScannerRenderer {
 
         GlStateManager.popAttrib();
         GlStateManager.popMatrix();
-
-        checkError("Post rendering");
     }
 
     // --------------------------------------------------------------------- //
@@ -456,30 +454,25 @@ public enum ScannerRenderer {
         }
     }
 
-    private static boolean checkError(final String context) {
-        final int error = GL11.glGetError();
-        if (error != 0) {
-            final String errorMessage = GLU.gluErrorString(error);
-            Scannable.getLog().warn("[OpenGL Error: {}] {}: {}", error, context, errorMessage);
-            return true;
-        }
-
-        return false;
-    }
-
     private void installDepthTexture(final Framebuffer framebuffer) {
         final int oldFramebuffer = GlStateManager.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
 
         switch (mode) {
             case INJECT:
                 framebufferObject = framebuffer.framebufferObject;
-                framebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL14.GL_DEPTH_COMPONENT24, GL11.GL_DEPTH_COMPONENT);
-                OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
-                OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+                if (framebuffer.isStencilEnabled()) {
+                    framebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL30.GL_DEPTH24_STENCIL8, GL30.GL_DEPTH_STENCIL, GL30.GL_UNSIGNED_INT_24_8);
+                    OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                    OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, GL30.GL_DEPTH_STENCIL_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+                } else {
+                    framebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL14.GL_DEPTH_COMPONENT24, GL11.GL_DEPTH_COMPONENT, GL11.GL_UNSIGNED_INT);
+                    OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                    OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
+                }
                 break;
             case RENDER:
                 framebufferObject = OpenGlHelper.glGenFramebuffers();
-                framebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL14.GL_DEPTH_COMPONENT24, GL11.GL_DEPTH_COMPONENT);
+                framebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL14.GL_DEPTH_COMPONENT24, GL11.GL_DEPTH_COMPONENT, GL11.GL_UNSIGNED_INT);
                 OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
                 OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, framebufferDepthTexture, 0);
                 break;
@@ -487,22 +480,26 @@ public enum ScannerRenderer {
                 framebufferDepthTexture = ProxyOptiFine.INSTANCE.getDepthTexture();
 
                 copyFramebufferObject = OpenGlHelper.glGenFramebuffers();
-                copyFramebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL30.GL_R32F, GL11.GL_RED);
+                copyFramebufferDepthTexture = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL30.GL_R32F, GL11.GL_RED, GL11.GL_UNSIGNED_BYTE);
                 OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, copyFramebufferObject);
                 OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, copyFramebufferDepthTexture, 0);
                 break;
         }
 
         OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, oldFramebuffer);
-
-        checkError("Install Depth Texture");
     }
 
     private void uninstallDepthTexture(final Framebuffer framebuffer) {
         switch (mode) {
             case INJECT:
-                OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
-                OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                if (framebuffer.isStencilEnabled()) {
+                    OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                    OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                    OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, GL30.GL_STENCIL_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                } else {
+                    OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject);
+                    OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, framebuffer.depthBuffer);
+                }
                 TextureUtil.deleteTexture(framebufferDepthTexture);
                 break;
             case RENDER:
@@ -519,11 +516,9 @@ public enum ScannerRenderer {
         framebufferDepthTexture = 0;
         copyFramebufferObject = 0;
         copyFramebufferDepthTexture = 0;
-
-        checkError("Uninstall Depth Texture");
     }
 
-    private int createTexture(final int width, final int height, final int internalFormat, final int format) {
+    private int createTexture(final int width, final int height, final int internalFormat, final int format, final int type) {
         final int texture = TextureUtil.glGenTextures();
         GlStateManager.bindTexture(texture);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
@@ -533,7 +528,7 @@ public enum ScannerRenderer {
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_DEPTH_TEXTURE_MODE, GL11.GL_LUMINANCE);
 //        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL14.GL_COMPARE_R_TO_TEXTURE);
         GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_LEQUAL);
-        GlStateManager.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL11.GL_UNSIGNED_BYTE, null);
+        GlStateManager.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null);
         GlStateManager.bindTexture(0);
         return texture;
     }
