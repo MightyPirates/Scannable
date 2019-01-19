@@ -172,7 +172,9 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
             return stack;
         }
 
-        MinecraftForge.EVENT_BUS.register(SoundCanceler.INSTANCE);
+        if (world.isRemote) {
+            SoundCanceler.cancelEquipSound();
+        }
 
         final List<ItemStack> modules = new ArrayList<>();
         if (!collectModules(stack, modules)) {
@@ -260,12 +262,16 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
 
     // --------------------------------------------------------------------- //
 
+    // Used to suppress the re-equip sound after finishing a scan (due to potential scanner item stack data change).
     private enum SoundCanceler {
         INSTANCE;
 
+        public static void cancelEquipSound() {
+            Minecraft.getMinecraft().addScheduledTask(() -> MinecraftForge.EVENT_BUS.register(SoundCanceler.INSTANCE));
+        }
+
         @SubscribeEvent
         public void onPlaySoundAtEntityEvent(final PlaySoundAtEntityEvent event) {
-            // Suppress the re-equip sound after finishing a scan.
             if (event.getSound() == SoundEvents.ITEM_ARMOR_EQUIP_GENERIC) {
                 event.setCanceled(true);
             }
