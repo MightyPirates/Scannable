@@ -1,1 +1,2 @@
-* Disable debug logging of failed item lookups by default, add config to allow enabling it.
+* Fixed potential crash.
+* Added proper resource reload support. Shaders in resource packs will now be used without having to restart Minecraft.
