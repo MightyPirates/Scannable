@@ -12,7 +12,9 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockRenderLayer;
@@ -100,10 +102,18 @@ public enum ScannerRenderer {
      * Initialize or re-initialize the shader used for the scanning effect.
      */
     public void init() {
+        final IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
+        reloadShaders(resourceManager);
+        if (resourceManager instanceof IReloadableResourceManager) {
+            ((IReloadableResourceManager) resourceManager).registerReloadListener(this::reloadShaders);
+        }
+    }
+
+    private void reloadShaders(final IResourceManager resourceManager) {
         try {
             deleteShader();
-            vertexShader = loadShader(GL20.GL_VERTEX_SHADER, SCANNER_VERTEX_SHADER_LOCATION);
-            fragmentShader = loadShader(GL20.GL_FRAGMENT_SHADER, SCANNER_FRAGMENT_SHADER_LOCATION);
+            vertexShader = loadShader(resourceManager, GL20.GL_VERTEX_SHADER, SCANNER_VERTEX_SHADER_LOCATION);
+            fragmentShader = loadShader(resourceManager, GL20.GL_FRAGMENT_SHADER, SCANNER_FRAGMENT_SHADER_LOCATION);
             shaderProgram = linkProgram(vertexShader, fragmentShader);
             camPosUniform = OpenGlHelper.glGetUniformLocation(shaderProgram, "camPos");
             centerUniform = OpenGlHelper.glGetUniformLocation(shaderProgram, "center");
@@ -112,8 +122,8 @@ public enum ScannerRenderer {
             zFarUniform = OpenGlHelper.glGetUniformLocation(shaderProgram, "zFar");
             aspectUniform = OpenGlHelper.glGetUniformLocation(shaderProgram, "aspect");
 
-            copyVertexShader = loadShader(GL20.GL_VERTEX_SHADER, COPY_VERTEX_SHADER_LOCATION);
-            copyFragmentShader = loadShader(GL20.GL_FRAGMENT_SHADER, COPY_FRAGMENT_SHADER_LOCATION);
+            copyVertexShader = loadShader(resourceManager, GL20.GL_VERTEX_SHADER, COPY_VERTEX_SHADER_LOCATION);
+            copyFragmentShader = loadShader(resourceManager, GL20.GL_FRAGMENT_SHADER, COPY_FRAGMENT_SHADER_LOCATION);
             copyShaderProgram = linkProgram(copyVertexShader, copyFragmentShader);
         } catch (final Exception e) {
             deleteShader();
@@ -393,14 +403,14 @@ public enum ScannerRenderer {
 
     // --------------------------------------------------------------------- //
 
-    private static int loadShader(final int type, final ResourceLocation location) throws Exception {
+    private static int loadShader(final IResourceManager resourceManager, final int type, final ResourceLocation location) throws Exception {
         final int shader = OpenGlHelper.glCreateShader(type);
-        compileShader(shader, location);
+        compileShader(resourceManager, shader, location);
         return shader;
     }
 
-    private static void compileShader(final int shader, final ResourceLocation location) throws Exception {
-        final IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(location);
+    private static void compileShader(final IResourceManager resourceManager, final int shader, final ResourceLocation location) throws Exception {
+        final IResource resource = resourceManager.getResource(location);
 
         try (final InputStream stream = resource.getInputStream()) {
             final byte[] bytes = IOUtils.toByteArray(stream);
@@ -544,7 +554,7 @@ public enum ScannerRenderer {
         setupCorner(CORNER_BOTTOM_RIGHT, bottomRight);
     }
 
-    private void setupCorner(final Vector4f corner, Vector3f into) {
+    private void setupCorner(final Vector4f corner, final Vector3f into) {
         Matrix4f.transform(mvpMatrix, corner, tempCorner);
         tempCorner.scale(1 / tempCorner.w);
         into.set(tempCorner);
