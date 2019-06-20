@@ -1,0 +1,68 @@
+#Scannable
+itemGroup.scannable=Scannable
+
+item.scannable.scanner.name=Сканер
+item.scannable.module_blank.name=Пустой модуль сканирования
+item.scannable.module_range.name=Модуль сканирования: Дальность
+item.scannable.module_animal.name=Модуль сканирования: Животные
+item.scannable.module_monster.name=Модуль сканирования: Монстры
+item.scannable.module_ore_common.name=Модуль сканирования: Обычные руды
+item.scannable.module_ore_rare.name=Модуль сканирования: Редкие руды
+item.scannable.module_block.name=Модуль сканирования: Блок
+item.scannable.module_structure.name=Модуль сканирования: Строения
+item.scannable.module_fluid.name=Модуль сканирования: Жидкости
+item.scannable.module_entity.name=Модуль сканирования: Существа
+
+tooltip.scannable.scanner=§8Используйте что бы просканировать ближайшие точки интереса.
+tooltip.scannable.scanner.energy=§7Заряд: §f%s/%s
+tooltip.scannable.module.energy_cost=§7Расход энергии: §a%s
+tooltip.scannable.module_range=§7Увеличивает дальность сканирования.
+tooltip.scannable.module_animal=§7Обнаруживает Животных (Не враждебных существ).
+tooltip.scannable.module_monster=§7Обнаруживает Монстров (Враждебных существ).
+tooltip.scannable.module_ore_common=§7Обнаруживает обычные руды (такие как уголь, железо).
+tooltip.scannable.module_ore_rare=§7Обнаруживает редкие руды (такие как алмазы, изумруды).
+tooltip.scannable.module_block=§7Используйте на блоке для настройки модуля.
+tooltip.scannable.module_block.name=§7Выбраный блок: §f%s
+tooltip.scannable.module_structure=§7Обнаруживает близлежащие строения.
+tooltip.scannable.module_structure.show_explored=§aПоказывать§f ранее найденые строения.
+tooltip.scannable.module_structure.hide_explored=§cНе показывать§f ранее найденые строения.
+tooltip.scannable.module_fluid=§7Обнаруживает жидкости (такие как вода, лава).
+tooltip.scannable.module_entity=§7Используйте на существе для настройки модуля.
+tooltip.scannable.module_entity.name=§7Выбраное существо: §f%s
+
+gui.scannable.scanner.title=Сканер
+gui.scannable.scanner.modules=Модули
+gui.scannable.scanner.modules.tooltip=Это активные модули, используемые для проведения сканирования.
+gui.scannable.scanner.modules_inactive=Отклочено
+gui.scannable.scanner.modules_inactive.tooltip=Это слоты для хранения неактивных модулей. Они не используются при скинировании.
+gui.scannable.scanner.progress=Зарядка... %s%%
+gui.scannable.overlay.entity_details=%s (%sm)
+
+message.scannable.no_scan_modules=§cНе установлены модули сканирования.
+message.scannable.not_enough_energy=§cНедостаточно энергии.
+message.scannable.block_blacklisted=§cБлок в черном списке.
+
+config.scannable.useEnergy=Использование энергии
+config.scannable.energyCapacityScanner=Емкость аккумулятора: Сканер
+config.scannable.energyCostModuleRange=Использование энергии: Модуль Дальности 
+config.scannable.energyCostModuleAnimal=Использование энергии: Модуль Животных
+config.scannable.energyCostModuleMonster=Использование энергии: Модуль Монстров
+config.scannable.energyCostModuleOreCommon=Использование энергии: Модуль Обычных Руд
+config.scannable.energyCostModuleOreRare=Использование энергии: Модуль Редких Руд
+config.scannable.energyCostModuleBlock=Использование энергии: Модуль Блоков
+config.scannable.energyCostModuleStructure=Использование энергии: Модуль Строений
+config.scannable.energyCostModuleFluid=Использование энергии: Модуль Жидкостей
+config.scannable.energyCostModuleEntity=Использование энергии: Модуль Существ
+config.scannable.baseScanRadius=Стандартный радиус сканирования
+config.scannable.blockBlacklist=Черный список: Блоки
+config.scannable.oreBlacklist=Черный список: Руды
+config.scannable.oresCommon=Руды: Обычные
+config.scannable.oresRare=Руды: Редкие
+config.scannable.statesCommon=Блоки: Обычные
+config.scannable.statesRare=Блоки: Редкие
+config.scannable.oreColors=Цвета руд
+config.scannable.structures=Строения
+config.scannable.injectDepthTexture=Inject Depth Texture
+config.scannable.fluidBlacklist=Черный список: Жидкости
+config.scannable.fluidColors=Цвета Жидкостей
+config.scannable.logBlockDropLookupFailures=Log item lookup failures
