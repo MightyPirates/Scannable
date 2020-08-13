@@ -1,28 +1,27 @@
-modLoader="javafml" #mandatory
-loaderVersion="[31,)" #mandatory
-issueTrackerURL="https://github.com/MightyPirates/Scannable/issues" #optional
+modLoader = "javafml"
+loaderVersion = "[31,)"
+issueTrackerURL = "https://github.com/MightyPirates/Scannable/issues"
 
-[[mods]] #mandatory
-modId="scannable" #mandatory
-version="${file.jarVersion}" #mandatory
-displayName="Scannable" #mandatory
-#updateJSONURL="http://myurl.me/" #optional
-displayURL="https://github.com/MightyPirates/Scannable" #optional
-#logoFile="examplemod.png" #optional
-authors="Sangar" #optional
-description='''
+[[mods]]
+modId = "scannable"
+version = "${mod_version}"
+displayName = "Scannable"
+displayURL = "https://github.com/MightyPirates/Scannable"
+logoFile = "logo.png"
+authors = "Sangar"
+description = '''
 Scan the area for points of interest.
 '''
 
-[[dependencies.scannable]] #optional
-    modId="forge" #mandatory
-    mandatory=true #mandatory
-    versionRange="[31,)" #mandatory
-    ordering="NONE"
-    side="BOTH"
 [[dependencies.scannable]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.15.2]"
-    ordering="NONE"
-    side="BOTH"
+modId = "forge"
+mandatory = true
+versionRange = "[31,)"
+ordering = "NONE"
+side = "BOTH"
+[[dependencies.scannable]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version}]"
+ordering = "NONE"
+side = "BOTH"

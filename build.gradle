@@ -9,9 +9,9 @@ buildscript {
     }
 }
 
- plugins {
-     id "com.matthewprenger.cursegradle" version "1.4.0"
- }
+plugins {
+    id "com.matthewprenger.cursegradle" version "1.4.0"
+}
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
@@ -35,16 +35,16 @@ group = config.mod.group
 archivesBaseName = config.mod.name
 
 def getGitRef() {
-  try {
-    def stdout = new ByteArrayOutputStream()
-    exec {
-      commandLine 'git', 'rev-parse', '--short', 'HEAD'
-      standardOutput = stdout
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (Throwable e) {
+        return "unknown"
     }
-    return stdout.toString().trim()
-  } catch (Throwable e) {
-    return "unknown"
-  }
 }
 
 if (System.getenv("PROMOTED_NUMBER") != null)
@@ -69,7 +69,11 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
 
-            source sourceSets.main
+            mods {
+                scannable {
+                    source sourceSets.main
+                }
+            }
         }
 
         server {
@@ -78,21 +82,66 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
 
-            source sourceSets.main
+            mods {
+                scannable {
+                    source sourceSets.main
+                }
+            }
         }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'scannable', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
+
+            environment 'target', 'fmluserdevdata'
+
+            mods {
+                scannable {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include 'META-INF/mods.toml'
+
+        expand([
+                'mod_version'      : simpleVersion,
+                'minecraft_version': config.minecraft.version
+        ])
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'META-INF/mods.toml'
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.minecraft.version}-${config.forge.version}"
- 
+
     compileOnly fg.deobf("mezz.jei:jei-${config.minecraft.version}:${config.jei.version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${config.minecraft.version}:${config.jei.version}")
 }
 
 jar {
     manifest {
-        attributes FMLAT: "accesstransformer.cfg"
+        attributes([
+                FMLAT                     : "accesstransformer.cfg",
+                "Specification-Title"     : "${config.mod.name}",
+                "Specification-Vendor"    : "Sangar",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${simpleVersion}",
+                "Implementation-Vendor"   : "Sangar",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
 
@@ -130,14 +179,14 @@ publishing {
     }
 }
 
- curseforge {
-     apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
-     project {
-         id = config.curse.project.id
-         releaseType = config.curse.project.releaseType
-         changelogType = "markdown"
-         changelog = file("changelog.md")
-         addGameVersion config.minecraft.version
-         addGameVersion "Java 8"
-     }
- }
+curseforge {
+    apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
+    project {
+        id = config.curse.project.id
+        releaseType = config.curse.project.releaseType
+        changelogType = "markdown"
+        changelog = file("changelog.md")
+        addGameVersion config.minecraft.version
+        addGameVersion "Java 8"
+    }
+}
