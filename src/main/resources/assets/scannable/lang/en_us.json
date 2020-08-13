@@ -11,7 +11,7 @@
   "item.scannable.module_block": "Scanner Module: Block",
   "item.scannable.module_structure": "Scanner Module: Structures",
   "item.scannable.module_fluid": "Scanner Module: Fluids",
-  "item.scannable.module_entity": "Scanner Module: Entity",
+  "item.scannable.module_entity": "Scanner Module: Living Entity",
 
   "tooltip.scannable.scanner": "§8Use to scan for nearby points of interest.",
   "tooltip.scannable.scanner.energy": "§7Energy: §f%s/%s",
@@ -27,7 +27,7 @@
   "tooltip.scannable.module_structure.show_explored": "§aIncluding§f explored structures.",
   "tooltip.scannable.module_structure.hide_explored": "§cExcluding§f explored structures.",
   "tooltip.scannable.module_fluid": "§7Detects fluids (e.g. water, lava).",
-  "tooltip.scannable.module_entity": "§7Use on an entity to configure the module.",
+  "tooltip.scannable.module_entity": "§7Use on an living entity to configure the module.",
   "tooltip.scannable.module_entity.name": "§7Configured entity: §f%s",
 
   "gui.scannable.scanner.title": "Scanner",
@@ -52,7 +52,7 @@
   "config.scannable.energyCostModuleBlock": "Energy Cost: Block Module",
   "config.scannable.energyCostModuleStructure": "Energy Cost: Structure Module",
   "config.scannable.energyCostModuleFluid": "Energy Cost: Fluid Module",
-  "config.scannable.energyCostModuleEntity": "Energy Cost: Entity Module",
+  "config.scannable.energyCostModuleEntity": "Energy Cost: Living Entity Module",
   "config.scannable.baseScanRadius": "Base Scan Radius",
   "config.scannable.ignoredBlocks": "Ignored Blocks",
   "config.scannable.ignoredBlockTags": "Ignored Block Tags",
