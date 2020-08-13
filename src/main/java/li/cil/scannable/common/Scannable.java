@@ -30,7 +30,7 @@ public final class Scannable {
     public static final RegistryObject<Item> MODULE_ORE_COMMON = ITEMS.register(Constants.NAME_MODULE_ORE_COMMON, ItemScannerModuleBlockOreCommon::new);
     public static final RegistryObject<Item> MODULE_ORE_RARE = ITEMS.register(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleBlockOreRare::new);
     public static final RegistryObject<Item> MODULE_FLUID = ITEMS.register(Constants.NAME_MODULE_FLUID, ItemScannerModuleBlockFluid::new);
-    public static final RegistryObject<Item> MODULE_STRUCTURE = ITEMS.register(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
+//    public static final RegistryObject<Item> MODULE_STRUCTURE = ITEMS.register(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
     public static final RegistryObject<Item> SCANNER = ITEMS.register(Constants.NAME_SCANNER, ItemScanner::new);
 
     public static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, API.MOD_ID);
