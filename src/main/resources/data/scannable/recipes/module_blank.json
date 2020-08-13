@@ -1,21 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
+  "group": "blank_module",
   "pattern": [
-    "GGG",
-    "CRC",
-    "CNC"
+    "ggg",
+    "crc",
+    "cnc"
   ],
   "key": {
-    "G": {
+    "g": {
       "tag": "forge:dyes/green"
     },
-    "C": {
+    "c": {
       "item": "minecraft:clay_ball"
     },
-    "R": {
+    "r": {
       "tag": "forge:dusts/glowstone"
     },
-    "N": {
+    "n": {
       "tag": "forge:nuggets/gold"
     }
   },

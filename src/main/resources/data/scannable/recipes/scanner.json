@@ -1,24 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
+  "group": "scanner",
   "pattern": [
-    "I I",
-    "BRB",
-    "GQG"
+    "i i",
+    "brb",
+    "gqg"
   ],
   "key": {
-    "I": {
+    "i": {
       "tag": "forge:ingots/iron"
     },
-    "B": {
+    "b": {
       "item": "minecraft:iron_bars"
     },
-    "R": {
+    "r": {
       "tag": "forge:dusts/redstone"
     },
-    "G": {
+    "g": {
       "tag": "forge:ingots/gold"
     },
-    "Q": {
+    "q": {
       "tag": "forge:gems/quartz"
     }
   },

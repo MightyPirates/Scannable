@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "scannable:module_blank"
+    ]
+  },
+  "criteria": {
+    "has_scanner": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "scannable:scanner"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "scannable:module_blank"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_scanner",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "scannable:scanner"
+    ]
+  },
+  "criteria": {
+    "is_delving": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "feature": "mineshaft"
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "scannable:scanner"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "is_delving",
+      "has_the_recipe"
+    ]
+  ]
+}
