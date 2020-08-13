@@ -88,6 +88,9 @@ public enum ScanManager {
     @Nullable
     private Vec3d lastScanCenter;
 
+    private MatrixStack viewMatrix;
+    private Matrix4f projectionMatrix;
+
     // --------------------------------------------------------------------- //
 
     public void beginScan(final PlayerEntity player, final List<ItemStack> stacks) {
@@ -238,9 +241,6 @@ public enum ScanManager {
         }
     }
 
-    private MatrixStack viewMatrix;
-    private Matrix4f projectionMatrix;
-
     @SubscribeEvent
     public void onRenderLast(final RenderWorldLastEvent event) {
         synchronized (renderingResults) {
@@ -248,13 +248,9 @@ public enum ScanManager {
                 return;
             }
 
-//            final MatrixStack matrixStack = event.getMatrixStack();
-
             viewMatrix = new MatrixStack();
             viewMatrix.getLast().getMatrix().set(event.getMatrixStack().getLast().getMatrix());
             projectionMatrix = event.getProjectionMatrix();
-
-//            render(event.getPartialTicks(), matrixStack, event.getProjectionMatrix());
         }
     }
 
