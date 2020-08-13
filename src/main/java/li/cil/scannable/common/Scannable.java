@@ -8,6 +8,9 @@ import li.cil.scannable.common.container.ContainerScanner;
 import li.cil.scannable.common.item.*;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.RegistryObject;
@@ -30,11 +33,13 @@ public final class Scannable {
     public static final RegistryObject<Item> MODULE_ORE_COMMON = ITEMS.register(Constants.NAME_MODULE_ORE_COMMON, ItemScannerModuleBlockOreCommon::new);
     public static final RegistryObject<Item> MODULE_ORE_RARE = ITEMS.register(Constants.NAME_MODULE_ORE_RARE, ItemScannerModuleBlockOreRare::new);
     public static final RegistryObject<Item> MODULE_FLUID = ITEMS.register(Constants.NAME_MODULE_FLUID, ItemScannerModuleBlockFluid::new);
-//    public static final RegistryObject<Item> MODULE_STRUCTURE = ITEMS.register(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
+    // public static final RegistryObject<Item> MODULE_STRUCTURE = ITEMS.register(Constants.NAME_MODULE_STRUCTURE, ItemScannerModuleStructure::new);
     public static final RegistryObject<Item> SCANNER = ITEMS.register(Constants.NAME_SCANNER, ItemScanner::new);
 
     public static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, API.MOD_ID);
     public static final RegistryObject<ContainerType<ContainerScanner>> SCANNER_CONTAINER = CONTAINERS.register(Constants.NAME_SCANNER, () -> IForgeContainerType.create(ContainerScanner::createForClient));
+
+    public static final Tag<Item> MODULES = new ItemTags.Wrapper(new ResourceLocation(API.MOD_ID, "modules"));
 
     public Scannable() {
         Settings.register();

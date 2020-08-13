@@ -12,6 +12,7 @@ public final class DataGenerators {
         final DataGenerator generator = event.getGenerator();
 
         if (event.includeServer()) {
+            generator.addProvider(new Tags(generator));
             generator.addProvider(new Recipes(generator));
         }
         if (event.includeClient()) {

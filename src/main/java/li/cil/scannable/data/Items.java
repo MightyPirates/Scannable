@@ -31,7 +31,7 @@ public class Items extends ItemModelProvider {
         registerModule(Scannable.MODULE_ORE_COMMON.get(), "items/module_ore_common");
         registerModule(Scannable.MODULE_ORE_RARE.get(), "items/module_ore_rare");
         registerModule(Scannable.MODULE_FLUID.get(), "items/module_fluid");
-//        registerModule(Scannable.MODULE_STRUCTURE.get(), "items/module_structure");
+        // registerModule(Scannable.MODULE_STRUCTURE.get(), "items/module_structure");
     }
 
     private ItemModelBuilder begin(final Item item) {
