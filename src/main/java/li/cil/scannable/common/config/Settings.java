@@ -84,7 +84,8 @@ public final class Settings {
     private static final ClientSettings CLIENT_INSTANCE;
     private static final ForgeConfigSpec CLIENT_SPEC;
 
-    public static Object2IntMap<Tag<Block>> blockColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
+    public static Object2IntMap<Block> blockColors = new Object2IntOpenHashMap<>();
+    public static Object2IntMap<Tag<Block>> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
         // Minecraft
         c.put(Tags.Blocks.ORES_COAL, MaterialColor.GRAY.colorValue);
         c.put(Tags.Blocks.ORES_IRON, MaterialColor.BROWN.colorValue); // MaterialColor.IRON is also gray, so...
@@ -94,7 +95,6 @@ public final class Settings {
         c.put(Tags.Blocks.ORES_REDSTONE, MaterialColor.RED.colorValue);
         c.put(Tags.Blocks.ORES_EMERALD, MaterialColor.EMERALD.colorValue);
         c.put(Tags.Blocks.ORES_QUARTZ, MaterialColor.QUARTZ.colorValue);
-        c.put(oreTag("glowstone"), MaterialColor.YELLOW.colorValue);
 
         // Common modded ores
         c.put(oreTag("tin"), MaterialColor.CYAN.colorValue);
@@ -105,7 +105,8 @@ public final class Settings {
         c.put(oreTag("platinum"), MaterialColor.WHITE_TERRACOTTA.colorValue);
         c.put(oreTag("mithril"), MaterialColor.PURPLE.colorValue);
     });
-    public static Object2IntMap<Tag<Fluid>> fluidColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
+    public static Object2IntMap<Fluid> fluidColors = new Object2IntOpenHashMap<>();
+    public static Object2IntMap<Tag<Fluid>> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
         c.put(FluidTags.WATER, MaterialColor.WATER.colorValue);
         c.put(FluidTags.LAVA, MaterialColor.ORANGE_TERRACOTTA.colorValue);
     });
@@ -184,8 +185,10 @@ public final class Settings {
         }
 
         if (isClientConfig(configEvent.getConfig().getSpec())) {
-            deserializeMap(blockColors, CLIENT_INSTANCE.blockColors.get(), Settings::getBlockTag, Integer::decode);
-            deserializeMap(fluidColors, CLIENT_INSTANCE.fluidColors.get(), Settings::getFluidTag, Integer::decode);
+            deserializeMap(blockColors, CLIENT_INSTANCE.blockColors.get(), Settings::getBlock, Integer::decode);
+            deserializeMap(blockTagColors, CLIENT_INSTANCE.blockTagColors.get(), Settings::getBlockTag, Integer::decode);
+            deserializeMap(fluidColors, CLIENT_INSTANCE.fluidColors.get(), Settings::getFluid, Integer::decode);
+            deserializeMap(fluidTagColors, CLIENT_INSTANCE.fluidTagColors.get(), Settings::getFluidTag, Integer::decode);
         }
     }
 
@@ -377,25 +380,41 @@ public final class Settings {
 
     private static final class ClientSettings {
         public ForgeConfigSpec.ConfigValue<List<? extends String>> blockColors;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> blockTagColors;
         public ForgeConfigSpec.ConfigValue<List<? extends String>> fluidColors;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> fluidTagColors;
 
         public ClientSettings(final ForgeConfigSpec.Builder builder) {
             blockColors = builder
                     .translation(Constants.CONFIG_BLOCK_COLORS)
-                    .comment("The colors for blocks used when rendering their result bounding box.\n" +
-                            "Each entry must be a key-value pair separated by a `=`, with the.\n" +
-                            "key being the ore dictionary name and the value being the hexadecimal\n" +
+                    .comment("The colors for blocks used when rendering their result bounding box\n" +
+                            "by block name. Each entry must be a key-value pair separated by a `=`,\n" +
+                            "with the key being the tag name and the value being the hexadecimal\n" +
                             "RGB value of the color.")
                     .worldRestart()
-                    .defineList("blockColors", serializeMap(Settings.blockColors, t -> t.getId().toString(), c -> "0x" + Integer.toHexString(c)),
+                    .defineList("blockColors", serializeMap(Settings.blockColors, t -> Objects.requireNonNull(t.getRegistryName()).toString(), c -> "0x" + Integer.toHexString(c)),
+                            Settings::validateResourceLocationMapEntry);
+            blockTagColors = builder
+                    .translation(Constants.CONFIG_BLOCK_TAG_COLORS)
+                    .comment("The colors for blocks used when rendering their result bounding box\n" +
+                            "by block tag. See `blockColors` for format entries have to be in.")
+                    .worldRestart()
+                    .defineList("blockTagColors", serializeMap(Settings.blockTagColors, t -> t.getId().toString(), c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
 
             fluidColors = builder
                     .translation(Constants.CONFIG_FLUID_COLORS)
-                    .comment("The colors for fluids used when rendering their result bounding box.\n" +
-                            "See `oreColors` for format entries have to be in.")
+                    .comment("The colors for fluids used when rendering their result bounding box\n" +
+                            "by fluid name. See `blockColors` for format entries have to be in.")
                     .worldRestart()
-                    .defineList("fluidColors", serializeMap(Settings.fluidColors, t -> t.getId().toString(), c -> "0x" + Integer.toHexString(c)),
+                    .defineList("fluidColors", serializeMap(Settings.fluidColors, t -> Objects.requireNonNull(t.getRegistryName()).toString(), c -> "0x" + Integer.toHexString(c)),
+                            Settings::validateResourceLocationMapEntry);
+            fluidTagColors = builder
+                    .translation(Constants.CONFIG_FLUID_TAG_COLORS)
+                    .comment("The colors for fluids used when rendering their result bounding box\n" +
+                            "by fluid tag. See `blockColors` for format entries have to be in.")
+                    .worldRestart()
+                    .defineList("fluidTagColors", serializeMap(Settings.fluidTagColors, t -> t.getId().toString(), c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
         }
     }
@@ -436,6 +455,11 @@ public final class Settings {
     @Nullable
     private static Block getBlock(final String o) {
         return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(o));
+    }
+
+    @Nullable
+    private static Fluid getFluid(final String o) {
+        return ForgeRegistries.FLUIDS.getValue(new ResourceLocation(o));
     }
 
     private static Tag<Block> getBlockTag(final String o) {

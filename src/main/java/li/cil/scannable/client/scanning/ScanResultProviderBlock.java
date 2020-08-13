@@ -309,18 +309,28 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BlockState blockState = getBlockState();
             color = blockState.getMaterialColor(world, new BlockPos(bounds.getCenter())).colorValue;
 
-            Settings.blockColors.forEach((k, v) -> {
-                if (k.contains(blockState.getBlock())) {
-                    color = v;
-                }
-            });
-
             final IFluidState fluidState = blockState.getFluidState();
-            Settings.fluidColors.forEach((k, v) -> {
-                if (k.contains(fluidState.getFluid())) {
-                    color = v;
+            if (!fluidState.isEmpty()) {
+                if (Settings.fluidColors.containsKey(fluidState.getFluid())) {
+                    color = Settings.fluidColors.getInt(fluidState.getFluid());
+                } else {
+                    Settings.fluidTagColors.forEach((k, v) -> {
+                        if (k.contains(fluidState.getFluid())) {
+                            color = v;
+                        }
+                    });
                 }
-            });
+            } else {
+                if (Settings.blockColors.containsKey(blockState.getBlock())) {
+                    color = Settings.blockColors.getInt(blockState.getBlock());
+                } else {
+                    Settings.blockTagColors.forEach((k, v) -> {
+                        if (k.contains(blockState.getBlock())) {
+                            color = v;
+                        }
+                    });
+                }
+            }
         }
 
         BlockState getBlockState() {

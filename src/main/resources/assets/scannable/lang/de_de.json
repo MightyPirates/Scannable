@@ -63,7 +63,9 @@
   "config.scannable.ignoredFluidTags": "Ignorierte Flüssigkeitstags",
   "config.scannable.structures": "Strukturen",
   "config.scannable.blockColors": "Blockfarben",
+  "config.scannable.blockTagColors": "Blocktagfarben",
   "config.scannable.fluidColors": "Flüssigkeitenfarben",
+  "config.scannable.fluidTagColors": "Flüssigkeittagfarben",
 
   "structure.pillager_outpost": "Plünderer-Außenposten",
   "structure.mineshaft": "Mine",

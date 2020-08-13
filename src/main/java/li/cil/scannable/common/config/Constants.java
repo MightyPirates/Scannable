@@ -49,7 +49,9 @@ public final class Constants {
     public static final String CONFIG_IGNORED_FLUID_TAGS = "config.scannable.ignoredFluidTags";
     public static final String CONFIG_STRUCTURES = "config.scannable.structures";
     public static final String CONFIG_BLOCK_COLORS = "config.scannable.blockColors";
+    public static final String CONFIG_BLOCK_TAG_COLORS = "config.scannable.blockTagColors";
     public static final String CONFIG_FLUID_COLORS = "config.scannable.fluidColors";
+    public static final String CONFIG_FLUID_TAG_COLORS = "config.scannable.fluidTagColors";
 
     // --------------------------------------------------------------------- //
     // GUI labels

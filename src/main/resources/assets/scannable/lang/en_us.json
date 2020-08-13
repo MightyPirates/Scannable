@@ -63,7 +63,9 @@
   "config.scannable.ignoredFluidTags": "Ignored Fluid Tags",
   "config.scannable.structures": "Structures",
   "config.scannable.blockColors": "Block Colors",
+  "config.scannable.blockTagColors": "Block Tag Colors",
   "config.scannable.fluidColors": "Fluid Colors",
+  "config.scannable.fluidTagColors": "Fluid Tag Colors",
 
   "structure.pillager_outpost": "Pillager Outpost",
   "structure.mineshaft": "Mineshaft",
