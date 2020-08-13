@@ -1,25 +1,28 @@
 package li.cil.scannable.api;
 
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.util.ResourceLocation;
 
-/**
- * Glue / actual references for the Scannable API.
- */
 public final class API {
-    /**
-     * The ID of the mod, i.e. the internal string it is identified by.
-     */
     public static final String MOD_ID = "scannable";
 
-    /**
-     * The current version of the mod.
-     */
-    public static final String MOD_VERSION = "@VERSION@";
+    // --------------------------------------------------------------------- //
+    // Built-in icons that may be useful when rendering scan results.
+
+    public static final ResourceLocation ICON_INFO = new ResourceLocation(MOD_ID, "textures/gui/overlay/info.png");
+    public static final ResourceLocation ICON_WARNING = new ResourceLocation(MOD_ID, "textures/gui/overlay/warning.png");
 
     // --------------------------------------------------------------------- //
+    // Registry names of reusable built-in scan providers.
 
+    public static final ResourceLocation SCAN_RESULT_PROVIDER_REGISTRY = new ResourceLocation(MOD_ID, "scan_result_providers");
+    public static final ResourceLocation SCAN_RESULT_PROVIDER_BLOCKS = new ResourceLocation(MOD_ID, "blocks");
+    public static final ResourceLocation SCAN_RESULT_PROVIDER_ENTITIES = new ResourceLocation(MOD_ID, "entities");
+
+    // --------------------------------------------------------------------- //
     // The creative tab holding all the good stuff.
-    public static CreativeTabs creativeTab;
+
+    public static ItemGroup itemGroup;
 
     // --------------------------------------------------------------------- //
 

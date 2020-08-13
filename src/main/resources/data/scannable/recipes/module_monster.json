@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "scannable:module_blank"
+    },
+    {
+      "tag": "forge:bones"
+    }
+  ],
+  "result": {
+    "item": "scannable:module_monster"
+  }
+}

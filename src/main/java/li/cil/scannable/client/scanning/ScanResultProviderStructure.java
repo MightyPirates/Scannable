@@ -1,36 +1,43 @@
 package li.cil.scannable.client.scanning;
 
-import li.cil.scannable.api.Icons;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
+import li.cil.scannable.common.capabilities.CapabilityScannerModule;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.item.ItemScannerModuleStructure;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.MessageStructureRequest;
+import li.cil.scannable.common.scanning.ScannerModuleStructure;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+@OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderStructure extends AbstractScanResultProvider {
     public static final ScanResultProviderStructure INSTANCE = new ScanResultProviderStructure();
 
     public static final class StructureLocation {
-        public final String name;
+        public final ITextComponent name;
         public final BlockPos pos;
 
-        public StructureLocation(final String name, final BlockPos pos) {
+        public StructureLocation(final ITextComponent name, final BlockPos pos) {
             this.name = name;
             this.pos = pos;
         }
@@ -61,16 +68,15 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     // ScanResultProvider
 
     @Override
-    public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
-        return Settings.getEnergyCostModuleStructure();
-    }
-
-    @Override
-    public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius * Constants.MODULE_STRUCTURE_RADIUS_MULTIPLIER, scanTicks);
         hideExplored = false;
         for (final ItemStack module : modules) {
-            hideExplored |= ItemScannerModuleStructure.hideExplored(module);
+            module.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY)
+                    .filter(c -> c instanceof ScannerModuleStructure)
+                    .ifPresent(c -> {
+                        hideExplored |= ItemScannerModuleStructure.shouldHideExplored(module);
+                    });
         }
         requestDelay = scanTicks / 4; // delay a little to avoid making spamming the server *too* easy.
         state = State.WAIT_REQUEST;
@@ -85,14 +91,14 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                     return;
                 }
 
-                Network.INSTANCE.getWrapper().sendToServer(new MessageStructureRequest(player.getEntityWorld(), new BlockPos(center), radius, hideExplored));
+                Network.INSTANCE.sendToServer(new MessageStructureRequest(player.getEntityWorld(), new BlockPos(center), radius, hideExplored));
 
                 state = State.WAIT_RESPONSE;
 
                 break;
             }
             case WAIT_RESULT: {
-                final float renderDistance = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
+                final float renderDistance = Minecraft.getInstance().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
                 final float sqRenderDistance = renderDistance * renderDistance;
                 for (final StructureLocation structure : structures) {
                     final Vec3d structureCenter = new Vec3d(structure.pos);
@@ -114,30 +120,23 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     }
 
     @Override
-    public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-        GlStateManager.enableBlend();
+    public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
+        final float yaw = renderInfo.getYaw();
+        final float pitch = renderInfo.getPitch();
 
-        final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-        final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-        final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        final float yaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
-        final float pitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
+        final Vec3d lookVec = new Vec3d(renderInfo.getViewVector());
+        final Vec3d viewerEyes = renderInfo.getProjectedView();
 
-        final Vec3d lookVec = entity.getLook(partialTicks).normalize();
-        final Vec3d viewerEyes = entity.getPositionEyes(partialTicks);
+        final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
 
-        final boolean showDistance = entity.isSneaking();
-
-        final float renderDistance = Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
+        final float renderDistance = Minecraft.getInstance().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
         final float sqRenderDistance = renderDistance * renderDistance;
 
         for (final ScanResult result : results) {
             final ScanResultStructure resultStructure = (ScanResultStructure) result;
             final Vec3d structureCenter = new Vec3d(resultStructure.structure.pos.getX() + 0.5,
-                                                    resultStructure.structure.pos.getY() + 0.5,
-                                                    resultStructure.structure.pos.getZ() + 0.5);
+                    resultStructure.structure.pos.getY() + 0.5,
+                    resultStructure.structure.pos.getZ() + 0.5);
             final Vec3d toStructure = structureCenter.subtract(viewerEyes);
             final Vec3d resultPos;
             if (toStructure.lengthSquared() > sqRenderDistance) {
@@ -145,15 +144,11 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
             } else {
                 resultPos = structureCenter;
             }
-            final String name = resultStructure.structure.name;
-            final ResourceLocation icon = Icons.INFO;
+            final ITextComponent name = resultStructure.structure.name;
+            final ResourceLocation icon = API.ICON_INFO;
             final float distance = showDistance ? (float) structureCenter.subtract(viewerEyes).length() : 0f;
-            renderIconLabel(posX, posY, posZ, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
+            renderIconLabel(renderTypeBuffer, matrixStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
         }
-
-        GlStateManager.disableBlend();
-        GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
     }
 
     @Override
@@ -194,5 +189,10 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         public AxisAlignedBB getRenderBounds() {
             return bounds;
         }
+    }
+
+    // --------------------------------------------------------------------- //
+
+    private ScanResultProviderStructure() {
     }
 }

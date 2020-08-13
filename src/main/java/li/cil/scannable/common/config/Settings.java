@@ -1,369 +1,492 @@
 package li.cil.scannable.common.config;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import li.cil.scannable.api.API;
-import li.cil.scannable.client.scanning.ScanResultProviderBlock;
+import li.cil.scannable.common.Scannable;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.Tag;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.config.Config;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraft.util.ResourceLocationException;
+import net.minecraft.util.Util;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.Tags;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.GameData;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-@Config(modid = API.MOD_ID)
+@Mod.EventBusSubscriber(modid = API.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Settings {
-    @Config.LangKey(Constants.CONFIG_USE_ENERGY)
-    @Config.Comment("Whether to consume energy when performing a scan.\n" +
-                    "Will make the scanner a chargeable item.")
-    @Config.RequiresWorldRestart
-    public static boolean useEnergy = true;
+    // --------------------------------------------------------------------- //
+    // Server settings
 
-    @Config.LangKey(Constants.CONFIG_ENERGY_CAPACITY_SCANNER)
-    @Config.Comment("Amount of energy that can be stored in a scanner.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCapacityScanner = 5000;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_RANGE)
-    @Config.Comment("Amount of energy used by the range module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleRange = 100;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ANIMAL)
-    @Config.Comment("Amount of energy used by the animal module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleAnimal = 25;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_MONSTER)
-    @Config.Comment("Amount of energy used by the monster module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleMonster = 50;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_COMMON)
-    @Config.Comment("Amount of energy used by the common ore module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleOreCommon = 75;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ORE_RARE)
-    @Config.Comment("Amount of energy used by the rare ore module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleOreRare = 100;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_BLOCK)
-    @Config.Comment("Amount of energy used by the block module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleBlock = 100;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_STRUCTURE)
-    @Config.Comment("Amount of energy used by the structure module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleStructure = 150;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_FLUID)
-    @Config.Comment("Amount of energy used by the fluid module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleFluid = 50;
-
-    @Config.LangKey(Constants.CONFIG_ENERGY_MODULE_ENTITY)
-    @Config.Comment("Amount of energy used by the entity module per scan.")
-    @Config.RangeInt(min = 0)
-    @Config.RequiresWorldRestart
-    public static int energyCostModuleEntity = 75;
-
-    @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
-    @Config.Comment("The basic scan radius without range modules.\n" +
-                    "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
-                    "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
-                    "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
-                    "Range modules will boost the range by half this value.")
-    @Config.RangeInt(min = 16, max = 128)
-    @Config.RequiresWorldRestart
-    public static int baseScanRadius = 64;
-
-    @Config.LangKey(Constants.CONFIG_BLOCK_BLACKLIST)
-    @Config.Comment("Ore dictionary entries that match the common ore pattern but should be ignored.")
-    @Config.RequiresWorldRestart
-    public static String[] oreBlacklist = {
-    };
-
-    @Config.LangKey(Constants.CONFIG_ORE_BLACKLIST)
-    @Config.Comment("Registry names of blocks that will never be scanned.")
-    @Config.RequiresWorldRestart
-    public static String[] blockBlacklist = {
-            "minecraft:command_block"
-    };
-
-    @Config.LangKey(Constants.CONFIG_ORES_COMMON)
-    @Config.Comment("Ore dictionary entries considered common ores, requiring the common ore scanner module.\n" +
-                    "Use this to mark ores as common, as opposed to rare (see oresRare).")
-    @Config.RequiresWorldRestart
-    public static String[] oresCommon = {
-            // Minecraft
-            "oreCoal",
-            "oreIron",
-            "oreRedstone",
-            "glowstone",
-
-            // Thermal Foundation
-            "oreCopper",
-            "oreTin",
-            "oreLead",
-
-            // Immersive Engineering
-            "oreAluminum",
-            "oreAluminium",
-
-            // Thaumcraft
-            "oreCinnabar"
-    };
-
-    @Config.LangKey(Constants.CONFIG_ORES_RARE)
-    @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.\n" +
-                    "Anything matching /ore[A-Z].*/ that isn't in the common ore list is\n" +
-                    "automatically considered a rare ore (as opposed to the other way around,\n" +
-                    "to make missing entries less likely be a problem). Use this to add rare\n" +
-                    "ores that do follow this pattern.")
-    @Config.RequiresWorldRestart
-    public static String[] oresRare = {
-    };
-
-    @Config.LangKey(Constants.CONFIG_STATES_COMMON)
-    @Config.Comment("Block states considered common ores, requiring the common ore scanner module.\n" +
-                    "Use this to mark arbitrary block states as common ores. Format is as follows:\n" +
-                    "  mod_id:block_name\n" +
-                    "or with block properties:\n" +
-                    "  mod_id:block_name[property1=value1,property2=value2]\n" +
-                    "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
-                    "in the bottom right.")
-    @Config.RequiresWorldRestart
-    public static String[] statesCommon = {
-    };
-
-    @Config.LangKey(Constants.CONFIG_STATES_RARE)
-    @Config.Comment("Block states considered rare ores, requiring the rare ore scanner module.\n" +
-                    "Use this to mark arbitrary block states as rare ores. Format is as follows:\n" +
-                    "  mod_id:block_name\n" +
-                    "or with block properties:\n" +
-                    "  mod_id:block_name[property1=value1,property2=value2]\n" +
-                    "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
-                    "in the bottom right.")
-    @Config.RequiresWorldRestart
-    public static String[] statesRare = {
-    };
-
-    @Config.LangKey(Constants.CONFIG_ORE_COLORS)
-    @Config.Comment("The colors for ores used when rendering their result bounding box.\n" +
-                    "Each entry must be a key-value pair separated by a `=`, with the.\n" +
-                    "key being the ore dictionary name and the value being the hexadecimal\n" +
-                    "RGB value of the color.")
-    @Config.RequiresWorldRestart
-    public static String[] oreColors = {
-            // Minecraft
-            "oreCoal=0x433E3B",
-            "oreIron=0xA17951",
-            "oreGold=0xF4F71F",
-            "oreLapis=0x4863F0",
-            "oreDiamond=0x48E2F0",
-            "oreRedstone=0xE61E1E",
-            "oreEmerald=0x12BA16",
-            "oreQuartz=0xB3D9D2",
-            "glowstone=0xE9E68E",
-
-            // Thermal Foundation
-            "oreCopper=0xE4A020",
-            "oreLead=0x8187C3",
-            "oreMithril=0x97D5FE",
-            "oreNickel=0xD0D3AC",
-            "orePlatinum=0x7AC0FD",
-            "oreSilver=0xE8F2FB",
-            "oreTin=0xCCE4FE",
-
-            // Misc.
-            "oreAluminum=0xCBE4E2",
-            "oreAluminium=0xCBE4E2",
-            "orePlutonium=0x9DE054",
-            "oreUranium=0x9DE054",
-            "oreYellorium=0xD8E054",
-
-            // Tinker's Construct
-            "oreArdite=0xB77E11",
-            "oreCobalt=0x413BB8",
-
-            // Thaumcraft
-            "oreCinnabar=0xF5DA25",
-            "oreInfusedAir=0xF7E677",
-            "oreInfusedFire=0xDC7248",
-            "oreInfusedWater=0x9595D5",
-            "oreInfusedEarth=0x49B45A",
-            "oreInfusedOrder=0x9FF2DE",
-            "oreInfusedEntropy=0x545476"
-    };
-
-    @Config.LangKey(Constants.CONFIG_STRUCTURES)
-    @Config.Comment("The list of structures the structure module scans for.")
-    @Config.RequiresWorldRestart
-    public static String[] structures = {
-            "EndCity",
-            "Fortress",
-            "Mansion",
-            "Mineshaft",
-            "Monument",
-            "Stronghold",
-            "Temple",
-            "Village"
-    };
-
-    @Config.LangKey(Constants.CONFIG_FLUID_BLACKLIST)
-    @Config.Comment("Fluid names of fluids that should be ignored.")
-    @Config.RequiresWorldRestart
-    public static String[] fluidBlacklist = {
-    };
-
-    @Config.LangKey(Constants.CONFIG_FLUID_COLORS)
-    @Config.Comment("The colors for fluids used when rendering their result bounding box.\n" +
-                    "See `oreColors` for format entries have to be in.")
-    @Config.RequiresWorldRestart
-    public static String[] fluidColors = {
-            "water=0x4275DC",
-            "lava=0xE26723"
-    };
-
-    @Config.LangKey(Constants.CONFIG_INJECT_DEPTH_TEXTURE)
-    @Config.Comment("Whether to try to inject a depth texture into Minecraft's FBO when rendering the\n" +
-                    "scan wave effect. This is much faster as it will not have to re-render the world\n" +
-                    "geometry to retrieve the depth information required for the effect. However, it\n" +
-                    "appears that on some systems this doesn't work. The mod tries to detect that and\n" +
-                    "will fall back to re-rendering automatically, but you can force re-rendering by\n" +
-                    "setting this to false, e.g. for debugging or just to avoid the one logged warning.")
-    public static boolean injectDepthTexture = true;
-
-    @Config.LangKey(Constants.CONFIG_LOG_BLOCK_DROP_LOOKUP_FAILURES)
-    @Config.Comment("Whether to log out failure to determine the item stack dropped by a block.\n" +
-                    "Scannable needs to find the item stack representation of a block to get the\n" +
-                    "ore dictionary name(s) of blocks, as well as to show a more accurate tooltip\n" +
-                    "of the currently bound block in the block module. Scannable attempts to find\n" +
-                    "the item stack representation by calling Block.getPickBlock (which is allowed\n" +
-                    "to fail, as some blocks require a valid world state) and alternatively by using\n " +
-                    "Item.getItemFromBlock+Block.damageDropped, the latter being verified using the\n" +
-                    "roundtrip through Block.damageDropped/Item.getMetadata/Block.getStateFromMeta.\n" +
-                    "Sadly this fails for a lot of modded blocks because people rarely implement\n" +
-                    "Block.damageDropped. As a workaround you can add blocks for which this fails to\n" +
-                    "the `statesCommon` and `statesRare` lists.")
-    public static boolean logBlockDropLookupFailures = false;
+    private static final ServerSettings SERVER_INSTANCE;
+    private static final ForgeConfigSpec SERVER_SPEC;
 
     // --------------------------------------------------------------------- //
 
-    private static ServerSettings serverSettings;
-    private static final Set<Block> blockBlacklistSet = new HashSet<>();
+    public static boolean useEnergy = true;
+    public static int energyCapacityScanner = 5000;
+    public static int energyCostModuleRange = 100;
+    public static int energyCostModuleAnimal = 25;
+    public static int energyCostModuleMonster = 50;
+    public static int energyCostModuleOreCommon = 75;
+    public static int energyCostModuleOreRare = 100;
+    public static int energyCostModuleBlock = 100;
+    public static int energyCostModuleStructure = 150;
+    public static int energyCostModuleFluid = 50;
+    public static int energyCostModuleEntity = 75;
 
-    public static void setServerSettings(@Nullable final ServerSettings serverSettings) {
-        Settings.serverSettings = serverSettings;
+    public static int baseScanRadius = 64;
 
-        ScanResultProviderBlock.INSTANCE.rebuildOreCache();
+    public static Set<Block> ignoredBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.COMMAND_BLOCK);
+    });
+    public static Set<Tag<Block>> ignoredBlockTags = new HashSet<>();
 
-        blockBlacklistSet.clear();
-        for (final String blockName : getBlockBlacklist()) {
-            final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockName));
-            if (block != null && block != Blocks.AIR) {
-                blockBlacklistSet.add(block);
+    public static Set<Block> commonOreBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.CLAY);
+    });
+    public static Set<Tag<Block>> commonOreBlockTags = Util.make(new HashSet<>(), c -> {
+        c.add(Tags.Blocks.ORES_COAL);
+        c.add(Tags.Blocks.ORES_IRON);
+        c.add(Tags.Blocks.ORES_REDSTONE);
+        c.add(Tags.Blocks.ORES_QUARTZ);
+    });
+    public static Set<Block> rareOreBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.GLOWSTONE);
+    });
+    public static Set<Tag<Block>> rareOreBlockTags = new HashSet<>();
+
+    public static Set<Tag<Fluid>> ignoredFluidTags = new HashSet<>();
+
+    public static Set<String> structures = Util.make(new HashSet<>(), c -> {
+        c.addAll(GameData.getStructureMap().keySet());
+    });
+
+    // --------------------------------------------------------------------- //
+    // Client settings
+
+    private static final ClientSettings CLIENT_INSTANCE;
+    private static final ForgeConfigSpec CLIENT_SPEC;
+
+    public static Object2IntMap<Tag<Block>> blockColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
+        // Minecraft
+        c.put(Tags.Blocks.ORES_COAL, MaterialColor.GRAY.colorValue);
+        c.put(Tags.Blocks.ORES_IRON, MaterialColor.BROWN.colorValue); // MaterialColor.IRON is also gray, so...
+        c.put(Tags.Blocks.ORES_GOLD, MaterialColor.GOLD.colorValue);
+        c.put(Tags.Blocks.ORES_LAPIS, MaterialColor.LAPIS.colorValue);
+        c.put(Tags.Blocks.ORES_DIAMOND, MaterialColor.DIAMOND.colorValue);
+        c.put(Tags.Blocks.ORES_REDSTONE, MaterialColor.RED.colorValue);
+        c.put(Tags.Blocks.ORES_EMERALD, MaterialColor.EMERALD.colorValue);
+        c.put(Tags.Blocks.ORES_QUARTZ, MaterialColor.QUARTZ.colorValue);
+        c.put(oreTag("glowstone"), MaterialColor.YELLOW.colorValue);
+
+        // Common modded ores
+        c.put(oreTag("tin"), MaterialColor.CYAN.colorValue);
+        c.put(oreTag("copper"), MaterialColor.ORANGE_TERRACOTTA.colorValue);
+        c.put(oreTag("lead"), MaterialColor.BLUE_TERRACOTTA.colorValue);
+        c.put(oreTag("silver"), MaterialColor.LIGHT_GRAY.colorValue);
+        c.put(oreTag("nickel"), MaterialColor.LIGHT_BLUE.colorValue);
+        c.put(oreTag("platinum"), MaterialColor.WHITE_TERRACOTTA.colorValue);
+        c.put(oreTag("mithril"), MaterialColor.PURPLE.colorValue);
+    });
+    public static Object2IntMap<Tag<Fluid>> fluidColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
+        c.put(FluidTags.WATER, MaterialColor.WATER.colorValue);
+        c.put(FluidTags.LAVA, MaterialColor.ORANGE_TERRACOTTA.colorValue);
+    });
+
+    private static Tag<Block> oreTag(final String oreName) {
+        return new BlockTags.Wrapper(new ResourceLocation("forge", "ores/" + oreName));
+    }
+
+    // --------------------------------------------------------------------- //
+
+    static {
+        final Pair<ServerSettings, ForgeConfigSpec> serverConfig = new ForgeConfigSpec.Builder().configure(ServerSettings::new);
+        SERVER_INSTANCE = serverConfig.getKey();
+        SERVER_SPEC = serverConfig.getValue();
+
+        final Pair<ClientSettings, ForgeConfigSpec> clientConfig = new ForgeConfigSpec.Builder().configure(ClientSettings::new);
+        CLIENT_INSTANCE = clientConfig.getKey();
+        CLIENT_SPEC = clientConfig.getValue();
+    }
+
+    public static void register() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Settings.SERVER_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Settings.CLIENT_SPEC);
+    }
+
+    public static boolean isServerConfig(final ForgeConfigSpec spec) {
+        return spec == SERVER_SPEC;
+    }
+
+    public static boolean isClientConfig(final ForgeConfigSpec spec) {
+        return spec == CLIENT_SPEC;
+    }
+
+    public static boolean shouldIgnore(final Block block) {
+        if (ignoredBlocks.contains(block)) {
+            return true;
+        }
+
+        for (final Tag<Block> ignoredBlockTag : ignoredBlockTags) {
+            if (ignoredBlockTag.contains(block)) {
+                return true;
             }
+        }
+
+        return false;
+    }
+
+    @SubscribeEvent
+    public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
+        if (isServerConfig(configEvent.getConfig().getSpec())) {
+            useEnergy = SERVER_INSTANCE.useEnergy.get();
+            energyCapacityScanner = SERVER_INSTANCE.energyCapacityScanner.get();
+            energyCostModuleRange = SERVER_INSTANCE.energyCostModuleRange.get();
+            energyCostModuleAnimal = SERVER_INSTANCE.energyCostModuleAnimal.get();
+            energyCostModuleMonster = SERVER_INSTANCE.energyCostModuleMonster.get();
+            energyCostModuleOreCommon = SERVER_INSTANCE.energyCostModuleOreCommon.get();
+            energyCostModuleOreRare = SERVER_INSTANCE.energyCostModuleOreRare.get();
+            energyCostModuleBlock = SERVER_INSTANCE.energyCostModuleBlock.get();
+            energyCostModuleStructure = SERVER_INSTANCE.energyCostModuleStructure.get();
+            energyCostModuleFluid = SERVER_INSTANCE.energyCostModuleFluid.get();
+            energyCostModuleEntity = SERVER_INSTANCE.energyCostModuleEntity.get();
+
+            baseScanRadius = SERVER_INSTANCE.baseScanRadius.get();
+
+            ignoredBlocks = deserializeSet(SERVER_INSTANCE.ignoredBlocks.get(), Settings::getBlock);
+            ignoredBlockTags = deserializeSet(SERVER_INSTANCE.ignoredBlockTags.get(), Settings::getBlockTag);
+
+            commonOreBlocks = deserializeSet(SERVER_INSTANCE.commonOreBlocks.get(), Settings::getBlock);
+            commonOreBlockTags = deserializeSet(SERVER_INSTANCE.commonOreBlockTags.get(), Settings::getBlockTag);
+            rareOreBlocks = deserializeSet(SERVER_INSTANCE.rareOreBlocks.get(), Settings::getBlock);
+            rareOreBlockTags = deserializeSet(SERVER_INSTANCE.rareOreBlockTags.get(), Settings::getBlockTag);
+
+            ignoredFluidTags = deserializeSet(SERVER_INSTANCE.ignoredFluidTags.get(), Settings::getFluidTag);
+
+            structures = deserializeSet(SERVER_INSTANCE.structures.get(), s -> s);
+        }
+
+        if (isClientConfig(configEvent.getConfig().getSpec())) {
+            deserializeMap(blockColors, CLIENT_INSTANCE.blockColors.get(), Settings::getBlockTag, Integer::decode);
+            deserializeMap(fluidColors, CLIENT_INSTANCE.fluidColors.get(), Settings::getFluidTag, Integer::decode);
         }
     }
 
-    public static Set<Block> getBlockBlacklistSet() {
-        return blockBlacklistSet;
+    private static final class ServerSettings {
+        public ForgeConfigSpec.BooleanValue useEnergy;
+
+        public ForgeConfigSpec.IntValue energyCapacityScanner;
+        public ForgeConfigSpec.IntValue energyCostModuleRange;
+        public ForgeConfigSpec.IntValue energyCostModuleAnimal;
+        public ForgeConfigSpec.IntValue energyCostModuleMonster;
+        public ForgeConfigSpec.IntValue energyCostModuleOreCommon;
+        public ForgeConfigSpec.IntValue energyCostModuleOreRare;
+        public ForgeConfigSpec.IntValue energyCostModuleBlock;
+        public ForgeConfigSpec.IntValue energyCostModuleStructure;
+        public ForgeConfigSpec.IntValue energyCostModuleFluid;
+        public ForgeConfigSpec.IntValue energyCostModuleEntity;
+
+        public ForgeConfigSpec.IntValue baseScanRadius;
+
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredBlocks;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredBlockTags;
+
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> commonOreBlocks;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> commonOreBlockTags;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> rareOreBlocks;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> rareOreBlockTags;
+
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredFluidTags;
+
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> structures;
+
+        public ServerSettings(final ForgeConfigSpec.Builder builder) {
+            builder.push("energy");
+
+            useEnergy = builder
+                    .translation(Constants.CONFIG_USE_ENERGY)
+                    .comment("Whether to consume energy when performing a scan. Will make the scanner a chargeable item.")
+                    .worldRestart()
+                    .define("useEnergy", Settings.useEnergy);
+
+            energyCapacityScanner = builder
+                    .translation(Constants.CONFIG_ENERGY_CAPACITY_SCANNER)
+                    .comment("Amount of energy that can be stored in a scanner.")
+                    .worldRestart()
+                    .defineInRange("energyCapacityScanner", Settings.energyCapacityScanner, 0, Integer.MAX_VALUE);
+
+            energyCostModuleRange = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_RANGE)
+                    .comment("Amount of energy used by the range module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleRange", Settings.energyCostModuleRange, 0, Integer.MAX_VALUE);
+
+            energyCostModuleAnimal = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_ANIMAL)
+                    .comment("Amount of energy used by the animal module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleAnimal", Settings.energyCostModuleAnimal, 0, Integer.MAX_VALUE);
+
+            energyCostModuleMonster = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_MONSTER)
+                    .comment("Amount of energy used by the monster module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleMonster", Settings.energyCostModuleMonster, 0, Integer.MAX_VALUE);
+
+            energyCostModuleOreCommon = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_ORE_COMMON)
+                    .comment("Amount of energy used by the common ore module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleOreCommon", Settings.energyCostModuleOreCommon, 0, Integer.MAX_VALUE);
+
+            energyCostModuleOreRare = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_ORE_RARE)
+                    .comment("Amount of energy used by the rare ore module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleOreRare", Settings.energyCostModuleOreRare, 0, Integer.MAX_VALUE);
+
+            energyCostModuleBlock = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_BLOCK)
+                    .comment("Amount of energy used by the block module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleBlock", Settings.energyCostModuleBlock, 0, Integer.MAX_VALUE);
+
+            energyCostModuleStructure = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_STRUCTURE)
+                    .comment("Amount of energy used by the structure module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleStructure", Settings.energyCostModuleStructure, 0, Integer.MAX_VALUE);
+
+            energyCostModuleFluid = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_FLUID)
+                    .comment("Amount of energy used by the fluid module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleFluid", Settings.energyCostModuleFluid, 0, Integer.MAX_VALUE);
+
+            energyCostModuleEntity = builder
+                    .translation(Constants.CONFIG_ENERGY_MODULE_ENTITY)
+                    .comment("Amount of energy used by the entity module per scan.")
+                    .worldRestart()
+                    .defineInRange("energyCostModuleEntity", Settings.energyCostModuleEntity, 0, Integer.MAX_VALUE);
+
+            builder.pop();
+
+            builder.push("general");
+
+            baseScanRadius = builder
+                    .translation(Constants.CONFIG_BASE_SCAN_RADIUS)
+                    .comment("The basic scan radius without range modules. Higher values mean more computational\n" +
+                            "overhead and thus potentially worse performance while scanning.\n" +
+                            "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
+                            "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
+                            "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
+                            "Range modules will boost the range by half this value.")
+                    .worldRestart()
+                    .defineInRange("baseScanRadius", Settings.baseScanRadius, 16, 128);
+
+            builder.pop();
+
+            builder.push("blocks");
+
+            ignoredBlocks = builder
+                    .translation(Constants.CONFIG_IGNORED_BLOCKS)
+                    .comment("Registry names of blocks that should be ignored.\n" +
+                            "Blocks in this list will be excluded from the default ore list based on the forge:ores\n" +
+                            "tag and it will be impossible to tune the entity module to this block.")
+                    .worldRestart()
+                    .defineList("ignoredBlocks", serializeSet(Settings.ignoredBlocks, v -> Objects.requireNonNull(v.getRegistryName()).toString()), Settings::validateResourceLocation);
+
+            ignoredBlockTags = builder
+                    .translation(Constants.CONFIG_IGNORED_BLOCK_TAGS)
+                    .comment("Tag names of block tags that should be ignored.\n" +
+                            "Blocks matching a tag in this list will be excluded from the default ore list based on the" +
+                            "forge:ores tag and it will be impossible to tune the entity module to this block.")
+                    .worldRestart()
+                    .defineList("ignoredBlockTags", serializeSet(Settings.ignoredBlockTags, v -> v.getId().toString()), Settings::validateResourceLocation);
+
+            builder.pop();
+
+            builder.push("ores");
+
+            commonOreBlocks = builder
+                    .translation(Constants.CONFIG_ORE_COMMON_BLOCKS)
+                    .comment("Registry names of blocks considered 'common ores', requiring the common ore scanner module.")
+                    .worldRestart()
+                    .defineList("commonOreBlocks", serializeSet(Settings.commonOreBlocks, v -> Objects.requireNonNull(v.getRegistryName()).toString()), Settings::validateResourceLocation);
+
+            commonOreBlockTags = builder
+                    .translation(Constants.CONFIG_ORE_COMMON_BLOCK_TAGS)
+                    .comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
+                    .worldRestart()
+                    .defineList("commonOreBlockTags", serializeSet(Settings.commonOreBlockTags, v -> v.getId().toString()), Settings::validateResourceLocation);
+
+            rareOreBlocks = builder
+                    .translation(Constants.CONFIG_ORE_RARE_BLOCKS)
+                    .comment("Registry names of blocks considered 'rare ores', requiring the common ore scanner module.")
+                    .worldRestart()
+                    .defineList("rareOreBlocks", serializeSet(Settings.rareOreBlocks, v -> Objects.requireNonNull(v.getRegistryName()).toString()), Settings::validateResourceLocation);
+
+            rareOreBlockTags = builder
+                    .translation(Constants.CONFIG_ORE_RARE_BLOCK_TAGS)
+                    .comment("Block tags of blocks considered 'rare ores', requiring the common ore scanner module.\n" +
+                            "Any block with the forge:ores tag is implicitly in this list, unless the block also\n" +
+                            "matches an ignored or common ore block tag, or is an ignored or common block.")
+                    .worldRestart()
+                    .defineList("rareOreBlockTags", serializeSet(Settings.rareOreBlockTags, v -> v.getId().toString()), Settings::validateResourceLocation);
+
+            builder.pop();
+
+            builder.push("fluids");
+
+            ignoredFluidTags = builder
+                    .translation(Constants.CONFIG_IGNORED_FLUID_TAGS)
+                    .comment("Fluid tags of fluids that should be ignored.")
+                    .worldRestart()
+                    .defineList("ignoredFluidTags", serializeSet(Settings.ignoredFluidTags, v -> v.getId().toString()), Settings::validateResourceLocation);
+
+            builder.pop();
+
+            builder.push("structures");
+
+            structures = builder
+                    .translation(Constants.CONFIG_STRUCTURES)
+                    .comment("The list of structures the structure module scans for.")
+                    .worldRestart()
+                    .defineList("structures", serializeSet(Settings.structures, v -> v), o -> GameData.getStructureMap().containsKey(o));
+
+            builder.pop();
+        }
+    }
+
+    private static final class ClientSettings {
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> blockColors;
+        public ForgeConfigSpec.ConfigValue<List<? extends String>> fluidColors;
+
+        public ClientSettings(final ForgeConfigSpec.Builder builder) {
+            blockColors = builder
+                    .translation(Constants.CONFIG_BLOCK_COLORS)
+                    .comment("The colors for blocks used when rendering their result bounding box.\n" +
+                            "Each entry must be a key-value pair separated by a `=`, with the.\n" +
+                            "key being the ore dictionary name and the value being the hexadecimal\n" +
+                            "RGB value of the color.")
+                    .worldRestart()
+                    .defineList("blockColors", serializeMap(Settings.blockColors, t -> t.getId().toString(), c -> "0x" + Integer.toHexString(c)),
+                            Settings::validateResourceLocationMapEntry);
+
+            fluidColors = builder
+                    .translation(Constants.CONFIG_FLUID_COLORS)
+                    .comment("The colors for fluids used when rendering their result bounding box.\n" +
+                            "See `oreColors` for format entries have to be in.")
+                    .worldRestart()
+                    .defineList("fluidColors", serializeMap(Settings.fluidColors, t -> t.getId().toString(), c -> "0x" + Integer.toHexString(c)),
+                            Settings::validateResourceLocationMapEntry);
+        }
     }
 
     // --------------------------------------------------------------------- //
 
-    public static boolean useEnergy() {
-        return serverSettings != null ? serverSettings.useEnergy : useEnergy;
+    private static boolean validateResourceLocationMapEntry(final Object value) {
+        return validateMapEntry(value, Settings::validateResourceLocation);
     }
 
-    public static int getEnergyCapacityScanner() {
-        return serverSettings != null ? serverSettings.energyCapacityScanner : energyCapacityScanner;
+    private static boolean validateMapEntry(final Object value, final Predicate<String> validateKey) {
+        final String[] keyValue = ((String) value).split("=", 2);
+        if (keyValue.length != 2) {
+            return false;
+        }
+        if (!validateKey.test(keyValue[0])) {
+            return false;
+        }
+        try {
+            Integer.decode(keyValue[1]);
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+
+        return true;
     }
 
-    public static int getEnergyCostModuleRange() {
-        return serverSettings != null ? serverSettings.energyCostModuleRange : energyCostModuleRange;
+    private static boolean validateResourceLocation(final Object value) {
+        try {
+            new ResourceLocation((String) value);
+            return true;
+        } catch (final ResourceLocationException e) {
+            Scannable.getLog().error(e);
+            return false;
+        }
     }
 
-    public static int getEnergyCostModuleAnimal() {
-        return serverSettings != null ? serverSettings.energyCostModuleAnimal : energyCostModuleAnimal;
+    @Nullable
+    private static Block getBlock(final String o) {
+        return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(o));
     }
 
-    public static int getEnergyCostModuleMonster() {
-        return serverSettings != null ? serverSettings.energyCostModuleMonster : energyCostModuleMonster;
+    private static Tag<Block> getBlockTag(final String o) {
+        return new BlockTags.Wrapper(new ResourceLocation(o));
     }
 
-    public static int getEnergyCostModuleOreCommon() {
-        return serverSettings != null ? serverSettings.energyCostModuleOreCommon : energyCostModuleOreCommon;
+    private static Tag<Fluid> getFluidTag(final String o) {
+        return new FluidTags.Wrapper(new ResourceLocation(o));
     }
 
-    public static int getEnergyCostModuleOreRare() {
-        return serverSettings != null ? serverSettings.energyCostModuleOreRare : energyCostModuleOreRare;
+    private static <T> List<? extends String> serializeSet(final Set<T> set, final Function<T, String> serializer) {
+        final ArrayList<String> result = new ArrayList<>();
+        for (final T v : set) {
+            result.add(serializer.apply(v));
+        }
+        return result;
     }
 
-    public static int getEnergyCostModuleBlock() {
-        return serverSettings != null ? serverSettings.energyCostModuleBlock : energyCostModuleBlock;
+    private static <T> Set<T> deserializeSet(final List<? extends String> list, final Function<String, T> deserializer) {
+        final Set<T> result = new HashSet<>();
+        for (final String v : list) {
+            final T t = deserializer.apply(v);
+            if (t != null) {
+                result.add(t);
+            }
+        }
+        return result;
     }
 
-    public static int getEnergyCostModuleStructure() {
-        return serverSettings != null ? serverSettings.energyCostModuleStructure : energyCostModuleStructure;
+    private static <K, V> List<? extends String> serializeMap(final Map<K, V> map, final Function<K, String> keySerializer, final Function<V, String> valueSerializer) {
+        final ArrayList<String> result = new ArrayList<>();
+        map.forEach((k, v) -> result.add(keySerializer.apply(k) + "=" + valueSerializer.apply(v)));
+        return result;
     }
 
-    public static int getEnergyCostModuleFluid() {
-        return serverSettings != null ? serverSettings.energyCostModuleFluid : energyCostModuleFluid;
-    }
+    private static <K, V> void deserializeMap(final Map<K, V> map, final List<? extends String> list, final Function<String, K> keyDeserializer, final Function<String, V> valueDeserializer) {
+        map.clear();
+        for (final String v : list) {
+            final String[] keyValue = v.split("=", 2);
+            if (keyValue.length != 2) {
+                Scannable.getLog().error("Failed parsing setting value [{}].", v);
+                continue;
+            }
 
-    public static int getEnergyCostModuleEntity() {
-        return serverSettings != null ? serverSettings.energyCostModuleEntity : energyCostModuleEntity;
-    }
+            final K key = keyDeserializer.apply(keyValue[0]);
+            final V value = valueDeserializer.apply(keyValue[1]);
 
-    public static int getBaseScanRadius() {
-        return serverSettings != null ? serverSettings.baseScanRadius : baseScanRadius;
-    }
-
-    public static String[] getBlockBlacklist() {
-        return serverSettings != null ? serverSettings.blockBlacklist : blockBlacklist;
-    }
-
-    public static String[] getOreBlacklist() {
-        return serverSettings != null ? serverSettings.oresBlacklist : oreBlacklist;
-    }
-
-    public static String[] getCommonOres() {
-        return serverSettings != null ? serverSettings.oresCommon : oresCommon;
-    }
-
-    public static String[] getRareOres() {
-        return serverSettings != null ? serverSettings.oresRare : oresRare;
-    }
-
-    public static String[] getCommonStates() {
-        return serverSettings != null ? serverSettings.statesCommon : statesCommon;
-    }
-
-    public static String[] getRareStates() {
-        return serverSettings != null ? serverSettings.statesRare : statesRare;
-    }
-
-    public static String[] getStructures() {
-        return serverSettings != null ? serverSettings.structures : structures;
-    }
-
-    public static String[] getFluidBlacklist() {
-        return serverSettings != null ? serverSettings.fluidBlacklist : fluidBlacklist;
+            if (key != null && value != null) {
+                map.put(key, value);
+            }
+        }
     }
 
     // --------------------------------------------------------------------- //

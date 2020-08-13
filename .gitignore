@@ -1,18 +1,24 @@
-/*
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
 
-# folders
-!/gradle
-!/src
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
 
-# files
-!/.gitignore
-!/README.md
-!/build.gradle
-!/build.properties
-!/gradlew
-!/gradlew.bat
-!/changelog.md
+# gradle
+build
+.gradle
 
-# APIs and dependencies
-!/libs
-/libs/*
+# other
+eclipse
+run
+
+src/generated/**/.cache/

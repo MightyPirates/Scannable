@@ -1,56 +1,61 @@
 package li.cil.scannable.common.container;
 
-import li.cil.scannable.common.init.Items;
+import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.inventory.ItemHandlerScanner;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
+import li.cil.scannable.common.item.ItemScanner;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Hand;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class ContainerScanner extends Container {
-    private final EntityPlayer player;
-    private final EnumHand hand;
+    private final PlayerEntity player;
+    private final Hand hand;
+
+    public static ContainerScanner createForServer(final int windowId, final PlayerInventory inventory, final Hand hand, final ItemHandlerScanner itemHandler) {
+        return new ContainerScanner(windowId, inventory, hand, itemHandler);
+    }
+
+    public static ContainerScanner createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
+        final Hand hand = buffer.readEnumValue(Hand.class);
+        return new ContainerScanner(windowId, inventory, hand, new ItemHandlerScanner(inventory.player.getHeldItem(hand)));
+    }
 
     // --------------------------------------------------------------------- //
 
-    public ContainerScanner(final EntityPlayer player, final EnumHand hand) {
-        this.player = player;
+    public ContainerScanner(final int windowId, final PlayerInventory inventory, final Hand hand, final ItemHandlerScanner itemHandler) {
+        super(Scannable.SCANNER_CONTAINER.get(), windowId);
+
+        this.player = inventory.player;
         this.hand = hand;
 
-        final IItemHandlerModifiable itemHandler = (IItemHandlerModifiable) player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        assert itemHandler instanceof ItemHandlerScanner;
-
-        final IItemHandler activeModules = ((ItemHandlerScanner) itemHandler).getActiveModules();
+        final IItemHandler activeModules = itemHandler.getActiveModules();
         for (int slot = 0; slot < activeModules.getSlots(); ++slot) {
-            addSlotToContainer(new SlotItemHandler(activeModules, slot, 62 + slot * 18, 20));
+            addSlot(new SlotItemHandler(activeModules, slot, 62 + slot * 18, 20));
         }
 
-        final IItemHandler storedModules = ((ItemHandlerScanner) itemHandler).getInactiveModules();
+        final IItemHandler storedModules = itemHandler.getInactiveModules();
         for (int slot = 0; slot < storedModules.getSlots(); ++slot) {
-            addSlotToContainer(new SlotItemHandler(storedModules, slot, 62 + slot * 18, 46));
+            addSlot(new SlotItemHandler(storedModules, slot, 62 + slot * 18, 46));
         }
 
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                addSlotToContainer(new Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, row * 18 + 77));
+                addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, row * 18 + 77));
             }
         }
 
         for (int slot = 0; slot < 9; ++slot) {
-            addSlotToContainer(new Slot(player.inventory, slot, 8 + slot * 18, 135));
+            addSlot(new Slot(inventory, slot, 8 + slot * 18, 135));
         }
     }
 
-    public EntityPlayer getPlayer() {
-        return player;
-    }
-
-    public EnumHand getHand() {
+    public Hand getHand() {
         return hand;
     }
 
@@ -58,12 +63,12 @@ public final class ContainerScanner extends Container {
     // Container
 
     @Override
-    public boolean canInteractWith(final EntityPlayer player) {
-        return player == this.player && Items.isScanner(player.getHeldItem(hand));
+    public boolean canInteractWith(final PlayerEntity player) {
+        return player == this.player && ItemScanner.isScanner(player.getHeldItem(hand));
     }
 
     @Override
-    public ItemStack transferStackInSlot(final EntityPlayer player, final int index) {
+    public ItemStack transferStackInSlot(final PlayerEntity player, final int index) {
         final Slot from = inventorySlots.get(index);
         if (from == null) {
             return ItemStack.EMPTY;

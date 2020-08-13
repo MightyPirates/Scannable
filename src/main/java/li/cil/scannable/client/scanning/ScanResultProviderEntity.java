@@ -1,101 +1,72 @@
 package li.cil.scannable.client.scanning;
 
-import li.cil.scannable.api.Icons;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
+import li.cil.scannable.api.scanning.ScanFilterEntity;
 import li.cil.scannable.api.scanning.ScanResult;
-import li.cil.scannable.common.config.Settings;
-import li.cil.scannable.common.init.Items;
-import li.cil.scannable.common.item.ItemScannerModuleEntity;
-import net.minecraft.client.renderer.GlStateManager;
+import li.cil.scannable.api.scanning.ScannerModule;
+import li.cil.scannable.api.scanning.ScannerModuleEntity;
+import li.cil.scannable.common.capabilities.CapabilityScannerModule;
+import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.monster.EntityGhast;
-import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntityBat;
-import net.minecraft.entity.passive.EntitySquid;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.LazyOptional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
+@OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     public static final ScanResultProviderEntity INSTANCE = new ScanResultProviderEntity();
 
     // --------------------------------------------------------------------- //
 
-    private boolean scanAnimal;
-    private boolean scanMonster;
-    private String scanEntity;
+    private final List<ScanFilterEntity> scanFilters = new ArrayList<>();
     private AxisAlignedBB bounds;
     private int minX, maxX, minZ, maxZ;
     private int chunksPerTick;
     private int x, z;
-    private final List<EntityLivingBase> entities = new ArrayList<>();
-
-    // --------------------------------------------------------------------- //
-
-    private ScanResultProviderEntity() {
-    }
+    private final List<LivingEntity> entities = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
     // ScanResultProvider
 
     @Override
-    public int getEnergyCost(final EntityPlayer player, final ItemStack module) {
-        if (Items.isModuleAnimal(module)) {
-            return Settings.getEnergyCostModuleAnimal();
-        }
-        if (Items.isModuleMonster(module)) {
-            return Settings.getEnergyCostModuleMonster();
-        }
-        if (Items.isModuleEntity(module)) {
-            return Settings.getEnergyCostModuleEntity();
-        }
-
-        throw new IllegalArgumentException(String.format("Module not supported by this provider: %s", module));
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void initialize(final EntityPlayer player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
 
-        scanAnimal = false;
-        scanMonster = false;
-        scanEntity = null;
+        scanFilters.clear();
         for (final ItemStack module : modules) {
-            scanAnimal |= Items.isModuleAnimal(module);
-            scanMonster |= Items.isModuleMonster(module);
-            if (Items.isModuleEntity(module)) {
-                scanEntity = ItemScannerModuleEntity.getEntity(module);
-            }
+            final LazyOptional<ScannerModule> capability = module.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
+            capability
+                    .filter(c -> c instanceof ScannerModuleEntity)
+                    .ifPresent(c -> {
+                        final Optional<ScanFilterEntity> filter = ((ScannerModuleEntity) c).getFilter(module);
+                        filter.ifPresent(scanFilters::add);
+                    });
         }
 
         bounds = new AxisAlignedBB(center.x - radius, center.y - radius, center.z - radius,
-                                   center.x + radius, center.y + radius, center.z + radius);
+                center.x + radius, center.y + radius, center.z + radius);
 
-        minX = MathHelper.floor((bounds.minX - World.MAX_ENTITY_RADIUS) / 16f);
-        maxX = MathHelper.ceil((bounds.maxX + World.MAX_ENTITY_RADIUS) / 16f);
-        minZ = MathHelper.floor((bounds.minZ - World.MAX_ENTITY_RADIUS) / 16f);
-        maxZ = MathHelper.ceil((bounds.maxZ + World.MAX_ENTITY_RADIUS) / 16f);
+        final double maxEntityRadius = player.world.getMaxEntityRadius();
+        minX = MathHelper.floor((bounds.minX - maxEntityRadius) / 16f);
+        maxX = MathHelper.ceil((bounds.maxX + maxEntityRadius) / 16f);
+        minZ = MathHelper.floor((bounds.minZ - maxEntityRadius) / 16f);
+        maxZ = MathHelper.ceil((bounds.maxZ + maxEntityRadius) / 16f);
         x = minX - 1; // -1 for initial moveNext.
         z = minZ;
 
@@ -103,7 +74,6 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         chunksPerTick = MathHelper.ceil(count / (float) scanTicks);
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
     public void computeScanResults(final Consumer<ScanResult> callback) {
         final World world = player.getEntityWorld();
@@ -112,67 +82,64 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
                 return;
             }
 
-            world.getChunk(x, z).getEntitiesOfTypeWithinAABB(EntityLiving.class, bounds, entities, this::FilterEntities);
-            for (final EntityLivingBase entity : entities) {
-                if (entity.isDead) {
+            world.getChunk(x, z).getEntitiesOfTypeWithinAABB(LivingEntity.class, bounds, entities, this::FilterEntities);
+            for (final LivingEntity entity : entities) {
+                if (!entity.isAlive()) {
                     continue;
                 }
 
                 final Vec3d position = entity.getPositionVector();
                 if (center.distanceTo(position) < radius) {
-                    callback.accept(new ScanResultEntity(entity));
+                    ResourceLocation icon = API.ICON_INFO;
+                    for (final ScanFilterEntity filter : scanFilters) {
+                        if (filter.matches(entity)) {
+                            final Optional<ResourceLocation> filterIcon = filter.getIcon(entity);
+                            if (filterIcon.isPresent()) {
+                                icon = filterIcon.get();
+                                break;
+                            }
+                        }
+                    }
+                    callback.accept(new ScanResultEntity(entity, icon));
                 }
             }
             entities.clear();
         }
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public void render(final Entity entity, final List<ScanResult> results, final float partialTicks) {
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-        GlStateManager.enableBlend();
+    public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
+        final float yaw = renderInfo.getYaw();
+        final float pitch = renderInfo.getPitch();
 
-        final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-        final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-        final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        final float yaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks;
-        final float pitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
+        final Vec3d lookVec = new Vec3d(renderInfo.getViewVector());
+        final Vec3d viewerEyes = renderInfo.getProjectedView();
 
-        final Vec3d lookVec = entity.getLook(partialTicks).normalize();
-        final Vec3d viewerEyes = entity.getPositionEyes(partialTicks);
-
-        final boolean showDistance = entity.isSneaking();
+        final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
 
         // Order results by distance to center of screen (deviation from look
         // vector) so that labels we're looking at are in front of others.
         results.sort(Comparator.comparing(result -> {
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
-            final Vec3d entityEyes = resultEntity.entity.getPositionEyes(partialTicks);
+            final Vec3d entityEyes = resultEntity.entity.getEyePosition(partialTicks);
             final Vec3d toResult = entityEyes.subtract(viewerEyes);
             return lookVec.dotProduct(toResult.normalize());
         }));
 
         for (final ScanResult result : results) {
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
-            final String name = resultEntity.entity.getName();
-            final ResourceLocation icon = isMonster(resultEntity.entity) ? Icons.WARNING : Icons.INFO;
-            final Vec3d resultPos = resultEntity.entity.getPositionEyes(partialTicks);
+            final ITextComponent name = resultEntity.entity.getName();
+            final ResourceLocation icon = resultEntity.getIcon();
+            final Vec3d resultPos = resultEntity.entity.getEyePosition(partialTicks);
             final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).length() : 0f;
-            renderIconLabel(posX, posY, posZ, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
+            renderIconLabel(renderTypeBuffer, matrixStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
         }
-
-        GlStateManager.disableBlend();
-        GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
     public void reset() {
         super.reset();
-        scanAnimal = scanMonster = false;
+        scanFilters.clear();
         bounds = null;
         minX = maxX = minZ = maxZ = 0;
         chunksPerTick = 0;
@@ -182,7 +149,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
     // --------------------------------------------------------------------- //
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private boolean moveNext() {
         x++;
         if (x > maxX) {
@@ -197,60 +164,22 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     }
 
     private <T extends Entity> boolean FilterEntities(final T entity) {
-        if (scanEntity != null && Objects.equals(scanEntity, EntityList.getEntityString(entity))) {
-            return true;
-        }
-
-        if (scanAnimal && isAnimal(entity)) {
-            return true;
-        }
-
-        if (scanMonster && isMonster(entity)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static boolean isAnimal(final Entity entity) {
-        if (entity instanceof EntityAnimal) {
-            return true;
-        }
-        if (entity instanceof EntityBat) {
-            return true;
-        }
-        if (entity instanceof EntitySquid) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean isMonster(final Entity entity) {
-        if (entity instanceof EntityMob) {
-            return true;
-        }
-        if (entity instanceof EntitySlime) {
-            return true;
-        }
-        if (entity instanceof EntityGhast) {
-            return true;
-        }
-        if (entity instanceof EntityDragon) {
-            return true;
-        }
-        if (entity instanceof EntityGolem) {
-            return true;
-        }
-        return false;
+        return scanFilters.stream().anyMatch(f -> f.matches(entity));
     }
 
     // --------------------------------------------------------------------- //
 
     private static final class ScanResultEntity implements ScanResult {
         private final Entity entity;
+        private final ResourceLocation icon;
 
-        ScanResultEntity(final Entity entity) {
+        ScanResultEntity(final Entity entity, final ResourceLocation icon) {
             this.entity = entity;
+            this.icon = icon;
+        }
+
+        public ResourceLocation getIcon() {
+            return icon;
         }
 
         // --------------------------------------------------------------------- //
@@ -266,4 +195,10 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             return entity.getRenderBoundingBox();
         }
     }
+
+    // --------------------------------------------------------------------- //
+
+    private ScanResultProviderEntity() {
+    }
+
 }

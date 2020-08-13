@@ -1,0 +1,28 @@
+modLoader="javafml" #mandatory
+loaderVersion="[31,)" #mandatory
+issueTrackerURL="https://github.com/MightyPirates/Scannable/issues" #optional
+
+[[mods]] #mandatory
+modId="scannable" #mandatory
+version="${file.jarVersion}" #mandatory
+displayName="Scannable" #mandatory
+#updateJSONURL="http://myurl.me/" #optional
+displayURL="https://github.com/MightyPirates/Scannable" #optional
+#logoFile="examplemod.png" #optional
+authors="Sangar" #optional
+description='''
+Scan the area for points of interest.
+'''
+
+[[dependencies.scannable]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[31,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.scannable]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2]"
+    ordering="NONE"
+    side="BOTH"

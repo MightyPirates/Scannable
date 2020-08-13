@@ -1,22 +1,25 @@
 buildscript {
     repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
 
-plugins {
-    id "com.matthewprenger.cursegradle" version "1.0.9"
-}
+ plugins {
+     id "com.matthewprenger.cursegradle" version "1.4.0"
+ }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+
+repositories {
+    maven { url "http://dvs1.progwml6.com/files/maven" } // JEI
+}
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -55,45 +58,45 @@ ext.simpleVersion = version
 version = "MC${config.minecraft.version}-${project.version}"
 
 minecraft {
-    version = "${config.minecraft.version}-${config.forge.version}"
-    runDir = "run"
-    mappings = config.minecraft.mappings
-    replace "@VERSION@", project.simpleVersion
-}
+    mappings channel: config.minecraft.mappings.channel, version: config.minecraft.mappings.version
 
-repositories {
-    maven { url "http://dvs1.progwml6.com/files/maven" }
-    maven { url = "http://maven.ic2.player.to/" }
-    maven { url = "http://maven.covers1624.net" }
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+
+            source sourceSets.main
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+
+            source sourceSets.main
+        }
+    }
 }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_${config.minecraft.version}:${config.jei.version}"
-    deobfCompile "net.industrial-craft:industrialcraft-2:${config.ic2.version}"
-    deobfCompile "cofh:RedstoneFlux:${config.rf.version}:universal"
-}
-
-processResources {
-    inputs.property "version", project.simpleVersion
-    inputs.property "mcversion", project.minecraft.version
-    inputs.property "fversion", config.forge.version
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version':project.simpleVersion, 'mcversion':project.minecraft.version, 'fversion':config.forge.version
-    }
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-
-    // Move access transformer to META-INF
-    rename '(.+_at.cfg)', 'META-INF/$1'
+    minecraft "net.minecraftforge:forge:${config.minecraft.version}-${config.forge.version}"
+ 
+    compileOnly fg.deobf("mezz.jei:jei-${config.minecraft.version}:${config.jei.version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${config.minecraft.version}:${config.jei.version}")
 }
 
 jar {
     manifest {
-        attributes FMLAT: "scannable_at.cfg"
+        attributes FMLAT: "accesstransformer.cfg"
     }
 }
+
+jar.finalizedBy('reobfJar')
 
 task apiJar(type: Jar) {
     from sourceSets.main.allSource
@@ -127,21 +130,14 @@ publishing {
     }
 }
 
-curseforge {
-    apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
-    project {
-        id = config.curse.project.id
-        releaseType = config.curse.project.releaseType
-        changelogType = "markdown"
-        changelog = file("changelog.md")
-        addGameVersion config.minecraft.version
-        addGameVersion "Java 8"
-    }
-}
-
-// this is needed for IntelliJ so we don't have to copy over the assets manually every time
-idea {
-    module {
-        outputDir = file('build/classes/main')
-    }
-}
+ curseforge {
+     apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
+     project {
+         id = config.curse.project.id
+         releaseType = config.curse.project.releaseType
+         changelogType = "markdown"
+         changelog = file("changelog.md")
+         addGameVersion config.minecraft.version
+         addGameVersion "Java 8"
+     }
+ }

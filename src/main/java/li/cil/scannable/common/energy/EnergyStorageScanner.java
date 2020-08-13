@@ -2,25 +2,25 @@ package li.cil.scannable.common.energy;
 
 import li.cil.scannable.common.config.Settings;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.EnergyStorage;
 
-public final class EnergyStorageScanner extends EnergyStorage implements INBTSerializable<NBTTagInt> {
+public final class EnergyStorageScanner extends EnergyStorage implements INBTSerializable<IntNBT> {
     private static final String TAG_ENERGY = "energy";
 
     private final ItemStack container;
 
     public EnergyStorageScanner(final ItemStack container) {
-        super(Settings.getEnergyCapacityScanner());
+        super(Settings.energyCapacityScanner);
         this.container = container;
     }
 
     public void updateFromNBT() {
-        final NBTTagCompound nbt = container.getTagCompound();
-        if (nbt != null && nbt.hasKey(TAG_ENERGY, net.minecraftforge.common.util.Constants.NBT.TAG_INT)) {
-            deserializeNBT((NBTTagInt) nbt.getTag(TAG_ENERGY));
+        final CompoundNBT nbt = container.getTag();
+        if (nbt != null && nbt.contains(TAG_ENERGY, net.minecraftforge.common.util.Constants.NBT.TAG_INT)) {
+            deserializeNBT((IntNBT) nbt.get(TAG_ENERGY));
         }
     }
 
@@ -29,7 +29,7 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
 
     @Override
     public int receiveEnergy(final int maxReceive, final boolean simulate) {
-        if (!Settings.useEnergy()) {
+        if (!Settings.useEnergy) {
             return 0;
         }
 
@@ -43,7 +43,7 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
 
     @Override
     public int extractEnergy(final int maxExtract, final boolean simulate) {
-        if (!Settings.useEnergy()) {
+        if (!Settings.useEnergy) {
             return 0;
         }
 
@@ -59,12 +59,12 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
     // INBTSerializable
 
     @Override
-    public NBTTagInt serializeNBT() {
-        return new NBTTagInt(energy);
+    public IntNBT serializeNBT() {
+        return IntNBT.valueOf(energy);
     }
 
     @Override
-    public void deserializeNBT(final NBTTagInt nbt) {
+    public void deserializeNBT(final IntNBT nbt) {
         energy = nbt.getInt();
     }
 }

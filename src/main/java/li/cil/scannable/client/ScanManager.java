@@ -1,46 +1,51 @@
 package li.cil.scannable.client;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
+import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
-import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
+import li.cil.scannable.common.capabilities.CapabilityScannerModule;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
-import li.cil.scannable.common.init.Items;
-import li.cil.scannable.integration.optifine.ProxyOptiFine;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockReader;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public enum ScanManager {
     INSTANCE;
 
     // --------------------------------------------------------------------- //
 
-    private static int computeTargetRadius() {
-        return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE - Constants.SCAN_INITIAL_RADIUS;
+    private static float computeTargetRadius() {
+        return Minecraft.getInstance().gameRenderer.getFarPlaneDistance();
     }
 
     public static int computeScanGrowthDuration() {
-        return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks / Constants.REFERENCE_RENDER_DISTANCE;
+        return Constants.SCAN_GROWTH_DURATION * Minecraft.getInstance().gameSettings.renderDistanceChunks / Constants.REFERENCE_RENDER_DISTANCE;
     }
 
     public static float computeRadius(final long start, final float duration) {
@@ -52,7 +57,7 @@ public enum ScanManager {
         //   c = r1/((t1 + b)^2 - b*b)
         //   a = -r1*b*b/((t1 + b)^2 - b*b)
 
-        final float r1 = (float) computeTargetRadius();
+        final float r1 = computeTargetRadius();
         final float t1 = duration;
         final float b = Constants.SCAN_TIME_OFFSET;
         final float n = 1f / ((t1 + b) * (t1 + b) - b * b);
@@ -85,20 +90,23 @@ public enum ScanManager {
 
     // --------------------------------------------------------------------- //
 
-    public void beginScan(final EntityPlayer player, final List<ItemStack> modules) {
+    public void beginScan(final PlayerEntity player, final List<ItemStack> stacks) {
         cancelScan();
 
-        float scanRadius = Settings.getBaseScanRadius();
+        float scanRadius = Settings.baseScanRadius;
 
-        for (final ItemStack module : modules) {
-            final ScanResultProvider provider = module.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
+        final List<ScannerModule> modules = new ArrayList<>();
+        for (final ItemStack stack : stacks) {
+            final LazyOptional<ScannerModule> module = stack.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
+            module.ifPresent(modules::add);
+        }
+        for (final ScannerModule module : modules) {
+            final ScanResultProvider provider = module.getResultProvider();
             if (provider != null) {
                 collectingProviders.add(provider);
             }
 
-            if (Items.isModuleRange(module)) {
-                scanRadius += MathHelper.ceil(Settings.getBaseScanRadius() / 2f);
-            }
+            scanRadius = module.adjustGlobalRange(scanRadius);
         }
 
         if (collectingProviders.isEmpty()) {
@@ -107,7 +115,7 @@ public enum ScanManager {
 
         final Vec3d center = player.getPositionVector();
         for (final ScanResultProvider provider : collectingProviders) {
-            provider.initialize(player, modules, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
+            provider.initialize(player, stacks, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
         }
     }
 
@@ -163,6 +171,11 @@ public enum ScanManager {
             return;
         }
 
+        final IBlockReader world = Minecraft.getInstance().world;
+        if (world == null) {
+            return;
+        }
+
         if (lastScanCenter == null || currentStart < 0) {
             return;
         }
@@ -171,7 +184,7 @@ public enum ScanManager {
             pendingResults.clear();
             synchronized (renderingResults) {
                 if (!renderingResults.isEmpty()) {
-                    for (Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = renderingResults.entrySet().iterator(); iterator.hasNext(); ) {
+                    for (final Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = renderingResults.entrySet().iterator(); iterator.hasNext(); ) {
                         final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
                         final List<ScanResult> list = entry.getValue();
                         for (int i = MathHelper.ceil(list.size() / 2f); i > 0; i--) {
@@ -208,7 +221,7 @@ public enum ScanManager {
                 final Vec3d position = result.getPosition();
                 if (lastScanCenter.squareDistanceTo(position) <= sqRadius) {
                     results.remove(results.size() - 1);
-                    if (!provider.isValid(result)) {
+                    if (!provider.bakeResult(world, result)) {
                         continue;
                     }
                     synchronized (renderingResults) {
@@ -225,19 +238,23 @@ public enum ScanManager {
         }
     }
 
+    private MatrixStack viewMatrix;
+    private Matrix4f projectionMatrix;
+
     @SubscribeEvent
     public void onRenderLast(final RenderWorldLastEvent event) {
-        final boolean isUsingShaders = ProxyOptiFine.INSTANCE.isShaderPackLoaded();
-        if (isUsingShaders) {
-            return;
-        }
-
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
             }
 
-            render(event.getPartialTicks());
+//            final MatrixStack matrixStack = event.getMatrixStack();
+
+            viewMatrix = new MatrixStack();
+            viewMatrix.getLast().getMatrix().set(event.getMatrixStack().getLast().getMatrix());
+            projectionMatrix = event.getProjectionMatrix();
+
+//            render(event.getPartialTicks(), matrixStack, event.getProjectionMatrix());
         }
     }
 
@@ -247,56 +264,49 @@ public enum ScanManager {
             return;
         }
 
-        final boolean isUsingShaders = ProxyOptiFine.INSTANCE.isShaderPackLoaded();
-        if (!isUsingShaders) {
-            return;
-        }
-
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
             }
 
             // Using shaders so we render as game overlay; restore matrices as used for world rendering.
-            GlStateManager.matrixMode(GL11.GL_PROJECTION);
-            GlStateManager.pushMatrix();
-            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-            GlStateManager.pushMatrix();
+            RenderSystem.matrixMode(GL11.GL_PROJECTION);
+            RenderSystem.pushMatrix();
+            RenderSystem.loadIdentity();
+            RenderSystem.multMatrix(projectionMatrix);
+            RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+            RenderSystem.pushMatrix();
+            RenderSystem.loadIdentity();
 
-            Minecraft.getMinecraft().entityRenderer.setupCameraTransform(event.getPartialTicks(), 2);
-            render(event.getPartialTicks());
+            render(event.getPartialTicks(), viewMatrix, projectionMatrix);
 
-            GlStateManager.matrixMode(GL11.GL_PROJECTION);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-            GlStateManager.popMatrix();
+            RenderSystem.matrixMode(GL11.GL_PROJECTION);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+            RenderSystem.popMatrix();
         }
     }
 
-    private void render(final float partialTicks) {
-        final Minecraft mc = Minecraft.getMinecraft();
+    private void render(final float partialTicks, final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
+        final ActiveRenderInfo activeRenderInfo = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
+        final Vec3d pos = activeRenderInfo.getProjectedView();
 
-        final Entity entity = mc.getRenderViewEntity();
-        if (entity == null) {
-            return;
-        }
+        final ClippingHelperImpl frustum = new ClippingHelperImpl(matrixStack.getLast().getMatrix(), projectionMatrix);
+        frustum.setCameraPosition(pos.getX(), pos.getY(), pos.getZ());
 
-        final ICamera frustum = new Frustum();
-        final double posX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-        final double posY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-        final double posZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        frustum.setPosition(posX, posY, posZ);
+        RenderSystem.disableDepthTest();
 
-        GlStateManager.bindTexture(0);
-        GlStateManager.color(1, 1, 1, 1);
+        matrixStack.push();
+        matrixStack.translate(-pos.x, -pos.y, -pos.z);
 
         // We render all results in batches, grouped by their provider.
         // This allows providers to do more optimized rendering, in e.g.
         // setting up the render state once before rendering all visuals,
         // or even set up display lists or VBOs.
+        final IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
         for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
             // Quick and dirty frustum culling.
-            for (ScanResult result : entry.getValue()) {
+            for (final ScanResult result : entry.getValue()) {
                 final AxisAlignedBB bounds = result.getRenderBounds();
                 if (bounds == null || frustum.isBoundingBoxInFrustum(bounds)) {
                     renderingList.add(result);
@@ -304,10 +314,15 @@ public enum ScanManager {
             }
 
             if (!renderingList.isEmpty()) {
-                entry.getKey().render(entity, renderingList, partialTicks);
+                entry.getKey().render(renderTypeBuffer, matrixStack, projectionMatrix, activeRenderInfo, partialTicks, renderingList);
                 renderingList.clear();
             }
         }
+        renderTypeBuffer.finish();
+
+        matrixStack.pop();
+
+        RenderSystem.enableDepthTest();
     }
 
     // --------------------------------------------------------------------- //

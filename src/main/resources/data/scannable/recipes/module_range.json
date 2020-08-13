@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "scannable:module_blank"
+    },
+    {
+      "tag": "forge:ender_pearls"
+    }
+  ],
+  "result": {
+    "item": "scannable:module_range"
+  }
+}
