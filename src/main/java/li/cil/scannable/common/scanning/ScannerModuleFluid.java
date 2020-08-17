@@ -4,7 +4,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
-import li.cil.scannable.client.scanning.filter.ScanFilterCache;
+import li.cil.scannable.client.scanning.filter.ScanFilterBlockCache;
 import li.cil.scannable.client.scanning.filter.ScanFilterFluidTag;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
@@ -67,7 +67,7 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
                 filters.add(new ScanFilterFluidTag(tag));
             }
         }
-        filter = new ScanFilterCache(filters);
+        filter = new ScanFilterBlockCache(filters);
     }
 
     @OnlyIn(Dist.CLIENT)

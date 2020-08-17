@@ -4,7 +4,9 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.client.InitializerClient;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.container.BlockModuleContainer;
 import li.cil.scannable.common.container.ContainerScanner;
+import li.cil.scannable.common.container.EntityModuleContainer;
 import li.cil.scannable.common.item.*;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
@@ -38,6 +40,8 @@ public final class Scannable {
 
     public static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, API.MOD_ID);
     public static final RegistryObject<ContainerType<ContainerScanner>> SCANNER_CONTAINER = CONTAINERS.register(Constants.NAME_SCANNER, () -> IForgeContainerType.create(ContainerScanner::createForClient));
+    public static final RegistryObject<ContainerType<BlockModuleContainer>> BLOCK_MODULE_CONTAINER = CONTAINERS.register(Constants.NAME_MODULE_BLOCK, () -> IForgeContainerType.create(BlockModuleContainer::createForClient));
+    public static final RegistryObject<ContainerType<EntityModuleContainer>> ENTITY_MODULE_CONTAINER = CONTAINERS.register(Constants.NAME_MODULE_ENTITY, () -> IForgeContainerType.create(EntityModuleContainer::createForClient));
 
     public static final Tag<Item> MODULES = new ItemTags.Wrapper(new ResourceLocation(API.MOD_ID, "modules"));
 

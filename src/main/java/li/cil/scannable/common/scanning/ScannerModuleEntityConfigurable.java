@@ -4,6 +4,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterEntity;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleEntity;
+import li.cil.scannable.client.scanning.filter.ScanFilterEntityList;
 import li.cil.scannable.client.scanning.filter.ScanFilterEntityType;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.item.ItemScannerModuleEntityConfigurable;
@@ -14,7 +15,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public enum ScannerModuleEntityConfigurable implements ScannerModuleEntity {
     INSTANCE;
@@ -33,7 +36,7 @@ public enum ScannerModuleEntityConfigurable implements ScannerModuleEntity {
     @OnlyIn(Dist.CLIENT)
     @Override
     public Optional<ScanFilterEntity> getFilter(final ItemStack module) {
-        final Optional<EntityType<?>> entityType = ItemScannerModuleEntityConfigurable.getEntityType(module);
-        return entityType.map(ScanFilterEntityType::new);
+        final List<EntityType<?>> entityType = ItemScannerModuleEntityConfigurable.getEntityTypes(module);
+        return Optional.of(new ScanFilterEntityList(entityType.stream().map(ScanFilterEntityType::new).collect(Collectors.toList())));
     }
 }

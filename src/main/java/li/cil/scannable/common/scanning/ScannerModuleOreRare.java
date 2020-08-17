@@ -5,7 +5,7 @@ import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
 import li.cil.scannable.client.scanning.filter.ScanFilterBlockTag;
-import li.cil.scannable.client.scanning.filter.ScanFilterCache;
+import li.cil.scannable.client.scanning.filter.ScanFilterBlockCache;
 import li.cil.scannable.client.scanning.filter.ScanFilterRareOreCatchAll;
 import li.cil.scannable.client.scanning.filter.ScanFilterSingleBlock;
 import li.cil.scannable.common.config.Constants;
@@ -70,7 +70,7 @@ public enum ScannerModuleOreRare implements ScannerModuleBlock {
             filters.add(new ScanFilterBlockTag(tag));
         }
         filters.add(ScanFilterRareOreCatchAll.INSTANCE);
-        filter = new ScanFilterCache(filters);
+        filter = new ScanFilterBlockCache(filters);
     }
 
     @OnlyIn(Dist.CLIENT)

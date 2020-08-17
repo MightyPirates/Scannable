@@ -1,5 +1,7 @@
 package li.cil.scannable.client;
 
+import li.cil.scannable.client.gui.BlockModuleScreen;
+import li.cil.scannable.client.gui.EntityModuleScreen;
 import li.cil.scannable.client.gui.GuiScanner;
 import li.cil.scannable.client.renderer.OverlayRenderer;
 import li.cil.scannable.client.renderer.ScannerRenderer;
@@ -32,5 +34,7 @@ public final class InitializerClient extends InitializerCommon {
         ScanResultShader.INSTANCE.initialize();
 
         ScreenManager.registerFactory(Scannable.SCANNER_CONTAINER.get(), GuiScanner::new);
+        ScreenManager.registerFactory(Scannable.BLOCK_MODULE_CONTAINER.get(), BlockModuleScreen::new);
+        ScreenManager.registerFactory(Scannable.ENTITY_MODULE_CONTAINER.get(), EntityModuleScreen::new);
     }
 }

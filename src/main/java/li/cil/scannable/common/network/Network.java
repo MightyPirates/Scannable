@@ -1,6 +1,8 @@
 package li.cil.scannable.common.network;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.common.network.message.MessageRemoveConfiguredModuleItemAt;
+import li.cil.scannable.common.network.message.MessageSetConfiguredModuleItemAt;
 import li.cil.scannable.common.network.message.MessageStructureRequest;
 import li.cil.scannable.common.network.message.MessageStructureResponse;
 import net.minecraft.util.ResourceLocation;
@@ -35,6 +37,18 @@ public final class Network {
                 .encoder(MessageStructureResponse::toBytes)
                 .decoder(MessageStructureResponse::new)
                 .consumer(MessageStructureResponse::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MessageRemoveConfiguredModuleItemAt.class, getNextPacketId())
+                .encoder(MessageRemoveConfiguredModuleItemAt::toBytes)
+                .decoder(MessageRemoveConfiguredModuleItemAt::new)
+                .consumer(MessageRemoveConfiguredModuleItemAt::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MessageSetConfiguredModuleItemAt.class, getNextPacketId())
+                .encoder(MessageSetConfiguredModuleItemAt::toBytes)
+                .decoder(MessageSetConfiguredModuleItemAt::new)
+                .consumer(MessageSetConfiguredModuleItemAt::handle)
                 .add();
     }
 }

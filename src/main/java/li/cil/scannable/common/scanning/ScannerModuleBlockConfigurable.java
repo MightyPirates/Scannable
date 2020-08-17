@@ -4,7 +4,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
-import li.cil.scannable.client.scanning.filter.ScanFilterSingleBlock;
+import li.cil.scannable.client.scanning.filter.ScanFilterBlockCache;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
@@ -15,6 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import java.util.List;
 import java.util.Optional;
 
 public enum ScannerModuleBlockConfigurable implements ScannerModuleBlock {
@@ -40,7 +41,7 @@ public enum ScannerModuleBlockConfigurable implements ScannerModuleBlock {
     @OnlyIn(Dist.CLIENT)
     @Override
     public Optional<ScanFilterBlock> getFilter(final ItemStack module) {
-        final Optional<Block> block = ItemScannerModuleBlockConfigurable.getBlock(module);
-        return block.map(ScanFilterSingleBlock::new);
+        final List<Block> blocks = ItemScannerModuleBlockConfigurable.getBlocks(module);
+        return Optional.of(new ScanFilterBlockCache(blocks));
     }
 }

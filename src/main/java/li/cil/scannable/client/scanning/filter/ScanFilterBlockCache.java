@@ -7,12 +7,17 @@ import net.minecraft.block.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
+import java.util.List;
 
-public final class ScanFilterCache implements ScanFilterBlock {
+public final class ScanFilterBlockCache implements ScanFilterBlock {
     private final IntSet stateIds;
 
-    public ScanFilterCache(final Collection<ScanFilterBlock> filters) {
-        this.stateIds = buildCache(filters);
+    public ScanFilterBlockCache(final Collection<ScanFilterBlock> filters) {
+        stateIds = buildCache(filters);
+    }
+
+    public ScanFilterBlockCache(final List<Block> blocks) {
+        stateIds = buildCache(blocks);
     }
 
     @Override
@@ -27,6 +32,22 @@ public final class ScanFilterCache implements ScanFilterBlock {
                 if (filters.stream().anyMatch(f -> f.matches(blockState))) {
                     list.add(Block.getStateId(blockState));
                 }
+            }
+        }
+
+        if (list.size() > 10) {
+            return new IntOpenHashSet(list);
+        } else {
+            return new IntArraySet(list);
+        }
+    }
+
+    private static IntSet buildCache(final List<Block> blocks) {
+        final IntList list = new IntArrayList();
+
+        for (final Block block : blocks) {
+            for (final BlockState blockState : block.getStateContainer().getValidStates()) {
+                list.add(Block.getStateId(blockState));
             }
         }
 

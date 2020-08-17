@@ -62,6 +62,8 @@ public final class Constants {
     public static final String GUI_SCANNER_MODULES_INACTIVE = "gui.scannable.scanner.modules_inactive";
     public static final String GUI_SCANNER_MODULES_INACTIVE_TOOLTIP = "gui.scannable.scanner.modules_inactive.tooltip";
     public static final String GUI_SCANNER_PROGRESS = "gui.scannable.scanner.progress";
+    public static final String GUI_MODULE_BLOCK_LIST = "gui.scannable.module_block.list";
+    public static final String GUI_MODULE_ENTITY_LIST = "gui.scannable.module_entity.list";
     public static final String GUI_OVERLAY_LABEL_DISTANCE = "gui.scannable.overlay.entity_details";
 
     // --------------------------------------------------------------------- //
@@ -71,6 +73,7 @@ public final class Constants {
     public static final String MESSAGE_NO_SCAN_MODULES = "message.scannable.no_scan_modules";
     public static final String MESSAGE_NOT_ENOUGH_ENERGY = "message.scannable.not_enough_energy";
     public static final String MESSAGE_BLOCK_BLACKLISTED = "message.scannable.block_blacklisted";
+    public static final String MESSAGE_NO_FREE_SLOTS = "message.scannable.no_free_slots";
 
     // --------------------------------------------------------------------- //
     // Tooltips
@@ -84,13 +87,14 @@ public final class Constants {
     public static final String TOOLTIP_MODULE_ORE_COMMON = "tooltip.scannable.module_ore_common";
     public static final String TOOLTIP_MODULE_ORE_RARE = "tooltip.scannable.module_ore_rare";
     public static final String TOOLTIP_MODULE_BLOCK = "tooltip.scannable.module_block";
-    public static final String TOOLTIP_MODULE_BLOCK_NAME = "tooltip.scannable.module_block.name";
+    public static final String TOOLTIP_MODULE_BLOCK_LIST = "tooltip.scannable.module_block.list";
     public static final String TOOLTIP_MODULE_STRUCTURE = "tooltip.scannable.module_structure";
     public static final String TOOLTIP_MODULE_STRUCTURE_SHOW_EXPLORED = "tooltip.scannable.module_structure.show_explored";
     public static final String TOOLTIP_MODULE_STRUCTURE_HIDE_EXPLORED = "tooltip.scannable.module_structure.hide_explored";
     public static final String TOOLTIP_MODULE_FLUID = "tooltip.scannable.module_fluid";
     public static final String TOOLTIP_MODULE_ENTITY = "tooltip.scannable.module_entity";
-    public static final String TOOLTIP_MODULE_ENTITY_NAME = "tooltip.scannable.module_entity.name";
+    public static final String TOOLTIP_MODULE_ENTITY_LIST = "tooltip.scannable.module_entity.list";
+    public static final String TOOLTIP_LIST_ITEM_FORMAT = "tooltip.scannable.list_item";
 
     // --------------------------------------------------------------------- //
     // Scanner settings
@@ -124,4 +128,7 @@ public final class Constants {
     public static final float MODULE_BLOCK_RADIUS_MULTIPLIER = 0.5f;
     // By how much to scale the base scan range when scanning for structures.
     public static final float MODULE_STRUCTURE_RADIUS_MULTIPLIER = 2.0f;
+
+    // Number of slots we have in configurable modules (block and entity modules).
+    public static final int CONFIGURABLE_MODULE_SLOTS = 5;
 }
