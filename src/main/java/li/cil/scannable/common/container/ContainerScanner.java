@@ -2,7 +2,6 @@ package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.inventory.ItemHandlerScanner;
-import li.cil.scannable.common.item.ItemScanner;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -16,6 +15,7 @@ import net.minecraftforge.items.SlotItemHandler;
 public final class ContainerScanner extends Container {
     private final PlayerEntity player;
     private final Hand hand;
+    private final ItemStack stack;
 
     public static ContainerScanner createForServer(final int windowId, final PlayerInventory inventory, final Hand hand, final ItemHandlerScanner itemHandler) {
         return new ContainerScanner(windowId, inventory, hand, itemHandler);
@@ -33,6 +33,7 @@ public final class ContainerScanner extends Container {
 
         this.player = inventory.player;
         this.hand = hand;
+        this.stack = player.getHeldItem(hand);
 
         final IItemHandler activeModules = itemHandler.getActiveModules();
         for (int slot = 0; slot < activeModules.getSlots(); ++slot) {
@@ -64,7 +65,7 @@ public final class ContainerScanner extends Container {
 
     @Override
     public boolean canInteractWith(final PlayerEntity player) {
-        return player == this.player && ItemScanner.isScanner(player.getHeldItem(hand));
+        return player == this.player && ItemStack.areItemStacksEqual(player.getHeldItem(hand), stack);
     }
 
     @Override
