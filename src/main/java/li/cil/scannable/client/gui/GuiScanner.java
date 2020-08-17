@@ -35,7 +35,7 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
 
     @Override
     public void render(final int mouseX, final int mouseY, final float partialTicks) {
-        this.renderBackground();
+        renderBackground();
         super.render(mouseX, mouseY, partialTicks);
 
         if (isPointInRegion(8, 23, font.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES)), font.FONT_HEIGHT, mouseX, mouseY)) {
@@ -45,7 +45,7 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
             renderTooltip(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE_TOOLTIP), mouseX, mouseY);
         }
 
-        this.renderHoveredToolTip(mouseX, mouseY);
+        renderHoveredToolTip(mouseX, mouseY);
     }
 
     @Override
@@ -68,15 +68,14 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
 
     @Override
     protected void handleMouseClick(@Nullable final Slot slot, final int slotId, final int mouseButton, final ClickType type) {
-        if (slot == null) {
-            return;
-        }
-        final ItemStack scannerItemStack = playerInventory.player.getHeldItem(container.getHand());
-        if (slot.getStack() == scannerItemStack) {
-            return;
-        }
-        if (type == ClickType.SWAP && playerInventory.getStackInSlot(mouseButton) == scannerItemStack) {
-            return;
+        if (slot != null) {
+            final ItemStack scannerItemStack = playerInventory.player.getHeldItem(container.getHand());
+            if (slot.getStack() == scannerItemStack) {
+                return;
+            }
+            if (type == ClickType.SWAP && playerInventory.getStackInSlot(mouseButton) == scannerItemStack) {
+                return;
+            }
         }
 
         super.handleMouseClick(slot, slotId, mouseButton, type);
