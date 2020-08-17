@@ -102,7 +102,6 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final World world = player.getEntityWorld();
         for (int i = 0; i < blocksPerTick; i++) {
             if (!moveNext(world)) {
-                Minecraft.getInstance().getProfiler().endSection();
                 return;
             }
 
