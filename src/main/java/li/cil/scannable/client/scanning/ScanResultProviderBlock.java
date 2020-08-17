@@ -25,13 +25,14 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
+import net.minecraft.util.palette.PalettedContainer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
@@ -50,11 +51,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private static final float MAX_ALPHA = 0.66f;
     private static final float MIN_ALPHA = 0.2f;
 
-    private final IntObjectMap<List<ScanFilterBlock>> scanFilters = new IntObjectHashMap<>();
-    private final IntList scanFilterKeys = new IntArrayList();
-    private BlockPos min, max;
-    private int blocksPerTick;
-    private int x, y, z;
+    private final List<ScanFilterLayer> scanFilterLayers = new ArrayList<>();
+    private ChunkPos min, max;
+    private int minChunkSectionIndex, maxChunkSectionIndex;
+    private int chunkSectionsPerTick;
+    private int chunkX, chunkSectionIndex, chunkZ;
     private final Map<BlockPos, BlockScanResult> resultClusters = new HashMap<>();
 
     // --------------------------------------------------------------------- //
@@ -64,7 +65,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
 
-        scanFilters.clear();
+        scanFilterLayers.clear();
+
+        final IntObjectMap<List<ScanFilterBlock>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack module : modules) {
             final LazyOptional<ScannerModule> capability = module.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
             capability
@@ -74,60 +77,104 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         final Optional<ScanFilterBlock> filter = m.getFilter(module);
                         filter.ifPresent(f -> {
                             final int localRadius = (int) Math.ceil(m.adjustLocalRange(this.radius));
-                            scanFilters.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(f);
+                            filterByRadius.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(f);
                         });
                     });
         }
 
-        scanFilterKeys.clear();
-        scanFilterKeys.addAll(scanFilters.keySet());
+        final IntList scanFilterKeys = new IntArrayList();
+        scanFilterKeys.addAll(filterByRadius.keySet());
         scanFilterKeys.sort((a, b) -> -Integer.compare(a, b));
 
         if (scanFilterKeys.size() > 0) {
             this.radius = scanFilterKeys.getInt(0);
+            for (final int r : scanFilterKeys) {
+                scanFilterLayers.add(new ScanFilterLayer(r, filterByRadius.get(r)));
+            }
 
-            min = new BlockPos(center).add(-this.radius, -this.radius, -this.radius);
-            max = new BlockPos(center).add(this.radius, this.radius, this.radius);
-            x = min.getX();
-            y = min.getY() - 1; // -1 for initial moveNext.
-            z = min.getZ();
-            final BlockPos size = max.subtract(min);
-            final int count = (size.getX() + 1) * (size.getY() + 1) * (size.getZ() + 1);
-            blocksPerTick = MathHelper.ceil(count / (float) scanTicks);
+            final BlockPos minBlockPos = new BlockPos(center).add(-this.radius, -this.radius, -this.radius);
+            final BlockPos maxBlockPos = new BlockPos(center).add(this.radius, this.radius, this.radius);
+            min = new ChunkPos(minBlockPos);
+            max = new ChunkPos(maxBlockPos);
+            minChunkSectionIndex = minBlockPos.getY() >> 4;
+            maxChunkSectionIndex = maxBlockPos.getY() >> 4;
+
+            chunkX = min.x;
+            chunkSectionIndex = -1; // -1 for initial moveNext.
+            chunkZ = min.z;
+
+            final int chunkSectionCount = ((max.x - min.x) + 1) * ((max.z - min.z) + 1) * ((maxChunkSectionIndex - minChunkSectionIndex) + 1);
+            chunkSectionsPerTick = MathHelper.ceil(chunkSectionCount / (float) scanTicks);
         }
     }
 
     @Override
     public void computeScanResults(final Consumer<ScanResult> callback) {
         final World world = player.getEntityWorld();
-        for (int i = 0; i < blocksPerTick; i++) {
-            if (!moveNext(world)) {
+        for (int i = 0; i < chunkSectionsPerTick; i++) {
+            if (!moveNext()) {
                 return;
             }
 
-            if (center.squareDistanceTo(x + 0.5, y + 0.5, z + 0.5) > radius * radius) {
+            // Skip chunks outside our bounding sphere defined by the global scan radius.
+            final double dx = Math.min(Math.abs((chunkX << 4) - center.x), Math.abs((chunkX << 4) + 15 - center.x));
+            final double dz = Math.min(Math.abs((chunkZ << 4) - center.z), Math.abs((chunkZ << 4) + 15 - center.z));
+            final double dy = Math.min(Math.abs((chunkSectionIndex << 4) - center.y), Math.abs((chunkSectionIndex << 4) + 15 - center.y));
+            if (dx * dx + dy * dy + dz * dz > radius * radius) {
                 continue;
             }
 
-            final BlockPos pos = new BlockPos(x, y, z);
-            final BlockState state = world.getBlockState(pos);
-
-            if (Settings.shouldIgnore(state.getBlock())) {
+            final IChunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+            if (chunk == null) {
                 continue;
             }
 
-            final int stateId = Block.getStateId(state);
+            final ChunkSection[] sections = chunk.getSections();
+            assert sections.length == 16;
 
-            for (final int filterRadius : scanFilterKeys) {
-                if (center.squareDistanceTo(x + 0.5, y + 0.5, z + 0.5) > filterRadius * filterRadius) {
-                    break; // Filters radii only get smaller in the sorted filter list.
-                }
+            final ChunkSection section = sections[chunkSectionIndex];
+            if (section == null || section.isEmpty()) {
+                continue;
+            }
 
-                if (scanFilters.get(filterRadius).stream().anyMatch(f -> f.matches(state)) && !tryAddToCluster(pos, stateId)) {
-                    final BlockScanResult result = new BlockScanResult(stateId, pos);
-                    callback.accept(result);
-                    resultClusters.put(pos, result);
-                    break;
+            final PalettedContainer<BlockState> data = section.getData();
+            final BlockPos origin = chunk.getPos().asBlockPos().add(0, section.getYLocation(), 0);
+            final int originX = origin.getX();
+            final int originY = origin.getY();
+            final int originZ = origin.getZ();
+            for (int y = 0; y < 16; y++) {
+                final int globalY = originY + y;
+                for (int z = 0; z < 16; z++) {
+                    final int globalZ = originZ + z;
+                    for (int x = 0; x < 16; x++) {
+                        final int globalX = originX + x;
+
+                        final BlockState state = data.get(x, y, z);
+                        if (Settings.shouldIgnore(state.getBlock())) {
+                            continue;
+                        }
+
+                        final BlockPos pos = new BlockPos(globalX, globalY, globalZ);
+                        final double squaredDistance = center.squareDistanceTo(globalX + 0.5, globalY + 0.5, globalZ + 0.5);
+
+                        outer:
+                        for (final ScanFilterLayer layer : scanFilterLayers) {
+                            if (squaredDistance > layer.radius * layer.radius) {
+                                break; // Filters radii only get smaller in the sorted filter list.
+                            }
+
+                            for (final ScanFilterBlock filter : layer.filters) {
+                                if (filter.matches(state)) {
+                                    if (!tryAddToCluster(pos, state.getBlock())) {
+                                        final BlockScanResult result = new BlockScanResult(state.getBlock(), pos);
+                                        callback.accept(result);
+                                        resultClusters.put(pos, result);
+                                    }
+                                    break outer;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -206,8 +253,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final Vec3d toResult = resultPos.subtract(viewerEyes);
             final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
 
-            final BlockState blockState = blockResult.getBlockState();
-            final ITextComponent label = blockState.getBlock().getNameTextComponent();
+            final Block block = blockResult.getBlock();
+            final ITextComponent label = block.getNameTextComponent();
             if (lookDirDot > 0.98f && !Strings.isNullOrEmpty(label.getString())) {
                 final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).length() : 0f;
                 renderIconLabel(renderTypeBuffer, matrixStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, API.ICON_INFO, label);
@@ -218,11 +265,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     @Override
     public void reset() {
         super.reset();
-        scanFilters.clear();
-        scanFilterKeys.clear();
+        scanFilterLayers.clear();
         min = max = null;
-        blocksPerTick = 0;
-        x = y = z = 0;
+        minChunkSectionIndex = maxChunkSectionIndex = 0;
+        chunkSectionsPerTick = 0;
+        chunkX = chunkSectionIndex = chunkZ = 0;
         resultClusters.clear();
     }
 
@@ -242,7 +289,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         .build(false));
     }
 
-    private boolean tryAddToCluster(final BlockPos pos, final int stateId) {
+    private boolean tryAddToCluster(final BlockPos pos, final Block block) {
         final BlockPos min = pos.add(-1, -1, -1);
         final BlockPos max = pos.add(1, 1, 1);
 
@@ -255,7 +302,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     if (cluster == null) {
                         continue;
                     }
-                    if (stateId != cluster.stateId) {
+                    if (block != cluster.block) {
                         continue;
                     }
 
@@ -273,16 +320,16 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         return root != null;
     }
 
-    private boolean moveNext(final World world) {
-        y++;
-        if (y > max.getY() || y >= world.getHeight()) {
-            y = min.getY();
-            x++;
-            if (x > max.getX()) {
-                x = min.getX();
-                z++;
-                if (z > max.getZ()) {
-                    blocksPerTick = 0;
+    private boolean moveNext() {
+        chunkSectionIndex++;
+        if (chunkSectionIndex > maxChunkSectionIndex || chunkSectionIndex >= 15) {
+            chunkSectionIndex = minChunkSectionIndex;
+            chunkX++;
+            if (chunkX > max.x) {
+                chunkX = min.x;
+                chunkZ++;
+                if (chunkZ > max.z) {
+                    chunkSectionsPerTick = 0;
                     return false;
                 }
             }
@@ -290,22 +337,33 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         return true;
     }
 
+    private static final class ScanFilterLayer {
+        public int radius;
+        public List<ScanFilterBlock> filters;
+
+        public ScanFilterLayer(final int radius, final List<ScanFilterBlock> filters) {
+            this.radius = radius;
+            this.filters = filters;
+        }
+    }
+
     // --------------------------------------------------------------------- //
 
     private static final class BlockScanResult implements ScanResult {
-        private final int stateId;
+        private final Block block;
         private AxisAlignedBB bounds;
         @Nullable
         private BlockScanResult parent;
         private int color;
 
-        BlockScanResult(final int stateId, final BlockPos pos) {
+        BlockScanResult(final Block block, final BlockPos pos) {
+            this.block = block;
             bounds = new AxisAlignedBB(pos);
-            this.stateId = stateId;
         }
 
         void computeColor(final IBlockReader world) {
-            final BlockState blockState = getBlockState();
+            final BlockState blockState = block.getDefaultState();
+
             color = blockState.getMaterialColor(world, new BlockPos(bounds.getCenter())).colorValue;
 
             final IFluidState fluidState = blockState.getFluidState();
@@ -332,8 +390,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             }
         }
 
-        BlockState getBlockState() {
-            return Block.getStateById(stateId);
+        Block getBlock() {
+            return block;
         }
 
         int getColor() {
