@@ -8,15 +8,13 @@ import li.cil.scannable.common.capabilities.CapabilityProviderScanner;
 import li.cil.scannable.common.capabilities.CapabilityScannerModule;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
-import li.cil.scannable.common.container.ContainerScanner;
+import li.cil.scannable.common.container.ScannerContainerProvider;
 import li.cil.scannable.common.inventory.ItemHandlerScanner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -300,31 +298,6 @@ public final class ItemScanner extends AbstractItem {
                 event.setCanceled(true);
             }
             MinecraftForge.EVENT_BUS.unregister(this);
-        }
-    }
-
-    private static class ScannerContainerProvider implements INamedContainerProvider {
-        private final PlayerEntity player;
-        private final Hand hand;
-
-        public ScannerContainerProvider(final PlayerEntity player, final Hand hand) {
-            this.player = player;
-            this.hand = hand;
-        }
-
-        @Override
-        public ITextComponent getDisplayName() {
-            return player.getHeldItem(hand).getDisplayName();
-        }
-
-        @Nullable
-        @Override
-        public Container createMenu(final int windowId, final PlayerInventory inventory, final PlayerEntity player) {
-            final LazyOptional<IItemHandler> capability = player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-            return capability
-                    .filter(itemHandler -> itemHandler instanceof ItemHandlerScanner)
-                    .map(itemHandler -> ContainerScanner.createForServer(windowId, inventory, hand, (ItemHandlerScanner) itemHandler))
-                    .orElse(null);
         }
     }
 }
