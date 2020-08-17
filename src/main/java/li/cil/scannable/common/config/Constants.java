@@ -19,13 +19,6 @@ public final class Constants {
     public static final String NAME_MODULE_ENTITY = "module_entity";
 
     // --------------------------------------------------------------------- //
-    // Registered scan providers
-
-    public static final String REGISTRY_NAME_SCAN_PROVIDERS = "scan_result_providers";
-    public static final String REGISTRY_NAME_SCAN_PROVIDER_BLOCKS = "blocks";
-    public static final String REGISTRY_NAME_SCAN_PROVIDER_ENTITIES = "entities";
-
-    // --------------------------------------------------------------------- //
     // Config
 
     public static final String CONFIG_USE_ENERGY = "config.scannable.useEnergy";
