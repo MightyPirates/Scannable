@@ -96,8 +96,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BlockPos maxBlockPos = new BlockPos(center).add(this.radius, this.radius, this.radius);
             minChunkPos = new ChunkPos(minBlockPos);
             maxChunkPos = new ChunkPos(maxBlockPos);
-            minChunkSectionIndex = minBlockPos.getY() >> 4;
-            maxChunkSectionIndex = maxBlockPos.getY() >> 4;
+            minChunkSectionIndex = Math.max(minBlockPos.getY() >> 4, 0);
+            maxChunkSectionIndex = Math.min(maxBlockPos.getY() >> 4, 15);
 
             currentChunkX = minChunkPos.x;
             currentChunkSectionIndex = -1; // -1 for initial moveNext.
