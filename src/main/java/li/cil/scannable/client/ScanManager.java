@@ -184,6 +184,7 @@ public enum ScanManager {
         }
 
         if (Constants.SCAN_STAY_DURATION < (int) (System.currentTimeMillis() - currentStart)) {
+            pendingResults.forEach((provider, results) -> results.forEach(ScanResult::close));
             pendingResults.clear();
             synchronized (renderingResults) {
                 if (!renderingResults.isEmpty()) {
@@ -191,6 +192,7 @@ public enum ScanManager {
                         final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
                         final List<ScanResult> list = entry.getValue();
                         for (int i = MathHelper.ceil(list.size() / 2f); i > 0; i--) {
+                            list.get(list.size() - 1).close();
                             list.remove(list.size() - 1);
                         }
                         if (list.isEmpty()) {
@@ -225,6 +227,7 @@ public enum ScanManager {
                 if (lastScanCenter.squareDistanceTo(position) <= sqRadius) {
                     results.remove(results.size() - 1);
                     if (!provider.bakeResult(world, result)) {
+                        result.close();
                         continue;
                     }
                     synchronized (renderingResults) {
@@ -327,7 +330,10 @@ public enum ScanManager {
         pendingResults.clear();
 
         synchronized (renderingResults) {
-            renderingResults.forEach((provider, results) -> provider.reset());
+            renderingResults.forEach((provider, results) -> {
+                provider.reset();
+                results.forEach(ScanResult::close);
+            });
             renderingResults.clear();
         }
 

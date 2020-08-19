@@ -4,12 +4,13 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nullable;
+import java.io.Closeable;
 
 /**
  * Represents a single logical scan result, for which one single visualization
  * is rendered using the provider that produced this result.
  */
-public interface ScanResult {
+public interface ScanResult extends Closeable {
     /**
      * Get the in-world location of this scan result.
      * <p>
@@ -29,4 +30,12 @@ public interface ScanResult {
      */
     @Nullable
     AxisAlignedBB getRenderBounds();
+
+    /**
+     * Called when results are disposed to allow freeing non-managed resources
+     * potentially used for rendering (e.g. VBOs).
+     */
+    @Override
+    default void close() {
+    }
 }

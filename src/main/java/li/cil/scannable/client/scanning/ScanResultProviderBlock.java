@@ -22,6 +22,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.ItemStack;
@@ -48,8 +49,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     // --------------------------------------------------------------------- //
 
-    private static final float MAX_ALPHA = 0.66f;
-    private static final float MIN_ALPHA = 0.2f;
+    private static final int DEFAULT_COLOR = 0x4466CC;
 
     private final List<ScanFilterLayer> scanFilterLayers = new ArrayList<>();
     private ChunkPos minChunkPos, maxChunkPos;
@@ -184,7 +184,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     public boolean bakeResult(final IBlockReader world, final ScanResult result) {
         final BlockScanResult blockResult = (BlockScanResult) result;
         if (blockResult.isRoot()) {
-            blockResult.computeColor(world);
+            blockResult.bake(world);
             return true;
         }
         return false;
@@ -192,10 +192,6 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     @Override
     public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
-        final Vec3d lookVec = new Vec3d(renderInfo.getViewVector());
-        final Vec3d viewerEyes = renderInfo.getProjectedView();
-        final float colorNormalizer = 1 / 255f;
-
         // Re-render hands into depth buffer to avoid rendering overlay on top of player hands.
         if (Minecraft.getInstance().gameRenderer.renderHand) {
             RenderSystem.colorMask(false, false, false, false);
@@ -206,35 +202,25 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         ScanResultShader.setProjectionMatrix(projectionMatrix);
+        ScanResultShader.setViewMatrix(matrixStack.getLast().getMatrix());
 
-        final IVertexBuilder buffer = renderTypeBuffer.getBuffer(getBlockScanResultRenderLayer());
-
+        final RenderType renderType = getBlockScanResultRenderLayer();
+        renderType.setupRenderState();
         for (final ScanResult result : results) {
             final BlockScanResult blockResult = (BlockScanResult) result;
-
-            final Vec3d toResult = blockResult.getPosition().subtract(viewerEyes);
-            final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
-            final float sqLookDirDot = lookDirDot * lookDirDot;
-            final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
-            final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
-
-            final int color = blockResult.getColor();
-
-            final float r = ((color >> 16) & 0xFF) * colorNormalizer;
-            final float g = ((color >> 8) & 0xFF) * colorNormalizer;
-            final float b = (color & 0xFF) * colorNormalizer;
-            final float a = Math.max(MIN_ALPHA, MAX_ALPHA * focusScale);
-
-            drawCube(
-                    buffer, matrixStack.getLast().getMatrix(),
-                    (float) blockResult.bounds.minX, (float) blockResult.bounds.minY, (float) blockResult.bounds.minZ,
-                    (float) blockResult.bounds.maxX, (float) blockResult.bounds.maxY, (float) blockResult.bounds.maxZ,
-                    r, g, b, a);
+            final VertexBuffer vbo = blockResult.vbo;
+            vbo.bindBuffer();
+            DefaultVertexFormats.POSITION_COLOR_TEX.setupBufferState(0);
+            vbo.draw(matrixStack.getLast().getMatrix(), GL11.GL_QUADS);
+            VertexBuffer.unbindBuffer();
+            DefaultVertexFormats.POSITION_COLOR_TEX.clearBufferState();
         }
+        renderType.clearRenderState();
 
+        final Vec3d lookVec = new Vec3d(renderInfo.getViewVector());
+        final Vec3d viewerEyes = renderInfo.getProjectedView();
         final float yaw = renderInfo.getYaw();
         final float pitch = renderInfo.getPitch();
-
         final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
 
         // Order results by distance to center of screen (deviation from look
@@ -253,7 +239,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final Vec3d toResult = resultPos.subtract(viewerEyes);
             final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
 
-            final Block block = blockResult.getBlock();
+            final Block block = blockResult.block;
             final ITextComponent label = block.getNameTextComponent();
             if (lookDirDot > 0.98f && !Strings.isNullOrEmpty(label.getString())) {
                 final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).length() : 0f;
@@ -354,14 +340,18 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         private AxisAlignedBB bounds;
         @Nullable
         private BlockScanResult parent;
+        private final Set<BlockPos> blocks;
         private int color;
+        private VertexBuffer vbo;
 
         BlockScanResult(final Block block, final BlockPos pos) {
             this.block = block;
             bounds = new AxisAlignedBB(pos);
+            blocks = new HashSet<>();
+            blocks.add(pos);
         }
 
-        void computeColor(final IBlockReader world) {
+        void bake(final IBlockReader world) {
             final BlockState blockState = block.getDefaultState();
 
             color = blockState.getMaterialColor(world, new BlockPos(bounds.getCenter())).colorValue;
@@ -391,14 +381,15 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     });
                 }
             }
-        }
 
-        Block getBlock() {
-            return block;
-        }
-
-        int getColor() {
-            return color;
+            final Tessellator tessellator = Tessellator.getInstance();
+            final BufferBuilder buffer = tessellator.getBuffer();
+            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
+            final MatrixStack matrixStack = new MatrixStack();
+            render(buffer, matrixStack);
+            buffer.finishDrawing();
+            vbo = new VertexBuffer(DefaultVertexFormats.POSITION_COLOR_TEX);
+            vbo.upload(buffer);
         }
 
         boolean isRoot() {
@@ -422,12 +413,120 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             }
 
             root.bounds = root.bounds.union(bounds);
+            root.blocks.addAll(blocks);
+            blocks.clear();
             parent = root;
         }
 
         void add(final BlockPos pos) {
             assert parent == null : "Trying to add to non-root node.";
             bounds = bounds.union(new AxisAlignedBB(pos));
+            blocks.add(pos);
+        }
+
+        void render(final IVertexBuilder buffer, final MatrixStack matrixStack) {
+            final Matrix4f matrix = matrixStack.getLast().getMatrix();
+
+            final float colorNormalizer = 1 / 255f;
+            final float r = ((color >> 16) & 0xFF) * colorNormalizer;
+            final float g = ((color >> 8) & 0xFF) * colorNormalizer;
+            final float b = (color & 0xFF) * colorNormalizer;
+
+            final float sizeUvX = (float) (1.0 / bounds.getXSize());
+            final float sizeUvY = (float) (1.0 / bounds.getYSize());
+            final float sizeUvZ = (float) (1.0 / bounds.getZSize());
+            for (final BlockPos cell : blocks) {
+                if (!blocks.contains(cell.add(-1, 0, 0))) {
+                    final float x = cell.getX();
+                    final float minY = cell.getY();
+                    final float maxY = cell.getY() + 1;
+                    final float minZ = cell.getZ();
+                    final float maxZ = cell.getZ() + 1;
+                    final float u0 = (minY - (float) bounds.minY) * sizeUvY;
+                    final float u1 = u0 + sizeUvY;
+                    final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
+                    final float v1 = v0 + sizeUvZ;
+                    buffer.pos(matrix, x, minY, minZ).color(r, g, b, 0.8f).tex(u0, v0).endVertex();
+                    buffer.pos(matrix, x, minY, maxZ).color(r, g, b, 0.8f).tex(u0, v1).endVertex();
+                    buffer.pos(matrix, x, maxY, maxZ).color(r, g, b, 0.8f).tex(u1, v1).endVertex();
+                    buffer.pos(matrix, x, maxY, minZ).color(r, g, b, 0.8f).tex(u1, v0).endVertex();
+                }
+                if (!blocks.contains(cell.add(1, 0, 0))) {
+                    final float x = cell.getX() + 1;
+                    final float minY = cell.getY();
+                    final float maxY = cell.getY() + 1;
+                    final float minZ = cell.getZ();
+                    final float maxZ = cell.getZ() + 1;
+                    final float u0 = (minY - (float) bounds.minY) * sizeUvY;
+                    final float u1 = u0 + sizeUvY;
+                    final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
+                    final float v1 = v0 + sizeUvZ;
+                    buffer.pos(matrix, x, minY, minZ).color(r, g, b, 0.8f).tex(u0, v0).endVertex();
+                    buffer.pos(matrix, x, maxY, minZ).color(r, g, b, 0.8f).tex(u1, v0).endVertex();
+                    buffer.pos(matrix, x, maxY, maxZ).color(r, g, b, 0.8f).tex(u1, v1).endVertex();
+                    buffer.pos(matrix, x, minY, maxZ).color(r, g, b, 0.8f).tex(u0, v1).endVertex();
+                }
+                if (!blocks.contains(cell.add(0, -1, 0))) {
+                    final float y = cell.getY();
+                    final float minX = cell.getX();
+                    final float maxX = cell.getX() + 1;
+                    final float minZ = cell.getZ();
+                    final float maxZ = cell.getZ() + 1;
+                    final float u0 = (minX - (float) bounds.minX) * sizeUvX;
+                    final float u1 = u0 + sizeUvX;
+                    final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
+                    final float v1 = v0 + sizeUvZ;
+                    buffer.pos(matrix, minX, y, minZ).color(r, g, b, 0.7f).tex(u0, v0).endVertex();
+                    buffer.pos(matrix, maxX, y, minZ).color(r, g, b, 0.7f).tex(u1, v0).endVertex();
+                    buffer.pos(matrix, maxX, y, maxZ).color(r, g, b, 0.7f).tex(u1, v1).endVertex();
+                    buffer.pos(matrix, minX, y, maxZ).color(r, g, b, 0.7f).tex(u0, v1).endVertex();
+                }
+                if (!blocks.contains(cell.add(0, 1, 0))) {
+                    final float y = cell.getY() + 1;
+                    final float minX = cell.getX();
+                    final float maxX = cell.getX() + 1;
+                    final float minZ = cell.getZ();
+                    final float maxZ = cell.getZ() + 1;
+                    final float u0 = (minX - (float) bounds.minX) * sizeUvX;
+                    final float u1 = u0 + sizeUvX;
+                    final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
+                    final float v1 = v0 + sizeUvZ;
+                    buffer.pos(matrix, minX, y, minZ).color(r, g, b, 1.0f).tex(u0, v0).endVertex();
+                    buffer.pos(matrix, minX, y, maxZ).color(r, g, b, 1.0f).tex(u0, v1).endVertex();
+                    buffer.pos(matrix, maxX, y, maxZ).color(r, g, b, 1.0f).tex(u1, v1).endVertex();
+                    buffer.pos(matrix, maxX, y, minZ).color(r, g, b, 1.0f).tex(u1, v0).endVertex();
+                }
+                if (!blocks.contains(cell.add(0, 0, -1))) {
+                    final float z = cell.getZ();
+                    final float minX = cell.getX();
+                    final float maxX = cell.getX() + 1;
+                    final float minY = cell.getY();
+                    final float maxY = cell.getY() + 1;
+                    final float u0 = (minX - (float) bounds.minX) * sizeUvX;
+                    final float u1 = u0 + sizeUvX;
+                    final float v0 = (minY - (float) bounds.minY) * sizeUvY;
+                    final float v1 = v0 + sizeUvY;
+                    buffer.pos(matrix, minX, minY, z).color(r, g, b, 0.9f).tex(u0, v0).endVertex();
+                    buffer.pos(matrix, minX, maxY, z).color(r, g, b, 0.9f).tex(u0, v1).endVertex();
+                    buffer.pos(matrix, maxX, maxY, z).color(r, g, b, 0.9f).tex(u1, v1).endVertex();
+                    buffer.pos(matrix, maxX, minY, z).color(r, g, b, 0.9f).tex(u1, v0).endVertex();
+                }
+                if (!blocks.contains(cell.add(0, 0, 1))) {
+                    final float z = cell.getZ() + 1;
+                    final float minX = cell.getX();
+                    final float maxX = cell.getX() + 1;
+                    final float minY = cell.getY();
+                    final float maxY = cell.getY() + 1;
+                    final float u0 = (minX - (float) bounds.minX) * sizeUvX;
+                    final float u1 = u0 + sizeUvX;
+                    final float v0 = (minY - (float) bounds.minY) * sizeUvY;
+                    final float v1 = v0 + sizeUvY;
+                    buffer.pos(matrix, minX, minY, z).color(r, g, b, 0.9f).tex(u0, v0).endVertex();
+                    buffer.pos(matrix, maxX, minY, z).color(r, g, b, 0.9f).tex(u1, v0).endVertex();
+                    buffer.pos(matrix, maxX, maxY, z).color(r, g, b, 0.9f).tex(u1, v1).endVertex();
+                    buffer.pos(matrix, minX, maxY, z).color(r, g, b, 0.9f).tex(u0, v1).endVertex();
+                }
+            }
         }
 
         // --------------------------------------------------------------------- //
@@ -442,6 +541,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         @Override
         public Vec3d getPosition() {
             return bounds.getCenter();
+        }
+
+        @Override
+        public void close() {
+            if (vbo != null) {
+                vbo.close();
+                vbo = null;
+            }
         }
     }
 

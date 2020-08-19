@@ -8,9 +8,14 @@ public final class ScanResultShader extends AbstractShader {
     public static ScanResultShader INSTANCE = new ScanResultShader();
 
     private static ShaderDefault projMatUniform;
+    private static ShaderDefault viewMatUniform;
 
     public static void setProjectionMatrix(final Matrix4f matrix) {
         projMatUniform.set(matrix);
+    }
+
+    public static void setViewMatrix(final Matrix4f matrix) {
+        viewMatUniform.set(matrix);
     }
 
     @Override
@@ -21,6 +26,7 @@ public final class ScanResultShader extends AbstractShader {
     @Override
     protected void handleShaderLoad() {
         super.handleShaderLoad();
-        projMatUniform = shaderInstance.getShaderUniform("ProjMat");
+        projMatUniform = shaderInstance.getShaderUniform("projMat");
+        viewMatUniform = shaderInstance.getShaderUniform("viewMat");
     }
 }

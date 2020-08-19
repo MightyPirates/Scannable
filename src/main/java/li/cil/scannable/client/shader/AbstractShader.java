@@ -59,6 +59,6 @@ public abstract class AbstractShader {
     protected abstract String getShaderName();
 
     protected void handleShaderLoad() {
-        timeUniform = shaderInstance.getShaderUniform("Time");
+        timeUniform = shaderInstance.getShaderUniform("time");
     }
 }
