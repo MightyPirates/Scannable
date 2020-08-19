@@ -365,6 +365,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BlockState blockState = block.getDefaultState();
 
             color = blockState.getMaterialColor(world, new BlockPos(bounds.getCenter())).colorValue;
+            if (color == 0) { // E.g. glass.
+                color = DEFAULT_COLOR;
+            }
 
             final IFluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
