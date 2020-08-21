@@ -29,10 +29,9 @@ public final class ScanFilterBlockCache implements ScanFilterBlock {
     private static Collection<Block> buildCache(final Collection<ScanFilterBlock> filters) {
         final Set<Block> cache = new HashSet<>();
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
-            for (final BlockState blockState : block.getStateContainer().getValidStates()) {
-                if (filters.stream().anyMatch(f -> f.matches(blockState))) {
-                    cache.add(blockState.getBlock());
-                }
+            final BlockState blockState = block.getDefaultState();
+            if (filters.stream().anyMatch(f -> f.matches(blockState))) {
+                cache.add(blockState.getBlock());
             }
         }
         return cache;

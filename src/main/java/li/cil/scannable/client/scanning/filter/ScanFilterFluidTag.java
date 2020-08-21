@@ -16,6 +16,6 @@ public final class ScanFilterFluidTag implements ScanFilterBlock {
     @Override
     public boolean matches(final BlockState state) {
         final IFluidState fluidState = state.getFluidState();
-        return tag.contains(fluidState.getFluid());
+        return !fluidState.isEmpty() && tag.contains(fluidState.getFluid());
     }
 }
