@@ -1,4 +1,1 @@
-* Changed block and entity modules to now support up to five configuration entries.
-* Added UI for block and entity modules to remove entries or configure them via other items.
-* Improved block scan performance and rendering individual scanned blocks in results.
-* Added possibility to spawn locked block and entity modules.
+* Fix waterloggable blocks always getting picked up by fluid module.
