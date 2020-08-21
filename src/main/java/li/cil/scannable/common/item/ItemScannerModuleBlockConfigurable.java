@@ -36,6 +36,12 @@ import java.util.List;
 public final class ItemScannerModuleBlockConfigurable extends AbstractItemScannerModuleBlock {
     private static final String TAG_BLOCK_DEPRECATED = "block";
     private static final String TAG_BLOCKS = "blocks";
+    private static final String TAG_IS_LOCKED = "isLocked";
+
+    public static boolean isLocked(final ItemStack stack) {
+        final CompoundNBT nbt = stack.getTag();
+        return nbt != null && nbt.getBoolean(TAG_IS_LOCKED);
+    }
 
     public static List<Block> getBlocks(final ItemStack stack) {
         final CompoundNBT nbt = stack.getTag();
@@ -68,9 +74,13 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return false;
         }
 
+        final CompoundNBT nbt = stack.getOrCreateTag();
+        if (nbt.getBoolean(TAG_IS_LOCKED)) {
+            return false;
+        }
+
         final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
         final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         if (list.contains(itemNbt)) {
             return true;
@@ -96,9 +106,13 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return false;
         }
 
+        final CompoundNBT nbt = stack.getOrCreateTag();
+        if (nbt.getBoolean(TAG_IS_LOCKED)) {
+            return false;
+        }
+
         final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
         final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);
         if (oldIndex == index) {
@@ -124,6 +138,10 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         }
 
         final CompoundNBT nbt = stack.getOrCreateTag();
+        if (nbt.getBoolean(TAG_IS_LOCKED)) {
+            return;
+        }
+
         final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         if (index < list.size()) {
             list.remove(index);
@@ -201,7 +219,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         if (addBlock(stack, block)) {
             return ActionResultType.SUCCESS;
         } else {
-            if (world.isRemote) {
+            if (world.isRemote && !ItemScannerModuleBlockConfigurable.isLocked(stack)) {
                 Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
             return ActionResultType.SUCCESS; // Prevent opening item UI.

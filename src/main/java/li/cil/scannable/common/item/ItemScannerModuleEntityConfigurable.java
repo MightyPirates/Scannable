@@ -34,6 +34,12 @@ import java.util.Optional;
 public final class ItemScannerModuleEntityConfigurable extends AbstractItemScannerModuleEntity {
     private static final String TAG_ENTITY_DEPRECATED = "entity";
     private static final String TAG_ENTITIES = "entities";
+    private static final String TAG_IS_LOCKED = "isLocked";
+
+    public static boolean isLocked(final ItemStack stack) {
+        final CompoundNBT nbt = stack.getTag();
+        return nbt != null && nbt.getBoolean(TAG_IS_LOCKED);
+    }
 
     public static List<EntityType<?>> getEntityTypes(final ItemStack stack) {
         final CompoundNBT nbt = stack.getTag();
@@ -59,9 +65,13 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
             return false;
         }
 
+        final CompoundNBT nbt = stack.getOrCreateTag();
+        if (nbt.getBoolean(TAG_IS_LOCKED)) {
+            return false;
+        }
+
         final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
         final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         if (list.contains(itemNbt)) {
             return true;
@@ -87,9 +97,13 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
             return false;
         }
 
+        final CompoundNBT nbt = stack.getOrCreateTag();
+        if (nbt.getBoolean(TAG_IS_LOCKED)) {
+            return false;
+        }
+
         final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
         final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);
         if (oldIndex == index) {
@@ -115,6 +129,10 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
         }
 
         final CompoundNBT nbt = stack.getOrCreateTag();
+        if (nbt.getBoolean(TAG_IS_LOCKED)) {
+            return;
+        }
+
         final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         if (index < list.size()) {
             list.remove(index);
@@ -173,7 +191,7 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
             player.inventory.markDirty();
             return true;
         } else {
-            if (player.getEntityWorld().isRemote) {
+            if (player.getEntityWorld().isRemote && !ItemScannerModuleEntityConfigurable.isLocked(stack)) {
                 Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
             return true; // Prevent opening item UI.
