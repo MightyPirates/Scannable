@@ -1,1 +1,1 @@
-* MC1.16.2 port.
+* Added Russian translation by Akaleaf.
