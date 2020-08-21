@@ -131,7 +131,7 @@ public enum ScanManager {
             }
 
             for (final ScanResultProvider provider : collectingProviders) {
-                provider.computeScanResults(result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+                provider.computeScanResults();
             }
 
             ++scanningTicks;
@@ -141,11 +141,12 @@ public enum ScanManager {
 
         for (int i = 0; i < remaining; i++) {
             for (final ScanResultProvider provider : collectingProviders) {
-                provider.computeScanResults(result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+                provider.computeScanResults();
             }
         }
 
         for (final ScanResultProvider provider : collectingProviders) {
+            provider.collectScanResults(entity.getEntityWorld(), result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             provider.reset();
         }
 
@@ -226,10 +227,6 @@ public enum ScanManager {
                 final Vec3d position = result.getPosition();
                 if (lastScanCenter.squareDistanceTo(position) <= sqRadius) {
                     results.remove(results.size() - 1);
-                    if (!provider.bakeResult(world, result)) {
-                        result.close();
-                        continue;
-                    }
                     synchronized (renderingResults) {
                         renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
                     }

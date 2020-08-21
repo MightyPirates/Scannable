@@ -20,6 +20,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -40,6 +41,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     private int chunksPerTick;
     private int x, z;
     private final List<LivingEntity> entities = new ArrayList<>();
+    private final List<ScanResultEntity> results = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
     // ScanResultProvider
@@ -75,7 +77,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     }
 
     @Override
-    public void computeScanResults(final Consumer<ScanResult> callback) {
+    public void computeScanResults() {
         final World world = player.getEntityWorld();
         for (int i = 0; i < chunksPerTick; i++) {
             if (!moveNext()) {
@@ -100,11 +102,16 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
                             }
                         }
                     }
-                    callback.accept(new ScanResultEntity(entity, icon));
+                    results.add(new ScanResultEntity(entity, icon));
                 }
             }
             entities.clear();
         }
+    }
+
+    @Override
+    public void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback) {
+        results.forEach(callback);
     }
 
     @Override
@@ -145,6 +152,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         chunksPerTick = 0;
         x = z = 0;
         entities.clear();
+        results.clear();
     }
 
     // --------------------------------------------------------------------- //

@@ -21,10 +21,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
@@ -51,6 +53,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     private int requestDelay;
     private State state;
     private StructureLocation[] structures = EMPTY;
+    private final List<ScanResultStructure> results = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
 
@@ -84,7 +87,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     }
 
     @Override
-    public void computeScanResults(final Consumer<ScanResult> callback) {
+    public void computeScanResults() {
         switch (state) {
             case WAIT_REQUEST: {
                 if (requestDelay-- > 0) {
@@ -105,9 +108,9 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                     final Vec3d toStructure = structureCenter.subtract(center);
                     if (toStructure.lengthSquared() > sqRenderDistance) {
                         final Vec3d clippedPos = center.add(toStructure.normalize().scale(renderDistance - 4));
-                        callback.accept(new ScanResultStructure(structure, clippedPos));
+                        results.add(new ScanResultStructure(structure, clippedPos));
                     } else {
-                        callback.accept(new ScanResultStructure(structure, structureCenter));
+                        results.add(new ScanResultStructure(structure, structureCenter));
                     }
                 }
                 structures = EMPTY;
@@ -117,6 +120,11 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                 break;
             }
         }
+    }
+
+    @Override
+    public void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback) {
+        results.forEach(callback);
     }
 
     @Override
@@ -157,6 +165,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         requestDelay = 0;
         state = State.WAIT_REQUEST;
         structures = EMPTY;
+        results.clear();
     }
 
     // --------------------------------------------------------------------- //

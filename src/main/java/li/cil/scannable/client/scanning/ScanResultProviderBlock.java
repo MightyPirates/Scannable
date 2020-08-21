@@ -49,14 +49,17 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     // --------------------------------------------------------------------- //
 
+    // Sanity performance check. Maybe some day I'll do some research on how to
+    // do the clustering more efficiently, but for now this is good enough. We
+    // really only need this when scanning for stupid stuff like stone.
+    private static final int MAX_RESULTS_PER_BLOCK = 8192;
     private static final int DEFAULT_COLOR = 0x4466CC;
 
     private final List<ScanFilterLayer> scanFilterLayers = new ArrayList<>();
-    private ChunkPos minChunkPos, maxChunkPos;
-    private int minChunkSectionIndex, maxChunkSectionIndex;
-    private int currentChunkX, currentChunkSectionIndex, currentChunkZ;
-    private int chunkSectionsPerTick;
-    private final Map<BlockPos, BlockScanResult> resultClusters = new HashMap<>();
+    private final List<ChunkSectionPos> pendingChunkSections = new ArrayList<>();
+    private int currentChunkSection, chunkSectionsPerTick;
+    private final Map<Block, Map<BlockPos, BlockScanResult>> resultClusters = new HashMap<>();
+    private final List<BlockScanResult> results = new ArrayList<>();
 
     // --------------------------------------------------------------------- //
     // ScanResultProvider
@@ -94,37 +97,51 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final BlockPos minBlockPos = new BlockPos(center).add(-this.radius, -this.radius, -this.radius);
             final BlockPos maxBlockPos = new BlockPos(center).add(this.radius, this.radius, this.radius);
-            minChunkPos = new ChunkPos(minBlockPos);
-            maxChunkPos = new ChunkPos(maxBlockPos);
-            minChunkSectionIndex = Math.max(minBlockPos.getY() >> 4, 0);
-            maxChunkSectionIndex = Math.min(maxBlockPos.getY() >> 4, 15);
+            final ChunkPos minChunkPos = new ChunkPos(minBlockPos);
+            final ChunkPos maxChunkPos = new ChunkPos(maxBlockPos);
+            final int minChunkSectionIndex = Math.max(minBlockPos.getY() >> 4, 0);
+            final int maxChunkSectionIndex = Math.min(maxBlockPos.getY() >> 4, 15);
 
-            currentChunkX = minChunkPos.x;
-            currentChunkSectionIndex = -1; // -1 for initial moveNext.
-            currentChunkZ = minChunkPos.z;
+            for (int chunkSectionIndex = minChunkSectionIndex; chunkSectionIndex <= maxChunkSectionIndex; chunkSectionIndex++) {
+                for (int chunkZ = minChunkPos.z; chunkZ <= maxChunkPos.z; chunkZ++) {
+                    for (int chunkX = minChunkPos.x; chunkX <= maxChunkPos.x; chunkX++) {
+                        final double dx = Math.min(Math.abs((chunkX << 4) - center.x), Math.abs((chunkX << 4) + 15 - center.x));
+                        final double dz = Math.min(Math.abs((chunkZ << 4) - center.z), Math.abs((chunkZ << 4) + 15 - center.z));
+                        final double dy = Math.min(Math.abs((chunkSectionIndex << 4) - center.y), Math.abs((chunkSectionIndex << 4) + 15 - center.y));
+                        final double squareDistToCenter = dx * dx + dy * dy + dz * dz;
 
-            final int chunkSectionCount = ((maxChunkPos.x - minChunkPos.x) + 1) * ((maxChunkPos.z - minChunkPos.z) + 1) * ((maxChunkSectionIndex - minChunkSectionIndex) + 1);
-            chunkSectionsPerTick = MathHelper.ceil(chunkSectionCount / (float) scanTicks);
+                        if (squareDistToCenter > radius * radius) {
+                            continue;
+                        }
+
+                        pendingChunkSections.add(new ChunkSectionPos(chunkX, chunkZ, chunkSectionIndex, squareDistToCenter));
+                    }
+                }
+            }
+
+            pendingChunkSections.sort(Comparator.comparingDouble(p -> p.squareDistToCenter));
+
+            chunkSectionsPerTick = MathHelper.ceil(pendingChunkSections.size() / (float) scanTicks);
+            this.currentChunkSection = 0;
         }
     }
 
     @Override
-    public void computeScanResults(final Consumer<ScanResult> callback) {
+    public void computeScanResults() {
         final World world = player.getEntityWorld();
         for (int i = 0; i < chunkSectionsPerTick; i++) {
-            if (!moveNext()) {
+            if (currentChunkSection >= pendingChunkSections.size()) {
                 return;
             }
 
-            // Skip chunks outside our bounding sphere defined by the global scan radius.
-            final double dx = Math.min(Math.abs((currentChunkX << 4) - center.x), Math.abs((currentChunkX << 4) + 15 - center.x));
-            final double dz = Math.min(Math.abs((currentChunkZ << 4) - center.z), Math.abs((currentChunkZ << 4) + 15 - center.z));
-            final double dy = Math.min(Math.abs((currentChunkSectionIndex << 4) - center.y), Math.abs((currentChunkSectionIndex << 4) + 15 - center.y));
-            if (dx * dx + dy * dy + dz * dz > radius * radius) {
-                continue;
-            }
+            final ChunkSectionPos chunkSectionPos = pendingChunkSections.get(currentChunkSection);
+            currentChunkSection++;
 
-            final IChunk chunk = world.getChunk(currentChunkX, currentChunkZ, ChunkStatus.FULL, false);
+            final int chunkX = chunkSectionPos.chunkX;
+            final int chunkZ = chunkSectionPos.chunkZ;
+            final int chunkSectionIndex = chunkSectionPos.chunkSectionIndex;
+
+            final IChunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
             if (chunk == null) {
                 continue;
             }
@@ -132,7 +149,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final ChunkSection[] sections = chunk.getSections();
             assert sections.length == 16;
 
-            final ChunkSection section = sections[currentChunkSectionIndex];
+            final ChunkSection section = sections[chunkSectionIndex];
             if (section == null || section.isEmpty()) {
                 continue;
             }
@@ -144,7 +161,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final int originZ = origin.getZ();
             for (int index = 0; index < 16 * 16 * 16; index++) {
                 final BlockState state = data.get(index);
-                if (Settings.shouldIgnore(state.getBlock())) {
+                final Block block = state.getBlock();
+                final Map<BlockPos, BlockScanResult> clusters = resultClusters.computeIfAbsent(block, b -> new HashMap<>());
+                if (clusters.size() > MAX_RESULTS_PER_BLOCK) {
+                    continue;
+                }
+
+                if (Settings.shouldIgnore(block)) {
                     continue;
                 }
 
@@ -167,10 +190,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     for (final ScanFilterBlock filter : layer.filters) {
                         if (filter.matches(state)) {
                             final BlockPos pos = new BlockPos(globalX, globalY, globalZ);
-                            if (!tryAddToCluster(pos, state.getBlock())) {
+                            if (!tryAddToCluster(clusters, pos)) {
                                 final BlockScanResult result = new BlockScanResult(state.getBlock(), pos);
-                                callback.accept(result);
-                                resultClusters.put(pos, result);
+                                clusters.put(pos, result);
+                                results.add(result);
                             }
                             break outer;
                         }
@@ -181,13 +204,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     }
 
     @Override
-    public boolean bakeResult(final IBlockReader world, final ScanResult result) {
-        final BlockScanResult blockResult = (BlockScanResult) result;
-        if (blockResult.isRoot()) {
-            blockResult.bake(world);
-            return true;
+    public void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback) {
+        for (final BlockScanResult result : results) {
+            if (result.isRoot()) {
+                result.bake(world);
+                callback.accept(result);
+            }
         }
-        return false;
     }
 
     @Override
@@ -252,11 +275,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     public void reset() {
         super.reset();
         scanFilterLayers.clear();
-        minChunkPos = maxChunkPos = null;
-        minChunkSectionIndex = maxChunkSectionIndex = 0;
-        chunkSectionsPerTick = 0;
-        currentChunkX = currentChunkSectionIndex = currentChunkZ = 0;
+        currentChunkSection = chunkSectionsPerTick = 0;
+        pendingChunkSections.clear();
         resultClusters.clear();
+        results.clear();
     }
 
     // --------------------------------------------------------------------- //
@@ -275,61 +297,56 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         .build(false));
     }
 
-    private boolean tryAddToCluster(final BlockPos pos, final Block block) {
-        final BlockPos min = pos.add(-1, -1, -1);
-        final BlockPos max = pos.add(1, 1, 1);
-
+    private boolean tryAddToCluster(final Map<BlockPos, BlockScanResult> clusters, final BlockPos pos) {
         BlockScanResult root = null;
-        for (int y = min.getY(); y <= max.getY(); y++) {
-            for (int x = min.getX(); x <= max.getX(); x++) {
-                for (int z = min.getZ(); z <= max.getZ(); z++) {
-                    final BlockPos clusterPos = new BlockPos(x, y, z);
-                    final BlockScanResult cluster = resultClusters.get(clusterPos);
-                    if (cluster == null) {
-                        continue;
-                    }
-                    if (block != cluster.block) {
-                        continue;
-                    }
-
-                    if (root == null) {
-                        root = cluster.getRoot();
-                        root.add(pos);
-                        resultClusters.put(pos, root);
-                    } else {
-                        cluster.setRoot(root);
-                    }
-                }
-            }
-        }
-
+        root = tryAddToCluster(clusters, pos, pos.east(), root);
+        root = tryAddToCluster(clusters, pos, pos.west(), root);
+        root = tryAddToCluster(clusters, pos, pos.north(), root);
+        root = tryAddToCluster(clusters, pos, pos.south(), root);
+        root = tryAddToCluster(clusters, pos, pos.up(), root);
+        root = tryAddToCluster(clusters, pos, pos.down(), root);
         return root != null;
     }
 
-    private boolean moveNext() {
-        currentChunkSectionIndex++;
-        if (currentChunkSectionIndex > maxChunkSectionIndex || currentChunkSectionIndex >= 15) {
-            currentChunkSectionIndex = minChunkSectionIndex;
-            currentChunkX++;
-            if (currentChunkX > maxChunkPos.x) {
-                currentChunkX = minChunkPos.x;
-                currentChunkZ++;
-                if (currentChunkZ > maxChunkPos.z) {
-                    chunkSectionsPerTick = 0;
-                    return false;
-                }
-            }
+    @Nullable
+    private BlockScanResult tryAddToCluster(final Map<BlockPos, BlockScanResult> clusters, final BlockPos pos, final BlockPos clusterPos, @Nullable BlockScanResult root) {
+        final BlockScanResult cluster = clusters.get(clusterPos);
+        if (cluster == null) {
+            return root;
         }
-        return true;
+
+        if (root == null) {
+            root = cluster.getRoot();
+            root.add(pos);
+            clusters.put(pos, root);
+        } else {
+            cluster.getRoot().setRoot(root);
+        }
+
+        return root;
     }
 
     private static final class ScanFilterLayer {
-        public int radius;
-        public List<ScanFilterBlock> filters;
+        public final int radius;
+        public final List<ScanFilterBlock> filters;
 
         public ScanFilterLayer(final int radius, final List<ScanFilterBlock> filters) {
             this.radius = radius;
             this.filters = filters;
+        }
+    }
+
+    private static final class ChunkSectionPos {
+        public final int chunkX;
+        public final int chunkZ;
+        public final int chunkSectionIndex;
+        public double squareDistToCenter;
+
+        private ChunkSectionPos(final int chunkX, final int chunkZ, final int chunkSectionIndex, final double squareDistToCenter) {
+            this.chunkX = chunkX;
+            this.chunkZ = chunkZ;
+            this.chunkSectionIndex = chunkSectionIndex;
+            this.squareDistToCenter = squareDistToCenter;
         }
     }
 
@@ -404,13 +421,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         void setRoot(final BlockScanResult root) {
-            if (parent != null) {
-                parent.setRoot(root);
-                return;
-            }
             if (root == this) {
                 return;
             }
+
+            assert parent == null;
 
             root.bounds = root.bounds.union(bounds);
             root.blocks.addAll(blocks);

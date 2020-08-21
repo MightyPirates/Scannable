@@ -24,24 +24,21 @@ import java.util.function.Consumer;
  * advancement so as to allow distributing scan workload over multiple ticks.
  * <p>
  * If your implementation is not that computationally expensive, it is fine to
- * just collect all scan results in the first {@link #computeScanResults(Consumer)}
- * call.
+ * just collect all scan results in {@link #collectScanResults(IBlockReader, Consumer)}.
  * <p>
  * Otherwise, the implementation should prepare for spread out collection of
  * results in {@link #initialize(PlayerEntity, Collection, Vec3d, float, int)},
  * over the specified number of ticks. Each tick until the scan is complete,
- * {@link #computeScanResults(Consumer)} will be called, in which the
- * implementation should add results collected this tick to the passed
- * collection. It is the responsibility of the implementation to ensure that
- * all results have been added by the end of the last tick's call to
- * {@link #computeScanResults(Consumer)}.
+ * {@link #computeScanResults()} will be called. Implementations should gather
+ * results and return all valid results when <code>collectScanResults</code>
+ * is called.
  */
 @OnlyIn(Dist.CLIENT)
 public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvider> {
     /**
      * Called each time a scan is started by the player.
      * <p>
-     * Prepare internal structures for incoming calls to {@link #computeScanResults(Consumer)}.
+     * Prepare internal structures for incoming calls to {@link #computeScanResults()}.
      * <p>
      * Note that the radius should be treated as a <em>maximum</em> radius.
      * Implementations are free to only scan smaller area if they so please.
@@ -55,27 +52,20 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
     void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks);
 
     /**
-     * Called each tick during an ongoing scan. Report any results generated this
-     * tick to the passed callback.
-     *
-     * @param callback the callback to feed results to.
+     * Called each tick during an ongoing scan. Perform internal computations
+     * to build a list of scan results over several ticks.
      */
-    void computeScanResults(final Consumer<ScanResult> callback);
+    void computeScanResults();
 
     /**
-     * Called to allow scan results to perform in-advance caching before rendering
-     * commences and serves to filter out invalid results when moving results to
-     * the active render list. Use this to filter out results that are no longer
-     * valid, either because the scanned object has become invalid in the meantime,
-     * or because the result has been merged into another one (e.g. the built-in
-     * ore scanner merges adjacent ore blocks into a single result for better
-     * render performance).
+     * Called after scanning is completed to collect the final results. Perform
+     * any post-scan filtering and baking here and report results using the
+     * provided callback.
      *
-     * @param world  the world to check for.
-     * @param result the result to filter.
-     * @return <code>true</code> if the result should be kept; <code>false</code> otherwise.
+     * @param world    the world to check for.
+     * @param callback the callback to feed results to.
      */
-    boolean bakeResult(final IBlockReader world, final ScanResult result);
+    void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback);
 
     /**
      * Render the specified results.
@@ -83,7 +73,7 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * This is delegated as a batch call to the provider to allow optimized
      * rendering of large numbers of results. The provided results are
      * guaranteed to have been produced by this provider via its
-     * {@link #computeScanResults(Consumer)} method.
+     * {@link #collectScanResults(IBlockReader, Consumer)} method.
      * <p>
      * The specified list has been frustum culled using the results' bounds
      * provided from {@link ScanResult#getRenderBounds()}.

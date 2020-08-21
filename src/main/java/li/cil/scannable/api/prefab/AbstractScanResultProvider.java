@@ -3,7 +3,6 @@ package li.cil.scannable.api.prefab;
 import com.google.common.base.Strings;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import net.minecraft.client.Minecraft;
@@ -17,7 +16,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -44,11 +42,6 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
         this.player = player;
         this.center = center;
         this.radius = radius;
-    }
-
-    @Override
-    public boolean bakeResult(final IBlockReader world, final ScanResult result) {
-        return true;
     }
 
     @Override
