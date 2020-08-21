@@ -1,5 +1,6 @@
 package li.cil.scannable.data;
 
+import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -12,7 +13,11 @@ public final class DataGenerators {
         final DataGenerator generator = event.getGenerator();
 
         if (event.includeServer()) {
-            generator.addProvider(new Tags(generator));
+            generator.addProvider(new Tags(generator, new BlockTagsProvider(generator) {
+                @Override
+                protected void registerTags() {
+                }
+            }));
             generator.addProvider(new Recipes(generator));
         }
         if (event.includeClient()) {

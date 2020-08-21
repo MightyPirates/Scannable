@@ -1,5 +1,5 @@
 {
-  "parent": "item/generated",
+  "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "scannable:items/module_blank",
     "layer1": "scannable:items/module_slot",

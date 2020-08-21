@@ -28,7 +28,7 @@ public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockMod
 
     @Override
     protected ITextComponent getItemName(final Block block) {
-        return block.getNameTextComponent();
+        return block.getTranslatedName();
     }
 
     @Override

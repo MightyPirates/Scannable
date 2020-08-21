@@ -24,9 +24,14 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.palette.PalettedContainer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
@@ -65,7 +70,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     // ScanResultProvider
 
     @Override
-    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
 
         scanFilterLayers.clear();
@@ -240,8 +245,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
         renderType.clearRenderState();
 
-        final Vec3d lookVec = new Vec3d(renderInfo.getViewVector());
-        final Vec3d viewerEyes = renderInfo.getProjectedView();
+        final Vector3d lookVec = new Vector3d(renderInfo.getViewVector());
+        final Vector3d viewerEyes = renderInfo.getProjectedView();
         final float yaw = renderInfo.getYaw();
         final float pitch = renderInfo.getPitch();
         final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
@@ -250,20 +255,20 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         // vector) so that labels we're looking at are in front of others.
         results.sort(Comparator.comparing(result -> {
             final BlockScanResult blockResult = (BlockScanResult) result;
-            final Vec3d resultPos = blockResult.getPosition();
-            final Vec3d toResult = resultPos.subtract(viewerEyes);
+            final Vector3d resultPos = blockResult.getPosition();
+            final Vector3d toResult = resultPos.subtract(viewerEyes);
             return lookVec.dotProduct(toResult.normalize());
         }));
 
         for (final ScanResult result : results) {
             final BlockScanResult blockResult = (BlockScanResult) result;
 
-            final Vec3d resultPos = result.getPosition();
-            final Vec3d toResult = resultPos.subtract(viewerEyes);
+            final Vector3d resultPos = result.getPosition();
+            final Vector3d toResult = resultPos.subtract(viewerEyes);
             final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
 
             final Block block = blockResult.block;
-            final ITextComponent label = block.getNameTextComponent();
+            final ITextComponent label = block.getTranslatedName();
             if (lookDirDot > 0.98f && !Strings.isNullOrEmpty(label.getString())) {
                 final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).length() : 0f;
                 renderIconLabel(renderTypeBuffer, matrixStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, API.ICON_INFO, label);
@@ -376,7 +381,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 color = DEFAULT_COLOR;
             }
 
-            final IFluidState fluidState = blockState.getFluidState();
+            final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
                 if (Settings.fluidColors.containsKey(fluidState.getFluid())) {
                     color = Settings.fluidColors.getInt(fluidState.getFluid());
@@ -554,7 +559,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         @Override
-        public Vec3d getPosition() {
+        public Vector3d getPosition() {
             return bounds.getCenter();
         }
 

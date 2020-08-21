@@ -1,6 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[31,)"
 issueTrackerURL = "https://github.com/MightyPirates/Scannable/issues"
+license = "MIT"
 
 [[mods]]
 modId = "scannable"

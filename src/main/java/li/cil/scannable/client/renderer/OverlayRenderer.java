@@ -4,15 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.ItemScanner;
+import li.cil.scannable.util.Migration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
@@ -130,7 +131,9 @@ public enum OverlayRenderer {
 
         tessellator.draw();
 
-        mc.fontRenderer.drawStringWithShadow(I18n.format(Constants.GUI_SCANNER_PROGRESS, MathHelper.floor(progress * 100)), right + 12, midY - mc.fontRenderer.FONT_HEIGHT / 2, 0xCCAACCEE);
+        Migration.FontRenderer.drawStringWithShadow(mc.fontRenderer, event.getMatrixStack(),
+                new TranslationTextComponent(Constants.GUI_SCANNER_PROGRESS, MathHelper.floor(progress * 100)),
+                right + 12, midY - mc.fontRenderer.FONT_HEIGHT / 2, 0xCCAACCEE);
 
         RenderSystem.bindTexture(0);
     }

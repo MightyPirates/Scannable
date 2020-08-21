@@ -12,15 +12,15 @@ import li.cil.scannable.common.config.Settings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -86,7 +86,7 @@ public enum ScanManager {
     private int scanningTicks = -1;
     private long currentStart = -1;
     @Nullable
-    private Vec3d lastScanCenter;
+    private Vector3d lastScanCenter;
 
     private MatrixStack viewMatrix;
     private Matrix4f projectionMatrix;
@@ -116,7 +116,7 @@ public enum ScanManager {
             return;
         }
 
-        final Vec3d center = player.getPositionVector();
+        final Vector3d center = player.getPositionVec();
         for (final ScanResultProvider provider : collectingProviders) {
             provider.initialize(player, stacks, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
         }
@@ -152,7 +152,7 @@ public enum ScanManager {
 
         clear();
 
-        lastScanCenter = entity.getPositionVector();
+        lastScanCenter = entity.getPositionVec();
         currentStart = System.currentTimeMillis();
 
         pendingResults.putAll(collectingResults);
@@ -224,7 +224,7 @@ public enum ScanManager {
 
             while (results.size() > 0) {
                 final ScanResult result = results.get(results.size() - 1);
-                final Vec3d position = result.getPosition();
+                final Vector3d position = result.getPosition();
                 if (lastScanCenter.squareDistanceTo(position) <= sqRadius) {
                     results.remove(results.size() - 1);
                     synchronized (renderingResults) {
@@ -285,9 +285,9 @@ public enum ScanManager {
 
     private void render(final float partialTicks, final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
         final ActiveRenderInfo activeRenderInfo = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
-        final Vec3d pos = activeRenderInfo.getProjectedView();
+        final Vector3d pos = activeRenderInfo.getProjectedView();
 
-        final ClippingHelperImpl frustum = new ClippingHelperImpl(matrixStack.getLast().getMatrix(), projectionMatrix);
+        final ClippingHelper frustum = new ClippingHelper(matrixStack.getLast().getMatrix(), projectionMatrix);
         frustum.setCameraPosition(pos.getX(), pos.getY(), pos.getZ());
 
         RenderSystem.disableDepthTest();

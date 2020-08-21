@@ -7,13 +7,16 @@ import net.minecraft.advancements.criterion.PositionTrigger;
 import net.minecraft.data.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.tags.Tag;
-import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.tags.ITag;
+import net.minecraft.world.gen.feature.structure.MineshaftConfig;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.common.Tags;
 
 import java.util.function.Consumer;
 
 public final class Recipes extends RecipeProvider {
+    public static final Structure<MineshaftConfig> MINESHAFT = Structure.field_236367_c_; // TODO Inline once mappings exist.
+
     public Recipes(final DataGenerator generator) {
         super(generator);
     }
@@ -30,7 +33,7 @@ public final class Recipes extends RecipeProvider {
                 .key('g', Tags.Items.INGOTS_GOLD)
                 .key('q', Tags.Items.GEMS_QUARTZ)
                 .setGroup("scanner")
-                .addCriterion("is_delving", PositionTrigger.Instance.forLocation(LocationPredicate.forFeature(Feature.MINESHAFT)))
+                .addCriterion("is_delving", PositionTrigger.Instance.forLocation(LocationPredicate.forFeature(MINESHAFT)))
                 .build(consumer);
 
         ShapedRecipeBuilder.shapedRecipe(Scannable.MODULE_BLANK.get())
@@ -56,7 +59,7 @@ public final class Recipes extends RecipeProvider {
 //        registerModule(Scannable.MODULE_STRUCTURE.get(), Tags.Items.GEMS_EMERALD).build(consumer);
     }
 
-    private static ShapelessRecipeBuilder registerModule(final Item item, final Tag<Item> ingredient) {
+    private static ShapelessRecipeBuilder registerModule(final Item item, final ITag<Item> ingredient) {
         return ShapelessRecipeBuilder.shapelessRecipe(item)
                 .addIngredient(Scannable.MODULE_BLANK.get())
                 .addIngredient(ingredient)

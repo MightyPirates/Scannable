@@ -13,13 +13,13 @@ import li.cil.scannable.common.scanning.ScannerModuleStructure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
@@ -71,7 +71,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     // ScanResultProvider
 
     @Override
-    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius * Constants.MODULE_STRUCTURE_RADIUS_MULTIPLIER, scanTicks);
         hideExplored = false;
         for (final ItemStack module : modules) {
@@ -104,10 +104,10 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                 final float renderDistance = Minecraft.getInstance().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
                 final float sqRenderDistance = renderDistance * renderDistance;
                 for (final StructureLocation structure : structures) {
-                    final Vec3d structureCenter = new Vec3d(structure.pos);
-                    final Vec3d toStructure = structureCenter.subtract(center);
+                    final Vector3d structureCenter = new Vector3d(structure.pos.getX(), structure.pos.getY(), structure.pos.getZ());
+                    final Vector3d toStructure = structureCenter.subtract(center);
                     if (toStructure.lengthSquared() > sqRenderDistance) {
-                        final Vec3d clippedPos = center.add(toStructure.normalize().scale(renderDistance - 4));
+                        final Vector3d clippedPos = center.add(toStructure.normalize().scale(renderDistance - 4));
                         results.add(new ScanResultStructure(structure, clippedPos));
                     } else {
                         results.add(new ScanResultStructure(structure, structureCenter));
@@ -132,8 +132,8 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         final float yaw = renderInfo.getYaw();
         final float pitch = renderInfo.getPitch();
 
-        final Vec3d lookVec = new Vec3d(renderInfo.getViewVector());
-        final Vec3d viewerEyes = renderInfo.getProjectedView();
+        final Vector3d lookVec = new Vector3d(renderInfo.getViewVector());
+        final Vector3d viewerEyes = renderInfo.getProjectedView();
 
         final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
 
@@ -142,11 +142,11 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
         for (final ScanResult result : results) {
             final ScanResultStructure resultStructure = (ScanResultStructure) result;
-            final Vec3d structureCenter = new Vec3d(resultStructure.structure.pos.getX() + 0.5,
+            final Vector3d structureCenter = new Vector3d(resultStructure.structure.pos.getX() + 0.5,
                     resultStructure.structure.pos.getY() + 0.5,
                     resultStructure.structure.pos.getZ() + 0.5);
-            final Vec3d toStructure = structureCenter.subtract(viewerEyes);
-            final Vec3d resultPos;
+            final Vector3d toStructure = structureCenter.subtract(viewerEyes);
+            final Vector3d resultPos;
             if (toStructure.lengthSquared() > sqRenderDistance) {
                 resultPos = viewerEyes.add(toStructure.normalize().scale(renderDistance / 2));
             } else {
@@ -179,17 +179,17 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
     private static final class ScanResultStructure implements ScanResult {
         private final StructureLocation structure;
-        private final Vec3d center;
+        private final Vector3d center;
         private final AxisAlignedBB bounds;
 
-        ScanResultStructure(final StructureLocation structure, final Vec3d renderCenter) {
+        ScanResultStructure(final StructureLocation structure, final Vector3d renderCenter) {
             this.structure = structure;
             this.center = renderCenter;
             this.bounds = new AxisAlignedBB(new BlockPos(renderCenter)).grow(8, 8, 8);
         }
 
         @Override
-        public Vec3d getPosition() {
+        public Vector3d getPosition() {
             return center;
         }
 

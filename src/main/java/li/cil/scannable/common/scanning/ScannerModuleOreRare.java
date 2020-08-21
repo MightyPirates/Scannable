@@ -4,8 +4,8 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
-import li.cil.scannable.client.scanning.filter.ScanFilterBlockTag;
 import li.cil.scannable.client.scanning.filter.ScanFilterBlockCache;
+import li.cil.scannable.client.scanning.filter.ScanFilterBlockTag;
 import li.cil.scannable.client.scanning.filter.ScanFilterRareOreCatchAll;
 import li.cil.scannable.client.scanning.filter.ScanFilterSingleBlock;
 import li.cil.scannable.common.config.Constants;
@@ -13,7 +13,7 @@ import li.cil.scannable.common.config.Settings;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -66,7 +66,7 @@ public enum ScannerModuleOreRare implements ScannerModuleBlock {
         for (final Block block : Settings.rareOreBlocks) {
             filters.add(new ScanFilterSingleBlock(block));
         }
-        for (final Tag<Block> tag : Settings.rareOreBlockTags) {
+        for (final ITag<Block> tag : Settings.rareOreBlockTags) {
             filters.add(new ScanFilterBlockTag(tag));
         }
         filters.add(ScanFilterRareOreCatchAll.INSTANCE);

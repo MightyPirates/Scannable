@@ -1,5 +1,6 @@
 package li.cil.scannable.client;
 
+import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.gui.BlockModuleScreen;
 import li.cil.scannable.client.gui.EntityModuleScreen;
 import li.cil.scannable.client.gui.GuiScanner;
@@ -22,7 +23,7 @@ public final class InitializerClient extends InitializerCommon {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initializeClient);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ScanResultProviderRegistryInitializer::registerScanResultProviderRegistry);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ScanResultProviderRegistryInitializer::registerScanResultProviders);
+        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(ScanResultProvider.class, ScanResultProviderRegistryInitializer::registerScanResultProviders);
     }
 
     public void initializeClient(final FMLClientSetupEvent event) {

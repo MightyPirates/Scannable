@@ -24,12 +24,8 @@ public final class ScanResultProviderRegistryInitializer {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void registerScanResultProviders(final RegistryEvent.Register<?> event) {
-        if (event.getRegistry().getRegistrySuperType() != ScanResultProvider.class) {
-            return;
-        }
-
-        @SuppressWarnings("unchecked") final IForgeRegistry<ScanResultProvider> registry = (IForgeRegistry<ScanResultProvider>) event.getRegistry();
+    public static void registerScanResultProviders(final RegistryEvent.Register<ScanResultProvider> event) {
+        final IForgeRegistry<ScanResultProvider> registry = event.getRegistry();
         ScanResultProviderBlock.INSTANCE.setRegistryName(API.SCAN_RESULT_PROVIDER_BLOCKS);
         registry.register(ScanResultProviderBlock.INSTANCE);
 

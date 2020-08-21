@@ -174,7 +174,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_BLOCK_LIST));
-            blocks.forEach(b -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getNameTextComponent())));
+            blocks.forEach(b -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getTranslatedName())));
         }
         super.addInformation(stack, world, tooltip, flag);
     }

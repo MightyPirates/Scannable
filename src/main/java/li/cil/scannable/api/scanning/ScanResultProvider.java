@@ -3,10 +3,10 @@ package li.cil.scannable.api.scanning;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  * just collect all scan results in {@link #collectScanResults(IBlockReader, Consumer)}.
  * <p>
  * Otherwise, the implementation should prepare for spread out collection of
- * results in {@link #initialize(PlayerEntity, Collection, Vec3d, float, int)},
+ * results in {@link #initialize(PlayerEntity, Collection, Vector3d, float, int)},
  * over the specified number of ticks. Each tick until the scan is complete,
  * {@link #computeScanResults()} will be called. Implementations should gather
  * results and return all valid results when <code>collectScanResults</code>
@@ -49,7 +49,7 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * @param radius    the maximum radius of the scanned sphere.
      * @param scanTicks the total number of ticks the scan will take.
      */
-    void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks);
+    void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks);
 
     /**
      * Called each tick during an ongoing scan. Perform internal computations

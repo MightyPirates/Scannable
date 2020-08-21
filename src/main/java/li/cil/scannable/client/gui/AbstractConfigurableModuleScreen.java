@@ -1,5 +1,6 @@
 package li.cil.scannable.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
@@ -33,6 +34,8 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
         ySize = 133;
         passEvents = false;
         this.listCaptionTranslationKey = listCaptionTranslationKey;
+        playerInventoryTitleX = 8;
+        playerInventoryTitleY = 39;
     }
 
     private ItemStack getHeldItem() {
@@ -51,10 +54,10 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     // --------------------------------------------------------------------- //
 
     @Override
-    public void render(final int mouseX, final int mouseY, final float partialTicks) {
-        renderBackground();
-        super.render(mouseX, mouseY, partialTicks);
-        renderHoveredToolTip(mouseX, mouseY);
+    public void render(final MatrixStack matrixStack, final int mouseX, final int mouseY, final float partialTicks) {
+        renderBackground(matrixStack);
+        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        renderHoveredToolTip(matrixStack, mouseX, mouseY);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -64,17 +67,15 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
 
             if (isPointInRegion(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
                 final TItem item = items.get(slot);
-                renderTooltip(getItemName(item).getFormattedText(), mouseX, mouseY);
+                renderTooltip(matrixStack, getItemName(item), mouseX, mouseY);
             }
         }
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(final int mouseX, final int mouseY) {
-        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-        font.drawString(getHeldItem().getDisplayName().getFormattedText(), 8, 6, 0x404040);
-        font.drawString(I18n.format(listCaptionTranslationKey), 8, 23, 0x404040);
-        font.drawString(playerInventory.getDisplayName().getUnformattedComponentText(), 8, 39, 0x404040);
+    protected void drawGuiContainerForegroundLayer(final MatrixStack matrixStack, final int mouseX, final int mouseY) {
+        super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+        font.drawString(matrixStack, I18n.format(listCaptionTranslationKey), 8, 23, 0x404040);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -83,7 +84,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
             final int y = SLOTS_ORIGIN_Y;
 
             if (isPointInRegion(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
-                drawHoverHighlight(x, y, SLOT_SIZE - 2, SLOT_SIZE - 2);
+                drawHoverHighlight(matrixStack, x, y, SLOT_SIZE - 2, SLOT_SIZE - 2);
             }
 
             if (slot < items.size()) {
@@ -94,12 +95,12 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(final float partialTicks, final int mouseX, final int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(final MatrixStack matrixStack, final float partialTicks, final int mouseX, final int mouseY) {
         RenderSystem.color4f(1, 1, 1, 1);
         minecraft.getTextureManager().bindTexture(BACKGROUND);
         final int x = (width - xSize) / 2;
         final int y = (height - ySize) / 2;
-        blit(x, y, 0, 0, xSize, ySize);
+        blit(matrixStack, x, y, 0, 0, xSize, ySize);
     }
 
     @Override
@@ -139,11 +140,16 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
 
     // --------------------------------------------------------------------- //
 
-    private void drawHoverHighlight(final int x, final int y, final int width, final int height) {
+    private void drawHoverHighlight(final MatrixStack matrixStack, final int x, final int y, final int width, final int height) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
-        this.fillGradient(x, y, x + width, y + height, slotColor, slotColor);
+        this.fillGradient(matrixStack, x, y, x + width, y + height, slotColor, slotColor);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
+    }
+
+    // TODO Inline once mappings exist.
+    private void renderHoveredToolTip(final MatrixStack matrixStack, final int x, final int y) {
+        func_230459_a_(matrixStack, x, y);
     }
 }

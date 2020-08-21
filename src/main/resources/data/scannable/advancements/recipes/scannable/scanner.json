@@ -9,7 +9,9 @@
     "is_delving": {
       "trigger": "minecraft:location",
       "conditions": {
-        "feature": "mineshaft"
+        "location": {
+          "feature": "mineshaft"
+        }
       }
     },
     "has_the_recipe": {

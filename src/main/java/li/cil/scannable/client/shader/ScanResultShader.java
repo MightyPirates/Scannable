@@ -1,8 +1,8 @@
 package li.cil.scannable.client.shader;
 
 import li.cil.scannable.api.API;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.shader.ShaderDefault;
+import net.minecraft.util.math.vector.Matrix4f;
 
 public final class ScanResultShader extends AbstractShader {
     public static ScanResultShader INSTANCE = new ScanResultShader();

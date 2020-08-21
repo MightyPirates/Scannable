@@ -1,7 +1,7 @@
 package li.cil.scannable.api.scanning;
 
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -19,7 +19,7 @@ public interface ScanResult extends Closeable {
      *
      * @return the in-world position of the scan result.
      */
-    Vec3d getPosition();
+    Vector3d getPosition();
 
     /**
      * A bounding box encompassing anything the result may render.

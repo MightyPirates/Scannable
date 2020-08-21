@@ -5,15 +5,20 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.util.Migration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -31,14 +36,14 @@ import java.util.Collection;
 @OnlyIn(Dist.CLIENT)
 public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<ScanResultProvider> implements ScanResultProvider {
     protected PlayerEntity player;
-    protected Vec3d center;
+    protected Vector3d center;
     protected float radius;
 
     // --------------------------------------------------------------------- //
     // ScanResultProvider
 
     @Override
-    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vec3d center, final float radius, final int scanTicks) {
+    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks) {
         this.player = player;
         this.center = center;
         this.radius = radius;
@@ -68,8 +73,8 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
      * @param icon             the icon to display.
      * @param label            the label text. May be null.
      */
-    protected static void renderIconLabel(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final float yaw, final float pitch, final Vec3d lookVec, final Vec3d viewerEyes, final float displayDistance, final Vec3d resultPos, final ResourceLocation icon, @Nullable final ITextComponent label) {
-        final Vec3d toResult = resultPos.subtract(viewerEyes);
+    protected static void renderIconLabel(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final float yaw, final float pitch, final Vector3d lookVec, final Vector3d viewerEyes, final float displayDistance, final Vector3d resultPos, final ResourceLocation icon, @Nullable final ITextComponent label) {
+        final Vector3d toResult = resultPos.subtract(viewerEyes);
         final float distance = (float) toResult.length();
         final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
         final float sqLookDirDot = lookDirDot * lookDirDot;
@@ -92,7 +97,7 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
             }
 
             final FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-            final int width = fontRenderer.getStringWidth(text.getFormattedText()) + 16;
+            final int width = Migration.FontRenderer.getStringWidth(fontRenderer, text) + 16;
 
             matrixStack.push();
             matrixStack.translate(width / 2f, 0, 0);
@@ -100,7 +105,7 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
             drawQuad(renderTypeBuffer.getBuffer(getRenderLayer()), matrixStack, width, fontRenderer.FONT_HEIGHT + 5, 0, 0, 0, 0.6f);
 
             matrixStack.pop();
-            fontRenderer.renderString(text.getFormattedText(), 12, -4, 0xFFFFFFFF, true, matrixStack.getLast().getMatrix(), renderTypeBuffer, true, 0, 0xf000f0);
+            Migration.FontRenderer.renderString(fontRenderer, text, 12, -4, 0xFFFFFFFF, true, matrixStack.getLast().getMatrix(), renderTypeBuffer, true, 0, 0xf000f0);
         }
 
         drawQuad(renderTypeBuffer.getBuffer(getRenderLayer(icon)), matrixStack, 16, 16);

@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,7 +20,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +64,7 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
         }
 
         final List<ScanFilterBlock> filters = new ArrayList<>();
-        for (final Tag<Fluid> tag : FluidTags.getCollection().getTagMap().values()) {
+        for (final ITag<Fluid> tag : getAllFluidTags()) {
             if (!Settings.ignoredFluidTags.contains(tag)) {
                 filters.add(new ScanFilterFluidTag(tag));
             }
@@ -76,5 +78,10 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
         // Reset on any config change so we also rebuild the filter when resource reload
         // kicks in which can result in ids changing and thus our cache being invalid.
         ScannerModuleFluid.INSTANCE.filter = null;
+    }
+
+    @Nonnull
+    private Collection<ITag<Fluid>> getAllFluidTags() {
+        return FluidTags.getCollection().func_241833_a().values();
     }
 }

@@ -1,17 +1,18 @@
 package li.cil.scannable.data;
 
 import li.cil.scannable.common.Scannable;
+import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.ItemTagsProvider;
 
 public final class Tags extends ItemTagsProvider {
-    public Tags(final DataGenerator generatorIn) {
-        super(generatorIn);
+    public Tags(final DataGenerator generatorIn, final BlockTagsProvider blockTagsProvider) {
+        super(generatorIn, blockTagsProvider);
     }
 
     @Override
     protected void registerTags() {
-        getBuilder(Scannable.MODULES).add(
+        getOrCreateBuilder(Scannable.MODULES).add(
                 Scannable.MODULE_BLANK.get(),
                 Scannable.MODULE_RANGE.get(),
                 Scannable.MODULE_ENTITY.get(),

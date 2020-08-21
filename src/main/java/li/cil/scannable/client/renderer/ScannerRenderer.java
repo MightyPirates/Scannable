@@ -6,14 +6,14 @@ import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.shader.ScanEffectShader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.FramebufferConstants;
 import net.minecraft.client.util.JSONBlendingMode;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -48,7 +48,7 @@ public enum ScannerRenderer {
 
     // --------------------------------------------------------------------- //
 
-    public void ping(final Vec3d pos) {
+    public void ping(final Vector3d pos) {
         currentStart = System.currentTimeMillis();
         ScanEffectShader.INSTANCE.setCenter(pos);
     }
@@ -86,7 +86,7 @@ public enum ScannerRenderer {
         invertedProjectionMatrix.invert();
         ScanEffectShader.INSTANCE.setInverseProjectionMatrix(invertedProjectionMatrix);
 
-        final Vec3d position = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+        final Vector3d position = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
         ScanEffectShader.INSTANCE.setPosition(position);
 
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();

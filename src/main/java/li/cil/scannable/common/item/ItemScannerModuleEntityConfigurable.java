@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -184,17 +185,17 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
     }
 
     @Override
-    public boolean itemInteractionForEntity(final ItemStack stack, final PlayerEntity player, final LivingEntity target, final Hand hand) {
+    public ActionResultType itemInteractionForEntity(final ItemStack stack, final PlayerEntity player, final LivingEntity target, final Hand hand) {
         // NOT adding to `stack` parameter, because that's a copy in creative mode.
         if (addEntityType(player.getHeldItem(hand), target.getType())) {
             player.swingArm(hand);
             player.inventory.markDirty();
-            return true;
+            return ActionResultType.SUCCESS;
         } else {
             if (player.getEntityWorld().isRemote && !ItemScannerModuleEntityConfigurable.isLocked(stack)) {
                 Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
-            return true; // Prevent opening item UI.
+            return ActionResultType.SUCCESS; // Prevent opening item UI.
         }
     }
 }

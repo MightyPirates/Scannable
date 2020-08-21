@@ -1,9 +1,9 @@
 package li.cil.scannable.client.shader;
 
 import li.cil.scannable.api.API;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.shader.ShaderDefault;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 
 public final class ScanEffectShader extends AbstractShader {
     public static final ScanEffectShader INSTANCE = new ScanEffectShader();
@@ -22,11 +22,11 @@ public final class ScanEffectShader extends AbstractShader {
         inverseProjectionMatrixUniform.set(value);
     }
 
-    public void setPosition(final Vec3d value) {
+    public void setPosition(final Vector3d value) {
         positionUniform.set((float) value.getX(), (float) value.getY(), (float) value.getZ());
     }
 
-    public void setCenter(final Vec3d value) {
+    public void setCenter(final Vector3d value) {
         centerUniform.set((float) value.getX(), (float) value.getY(), (float) value.getZ());
     }
 
@@ -35,7 +35,7 @@ public final class ScanEffectShader extends AbstractShader {
     }
 
     public void setDepthBuffer(final int buffer) {
-        shaderInstance.func_216537_a("depthTex", buffer);
+        shaderInstance.func_216537_a("depthTex", () -> buffer);
     }
 
     @Override
