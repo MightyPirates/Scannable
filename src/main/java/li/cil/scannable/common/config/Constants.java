@@ -33,6 +33,7 @@ public final class Constants {
     public static final String CONFIG_ENERGY_MODULE_FLUID = "config.scannable.energyCostModuleFluid";
     public static final String CONFIG_ENERGY_MODULE_ENTITY = "config.scannable.energyCostModuleEntity";
     public static final String CONFIG_BASE_SCAN_RADIUS = "config.scannable.baseScanRadius";
+    public static final String CONFIG_SCAN_STAY_DURATION = "config.scannable.scanStayDuration";
     public static final String CONFIG_IGNORED_BLOCKS = "config.scannable.ignoredBlocks";
     public static final String CONFIG_IGNORED_BLOCK_TAGS = "config.scannable.ignoredBlockTags";
     public static final String CONFIG_ORE_COMMON_BLOCKS = "config.scannable.oreCommonBlocks";
@@ -101,8 +102,6 @@ public final class Constants {
     public static final int SCAN_TIME_OFFSET = 200;
     // How long the ping takes to reach the end of the visible area.
     public static final int SCAN_GROWTH_DURATION = 2000;
-    // How long the results from a scan should remain visible.
-    public static final int SCAN_STAY_DURATION = 10000;
 
     // Reference render distance the above constants are relative to.
     public static final int REFERENCE_RENDER_DISTANCE = 12;

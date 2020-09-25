@@ -184,7 +184,7 @@ public enum ScanManager {
             return;
         }
 
-        if (Constants.SCAN_STAY_DURATION < (int) (System.currentTimeMillis() - currentStart)) {
+        if (Settings.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
             pendingResults.forEach((provider, results) -> results.forEach(ScanResult::close));
             pendingResults.clear();
             synchronized (renderingResults) {

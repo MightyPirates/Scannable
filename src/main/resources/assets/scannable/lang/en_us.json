@@ -58,6 +58,7 @@
   "config.scannable.energyCostModuleFluid": "Energy Cost: Fluid Module",
   "config.scannable.energyCostModuleEntity": "Energy Cost: Living Entity Module",
   "config.scannable.baseScanRadius": "Base Scan Radius",
+  "config.scannable.scanStayDuration": "Scan Stay Duration",
   "config.scannable.ignoredBlocks": "Ignored Blocks",
   "config.scannable.ignoredBlockTags": "Ignored Block Tags",
   "config.scannable.oreCommonBlocks": "Common Ore: Blocks",
