@@ -124,9 +124,12 @@ public final class ItemScanner extends AbstractItem {
         }
 
         final LazyOptional<IEnergyStorage> energyStorage = stack.getCapability(CapabilityEnergy.ENERGY);
-        return energyStorage
-                .map(storage -> 1 - storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
-                .orElse(1.0f);
+        if (energyStorage.isPresent()) { // NB: map() has a breaking API change 1.16.3.
+            final IEnergyStorage storage = energyStorage.orElseThrow(AssertionError::new);
+            return 1 - storage.getEnergyStored() / (float) storage.getMaxEnergyStored();
+        } else {
+            return 1.0f;
+        }
     }
 
     @Override
