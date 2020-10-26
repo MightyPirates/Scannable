@@ -52,6 +52,7 @@ public final class Settings {
     public static int energyCostModuleEntity = 75;
 
     public static int baseScanRadius = 64;
+    public static int scanStayDuration = 10000;
 
     public static Set<Block> ignoredBlocks = Util.make(new HashSet<>(), c -> {
         c.add(Blocks.COMMAND_BLOCK);
@@ -170,6 +171,7 @@ public final class Settings {
             energyCostModuleEntity = SERVER_INSTANCE.energyCostModuleEntity.get();
 
             baseScanRadius = SERVER_INSTANCE.baseScanRadius.get();
+            scanStayDuration = SERVER_INSTANCE.scanStayDuration.get();
 
             ignoredBlocks = deserializeSet(SERVER_INSTANCE.ignoredBlocks.get(), Settings::getBlock);
             ignoredBlockTags = deserializeSet(SERVER_INSTANCE.ignoredBlockTags.get(), Settings::getBlockTag);
@@ -207,6 +209,7 @@ public final class Settings {
         public ForgeConfigSpec.IntValue energyCostModuleEntity;
 
         public ForgeConfigSpec.IntValue baseScanRadius;
+        public ForgeConfigSpec.IntValue scanStayDuration;
 
         public ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredBlocks;
         public ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredBlockTags;
@@ -303,6 +306,12 @@ public final class Settings {
                             "Range modules will boost the range by half this value.")
                     .worldRestart()
                     .defineInRange("baseScanRadius", Settings.baseScanRadius, 16, 128);
+
+            scanStayDuration = builder
+                    .translation(Constants.CONFIG_SCAN_STAY_DURATION)
+                    .comment("How long the results from a scan should remain visible, in milliseconds.")
+                    .worldRestart()
+                    .defineInRange("scanStayDuration", Settings.scanStayDuration, 1000, 60000 * 5);
 
             builder.pop();
 
