@@ -53,7 +53,7 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
             renderTooltip(matrixStack, SCANNER_MODULES_INACTIVE_TOOLTIP, mouseX, mouseY);
         }
 
-        renderHoveredToolTip(matrixStack, mouseX, mouseY);
+        renderHoveredTooltip(matrixStack, mouseX, mouseY);
     }
 
     @Override
@@ -86,10 +86,5 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
         }
 
         super.handleMouseClick(slot, slotId, mouseButton, type);
-    }
-
-    // TODO Inline once mappings exist.
-    private void renderHoveredToolTip(final MatrixStack matrixStack, final int x, final int y) {
-        func_230459_a_(matrixStack, x, y);
     }
 }

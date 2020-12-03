@@ -15,7 +15,6 @@ import net.minecraftforge.common.Tags;
 import java.util.function.Consumer;
 
 public final class Recipes extends RecipeProvider {
-    public static final Structure<MineshaftConfig> MINESHAFT = Structure.field_236367_c_; // TODO Inline once mappings exist.
 
     public Recipes(final DataGenerator generator) {
         super(generator);
@@ -33,7 +32,7 @@ public final class Recipes extends RecipeProvider {
                 .key('g', Tags.Items.INGOTS_GOLD)
                 .key('q', Tags.Items.GEMS_QUARTZ)
                 .setGroup("scanner")
-                .addCriterion("is_delving", PositionTrigger.Instance.forLocation(LocationPredicate.forFeature(MINESHAFT)))
+                .addCriterion("is_delving", PositionTrigger.Instance.forLocation(LocationPredicate.forFeature(Structure.MINESHAFT)))
                 .build(consumer);
 
         ShapedRecipeBuilder.shapedRecipe(Scannable.MODULE_BLANK.get())

@@ -22,7 +22,7 @@ public final class Migration {
         }
 
         public static int getStringWidth(final net.minecraft.client.gui.FontRenderer font, final ITextProperties text) {
-            return font.func_238414_a_(text);
+            return font.getStringPropertyWidth(text);
         }
 
         public static void renderString(final net.minecraft.client.gui.FontRenderer font, final ITextComponent text, final float x, final float y, final int color, final boolean dropShadow, final Matrix4f matrix, final IRenderTypeBuffer buffer, final boolean transparent, final int backgroundColor, final int packedLight) {
@@ -36,7 +36,7 @@ public final class Migration {
 
     public static final class World {
         public static net.minecraft.util.RegistryKey<net.minecraft.world.World> getDimension(final net.minecraft.world.World world) {
-            return world.func_234923_W_();
+            return world.getDimensionKey();
         }
 
         public static BlockPos findNearestStructure(final ServerWorld world, final Structure<?> structure, final BlockPos pos, final int radius, final boolean skipExistingChunks) {
@@ -46,17 +46,17 @@ public final class Migration {
 
     public static final class RegistryKey {
         public static <T> net.minecraft.util.RegistryKey<T> getKey(final net.minecraft.util.RegistryKey<? extends Registry<T>> registryLocation, final ResourceLocation keyLocation) {
-            return net.minecraft.util.RegistryKey.func_240903_a_(registryLocation, keyLocation);
+            return net.minecraft.util.RegistryKey.getOrCreateKey(registryLocation, keyLocation);
         }
 
         public static <T> ResourceLocation getResourceLocation(final net.minecraft.util.RegistryKey<T> key) {
-            return key.func_240901_a_();
+            return key.getLocation();
         }
     }
 
     public static final class BlockTags {
         public static ITag.INamedTag<Block> getOrCreateTag(final ResourceLocation location) {
-            for (final ITag.INamedTag<Block> tag : net.minecraft.tags.BlockTags.func_242174_b()) {
+            for (final ITag.INamedTag<Block> tag : net.minecraft.tags.BlockTags.getAllTags()) {
                 if (tag.getName().equals(location)) {
                     return tag;
                 }
@@ -68,7 +68,7 @@ public final class Migration {
 
     public static final class FluidTags {
         public static ITag.INamedTag<Fluid> getOrCreateTag(final ResourceLocation location) {
-            for (final ITag.INamedTag<Fluid> tag : net.minecraft.tags.FluidTags.func_241280_c_()) {
+            for (final ITag.INamedTag<Fluid> tag : net.minecraft.tags.FluidTags.getAllTags()) {
                 if (tag.getName().equals(location)) {
                     return tag;
                 }
@@ -80,7 +80,7 @@ public final class Migration {
 
     public static final class ItemTags {
         public static ITag.INamedTag<Item> getOrCreateTag(final ResourceLocation location) {
-            for (final ITag.INamedTag<Item> tag : net.minecraft.tags.ItemTags.func_242177_b()) {
+            for (final ITag.INamedTag<Item> tag : net.minecraft.tags.ItemTags.getAllTags()) {
                 if (tag.getName().equals(location)) {
                     return tag;
                 }

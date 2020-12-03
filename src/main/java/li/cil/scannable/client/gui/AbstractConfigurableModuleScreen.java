@@ -57,7 +57,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     public void render(final MatrixStack matrixStack, final int mouseX, final int mouseY, final float partialTicks) {
         renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
-        renderHoveredToolTip(matrixStack, mouseX, mouseY);
+        renderHoveredTooltip(matrixStack, mouseX, mouseY);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -146,10 +146,5 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
         this.fillGradient(matrixStack, x, y, x + width, y + height, slotColor, slotColor);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
-    }
-
-    // TODO Inline once mappings exist.
-    private void renderHoveredToolTip(final MatrixStack matrixStack, final int x, final int y) {
-        func_230459_a_(matrixStack, x, y);
     }
 }
