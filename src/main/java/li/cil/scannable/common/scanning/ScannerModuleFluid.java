@@ -82,6 +82,6 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
 
     @Nonnull
     private Collection<ITag<Fluid>> getAllFluidTags() {
-        return FluidTags.getCollection().func_241833_a().values();
+        return FluidTags.getCollection().getIDTagMap().values();
     }
 }
