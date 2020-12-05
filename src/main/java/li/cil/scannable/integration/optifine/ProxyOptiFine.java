@@ -38,7 +38,7 @@ public enum ProxyOptiFine {
             Scannable.getLog().info("Successfully integrated with shader mod.");
         } catch (final ClassNotFoundException e) {
             Scannable.getLog().info("No shader mod found, we'll do our own hacks to inject a depth texture when needed.");
-        } catch (final IllegalAccessException | NoSuchFieldException e) {
+        } catch (final IllegalAccessException | NoSuchFieldException | NoClassDefFoundError e) {
             Scannable.getLog().warn("Failed integrating with shader mod. Ignoring.");
         }
     }
