@@ -577,7 +577,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 if (Objects.equals(property.getName(), "variant") || // Vanilla Minecraft.
                     Objects.equals(property.getName(), "type") || // E.g. ThermalFoundation, TiCon, IC2, Immersive Engineering.
                     Objects.equals(property.getName(), "ore") || // E.g. BigReactors.
-                    Objects.equals(property.getName(), "oretype")) { // E.g. DeepResonance.
+                    Objects.equals(property.getName(), "oretype") || // E.g. DeepResonance.
+                    Objects.equals(property.getName(), "basictype")) { // Galacticraft.
                     properties.add(property);
                 }
             }

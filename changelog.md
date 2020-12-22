@@ -1,1 +1,1 @@
-* Fixed potential crash in OptiFine integration.
+* Fixed Galacticraft ore support in the block module.
