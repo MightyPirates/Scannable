@@ -43,7 +43,7 @@ public final class MessageSetConfiguredModuleItemAt {
         final PacketBuffer packet = new PacketBuffer(buffer);
         windowId = packet.readByte();
         index = packet.readByte();
-        value = packet.readString();
+        value = packet.readString(1024);
     }
 
     public void toBytes(final ByteBuf buffer) {

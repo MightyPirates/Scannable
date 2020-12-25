@@ -97,7 +97,7 @@ public final class MessageStructureRequest {
 
     public void fromBytes(final ByteBuf buf) {
         final PacketBuffer packet = new PacketBuffer(buf);
-        dimension = new ResourceLocation(packet.readString());
+        dimension = new ResourceLocation(packet.readString(1024));
         center = packet.readBlockPos();
         radius = packet.readVarInt();
         skipExistingChunks = packet.readBoolean();
