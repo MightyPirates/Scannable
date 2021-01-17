@@ -1,8 +1,7 @@
 package li.cil.scannable.client.scanning.filter;
 
 import li.cil.scannable.api.scanning.ScanFilterBlock;
-import li.cil.scannable.common.config.Settings;
-import net.minecraft.block.Block;
+import li.cil.scannable.common.scanning.ScannerModuleOreCommon;
 import net.minecraft.block.BlockState;
 import net.minecraftforge.common.Tags;
 
@@ -11,10 +10,8 @@ public final class ScanFilterRareOreCatchAll implements ScanFilterBlock {
 
     @Override
     public boolean matches(final BlockState state) {
-        final Block block = state.getBlock();
-        return !Settings.shouldIgnore(block) &&
-                Tags.Blocks.ORES.contains(block) &&
-                !Settings.commonOreBlocks.contains(block) &&
-                Settings.commonOreBlockTags.stream().noneMatch(t -> t.contains(block));
+        return !ScanFilterUtils.shouldIgnore(state) &&
+               Tags.Blocks.ORES.contains(state.getBlock()) &&
+               !ScannerModuleOreCommon.matches(state);
     }
 }

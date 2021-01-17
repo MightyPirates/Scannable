@@ -1,18 +1,21 @@
 package li.cil.scannable.data;
 
+import li.cil.scannable.api.API;
 import li.cil.scannable.common.Scannable;
+import li.cil.scannable.common.tags.ItemTags;
 import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.ItemTagsProvider;
+import net.minecraftforge.common.data.ExistingFileHelper;
 
-public final class Tags extends ItemTagsProvider {
-    public Tags(final DataGenerator generatorIn, final BlockTagsProvider blockTagsProvider) {
-        super(generatorIn, blockTagsProvider);
+public final class ModItemTagsProvider extends ItemTagsProvider {
+    public ModItemTagsProvider(final DataGenerator generator, final BlockTagsProvider blockTagsProvider, final ExistingFileHelper existingFileHelper) {
+        super(generator, blockTagsProvider, API.MOD_ID, existingFileHelper);
     }
 
     @Override
     protected void registerTags() {
-        getOrCreateBuilder(Scannable.MODULES).add(
+        getOrCreateBuilder(ItemTags.MODULES).add(
                 Scannable.MODULE_BLANK.get(),
                 Scannable.MODULE_RANGE.get(),
                 Scannable.MODULE_ENTITY.get(),

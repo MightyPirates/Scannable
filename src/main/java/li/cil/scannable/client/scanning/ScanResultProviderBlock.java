@@ -14,6 +14,7 @@ import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
+import li.cil.scannable.client.scanning.filter.ScanFilterUtils;
 import li.cil.scannable.client.shader.ScanResultShader;
 import li.cil.scannable.common.capabilities.CapabilityScannerModule;
 import li.cil.scannable.common.config.Settings;
@@ -24,8 +25,12 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -172,7 +177,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     continue;
                 }
 
-                if (Settings.shouldIgnore(block)) {
+                if (ScanFilterUtils.shouldIgnore(state)) {
                     continue;
                 }
 
@@ -383,21 +388,23 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
-                if (Settings.fluidColors.containsKey(fluidState.getFluid())) {
+                if (Settings.fluidColors.containsKey(fluidState.getFluid().getRegistryName())) {
                     color = Settings.fluidColors.getInt(fluidState.getFluid());
                 } else {
                     Settings.fluidTagColors.forEach((k, v) -> {
-                        if (k.contains(fluidState.getFluid())) {
+                        final ITag<Fluid> tag = FluidTags.getCollection().get(k);
+                        if (tag != null && tag.contains(fluidState.getFluid())) {
                             color = v;
                         }
                     });
                 }
             } else {
-                if (Settings.blockColors.containsKey(blockState.getBlock())) {
+                if (Settings.blockColors.containsKey(blockState.getBlock().getRegistryName())) {
                     color = Settings.blockColors.getInt(blockState.getBlock());
                 } else {
                     Settings.blockTagColors.forEach((k, v) -> {
-                        if (k.contains(blockState.getBlock())) {
+                        final ITag<Block> tag = BlockTags.getCollection().get(k);
+                        if (tag != null && tag.contains(blockState.getBlock())) {
                             color = v;
                         }
                     });

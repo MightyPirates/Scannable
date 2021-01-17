@@ -20,9 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +29,7 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
     INSTANCE;
 
     @OnlyIn(Dist.CLIENT)
-    ScanFilterBlock filter;
+    private ScanFilterBlock filter;
 
     @Override
     public int getEnergyCost(final PlayerEntity player, final ItemStack module) {
@@ -64,8 +62,8 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
         }
 
         final List<ScanFilterBlock> filters = new ArrayList<>();
-        for (final ITag<Fluid> tag : getAllFluidTags()) {
-            if (!Settings.ignoredFluidTags.contains(tag)) {
+        for (final ITag.INamedTag<Fluid> tag : FluidTags.getAllTags()) {
+            if (!Settings.ignoredFluidTags.contains(tag.getName())) {
                 filters.add(new ScanFilterFluidTag(tag));
             }
         }
@@ -78,10 +76,5 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
         // Reset on any config change so we also rebuild the filter when resource reload
         // kicks in which can result in ids changing and thus our cache being invalid.
         ScannerModuleFluid.INSTANCE.filter = null;
-    }
-
-    @Nonnull
-    private Collection<ITag<Fluid>> getAllFluidTags() {
-        return FluidTags.getCollection().getIDTagMap().values();
     }
 }

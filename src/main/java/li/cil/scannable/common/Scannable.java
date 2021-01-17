@@ -8,11 +8,9 @@ import li.cil.scannable.common.container.BlockModuleContainer;
 import li.cil.scannable.common.container.ContainerScanner;
 import li.cil.scannable.common.container.EntityModuleContainer;
 import li.cil.scannable.common.item.*;
-import li.cil.scannable.util.Migration;
+import li.cil.scannable.common.tags.ItemTags;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.RegistryObject;
@@ -43,9 +41,9 @@ public final class Scannable {
     public static final RegistryObject<ContainerType<BlockModuleContainer>> BLOCK_MODULE_CONTAINER = CONTAINERS.register(Constants.NAME_MODULE_BLOCK, () -> IForgeContainerType.create(BlockModuleContainer::createForClient));
     public static final RegistryObject<ContainerType<EntityModuleContainer>> ENTITY_MODULE_CONTAINER = CONTAINERS.register(Constants.NAME_MODULE_ENTITY, () -> IForgeContainerType.create(EntityModuleContainer::createForClient));
 
-    public static final ITag.INamedTag<Item> MODULES = Migration.ItemTags.getOrCreateTag(new ResourceLocation(API.MOD_ID, "modules"));
-
     public Scannable() {
+        ItemTags.initialize();
+
         Settings.register();
 
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());

@@ -4,13 +4,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.Scannable;
-import li.cil.scannable.util.Migration;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.Util;
@@ -20,11 +16,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.GameData;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -54,26 +48,26 @@ public final class Settings {
     public static int baseScanRadius = 64;
     public static int scanStayDuration = 10000;
 
-    public static Set<Block> ignoredBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.COMMAND_BLOCK);
+    public static Set<ResourceLocation> ignoredBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.COMMAND_BLOCK.getRegistryName());
     });
-    public static Set<ITag<Block>> ignoredBlockTags = new HashSet<>();
+    public static Set<ResourceLocation> ignoredBlockTags = new HashSet<>();
 
-    public static Set<Block> commonOreBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.CLAY);
+    public static Set<ResourceLocation> commonOreBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.CLAY.getRegistryName());
     });
-    public static Set<ITag<Block>> commonOreBlockTags = Util.make(new HashSet<>(), c -> {
-        c.add(Tags.Blocks.ORES_COAL);
-        c.add(Tags.Blocks.ORES_IRON);
-        c.add(Tags.Blocks.ORES_REDSTONE);
-        c.add(Tags.Blocks.ORES_QUARTZ);
+    public static Set<ResourceLocation> commonOreBlockTags = Util.make(new HashSet<>(), c -> {
+        c.add(Tags.Blocks.ORES_COAL.getName());
+        c.add(Tags.Blocks.ORES_IRON.getName());
+        c.add(Tags.Blocks.ORES_REDSTONE.getName());
+        c.add(Tags.Blocks.ORES_QUARTZ.getName());
     });
-    public static Set<Block> rareOreBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.GLOWSTONE);
+    public static Set<ResourceLocation> rareOreBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.GLOWSTONE.getRegistryName());
     });
-    public static Set<ITag<Block>> rareOreBlockTags = new HashSet<>();
+    public static Set<ResourceLocation> rareOreBlockTags = new HashSet<>();
 
-    public static Set<ITag<Fluid>> ignoredFluidTags = new HashSet<>();
+    public static Set<ResourceLocation> ignoredFluidTags = new HashSet<>();
 
     public static Set<String> structures = Util.make(new HashSet<>(), c -> {
         c.addAll(GameData.getStructureMap().keySet());
@@ -85,36 +79,32 @@ public final class Settings {
     private static final ClientSettings CLIENT_INSTANCE;
     private static final ForgeConfigSpec CLIENT_SPEC;
 
-    public static Object2IntMap<Block> blockColors = new Object2IntOpenHashMap<>();
-    public static Object2IntMap<ITag<Block>> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
+    public static Object2IntMap<ResourceLocation> blockColors = new Object2IntOpenHashMap<>();
+    public static Object2IntMap<ResourceLocation> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
         // Minecraft
-        c.put(Tags.Blocks.ORES_COAL, MaterialColor.GRAY.colorValue);
-        c.put(Tags.Blocks.ORES_IRON, MaterialColor.BROWN.colorValue); // MaterialColor.IRON is also gray, so...
-        c.put(Tags.Blocks.ORES_GOLD, MaterialColor.GOLD.colorValue);
-        c.put(Tags.Blocks.ORES_LAPIS, MaterialColor.LAPIS.colorValue);
-        c.put(Tags.Blocks.ORES_DIAMOND, MaterialColor.DIAMOND.colorValue);
-        c.put(Tags.Blocks.ORES_REDSTONE, MaterialColor.RED.colorValue);
-        c.put(Tags.Blocks.ORES_EMERALD, MaterialColor.EMERALD.colorValue);
-        c.put(Tags.Blocks.ORES_QUARTZ, MaterialColor.QUARTZ.colorValue);
+        c.put(Tags.Blocks.ORES_COAL.getName(), MaterialColor.GRAY.colorValue);
+        c.put(Tags.Blocks.ORES_IRON.getName(), MaterialColor.BROWN.colorValue); // MaterialColor.IRON is also gray, so...
+        c.put(Tags.Blocks.ORES_GOLD.getName(), MaterialColor.GOLD.colorValue);
+        c.put(Tags.Blocks.ORES_LAPIS.getName(), MaterialColor.LAPIS.colorValue);
+        c.put(Tags.Blocks.ORES_DIAMOND.getName(), MaterialColor.DIAMOND.colorValue);
+        c.put(Tags.Blocks.ORES_REDSTONE.getName(), MaterialColor.RED.colorValue);
+        c.put(Tags.Blocks.ORES_EMERALD.getName(), MaterialColor.EMERALD.colorValue);
+        c.put(Tags.Blocks.ORES_QUARTZ.getName(), MaterialColor.QUARTZ.colorValue);
 
         // Common modded ores
-        c.put(oreTag("tin"), MaterialColor.CYAN.colorValue);
-        c.put(oreTag("copper"), MaterialColor.ORANGE_TERRACOTTA.colorValue);
-        c.put(oreTag("lead"), MaterialColor.BLUE_TERRACOTTA.colorValue);
-        c.put(oreTag("silver"), MaterialColor.LIGHT_GRAY.colorValue);
-        c.put(oreTag("nickel"), MaterialColor.LIGHT_BLUE.colorValue);
-        c.put(oreTag("platinum"), MaterialColor.WHITE_TERRACOTTA.colorValue);
-        c.put(oreTag("mithril"), MaterialColor.PURPLE.colorValue);
+        c.put(new ResourceLocation("forge", "ores/tin"), MaterialColor.CYAN.colorValue);
+        c.put(new ResourceLocation("forge", "ores/copper"), MaterialColor.ORANGE_TERRACOTTA.colorValue);
+        c.put(new ResourceLocation("forge", "ores/lead"), MaterialColor.BLUE_TERRACOTTA.colorValue);
+        c.put(new ResourceLocation("forge", "ores/silver"), MaterialColor.LIGHT_GRAY.colorValue);
+        c.put(new ResourceLocation("forge", "ores/nickel"), MaterialColor.LIGHT_BLUE.colorValue);
+        c.put(new ResourceLocation("forge", "ores/platinum"), MaterialColor.WHITE_TERRACOTTA.colorValue);
+        c.put(new ResourceLocation("forge", "ores/mithril"), MaterialColor.PURPLE.colorValue);
     });
-    public static Object2IntMap<Fluid> fluidColors = new Object2IntOpenHashMap<>();
-    public static Object2IntMap<ITag<Fluid>> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
-        c.put(FluidTags.WATER, MaterialColor.WATER.colorValue);
-        c.put(FluidTags.LAVA, MaterialColor.ORANGE_TERRACOTTA.colorValue);
+    public static Object2IntMap<ResourceLocation> fluidColors = new Object2IntOpenHashMap<>();
+    public static Object2IntMap<ResourceLocation> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
+        c.put(FluidTags.WATER.getName(), MaterialColor.WATER.colorValue);
+        c.put(FluidTags.LAVA.getName(), MaterialColor.ORANGE_TERRACOTTA.colorValue);
     });
-
-    private static ITag<Block> oreTag(final String oreName) {
-        return getBlockTag(new ResourceLocation("forge", "ores/" + oreName).toString());
-    }
 
     // --------------------------------------------------------------------- //
 
@@ -141,20 +131,6 @@ public final class Settings {
         return spec == CLIENT_SPEC;
     }
 
-    public static boolean shouldIgnore(final Block block) {
-        if (ignoredBlocks.contains(block)) {
-            return true;
-        }
-
-        for (final ITag<Block> ignoredBlockTag : ignoredBlockTags) {
-            if (ignoredBlockTag.contains(block)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     @SubscribeEvent
     public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
         if (isServerConfig(configEvent.getConfig().getSpec())) {
@@ -173,24 +149,24 @@ public final class Settings {
             baseScanRadius = SERVER_INSTANCE.baseScanRadius.get();
             scanStayDuration = SERVER_INSTANCE.scanStayDuration.get();
 
-            ignoredBlocks = deserializeSet(SERVER_INSTANCE.ignoredBlocks.get(), Settings::getBlock);
-            ignoredBlockTags = deserializeSet(SERVER_INSTANCE.ignoredBlockTags.get(), Settings::getBlockTag);
+            ignoredBlocks = deserializeSet(SERVER_INSTANCE.ignoredBlocks.get(), ResourceLocation::new);
+            ignoredBlockTags = deserializeSet(SERVER_INSTANCE.ignoredBlockTags.get(), ResourceLocation::new);
 
-            commonOreBlocks = deserializeSet(SERVER_INSTANCE.commonOreBlocks.get(), Settings::getBlock);
-            commonOreBlockTags = deserializeSet(SERVER_INSTANCE.commonOreBlockTags.get(), Settings::getBlockTag);
-            rareOreBlocks = deserializeSet(SERVER_INSTANCE.rareOreBlocks.get(), Settings::getBlock);
-            rareOreBlockTags = deserializeSet(SERVER_INSTANCE.rareOreBlockTags.get(), Settings::getBlockTag);
+            commonOreBlocks = deserializeSet(SERVER_INSTANCE.commonOreBlocks.get(), ResourceLocation::new);
+            commonOreBlockTags = deserializeSet(SERVER_INSTANCE.commonOreBlockTags.get(), ResourceLocation::new);
+            rareOreBlocks = deserializeSet(SERVER_INSTANCE.rareOreBlocks.get(), ResourceLocation::new);
+            rareOreBlockTags = deserializeSet(SERVER_INSTANCE.rareOreBlockTags.get(), ResourceLocation::new);
 
-            ignoredFluidTags = deserializeSet(SERVER_INSTANCE.ignoredFluidTags.get(), Settings::getFluidTag);
+            ignoredFluidTags = deserializeSet(SERVER_INSTANCE.ignoredFluidTags.get(), ResourceLocation::new);
 
             structures = deserializeSet(SERVER_INSTANCE.structures.get(), s -> s);
         }
 
         if (isClientConfig(configEvent.getConfig().getSpec())) {
-            deserializeMap(blockColors, CLIENT_INSTANCE.blockColors.get(), Settings::getBlock, Integer::decode);
-            deserializeMap(blockTagColors, CLIENT_INSTANCE.blockTagColors.get(), Settings::getBlockTag, Integer::decode);
-            deserializeMap(fluidColors, CLIENT_INSTANCE.fluidColors.get(), Settings::getFluid, Integer::decode);
-            deserializeMap(fluidTagColors, CLIENT_INSTANCE.fluidTagColors.get(), Settings::getFluidTag, Integer::decode);
+            deserializeMap(blockColors, CLIENT_INSTANCE.blockColors.get(), ResourceLocation::new, Integer::decode);
+            deserializeMap(blockTagColors, CLIENT_INSTANCE.blockTagColors.get(), ResourceLocation::new, Integer::decode);
+            deserializeMap(fluidColors, CLIENT_INSTANCE.fluidColors.get(), ResourceLocation::new, Integer::decode);
+            deserializeMap(fluidTagColors, CLIENT_INSTANCE.fluidTagColors.get(), ResourceLocation::new, Integer::decode);
         }
     }
 
@@ -299,11 +275,11 @@ public final class Settings {
             baseScanRadius = builder
                     .translation(Constants.CONFIG_BASE_SCAN_RADIUS)
                     .comment("The basic scan radius without range modules. Higher values mean more computational\n" +
-                            "overhead and thus potentially worse performance while scanning.\n" +
-                            "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
-                            "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
-                            "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
-                            "Range modules will boost the range by half this value.")
+                             "overhead and thus potentially worse performance while scanning.\n" +
+                             "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
+                             "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
+                             "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
+                             "Range modules will boost the range by half this value.")
                     .worldRestart()
                     .defineInRange("baseScanRadius", Settings.baseScanRadius, 16, 128);
 
@@ -320,18 +296,18 @@ public final class Settings {
             ignoredBlocks = builder
                     .translation(Constants.CONFIG_IGNORED_BLOCKS)
                     .comment("Registry names of blocks that should be ignored.\n" +
-                            "Blocks in this list will be excluded from the default ore list based on the forge:ores\n" +
-                            "tag and it will be impossible to tune the entity module to this block.")
+                             "Blocks in this list will be excluded from the default ore list based on the forge:ores\n" +
+                             "tag and it will be impossible to tune the entity module to this block.")
                     .worldRestart()
-                    .defineList("ignoredBlocks", serializeSet(Settings.ignoredBlocks, Settings::getBlockResourceLocation), Settings::validateResourceLocation);
+                    .defineList("ignoredBlocks", serializeSet(Settings.ignoredBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             ignoredBlockTags = builder
                     .translation(Constants.CONFIG_IGNORED_BLOCK_TAGS)
                     .comment("Tag names of block tags that should be ignored.\n" +
-                            "Blocks matching a tag in this list will be excluded from the default ore list based on the" +
-                            "forge:ores tag and it will be impossible to tune the entity module to this block.")
+                             "Blocks matching a tag in this list will be excluded from the default ore list based on the" +
+                             "forge:ores tag and it will be impossible to tune the entity module to this block.")
                     .worldRestart()
-                    .defineList("ignoredBlockTags", serializeSet(Settings.ignoredBlockTags, Settings::getBlockTagResourceLocation), Settings::validateResourceLocation);
+                    .defineList("ignoredBlockTags", serializeSet(Settings.ignoredBlockTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
             builder.pop();
 
@@ -341,27 +317,27 @@ public final class Settings {
                     .translation(Constants.CONFIG_ORE_COMMON_BLOCKS)
                     .comment("Registry names of blocks considered 'common ores', requiring the common ore scanner module.")
                     .worldRestart()
-                    .defineList("commonOreBlocks", serializeSet(Settings.commonOreBlocks, Settings::getBlockResourceLocation), Settings::validateResourceLocation);
+                    .defineList("commonOreBlocks", serializeSet(Settings.commonOreBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             commonOreBlockTags = builder
                     .translation(Constants.CONFIG_ORE_COMMON_BLOCK_TAGS)
                     .comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
                     .worldRestart()
-                    .defineList("commonOreBlockTags", serializeSet(Settings.commonOreBlockTags, Settings::getBlockTagResourceLocation), Settings::validateResourceLocation);
+                    .defineList("commonOreBlockTags", serializeSet(Settings.commonOreBlockTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
             rareOreBlocks = builder
                     .translation(Constants.CONFIG_ORE_RARE_BLOCKS)
                     .comment("Registry names of blocks considered 'rare ores', requiring the common ore scanner module.")
                     .worldRestart()
-                    .defineList("rareOreBlocks", serializeSet(Settings.rareOreBlocks, Settings::getBlockResourceLocation), Settings::validateResourceLocation);
+                    .defineList("rareOreBlocks", serializeSet(Settings.rareOreBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             rareOreBlockTags = builder
                     .translation(Constants.CONFIG_ORE_RARE_BLOCK_TAGS)
                     .comment("Block tags of blocks considered 'rare ores', requiring the common ore scanner module.\n" +
-                            "Any block with the forge:ores tag is implicitly in this list, unless the block also\n" +
-                            "matches an ignored or common ore block tag, or is an ignored or common block.")
+                             "Any block with the forge:ores tag is implicitly in this list, unless the block also\n" +
+                             "matches an ignored or common ore block tag, or is an ignored or common block.")
                     .worldRestart()
-                    .defineList("rareOreBlockTags", serializeSet(Settings.rareOreBlockTags, Settings::getBlockTagResourceLocation), Settings::validateResourceLocation);
+                    .defineList("rareOreBlockTags", serializeSet(Settings.rareOreBlockTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
             builder.pop();
 
@@ -371,7 +347,7 @@ public final class Settings {
                     .translation(Constants.CONFIG_IGNORED_FLUID_TAGS)
                     .comment("Fluid tags of fluids that should be ignored.")
                     .worldRestart()
-                    .defineList("ignoredFluidTags", serializeSet(Settings.ignoredFluidTags, Settings::getFluidTagResourceLocation), Settings::validateResourceLocation);
+                    .defineList("ignoredFluidTags", serializeSet(Settings.ignoredFluidTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
             builder.pop();
 
@@ -397,33 +373,33 @@ public final class Settings {
             blockColors = builder
                     .translation(Constants.CONFIG_BLOCK_COLORS)
                     .comment("The colors for blocks used when rendering their result bounding box\n" +
-                            "by block name. Each entry must be a key-value pair separated by a `=`,\n" +
-                            "with the key being the tag name and the value being the hexadecimal\n" +
-                            "RGB value of the color.")
+                             "by block name. Each entry must be a key-value pair separated by a `=`,\n" +
+                             "with the key being the tag name and the value being the hexadecimal\n" +
+                             "RGB value of the color.")
                     .worldRestart()
-                    .defineList("blockColors", serializeMap(Settings.blockColors, Settings::getBlockResourceLocation, c -> "0x" + Integer.toHexString(c)),
+                    .defineList("blockColors", serializeMap(Settings.blockColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
             blockTagColors = builder
                     .translation(Constants.CONFIG_BLOCK_TAG_COLORS)
                     .comment("The colors for blocks used when rendering their result bounding box\n" +
-                            "by block tag. See `blockColors` for format entries have to be in.")
+                             "by block tag. See `blockColors` for format entries have to be in.")
                     .worldRestart()
-                    .defineList("blockTagColors", serializeMap(Settings.blockTagColors, Settings::getBlockTagResourceLocation, c -> "0x" + Integer.toHexString(c)),
+                    .defineList("blockTagColors", serializeMap(Settings.blockTagColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
 
             fluidColors = builder
                     .translation(Constants.CONFIG_FLUID_COLORS)
                     .comment("The colors for fluids used when rendering their result bounding box\n" +
-                            "by fluid name. See `blockColors` for format entries have to be in.")
+                             "by fluid name. See `blockColors` for format entries have to be in.")
                     .worldRestart()
-                    .defineList("fluidColors", serializeMap(Settings.fluidColors, Settings::getFluidResourceLocation, c -> "0x" + Integer.toHexString(c)),
+                    .defineList("fluidColors", serializeMap(Settings.fluidColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
             fluidTagColors = builder
                     .translation(Constants.CONFIG_FLUID_TAG_COLORS)
                     .comment("The colors for fluids used when rendering their result bounding box\n" +
-                            "by fluid tag. See `blockColors` for format entries have to be in.")
+                             "by fluid tag. See `blockColors` for format entries have to be in.")
                     .worldRestart()
-                    .defineList("fluidTagColors", serializeMap(Settings.fluidTagColors, Settings::getFluidTagResourceLocation, c -> "0x" + Integer.toHexString(c)),
+                    .defineList("fluidTagColors", serializeMap(Settings.fluidTagColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
         }
     }
@@ -459,54 +435,6 @@ public final class Settings {
             Scannable.getLog().error(e);
             return false;
         }
-    }
-
-    @Nullable
-    private static Block getBlock(final String o) {
-        return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(o));
-    }
-
-    @Nullable
-    private static Fluid getFluid(final String o) {
-        return ForgeRegistries.FLUIDS.getValue(new ResourceLocation(o));
-    }
-
-    private static ITag<Block> getBlockTag(final String name) {
-        return Migration.BlockTags.getOrCreateTag(new ResourceLocation(name));
-    }
-
-    private static ITag<Fluid> getFluidTag(final String name) {
-        return Migration.FluidTags.getOrCreateTag(new ResourceLocation(name));
-    }
-
-    @Nullable
-    private static String getBlockResourceLocation(final Block v) {
-        final ResourceLocation registryName = v.getRegistryName();
-        return registryName != null ? registryName.toString() : null;
-    }
-
-    @Nullable
-    private static String getFluidResourceLocation(final Fluid t) {
-        final ResourceLocation registryName = t.getRegistryName();
-        return registryName != null ? registryName.toString() : null;
-    }
-
-    @Nullable
-    private static String getBlockTagResourceLocation(final ITag<Block> tag) {
-        if (tag instanceof ITag.INamedTag) {
-            return ((ITag.INamedTag<Block>) tag).getName().toString();
-        }
-
-        return null;
-    }
-
-    @Nullable
-    private static String getFluidTagResourceLocation(final ITag<Fluid> tag) {
-        if (tag instanceof ITag.INamedTag) {
-            return ((ITag.INamedTag<Fluid>) tag).getName().toString();
-        }
-
-        return null;
     }
 
     private static <T> List<? extends String> serializeSet(final Set<T> set, final Function<T, String> serializer) {

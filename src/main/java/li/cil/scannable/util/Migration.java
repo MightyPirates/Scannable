@@ -1,11 +1,7 @@
 package li.cil.scannable.util;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -51,42 +47,6 @@ public final class Migration {
 
         public static <T> ResourceLocation getResourceLocation(final net.minecraft.util.RegistryKey<T> key) {
             return key.getLocation();
-        }
-    }
-
-    public static final class BlockTags {
-        public static ITag.INamedTag<Block> getOrCreateTag(final ResourceLocation location) {
-            for (final ITag.INamedTag<Block> tag : net.minecraft.tags.BlockTags.getAllTags()) {
-                if (tag.getName().equals(location)) {
-                    return tag;
-                }
-            }
-
-            return net.minecraft.tags.BlockTags.createOptional(location);
-        }
-    }
-
-    public static final class FluidTags {
-        public static ITag.INamedTag<Fluid> getOrCreateTag(final ResourceLocation location) {
-            for (final ITag.INamedTag<Fluid> tag : net.minecraft.tags.FluidTags.getAllTags()) {
-                if (tag.getName().equals(location)) {
-                    return tag;
-                }
-            }
-
-            return net.minecraft.tags.FluidTags.createOptional(location);
-        }
-    }
-
-    public static final class ItemTags {
-        public static ITag.INamedTag<Item> getOrCreateTag(final ResourceLocation location) {
-            for (final ITag.INamedTag<Item> tag : net.minecraft.tags.ItemTags.getAllTags()) {
-                if (tag.getName().equals(location)) {
-                    return tag;
-                }
-            }
-
-            return net.minecraft.tags.ItemTags.createOptional(location);
         }
     }
 }
