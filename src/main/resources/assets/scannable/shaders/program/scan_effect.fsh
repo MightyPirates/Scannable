@@ -1,4 +1,4 @@
-#version 130
+#version 120
 
 uniform mat4 invViewMat;
 uniform mat4 invProjMat;
@@ -7,7 +7,7 @@ uniform vec3 center;
 uniform float radius;
 uniform sampler2D depthTex;
 
-in vec2 texCoord;
+varying vec2 texCoord;
 
 const float width = 10;
 const float sharpness = 10;

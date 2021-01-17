@@ -1,9 +1,9 @@
-#version 130
+#version 120
 
 uniform float time;
 
-in vec4 color;
-in vec2 texCoord;
+varying vec4 color;
+varying vec2 texCoord;
 
 float scanlines() {
     return sqrt(sin(gl_FragCoord.y+time*10)*0.5+0.5);
