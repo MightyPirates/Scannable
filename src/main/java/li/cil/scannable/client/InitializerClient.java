@@ -5,7 +5,6 @@ import li.cil.scannable.client.gui.BlockModuleScreen;
 import li.cil.scannable.client.gui.EntityModuleScreen;
 import li.cil.scannable.client.gui.GuiScanner;
 import li.cil.scannable.client.renderer.OverlayRenderer;
-import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.client.scanning.ScanResultProviderRegistryInitializer;
 import li.cil.scannable.client.shader.ScanEffectShader;
 import li.cil.scannable.client.shader.ScanResultShader;
@@ -27,7 +26,6 @@ public final class InitializerClient extends InitializerCommon {
     }
 
     public void initializeClient(final FMLClientSetupEvent event) {
-        MinecraftForge.EVENT_BUS.register(ScannerRenderer.INSTANCE);
         MinecraftForge.EVENT_BUS.register(OverlayRenderer.INSTANCE);
         MinecraftForge.EVENT_BUS.register(ScanManager.INSTANCE);
 

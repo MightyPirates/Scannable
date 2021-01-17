@@ -1,5 +1,6 @@
 package li.cil.scannable.client.renderer;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import li.cil.scannable.client.ScanManager;
@@ -16,8 +17,6 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
@@ -53,8 +52,11 @@ public enum ScannerRenderer {
         ScanEffectShader.INSTANCE.setCenter(pos);
     }
 
-    @SubscribeEvent
-    public void onWorldRender(final RenderWorldLastEvent event) {
+    public static void render(final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
+        INSTANCE.doRender(matrixStack, projectionMatrix);
+    }
+
+    public void doRender(final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
         final boolean shouldRender = currentStart > 0 && adjustedDuration > (int) (System.currentTimeMillis() - currentStart);
         if (shouldRender) {
@@ -62,7 +64,7 @@ public enum ScannerRenderer {
                 createDepthCopyFramebuffer();
             }
 
-            render(event.getMatrixStack().getLast().getMatrix(), event.getProjectionMatrix());
+            render(matrixStack.getLast().getMatrix(), projectionMatrix);
         } else {
             if (depthCopyFbo != 0) {
                 deleteDepthCopyFramebuffer();
