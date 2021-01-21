@@ -14,10 +14,10 @@ import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
-import li.cil.scannable.client.scanning.filter.ScanFilterUtils;
 import li.cil.scannable.client.shader.ScanResultShader;
 import li.cil.scannable.common.capabilities.CapabilityScannerModule;
 import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.scanning.filter.ScanFilterIgnoredBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -177,7 +177,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     continue;
                 }
 
-                if (ScanFilterUtils.shouldIgnore(state)) {
+                if (ScanFilterIgnoredBlocks.shouldIgnore(state)) {
                     continue;
                 }
 

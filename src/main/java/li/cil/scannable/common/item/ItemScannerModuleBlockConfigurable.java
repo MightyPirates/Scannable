@@ -1,10 +1,10 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.client.scanning.filter.ScanFilterUtils;
 import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.container.BlockModuleContainerProvider;
 import li.cil.scannable.common.scanning.ScannerModuleBlockConfigurable;
+import li.cil.scannable.common.scanning.filter.ScanFilterIgnoredBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -207,7 +207,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         final ItemStack stack = context.getItem();
         final BlockState state = world.getBlockState(context.getPos());
 
-        if (ScanFilterUtils.shouldIgnore(state)) {
+        if (ScanFilterIgnoredBlocks.shouldIgnore(state)) {
             if (world.isRemote) {
                 Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_BLOCK_BLACKLISTED), Constants.CHAT_LINE_ID);
             }
