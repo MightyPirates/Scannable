@@ -66,7 +66,7 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
             mods {
@@ -79,7 +79,7 @@ minecraft {
         server {
             workingDirectory project.file('run')
 
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
             mods {
@@ -92,7 +92,7 @@ minecraft {
         data {
             workingDirectory project.file('run')
 
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
             args '--mod', 'scannable', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
@@ -126,8 +126,8 @@ processResources {
 dependencies {
     minecraft "net.minecraftforge:forge:${config.minecraft.version}-${config.forge.version}"
 
-    compileOnly fg.deobf("mezz.jei:jei-${config.minecraft.version}:${config.jei.version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${config.minecraft.version}:${config.jei.version}")
+    compileOnly fg.deobf("mezz.jei:jei-${config.jei.minecraft.version}:${config.jei.version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${config.jei.minecraft.version}:${config.jei.version}")
 }
 
 jar {
