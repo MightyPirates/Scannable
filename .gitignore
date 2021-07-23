@@ -1,3 +1,6 @@
+#system
+.DS_Store
+
 # eclipse
 bin
 *.launch
@@ -20,5 +23,11 @@ build
 # other
 eclipse
 run
+logs
 
-src/generated/
+# Files from Forge MDK
+forge*changelog.txt
+/src/generated/
+
+#vscode
+.vscode
