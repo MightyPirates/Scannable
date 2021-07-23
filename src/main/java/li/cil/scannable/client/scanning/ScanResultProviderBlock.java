@@ -164,13 +164,13 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 continue;
             }
 
-            final PalettedContainer<BlockState> data = section.getStates();
+            final PalettedContainer<BlockState> palette = section.getStates();
             final BlockPos origin = chunk.getPos().getWorldPosition().offset(0, section.bottomBlockY(), 0);
             final int originX = origin.getX();
             final int originY = origin.getY();
             final int originZ = origin.getZ();
             for (int index = 0; index < 16 * 16 * 16; index++) {
-                final BlockState state = data.get(index);
+                final BlockState state = palette.get(index);
                 final Block block = state.getBlock();
                 final Map<BlockPos, BlockScanResult> clusters = resultClusters.computeIfAbsent(block, b -> new HashMap<>());
                 if (clusters.size() > MAX_RESULTS_PER_BLOCK) {
