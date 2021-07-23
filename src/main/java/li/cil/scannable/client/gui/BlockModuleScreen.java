@@ -28,21 +28,21 @@ public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockMod
 
     @Override
     protected ITextComponent getItemName(final Block block) {
-        return block.getTranslatedName();
+        return block.getName();
     }
 
     @Override
     protected void renderConfiguredItem(final Block block, final int x, final int y) {
-        getMinecraft().getItemRenderer().renderItemIntoGUI(new ItemStack(block.asItem()), x, y);
+        getMinecraft().getItemRenderer().renderGuiItem(new ItemStack(block.asItem()), x, y);
     }
 
     @Override
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
-        final Block block = Block.getBlockFromItem(value.getItem());
+        final Block block = Block.byItem(value.getItem());
         if (block != null && block != Blocks.AIR) {
             final ResourceLocation registryName = block.getRegistryName();
             if (registryName != null) {
-                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(container.windowId, slot, registryName.toString()));
+                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName.toString()));
             }
         }
     }

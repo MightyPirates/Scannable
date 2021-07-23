@@ -37,7 +37,7 @@ public final class MessageStructureResponse {
         final int length = packet.readInt();
         structures = new ScanResultProviderStructure.StructureLocation[length];
         for (int i = 0; i < length; i++) {
-            final ITextComponent name = packet.readTextComponent();
+            final ITextComponent name = packet.readComponent();
             final BlockPos pos = packet.readBlockPos();
             structures[i] = new ScanResultProviderStructure.StructureLocation(name, pos);
         }
@@ -47,7 +47,7 @@ public final class MessageStructureResponse {
         final PacketBuffer packet = new PacketBuffer(buffer);
         packet.writeInt(structures.length);
         for (final ScanResultProviderStructure.StructureLocation structure : structures) {
-            packet.writeTextComponent(structure.name);
+            packet.writeComponent(structure.name);
             packet.writeBlockPos(structure.pos);
         }
     }

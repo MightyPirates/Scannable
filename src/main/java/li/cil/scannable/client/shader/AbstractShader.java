@@ -19,9 +19,9 @@ public abstract class AbstractShader {
 
     public void initialize() {
         final IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-        Minecraft.getInstance().deferTask(() -> reloadShaders(resourceManager));
+        Minecraft.getInstance().submitAsync(() -> reloadShaders(resourceManager));
         if (resourceManager instanceof IReloadableResourceManager) {
-            ((IReloadableResourceManager) resourceManager).addReloadListener((ISelectiveResourceReloadListener) (manager, predicate) -> {
+            ((IReloadableResourceManager) resourceManager).registerReloadListener((ISelectiveResourceReloadListener) (manager, predicate) -> {
                 if (predicate.test(VanillaResourceType.SHADERS)) {
                     reloadShaders(manager);
                 }
@@ -32,13 +32,13 @@ public abstract class AbstractShader {
     public void bind() {
         if (shaderInstance != null) {
             timeUniform.set((System.currentTimeMillis() - START_TIME) / 1000.0f);
-            shaderInstance.func_216535_f();
+            shaderInstance.apply();
         }
     }
 
     public void unbind() {
         if (shaderInstance != null) {
-            shaderInstance.func_216544_e();
+            shaderInstance.clear();
         }
     }
 
@@ -59,6 +59,6 @@ public abstract class AbstractShader {
     protected abstract String getShaderName();
 
     protected void handleShaderLoad() {
-        timeUniform = shaderInstance.getShaderUniform("time");
+        timeUniform = shaderInstance.safeGetUniform("time");
     }
 }

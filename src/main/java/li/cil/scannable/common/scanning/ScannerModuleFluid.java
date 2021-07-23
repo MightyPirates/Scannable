@@ -62,7 +62,7 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
         }
 
         final List<ScanFilterBlock> filters = new ArrayList<>();
-        for (final ITag.INamedTag<Fluid> tag : FluidTags.getAllTags()) {
+        for (final ITag.INamedTag<Fluid> tag : FluidTags.getWrappers()) {
             if (!Settings.ignoredFluidTags.contains(tag.getName())) {
                 filters.add(new ScanFilterFluidTag(tag));
             }

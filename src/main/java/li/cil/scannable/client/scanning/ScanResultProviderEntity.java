@@ -64,7 +64,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         bounds = new AxisAlignedBB(center.x - radius, center.y - radius, center.z - radius,
                 center.x + radius, center.y + radius, center.z + radius);
 
-        final double maxEntityRadius = player.world.getMaxEntityRadius();
+        final double maxEntityRadius = player.level.getMaxEntityRadius();
         minX = MathHelper.floor((bounds.minX - maxEntityRadius) / 16f);
         maxX = MathHelper.ceil((bounds.maxX + maxEntityRadius) / 16f);
         minZ = MathHelper.floor((bounds.minZ - maxEntityRadius) / 16f);
@@ -78,19 +78,19 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
     @Override
     public void computeScanResults() {
-        final World world = player.getEntityWorld();
+        final World world = player.getCommandSenderWorld();
         for (int i = 0; i < chunksPerTick; i++) {
             if (!moveNext()) {
                 return;
             }
 
-            world.getChunk(x, z).getEntitiesOfTypeWithinAABB(LivingEntity.class, bounds, entities, this::FilterEntities);
+            world.getChunk(x, z).getEntitiesOfClass(LivingEntity.class, bounds, entities, this::FilterEntities);
             for (final LivingEntity entity : entities) {
                 if (!entity.isAlive()) {
                     continue;
                 }
 
-                final Vector3d position = entity.getPositionVec();
+                final Vector3d position = entity.position();
                 if (center.distanceTo(position) < radius) {
                     ResourceLocation icon = API.ICON_INFO;
                     for (final ScanFilterEntity filter : scanFilters) {
@@ -116,13 +116,13 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
     @Override
     public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
-        final float yaw = renderInfo.getYaw();
-        final float pitch = renderInfo.getPitch();
+        final float yaw = renderInfo.getYRot();
+        final float pitch = renderInfo.getXRot();
 
-        final Vector3d lookVec = new Vector3d(renderInfo.getViewVector());
-        final Vector3d viewerEyes = renderInfo.getProjectedView();
+        final Vector3d lookVec = new Vector3d(renderInfo.getLookVector());
+        final Vector3d viewerEyes = renderInfo.getPosition();
 
-        final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
+        final boolean showDistance = renderInfo.getEntity().isShiftKeyDown();
 
         // Order results by distance to center of screen (deviation from look
         // vector) so that labels we're looking at are in front of others.
@@ -130,7 +130,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             final ScanResultEntity resultEntity = (ScanResultEntity) result;
             final Vector3d entityEyes = resultEntity.entity.getEyePosition(partialTicks);
             final Vector3d toResult = entityEyes.subtract(viewerEyes);
-            return lookVec.dotProduct(toResult.normalize());
+            return lookVec.dot(toResult.normalize());
         }));
 
         for (final ScanResult result : results) {
@@ -195,12 +195,12 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
 
         @Override
         public Vector3d getPosition() {
-            return entity.getPositionVec();
+            return entity.position();
         }
 
         @Override
         public AxisAlignedBB getRenderBounds() {
-            return entity.getRenderBoundingBox();
+            return entity.getBoundingBoxForCulling();
         }
     }
 

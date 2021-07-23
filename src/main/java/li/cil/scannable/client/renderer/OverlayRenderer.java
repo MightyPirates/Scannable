@@ -35,7 +35,7 @@ public enum OverlayRenderer {
             return;
         }
 
-        final ItemStack stack = player.getActiveItemStack();
+        final ItemStack stack = player.getUseItem();
         if (stack.isEmpty()) {
             return;
         }
@@ -45,19 +45,19 @@ public enum OverlayRenderer {
         }
 
         final int total = stack.getUseDuration();
-        final int remaining = player.getItemInUseCount();
+        final int remaining = player.getUseItemRemainingTicks();
 
         final float progress = MathHelper.clamp(1 - (remaining - event.getPartialTicks()) / (float) total, 0, 1);
 
-        final int screenWidth = mc.getMainWindow().getScaledWidth();
-        final int screenHeight = mc.getMainWindow().getScaledHeight();
+        final int screenWidth = mc.getWindow().getGuiScaledWidth();
+        final int screenHeight = mc.getWindow().getGuiScaledHeight();
 
         RenderSystem.enableBlend();
         RenderSystem.color4f(0.66f, 0.8f, 0.93f, 0.66f);
-        mc.getTextureManager().bindTexture(PROGRESS);
+        mc.getTextureManager().bind(PROGRESS);
 
         final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder buffer = tessellator.getBuffer();
+        final BufferBuilder buffer = tessellator.getBuilder();
 
         buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_TEX);
 
@@ -74,66 +74,66 @@ public enum OverlayRenderer {
         final float tx = MathHelper.sin(angle);
         final float ty = MathHelper.cos(angle);
 
-        buffer.pos(midX, top, 0).tex(0.5f, 1).endVertex();
+        buffer.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
         if (progress < 0.125) { // Top right.
-            buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
+            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
             final float x = tx / ty * 0.5f;
-            buffer.pos(midX + x * width, top, 0).tex(0.5f + x, 1).endVertex();
+            buffer.vertex(midX + x * width, top, 0).uv(0.5f + x, 1).endVertex();
         } else {
-            buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
-            buffer.pos(right, top, 0).tex(1, 1).endVertex();
+            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+            buffer.vertex(right, top, 0).uv(1, 1).endVertex();
 
-            buffer.pos(right, top, 0).tex(1, 1).endVertex();
+            buffer.vertex(right, top, 0).uv(1, 1).endVertex();
             if (progress < 0.375) { // Right.
-                buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
+                buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                 final float y = Math.abs(ty / tx - 1) * 0.5f;
-                buffer.pos(right, top + y * height, 0).tex(1, 1 - y).endVertex();
+                buffer.vertex(right, top + y * height, 0).uv(1, 1 - y).endVertex();
             } else {
-                buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
-                buffer.pos(right, bottom, 0).tex(1, 0).endVertex();
+                buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                buffer.vertex(right, bottom, 0).uv(1, 0).endVertex();
 
-                buffer.pos(right, bottom, 0).tex(1, 0).endVertex();
+                buffer.vertex(right, bottom, 0).uv(1, 0).endVertex();
                 if (progress < 0.625) { // Bottom.
-                    buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
+                    buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                     final float x = Math.abs(tx / ty - 1) * 0.5f;
-                    buffer.pos(left + x * width, bottom, 0).tex(x, 0).endVertex();
+                    buffer.vertex(left + x * width, bottom, 0).uv(x, 0).endVertex();
                 } else {
-                    buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
-                    buffer.pos(left, bottom, 0).tex(0, 0).endVertex();
+                    buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                    buffer.vertex(left, bottom, 0).uv(0, 0).endVertex();
 
-                    buffer.pos(left, bottom, 0).tex(0, 0).endVertex();
+                    buffer.vertex(left, bottom, 0).uv(0, 0).endVertex();
                     if (progress < 0.875) { // Left.
-                        buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
+                        buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                         final float y = (ty / tx + 1) * 0.5f;
-                        buffer.pos(left, top + y * height, 0).tex(0, 1 - y).endVertex();
+                        buffer.vertex(left, top + y * height, 0).uv(0, 1 - y).endVertex();
                     } else {
-                        buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
-                        buffer.pos(left, top, 0).tex(0, 1).endVertex();
+                        buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                        buffer.vertex(left, top, 0).uv(0, 1).endVertex();
 
-                        buffer.pos(left, top, 0).tex(0, 1).endVertex();
+                        buffer.vertex(left, top, 0).uv(0, 1).endVertex();
                         if (progress < 1) { // Top left.
-                            buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
+                            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                             final float x = Math.abs(tx / ty) * 0.5f;
-                            buffer.pos(midX - x * width, top, 0).tex(0.5f - x, 1).endVertex();
+                            buffer.vertex(midX - x * width, top, 0).uv(0.5f - x, 1).endVertex();
                         } else {
-                            buffer.pos(midX, midY, 0).tex(0.5f, 0.5f).endVertex();
-                            buffer.pos(midX, top, 0).tex(0.5f, 1).endVertex();
+                            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                            buffer.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
                         }
                     }
                 }
             }
         }
 
-        tessellator.draw();
+        tessellator.end();
 
-        Migration.FontRenderer.drawStringWithShadow(mc.fontRenderer, event.getMatrixStack(),
+        Migration.FontRenderer.drawStringWithShadow(mc.font, event.getMatrixStack(),
                 new TranslationTextComponent(Constants.GUI_SCANNER_PROGRESS, MathHelper.floor(progress * 100)),
-                right + 12, midY - mc.fontRenderer.FONT_HEIGHT / 2, 0xCCAACCEE);
+                right + 12, midY - mc.font.lineHeight / 2, 0xCCAACCEE);
 
         RenderSystem.bindTexture(0);
     }

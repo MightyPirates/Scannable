@@ -32,8 +32,8 @@ public final class InitializerClient extends InitializerCommon {
         ScanEffectShader.INSTANCE.initialize();
         ScanResultShader.INSTANCE.initialize();
 
-        ScreenManager.registerFactory(Scannable.SCANNER_CONTAINER.get(), GuiScanner::new);
-        ScreenManager.registerFactory(Scannable.BLOCK_MODULE_CONTAINER.get(), BlockModuleScreen::new);
-        ScreenManager.registerFactory(Scannable.ENTITY_MODULE_CONTAINER.get(), EntityModuleScreen::new);
+        ScreenManager.register(Scannable.SCANNER_CONTAINER.get(), GuiScanner::new);
+        ScreenManager.register(Scannable.BLOCK_MODULE_CONTAINER.get(), BlockModuleScreen::new);
+        ScreenManager.register(Scannable.ENTITY_MODULE_CONTAINER.get(), EntityModuleScreen::new);
     }
 }

@@ -53,7 +53,7 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
         final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         final List<EntityType<?>> result = new ArrayList<>();
         list.forEach(tag -> {
-            final Optional<EntityType<?>> entityType = EntityType.byKey(tag.getString());
+            final Optional<EntityType<?>> entityType = EntityType.byString(tag.getAsString());
             entityType.ifPresent(result::add);
         });
 
@@ -160,40 +160,40 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
         final List<EntityType<?>> entities = getEntityTypes(stack);
         if (entities.size() == 0) {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_ENTITY));
         } else {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_ENTITY_LIST));
-            entities.forEach(e -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, e.getName())));
+            entities.forEach(e -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, e.getDescription())));
         }
-        super.addInformation(stack, world, tooltip, flag);
+        super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(final World world, final PlayerEntity player, final Hand hand) {
-        final ItemStack stack = player.getHeldItem(hand);
-        if (!player.isSneaking()) {
-            if (!world.isRemote()) {
+    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+        final ItemStack stack = player.getItemInHand(hand);
+        if (!player.isShiftKeyDown()) {
+            if (!world.isClientSide()) {
                 final INamedContainerProvider containerProvider = new EntityModuleContainerProvider(player, hand);
-                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnumValue(hand));
+                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnum(hand));
             }
-            return ActionResult.resultSuccess(stack);
+            return ActionResult.success(stack);
         }
-        return ActionResult.resultPass(stack);
+        return ActionResult.pass(stack);
     }
 
     @Override
-    public ActionResultType itemInteractionForEntity(final ItemStack stack, final PlayerEntity player, final LivingEntity target, final Hand hand) {
+    public ActionResultType interactLivingEntity(final ItemStack stack, final PlayerEntity player, final LivingEntity target, final Hand hand) {
         // NOT adding to `stack` parameter, because that's a copy in creative mode.
-        if (addEntityType(player.getHeldItem(hand), target.getType())) {
-            player.swingArm(hand);
-            player.inventory.markDirty();
+        if (addEntityType(player.getItemInHand(hand), target.getType())) {
+            player.swing(hand);
+            player.inventory.setChanged();
             return ActionResultType.SUCCESS;
         } else {
-            if (player.getEntityWorld().isRemote && !ItemScannerModuleEntityConfigurable.isLocked(stack)) {
-                Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
+            if (player.getCommandSenderWorld().isClientSide && !ItemScannerModuleEntityConfigurable.isLocked(stack)) {
+                Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
             return ActionResultType.SUCCESS; // Prevent opening item UI.
         }

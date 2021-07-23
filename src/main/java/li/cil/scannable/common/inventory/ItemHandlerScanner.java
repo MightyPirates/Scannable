@@ -78,6 +78,6 @@ public final class ItemHandlerScanner extends ItemStackHandler {
     @Override
     protected void onContentsChanged(final int slot) {
         super.onContentsChanged(slot);
-        container.setTagInfo(TAG_ITEMS, serializeNBT());
+        container.addTagElement(TAG_ITEMS, serializeNBT());
     }
 }

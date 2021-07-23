@@ -31,9 +31,9 @@ public final class ItemScannerModuleAnimal extends AbstractItemScannerModuleEnti
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
         tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_ANIMAL));
-        super.addInformation(stack, world, tooltip, flag);
+        super.appendHoverText(stack, world, tooltip, flag);
     }
 
     // --------------------------------------------------------------------- //

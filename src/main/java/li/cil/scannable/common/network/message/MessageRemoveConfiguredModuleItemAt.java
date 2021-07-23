@@ -27,9 +27,9 @@ public final class MessageRemoveConfiguredModuleItemAt {
 
     public static boolean handle(final MessageRemoveConfiguredModuleItemAt message, final Supplier<NetworkEvent.Context> context) {
         final ServerPlayerEntity player = context.get().getSender();
-        if (player != null && player.openContainer != null && player.openContainer.windowId == message.windowId) {
-            if (player.openContainer instanceof AbstractModuleContainer) {
-                ((AbstractModuleContainer) player.openContainer).removeItemAt(message.index);
+        if (player != null && player.containerMenu != null && player.containerMenu.containerId == message.windowId) {
+            if (player.containerMenu instanceof AbstractModuleContainer) {
+                ((AbstractModuleContainer) player.containerMenu).removeItemAt(message.index);
             }
         }
         return true;

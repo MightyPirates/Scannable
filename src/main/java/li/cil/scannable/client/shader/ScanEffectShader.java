@@ -23,11 +23,11 @@ public final class ScanEffectShader extends AbstractShader {
     }
 
     public void setPosition(final Vector3d value) {
-        positionUniform.set((float) value.getX(), (float) value.getY(), (float) value.getZ());
+        positionUniform.set((float) value.x(), (float) value.y(), (float) value.z());
     }
 
     public void setCenter(final Vector3d value) {
-        centerUniform.set((float) value.getX(), (float) value.getY(), (float) value.getZ());
+        centerUniform.set((float) value.x(), (float) value.y(), (float) value.z());
     }
 
     public void setRadius(final float value) {
@@ -35,7 +35,7 @@ public final class ScanEffectShader extends AbstractShader {
     }
 
     public void setDepthBuffer(final int buffer) {
-        shaderInstance.func_216537_a("depthTex", () -> buffer);
+        shaderInstance.setSampler("depthTex", () -> buffer);
     }
 
     @Override
@@ -46,10 +46,10 @@ public final class ScanEffectShader extends AbstractShader {
     @Override
     protected void handleShaderLoad() {
         super.handleShaderLoad();
-        inverseViewMatrixUniform = shaderInstance.getShaderUniform("invViewMat");
-        inverseProjectionMatrixUniform = shaderInstance.getShaderUniform("invProjMat");
-        positionUniform = shaderInstance.getShaderUniform("pos");
-        centerUniform = shaderInstance.getShaderUniform("center");
-        radiusUniform = shaderInstance.getShaderUniform("radius");
+        inverseViewMatrixUniform = shaderInstance.safeGetUniform("invViewMat");
+        inverseProjectionMatrixUniform = shaderInstance.safeGetUniform("invProjMat");
+        positionUniform = shaderInstance.safeGetUniform("pos");
+        centerUniform = shaderInstance.safeGetUniform("center");
+        radiusUniform = shaderInstance.safeGetUniform("radius");
     }
 }

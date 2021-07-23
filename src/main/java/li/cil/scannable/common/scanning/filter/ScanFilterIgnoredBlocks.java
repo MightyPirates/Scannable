@@ -43,14 +43,14 @@ public enum ScanFilterIgnoredBlocks {
 
         final List<ITag<Block>> ignoredTags = new ArrayList<>();
         for (final ResourceLocation location : Settings.ignoredBlockTags) {
-            final ITag<Block> tag = BlockTags.getCollection().get(location);
+            final ITag<Block> tag = BlockTags.getAllTags().getTag(location);
             if (tag != null) {
                 ignoredTags.add(tag);
             }
         }
 
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
-            final BlockState blockState = block.getDefaultState();
+            final BlockState blockState = block.defaultBlockState();
             if (ignoredTags.stream().anyMatch(tag -> tag.contains(block))) {
                 ignoredBlocks.add(blockState.getBlock());
             }

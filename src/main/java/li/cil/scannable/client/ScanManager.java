@@ -41,11 +41,11 @@ public enum ScanManager {
     // --------------------------------------------------------------------- //
 
     private static float computeTargetRadius() {
-        return Minecraft.getInstance().gameRenderer.getFarPlaneDistance();
+        return Minecraft.getInstance().gameRenderer.getRenderDistance();
     }
 
     public static int computeScanGrowthDuration() {
-        return Constants.SCAN_GROWTH_DURATION * Minecraft.getInstance().gameSettings.renderDistanceChunks / Constants.REFERENCE_RENDER_DISTANCE;
+        return Constants.SCAN_GROWTH_DURATION * Minecraft.getInstance().options.renderDistance / Constants.REFERENCE_RENDER_DISTANCE;
     }
 
     public static float computeRadius(final long start, final float duration) {
@@ -116,7 +116,7 @@ public enum ScanManager {
             return;
         }
 
-        final Vector3d center = player.getPositionVec();
+        final Vector3d center = player.position();
         for (final ScanResultProvider provider : collectingProviders) {
             provider.initialize(player, stacks, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
         }
@@ -146,13 +146,13 @@ public enum ScanManager {
         }
 
         for (final ScanResultProvider provider : collectingProviders) {
-            provider.collectScanResults(entity.getEntityWorld(), result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+            provider.collectScanResults(entity.getCommandSenderWorld(), result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             provider.reset();
         }
 
         clear();
 
-        lastScanCenter = entity.getPositionVec();
+        lastScanCenter = entity.position();
         currentStart = System.currentTimeMillis();
 
         pendingResults.putAll(collectingResults);
@@ -175,7 +175,7 @@ public enum ScanManager {
             return;
         }
 
-        final IBlockReader world = Minecraft.getInstance().world;
+        final IBlockReader world = Minecraft.getInstance().level;
         if (world == null) {
             return;
         }
@@ -225,7 +225,7 @@ public enum ScanManager {
             while (results.size() > 0) {
                 final ScanResult result = results.get(results.size() - 1);
                 final Vector3d position = result.getPosition();
-                if (lastScanCenter.squareDistanceTo(position) <= sqRadius) {
+                if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
                     results.remove(results.size() - 1);
                     synchronized (renderingResults) {
                         renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
@@ -249,7 +249,7 @@ public enum ScanManager {
             }
 
             viewMatrix = new MatrixStack();
-            viewMatrix.getLast().getMatrix().set(event.getMatrixStack().getLast().getMatrix());
+            viewMatrix.last().pose().set(event.getMatrixStack().last().pose());
             projectionMatrix = event.getProjectionMatrix();
         }
     }
@@ -284,27 +284,27 @@ public enum ScanManager {
     }
 
     private void render(final float partialTicks, final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
-        final ActiveRenderInfo activeRenderInfo = Minecraft.getInstance().gameRenderer.getActiveRenderInfo();
-        final Vector3d pos = activeRenderInfo.getProjectedView();
+        final ActiveRenderInfo activeRenderInfo = Minecraft.getInstance().gameRenderer.getMainCamera();
+        final Vector3d pos = activeRenderInfo.getPosition();
 
-        final ClippingHelper frustum = new ClippingHelper(matrixStack.getLast().getMatrix(), projectionMatrix);
-        frustum.setCameraPosition(pos.getX(), pos.getY(), pos.getZ());
+        final ClippingHelper frustum = new ClippingHelper(matrixStack.last().pose(), projectionMatrix);
+        frustum.prepare(pos.x(), pos.y(), pos.z());
 
         RenderSystem.disableDepthTest();
 
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(-pos.x, -pos.y, -pos.z);
 
         // We render all results in batches, grouped by their provider.
         // This allows providers to do more optimized rendering, in e.g.
         // setting up the render state once before rendering all visuals,
         // or even set up display lists or VBOs.
-        final IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+        final IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
             // Quick and dirty frustum culling.
             for (final ScanResult result : entry.getValue()) {
                 final AxisAlignedBB bounds = result.getRenderBounds();
-                if (bounds == null || frustum.isBoundingBoxInFrustum(bounds)) {
+                if (bounds == null || frustum.isVisible(bounds)) {
                     renderingList.add(result);
                 }
             }
@@ -314,9 +314,9 @@ public enum ScanManager {
                 renderingList.clear();
             }
         }
-        renderTypeBuffer.finish();
+        renderTypeBuffer.endBatch();
 
-        matrixStack.pop();
+        matrixStack.popPose();
 
         RenderSystem.enableDepthTest();
     }

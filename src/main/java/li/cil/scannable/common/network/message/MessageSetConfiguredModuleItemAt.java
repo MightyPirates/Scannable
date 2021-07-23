@@ -29,9 +29,9 @@ public final class MessageSetConfiguredModuleItemAt {
 
     public static boolean handle(final MessageSetConfiguredModuleItemAt message, final Supplier<NetworkEvent.Context> context) {
         final ServerPlayerEntity player = context.get().getSender();
-        if (player != null && player.openContainer != null && player.openContainer.windowId == message.windowId) {
-            if (player.openContainer instanceof AbstractModuleContainer) {
-                ((AbstractModuleContainer) player.openContainer).setItemAt(message.index, message.value);
+        if (player != null && player.containerMenu != null && player.containerMenu.containerId == message.windowId) {
+            if (player.containerMenu instanceof AbstractModuleContainer) {
+                ((AbstractModuleContainer) player.containerMenu).setItemAt(message.index, message.value);
             }
         }
         return true;
@@ -43,13 +43,13 @@ public final class MessageSetConfiguredModuleItemAt {
         final PacketBuffer packet = new PacketBuffer(buffer);
         windowId = packet.readByte();
         index = packet.readByte();
-        value = packet.readString(1024);
+        value = packet.readUtf(1024);
     }
 
     public void toBytes(final ByteBuf buffer) {
         final PacketBuffer packet = new PacketBuffer(buffer);
         packet.writeByte(windowId);
         packet.writeByte(index);
-        packet.writeString(value);
+        packet.writeUtf(value);
     }
 }

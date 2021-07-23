@@ -55,7 +55,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         final List<Block> result = new ArrayList<>();
         list.forEach(tag -> {
             try {
-                final ResourceLocation registryName = new ResourceLocation(tag.getString());
+                final ResourceLocation registryName = new ResourceLocation(tag.getAsString());
                 final Block block = ForgeRegistries.BLOCKS.getValue(registryName);
                 if (block != null && block != Blocks.AIR) {
                     result.add(block);
@@ -168,34 +168,34 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
         final List<Block> blocks = getBlocks(stack);
         if (blocks.size() == 0) {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_BLOCK_LIST));
-            blocks.forEach(b -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getTranslatedName())));
+            blocks.forEach(b -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getName())));
         }
-        super.addInformation(stack, world, tooltip, flag);
+        super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(final World world, final PlayerEntity player, final Hand hand) {
-        final ItemStack stack = player.getHeldItem(hand);
-        if (!player.isSneaking()) {
-            if (!world.isRemote) {
+    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+        final ItemStack stack = player.getItemInHand(hand);
+        if (!player.isShiftKeyDown()) {
+            if (!world.isClientSide) {
                 final INamedContainerProvider containerProvider = new BlockModuleContainerProvider(player, hand);
-                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnumValue(hand));
+                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnum(hand));
             }
-            return ActionResult.resultSuccess(stack);
+            return ActionResult.success(stack);
         }
-        return ActionResult.resultPass(stack);
+        return ActionResult.pass(stack);
     }
 
     @Override
-    public ActionResultType onItemUse(final ItemUseContext context) {
-        final World world = context.getWorld();
-        if (world.isAirBlock(context.getPos())) {
+    public ActionResultType useOn(final ItemUseContext context) {
+        final World world = context.getLevel();
+        if (world.isEmptyBlock(context.getClickedPos())) {
             return ActionResultType.PASS;
         }
 
@@ -204,22 +204,22 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return ActionResultType.PASS;
         }
 
-        final ItemStack stack = context.getItem();
-        final BlockState state = world.getBlockState(context.getPos());
+        final ItemStack stack = context.getItemInHand();
+        final BlockState state = world.getBlockState(context.getClickedPos());
 
         if (ScanFilterIgnoredBlocks.shouldIgnore(state)) {
-            if (world.isRemote) {
-                Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_BLOCK_BLACKLISTED), Constants.CHAT_LINE_ID);
+            if (world.isClientSide) {
+                Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_BLOCK_BLACKLISTED), Constants.CHAT_LINE_ID);
             }
-            player.getCooldownTracker().setCooldown(this, 10);
+            player.getCooldowns().addCooldown(this, 10);
             return ActionResultType.SUCCESS;
         }
 
         if (addBlock(stack, state.getBlock())) {
             return ActionResultType.SUCCESS;
         } else {
-            if (world.isRemote && !ItemScannerModuleBlockConfigurable.isLocked(stack)) {
-                Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
+            if (world.isClientSide && !ItemScannerModuleBlockConfigurable.isLocked(stack)) {
+                Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
             return ActionResultType.SUCCESS; // Prevent opening item UI.
         }

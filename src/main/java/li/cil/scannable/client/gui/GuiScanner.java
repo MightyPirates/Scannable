@@ -33,10 +33,10 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
     public GuiScanner(final ContainerScanner container, final PlayerInventory inventory, final ITextComponent title) {
         super(container, inventory, title);
         this.container = container;
-        ySize = 159;
+        imageHeight = 159;
         passEvents = false;
-        playerInventoryTitleX = 8;
-        playerInventoryTitleY = 65;
+        inventoryLabelX = 8;
+        inventoryLabelY = 65;
     }
 
     // --------------------------------------------------------------------- //
@@ -46,45 +46,45 @@ public class GuiScanner extends ContainerScreen<ContainerScanner> {
         renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
 
-        if (isPointInRegion(8, 23, Migration.FontRenderer.getStringWidth(font, SCANNER_MODULES_TEXT), font.FONT_HEIGHT, mouseX, mouseY)) {
+        if (isHovering(8, 23, Migration.FontRenderer.getStringWidth(font, SCANNER_MODULES_TEXT), font.lineHeight, mouseX, mouseY)) {
             renderTooltip(matrixStack, SCANNER_MODULES_TOOLTIP, mouseX, mouseY);
         }
-        if (isPointInRegion(8, 49, Migration.FontRenderer.getStringWidth(font, SCANNER_MODULES_INACTIVE_TEXT), font.FONT_HEIGHT, mouseX, mouseY)) {
+        if (isHovering(8, 49, Migration.FontRenderer.getStringWidth(font, SCANNER_MODULES_INACTIVE_TEXT), font.lineHeight, mouseX, mouseY)) {
             renderTooltip(matrixStack, SCANNER_MODULES_INACTIVE_TOOLTIP, mouseX, mouseY);
         }
 
-        renderHoveredTooltip(matrixStack, mouseX, mouseY);
+        renderTooltip(matrixStack, mouseX, mouseY);
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(final MatrixStack matrixStack, final int mouseX, final int mouseY) {
-        super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+    protected void renderLabels(final MatrixStack matrixStack, final int mouseX, final int mouseY) {
+        super.renderLabels(matrixStack, mouseX, mouseY);
 
         Migration.FontRenderer.drawString(font, matrixStack, SCANNER_MODULES_TEXT, 8, 23, 0x404040);
         Migration.FontRenderer.drawString(font, matrixStack, SCANNER_MODULES_INACTIVE_TEXT, 8, 49, 0x404040);
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(final MatrixStack matrixStack, final float partialTicks, final int mouseX, final int mouseY) {
+    protected void renderBg(final MatrixStack matrixStack, final float partialTicks, final int mouseX, final int mouseY) {
         RenderSystem.color4f(1, 1, 1, 1);
-        minecraft.getTextureManager().bindTexture(BACKGROUND);
-        final int x = (width - xSize) / 2;
-        final int y = (height - ySize) / 2;
-        blit(matrixStack, x, y, 0, 0, xSize, ySize);
+        minecraft.getTextureManager().bind(BACKGROUND);
+        final int x = (width - imageWidth) / 2;
+        final int y = (height - imageHeight) / 2;
+        blit(matrixStack, x, y, 0, 0, imageWidth, imageHeight);
     }
 
     @Override
-    protected void handleMouseClick(@Nullable final Slot slot, final int slotId, final int mouseButton, final ClickType type) {
+    protected void slotClicked(@Nullable final Slot slot, final int slotId, final int mouseButton, final ClickType type) {
         if (slot != null) {
-            final ItemStack scannerItemStack = playerInventory.player.getHeldItem(container.getHand());
-            if (slot.getStack() == scannerItemStack) {
+            final ItemStack scannerItemStack = inventory.player.getItemInHand(container.getHand());
+            if (slot.getItem() == scannerItemStack) {
                 return;
             }
-            if (type == ClickType.SWAP && playerInventory.getStackInSlot(mouseButton) == scannerItemStack) {
+            if (type == ClickType.SWAP && inventory.getItem(mouseButton) == scannerItemStack) {
                 return;
             }
         }
 
-        super.handleMouseClick(slot, slotId, mouseButton, type);
+        super.slotClicked(slot, slotId, mouseButton, type);
     }
 }

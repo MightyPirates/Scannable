@@ -26,7 +26,7 @@ public final class ScanResultShader extends AbstractShader {
     @Override
     protected void handleShaderLoad() {
         super.handleShaderLoad();
-        projMatUniform = shaderInstance.getShaderUniform("projMat");
-        viewMatUniform = shaderInstance.getShaderUniform("viewMat");
+        projMatUniform = shaderInstance.safeGetUniform("projMat");
+        viewMatUniform = shaderInstance.safeGetUniform("viewMat");
     }
 }

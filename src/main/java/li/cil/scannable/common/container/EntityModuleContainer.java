@@ -16,7 +16,7 @@ public class EntityModuleContainer extends AbstractModuleContainer {
     }
 
     public static EntityModuleContainer createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
-        final Hand hand = buffer.readEnumValue(Hand.class);
+        final Hand hand = buffer.readEnum(Hand.class);
         return new EntityModuleContainer(windowId, inventory, hand);
     }
 
@@ -28,14 +28,14 @@ public class EntityModuleContainer extends AbstractModuleContainer {
 
     @Override
     public void removeItemAt(final int index) {
-        final ItemStack stack = getPlayer().getHeldItem(getHand());
+        final ItemStack stack = getPlayer().getItemInHand(getHand());
         ItemScannerModuleEntityConfigurable.removeEntityTypeAt(stack, index);
     }
 
     @Override
     public void setItemAt(final int index, final String value) {
-        final ItemStack stack = getPlayer().getHeldItem(getHand());
-        final Optional<EntityType<?>> entityType = EntityType.byKey(value);
+        final ItemStack stack = getPlayer().getItemInHand(getHand());
+        final Optional<EntityType<?>> entityType = EntityType.byString(value);
         entityType.ifPresent(e -> {
             ItemScannerModuleEntityConfigurable.setEntityTypeAt(stack, index, e);
         });

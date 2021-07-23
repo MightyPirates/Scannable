@@ -14,7 +14,7 @@ public enum ScanFilterEntityMonster implements ScanFilterEntity {
     @Override
     public boolean matches(final Entity entity) {
         return !(entity instanceof PlayerEntity) &&
-               !entity.getClassification(false).getPeacefulCreature();
+               !entity.getClassification(false).isFriendly();
     }
 
     @Override

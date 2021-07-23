@@ -18,7 +18,7 @@ public class BlockModuleContainer extends AbstractModuleContainer {
     }
 
     public static BlockModuleContainer createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
-        final Hand hand = buffer.readEnumValue(Hand.class);
+        final Hand hand = buffer.readEnum(Hand.class);
         return new BlockModuleContainer(windowId, inventory, hand);
     }
 
@@ -30,7 +30,7 @@ public class BlockModuleContainer extends AbstractModuleContainer {
 
     @Override
     public void removeItemAt(final int index) {
-        ItemScannerModuleBlockConfigurable.removeBlockAt(getPlayer().getHeldItem(getHand()), index);
+        ItemScannerModuleBlockConfigurable.removeBlockAt(getPlayer().getItemInHand(getHand()), index);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class BlockModuleContainer extends AbstractModuleContainer {
             final ResourceLocation registryName = new ResourceLocation(value);
             final Block block = ForgeRegistries.BLOCKS.getValue(registryName);
             if (block != null && block != Blocks.AIR) {
-                final ItemStack stack = getPlayer().getHeldItem(getHand());
+                final ItemStack stack = getPlayer().getItemInHand(getHand());
                 ItemScannerModuleBlockConfigurable.setBlockAt(stack, index, block);
             }
         } catch (final ResourceLocationException e) {

@@ -76,16 +76,16 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
     protected static void renderIconLabel(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final float yaw, final float pitch, final Vector3d lookVec, final Vector3d viewerEyes, final float displayDistance, final Vector3d resultPos, final ResourceLocation icon, @Nullable final ITextComponent label) {
         final Vector3d toResult = resultPos.subtract(viewerEyes);
         final float distance = (float) toResult.length();
-        final float lookDirDot = (float) lookVec.dotProduct(toResult.normalize());
+        final float lookDirDot = (float) lookVec.dot(toResult.normalize());
         final float sqLookDirDot = lookDirDot * lookDirDot;
         final float sq2LookDirDot = sqLookDirDot * sqLookDirDot;
         final float focusScale = MathHelper.clamp(sq2LookDirDot * sq2LookDirDot + 0.005f, 0.5f, 1f);
         final float scale = distance * focusScale * 0.005f;
 
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(resultPos.x, resultPos.y, resultPos.z);
-        matrixStack.rotate(Vector3f.YN.rotationDegrees(yaw));
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(pitch));
+        matrixStack.mulPose(Vector3f.YN.rotationDegrees(yaw));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(pitch));
         matrixStack.scale(-scale, -scale, scale);
 
         if (lookDirDot > 0.999f && label != null && !Strings.isNullOrEmpty(label.getString())) {
@@ -96,21 +96,21 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
                 text = label;
             }
 
-            final FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+            final FontRenderer fontRenderer = Minecraft.getInstance().font;
             final int width = Migration.FontRenderer.getStringWidth(fontRenderer, text) + 16;
 
-            matrixStack.push();
+            matrixStack.pushPose();
             matrixStack.translate(width / 2f, 0, 0);
 
-            drawQuad(renderTypeBuffer.getBuffer(getRenderLayer()), matrixStack, width, fontRenderer.FONT_HEIGHT + 5, 0, 0, 0, 0.6f);
+            drawQuad(renderTypeBuffer.getBuffer(getRenderLayer()), matrixStack, width, fontRenderer.lineHeight + 5, 0, 0, 0, 0.6f);
 
-            matrixStack.pop();
-            Migration.FontRenderer.renderString(fontRenderer, text, 12, -4, 0xFFFFFFFF, true, matrixStack.getLast().getMatrix(), renderTypeBuffer, true, 0, 0xf000f0);
+            matrixStack.popPose();
+            Migration.FontRenderer.renderString(fontRenderer, text, 12, -4, 0xFFFFFFFF, true, matrixStack.last().pose(), renderTypeBuffer, true, 0, 0xf000f0);
         }
 
         drawQuad(renderTypeBuffer.getBuffer(getRenderLayer(icon)), matrixStack, 16, 16);
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
     // --------------------------------------------------------------------- //
@@ -121,11 +121,11 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
     }
 
     protected static void drawQuad(final IVertexBuilder buffer, final MatrixStack matrixStack, final float width, final float height, final float r, final float g, final float b, final float a) {
-        final Matrix4f matrix = matrixStack.getLast().getMatrix();
-        buffer.pos(matrix, -width / 2, height / 2, 0).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, width / 2, height / 2, 0).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, width / 2, -height / 2, 0).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, -width / 2, -height / 2, 0).color(r, g, b, a).tex(0, 0).endVertex();
+        final Matrix4f matrix = matrixStack.last().pose();
+        buffer.vertex(matrix, -width / 2, height / 2, 0).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, width / 2, height / 2, 0).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, width / 2, -height / 2, 0).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, -width / 2, -height / 2, 0).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     protected static void drawCube(final IVertexBuilder buffer, final Matrix4f matrix, final float minX, final float minY, final float minZ, final float maxX, final float maxY, final float maxZ, final float r, final float g, final float b, final float a) {
@@ -138,72 +138,72 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
     }
 
     protected static void drawPlaneNegX(final IVertexBuilder buffer, final Matrix4f matrix, final float x, final float minY, final float maxY, final float minZ, final float maxZ, final float r, final float g, final float b, final float a) {
-        buffer.pos(matrix, x, minY, minZ).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, x, minY, maxZ).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, x, maxY, maxZ).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, x, maxY, minZ).color(r, g, b, a).tex(0, 0).endVertex();
+        buffer.vertex(matrix, x, minY, minZ).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, x, minY, maxZ).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, x, maxY, maxZ).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, x, maxY, minZ).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     protected static void drawPlanePosX(final IVertexBuilder buffer, final Matrix4f matrix, final float x, final float minY, final float maxY, final float minZ, final float maxZ, final float r, final float g, final float b, final float a) {
-        buffer.pos(matrix, x, minY, minZ).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, x, maxY, minZ).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, x, maxY, maxZ).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, x, minY, maxZ).color(r, g, b, a).tex(0, 0).endVertex();
+        buffer.vertex(matrix, x, minY, minZ).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, x, maxY, minZ).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, x, maxY, maxZ).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, x, minY, maxZ).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     protected static void drawPlaneNegY(final IVertexBuilder buffer, final Matrix4f matrix, final float y, final float minX, final float maxX, final float minZ, final float maxZ, final float r, final float g, final float b, final float a) {
-        buffer.pos(matrix, minX, y, minZ).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, maxX, y, minZ).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, maxX, y, maxZ).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, minX, y, maxZ).color(r, g, b, a).tex(0, 0).endVertex();
+        buffer.vertex(matrix, minX, y, minZ).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, maxX, y, minZ).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, maxX, y, maxZ).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, minX, y, maxZ).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     protected static void drawPlanePosY(final IVertexBuilder buffer, final Matrix4f matrix, final float y, final float minX, final float maxX, final float minZ, final float maxZ, final float r, final float g, final float b, final float a) {
-        buffer.pos(matrix, minX, y, minZ).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, minX, y, maxZ).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, maxX, y, maxZ).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, maxX, y, minZ).color(r, g, b, a).tex(0, 0).endVertex();
+        buffer.vertex(matrix, minX, y, minZ).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, minX, y, maxZ).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, maxX, y, maxZ).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, maxX, y, minZ).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     protected static void drawPlaneNegZ(final IVertexBuilder buffer, final Matrix4f matrix, final float z, final float minX, final float maxX, final float minY, final float maxY, final float r, final float g, final float b, final float a) {
-        buffer.pos(matrix, minX, minY, z).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, minX, maxY, z).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, maxX, maxY, z).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, maxX, minY, z).color(r, g, b, a).tex(0, 0).endVertex();
+        buffer.vertex(matrix, minX, minY, z).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, minX, maxY, z).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, maxX, maxY, z).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, maxX, minY, z).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     protected static void drawPlanePosZ(final IVertexBuilder buffer, final Matrix4f matrix, final float z, final float minX, final float maxX, final float minY, final float maxY, final float r, final float g, final float b, final float a) {
-        buffer.pos(matrix, minX, minY, z).color(r, g, b, a).tex(0, 1).endVertex();
-        buffer.pos(matrix, maxX, minY, z).color(r, g, b, a).tex(1, 1).endVertex();
-        buffer.pos(matrix, maxX, maxY, z).color(r, g, b, a).tex(1, 0).endVertex();
-        buffer.pos(matrix, minX, maxY, z).color(r, g, b, a).tex(0, 0).endVertex();
+        buffer.vertex(matrix, minX, minY, z).color(r, g, b, a).uv(0, 1).endVertex();
+        buffer.vertex(matrix, maxX, minY, z).color(r, g, b, a).uv(1, 1).endVertex();
+        buffer.vertex(matrix, maxX, maxY, z).color(r, g, b, a).uv(1, 0).endVertex();
+        buffer.vertex(matrix, minX, maxY, z).color(r, g, b, a).uv(0, 0).endVertex();
     }
 
     // --------------------------------------------------------------------- //
     // Simple render layers for result rendering.
 
     protected static RenderType getRenderLayer() {
-        return RenderType.makeType("scan_result",
+        return RenderType.create("scan_result",
                 DefaultVertexFormats.POSITION_COLOR_TEX,
                 GL11.GL_QUADS,
                 65536,
-                RenderType.State.getBuilder()
-                        .transparency(RenderType.TRANSLUCENT_TRANSPARENCY)
-                        .depthTest(RenderState.DEPTH_ALWAYS)
-                        .writeMask(RenderState.COLOR_WRITE)
-                        .build(false));
+                RenderType.State.builder()
+                        .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                        .setDepthTestState(RenderState.NO_DEPTH_TEST)
+                        .setWriteMaskState(RenderState.COLOR_WRITE)
+                        .createCompositeState(false));
     }
 
     protected static RenderType getRenderLayer(final ResourceLocation textureLocation) {
-        return RenderType.makeType("scan_result",
+        return RenderType.create("scan_result",
                 DefaultVertexFormats.POSITION_COLOR_TEX,
                 GL11.GL_QUADS,
                 65536,
-                RenderType.State.getBuilder()
-                        .texture(new RenderState.TextureState(textureLocation, false, false))
-                        .transparency(RenderType.TRANSLUCENT_TRANSPARENCY)
-                        .depthTest(RenderState.DEPTH_ALWAYS)
-                        .writeMask(RenderState.COLOR_WRITE)
-                        .build(false));
+                RenderType.State.builder()
+                        .setTextureState(new RenderState.TextureState(textureLocation, false, false))
+                        .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                        .setDepthTestState(RenderState.NO_DEPTH_TEST)
+                        .setWriteMaskState(RenderState.COLOR_WRITE)
+                        .createCompositeState(false));
     }
 }

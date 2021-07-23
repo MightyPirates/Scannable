@@ -94,19 +94,19 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                     return;
                 }
 
-                Network.INSTANCE.sendToServer(new MessageStructureRequest(player.getEntityWorld(), new BlockPos(center), radius, hideExplored));
+                Network.INSTANCE.sendToServer(new MessageStructureRequest(player.getCommandSenderWorld(), new BlockPos(center), radius, hideExplored));
 
                 state = State.WAIT_RESPONSE;
 
                 break;
             }
             case WAIT_RESULT: {
-                final float renderDistance = Minecraft.getInstance().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
+                final float renderDistance = Minecraft.getInstance().options.renderDistance * Constants.CHUNK_SIZE;
                 final float sqRenderDistance = renderDistance * renderDistance;
                 for (final StructureLocation structure : structures) {
                     final Vector3d structureCenter = new Vector3d(structure.pos.getX(), structure.pos.getY(), structure.pos.getZ());
                     final Vector3d toStructure = structureCenter.subtract(center);
-                    if (toStructure.lengthSquared() > sqRenderDistance) {
+                    if (toStructure.lengthSqr() > sqRenderDistance) {
                         final Vector3d clippedPos = center.add(toStructure.normalize().scale(renderDistance - 4));
                         results.add(new ScanResultStructure(structure, clippedPos));
                     } else {
@@ -129,15 +129,15 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
     @Override
     public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
-        final float yaw = renderInfo.getYaw();
-        final float pitch = renderInfo.getPitch();
+        final float yaw = renderInfo.getYRot();
+        final float pitch = renderInfo.getXRot();
 
-        final Vector3d lookVec = new Vector3d(renderInfo.getViewVector());
-        final Vector3d viewerEyes = renderInfo.getProjectedView();
+        final Vector3d lookVec = new Vector3d(renderInfo.getLookVector());
+        final Vector3d viewerEyes = renderInfo.getPosition();
 
-        final boolean showDistance = renderInfo.getRenderViewEntity().isSneaking();
+        final boolean showDistance = renderInfo.getEntity().isShiftKeyDown();
 
-        final float renderDistance = Minecraft.getInstance().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE;
+        final float renderDistance = Minecraft.getInstance().options.renderDistance * Constants.CHUNK_SIZE;
         final float sqRenderDistance = renderDistance * renderDistance;
 
         for (final ScanResult result : results) {
@@ -147,7 +147,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                     resultStructure.structure.pos.getZ() + 0.5);
             final Vector3d toStructure = structureCenter.subtract(viewerEyes);
             final Vector3d resultPos;
-            if (toStructure.lengthSquared() > sqRenderDistance) {
+            if (toStructure.lengthSqr() > sqRenderDistance) {
                 resultPos = viewerEyes.add(toStructure.normalize().scale(renderDistance / 2));
             } else {
                 resultPos = structureCenter;
@@ -185,7 +185,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         ScanResultStructure(final StructureLocation structure, final Vector3d renderCenter) {
             this.structure = structure;
             this.center = renderCenter;
-            this.bounds = new AxisAlignedBB(new BlockPos(renderCenter)).grow(8, 8, 8);
+            this.bounds = new AxisAlignedBB(new BlockPos(renderCenter)).inflate(8, 8, 8);
         }
 
         @Override

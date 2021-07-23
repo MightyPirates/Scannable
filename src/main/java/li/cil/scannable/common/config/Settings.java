@@ -82,28 +82,28 @@ public final class Settings {
     public static Object2IntMap<ResourceLocation> blockColors = new Object2IntOpenHashMap<>();
     public static Object2IntMap<ResourceLocation> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
         // Minecraft
-        c.put(Tags.Blocks.ORES_COAL.getName(), MaterialColor.GRAY.colorValue);
-        c.put(Tags.Blocks.ORES_IRON.getName(), MaterialColor.BROWN.colorValue); // MaterialColor.IRON is also gray, so...
-        c.put(Tags.Blocks.ORES_GOLD.getName(), MaterialColor.GOLD.colorValue);
-        c.put(Tags.Blocks.ORES_LAPIS.getName(), MaterialColor.LAPIS.colorValue);
-        c.put(Tags.Blocks.ORES_DIAMOND.getName(), MaterialColor.DIAMOND.colorValue);
-        c.put(Tags.Blocks.ORES_REDSTONE.getName(), MaterialColor.RED.colorValue);
-        c.put(Tags.Blocks.ORES_EMERALD.getName(), MaterialColor.EMERALD.colorValue);
-        c.put(Tags.Blocks.ORES_QUARTZ.getName(), MaterialColor.QUARTZ.colorValue);
+        c.put(Tags.Blocks.ORES_COAL.getName(), MaterialColor.COLOR_GRAY.col);
+        c.put(Tags.Blocks.ORES_IRON.getName(), MaterialColor.COLOR_BROWN.col); // MaterialColor.IRON is also gray, so...
+        c.put(Tags.Blocks.ORES_GOLD.getName(), MaterialColor.GOLD.col);
+        c.put(Tags.Blocks.ORES_LAPIS.getName(), MaterialColor.LAPIS.col);
+        c.put(Tags.Blocks.ORES_DIAMOND.getName(), MaterialColor.DIAMOND.col);
+        c.put(Tags.Blocks.ORES_REDSTONE.getName(), MaterialColor.COLOR_RED.col);
+        c.put(Tags.Blocks.ORES_EMERALD.getName(), MaterialColor.EMERALD.col);
+        c.put(Tags.Blocks.ORES_QUARTZ.getName(), MaterialColor.QUARTZ.col);
 
         // Common modded ores
-        c.put(new ResourceLocation("forge", "ores/tin"), MaterialColor.CYAN.colorValue);
-        c.put(new ResourceLocation("forge", "ores/copper"), MaterialColor.ORANGE_TERRACOTTA.colorValue);
-        c.put(new ResourceLocation("forge", "ores/lead"), MaterialColor.BLUE_TERRACOTTA.colorValue);
-        c.put(new ResourceLocation("forge", "ores/silver"), MaterialColor.LIGHT_GRAY.colorValue);
-        c.put(new ResourceLocation("forge", "ores/nickel"), MaterialColor.LIGHT_BLUE.colorValue);
-        c.put(new ResourceLocation("forge", "ores/platinum"), MaterialColor.WHITE_TERRACOTTA.colorValue);
-        c.put(new ResourceLocation("forge", "ores/mithril"), MaterialColor.PURPLE.colorValue);
+        c.put(new ResourceLocation("forge", "ores/tin"), MaterialColor.COLOR_CYAN.col);
+        c.put(new ResourceLocation("forge", "ores/copper"), MaterialColor.TERRACOTTA_ORANGE.col);
+        c.put(new ResourceLocation("forge", "ores/lead"), MaterialColor.TERRACOTTA_BLUE.col);
+        c.put(new ResourceLocation("forge", "ores/silver"), MaterialColor.COLOR_LIGHT_GRAY.col);
+        c.put(new ResourceLocation("forge", "ores/nickel"), MaterialColor.COLOR_LIGHT_BLUE.col);
+        c.put(new ResourceLocation("forge", "ores/platinum"), MaterialColor.TERRACOTTA_WHITE.col);
+        c.put(new ResourceLocation("forge", "ores/mithril"), MaterialColor.COLOR_PURPLE.col);
     });
     public static Object2IntMap<ResourceLocation> fluidColors = new Object2IntOpenHashMap<>();
     public static Object2IntMap<ResourceLocation> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
-        c.put(FluidTags.WATER.getName(), MaterialColor.WATER.colorValue);
-        c.put(FluidTags.LAVA.getName(), MaterialColor.ORANGE_TERRACOTTA.colorValue);
+        c.put(FluidTags.WATER.getName(), MaterialColor.WATER.col);
+        c.put(FluidTags.LAVA.getName(), MaterialColor.TERRACOTTA_ORANGE.col);
     });
 
     // --------------------------------------------------------------------- //

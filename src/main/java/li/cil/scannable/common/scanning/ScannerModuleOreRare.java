@@ -73,7 +73,7 @@ public enum ScannerModuleOreRare implements ScannerModuleBlock {
             }
         }
         for (final ResourceLocation location : Settings.rareOreBlockTags) {
-            final ITag<Block> tag = BlockTags.getCollection().get(location);
+            final ITag<Block> tag = BlockTags.getAllTags().getTag(location);
             if (tag != null) {
                 filters.add(new ScanFilterBlockTag(tag));
             }

@@ -31,15 +31,15 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
 
     public AbstractConfigurableModuleScreen(final TContainer container, final PlayerInventory inventory, final ITextComponent title, final String listCaptionTranslationKey) {
         super(container, inventory, title);
-        ySize = 133;
+        imageHeight = 133;
         passEvents = false;
         this.listCaptionTranslationKey = listCaptionTranslationKey;
-        playerInventoryTitleX = 8;
-        playerInventoryTitleY = 39;
+        inventoryLabelX = 8;
+        inventoryLabelY = 39;
     }
 
     private ItemStack getHeldItem() {
-        return playerInventory.player.getHeldItem(container.getHand());
+        return inventory.player.getItemInHand(menu.getHand());
     }
 
     protected abstract List<TItem> getConfiguredItems(final ItemStack stack);
@@ -57,7 +57,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     public void render(final MatrixStack matrixStack, final int mouseX, final int mouseY, final float partialTicks) {
         renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
-        renderHoveredTooltip(matrixStack, mouseX, mouseY);
+        renderTooltip(matrixStack, mouseX, mouseY);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -65,7 +65,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
             final int x = SLOTS_ORIGIN_X + slot * SLOT_SIZE;
             final int y = SLOTS_ORIGIN_Y;
 
-            if (isPointInRegion(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
+            if (isHovering(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
                 final TItem item = items.get(slot);
                 renderTooltip(matrixStack, getItemName(item), mouseX, mouseY);
             }
@@ -73,9 +73,9 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(final MatrixStack matrixStack, final int mouseX, final int mouseY) {
-        super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
-        font.drawString(matrixStack, I18n.format(listCaptionTranslationKey), 8, 23, 0x404040);
+    protected void renderLabels(final MatrixStack matrixStack, final int mouseX, final int mouseY) {
+        super.renderLabels(matrixStack, mouseX, mouseY);
+        font.draw(matrixStack, I18n.get(listCaptionTranslationKey), 8, 23, 0x404040);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -83,7 +83,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
             final int x = SLOTS_ORIGIN_X + slot * SLOT_SIZE;
             final int y = SLOTS_ORIGIN_Y;
 
-            if (isPointInRegion(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
+            if (isHovering(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
                 drawHoverHighlight(matrixStack, x, y, SLOT_SIZE - 2, SLOT_SIZE - 2);
             }
 
@@ -95,12 +95,12 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(final MatrixStack matrixStack, final float partialTicks, final int mouseX, final int mouseY) {
+    protected void renderBg(final MatrixStack matrixStack, final float partialTicks, final int mouseX, final int mouseY) {
         RenderSystem.color4f(1, 1, 1, 1);
-        minecraft.getTextureManager().bindTexture(BACKGROUND);
-        final int x = (width - xSize) / 2;
-        final int y = (height - ySize) / 2;
-        blit(matrixStack, x, y, 0, 0, xSize, ySize);
+        minecraft.getTextureManager().bind(BACKGROUND);
+        final int x = (width - imageWidth) / 2;
+        final int y = (height - imageHeight) / 2;
+        blit(matrixStack, x, y, 0, 0, imageWidth, imageHeight);
     }
 
     @Override
@@ -109,12 +109,12 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
             final int x = SLOTS_ORIGIN_X + slot * SLOT_SIZE;
             final int y = SLOTS_ORIGIN_Y;
 
-            if (isPointInRegion(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
-                final ItemStack heldItemStack = playerInventory.getItemStack();
+            if (isHovering(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
+                final ItemStack heldItemStack = inventory.getCarried();
                 if (!heldItemStack.isEmpty()) {
                     configureItemAt(getHeldItem(), slot, heldItemStack);
                 } else {
-                    Network.INSTANCE.sendToServer(new MessageRemoveConfiguredModuleItemAt(container.windowId, slot));
+                    Network.INSTANCE.sendToServer(new MessageRemoveConfiguredModuleItemAt(menu.containerId, slot));
                 }
                 return true;
             }
@@ -124,18 +124,18 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     }
 
     @Override
-    protected void handleMouseClick(@Nullable final Slot slot, final int slotId, final int mouseButton, final ClickType type) {
+    protected void slotClicked(@Nullable final Slot slot, final int slotId, final int mouseButton, final ClickType type) {
         if (slot != null) {
             final ItemStack heldItem = getHeldItem();
-            if (slot.getStack() == heldItem) {
+            if (slot.getItem() == heldItem) {
                 return;
             }
-            if (type == ClickType.SWAP && playerInventory.getStackInSlot(mouseButton) == heldItem) {
+            if (type == ClickType.SWAP && inventory.getItem(mouseButton) == heldItem) {
                 return;
             }
         }
 
-        super.handleMouseClick(slot, slotId, mouseButton, type);
+        super.slotClicked(slot, slotId, mouseButton, type);
     }
 
     // --------------------------------------------------------------------- //

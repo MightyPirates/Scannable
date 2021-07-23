@@ -24,13 +24,13 @@ public abstract class AbstractHeldItemStackContainerProvider implements INamedCo
 
     @Override
     public ITextComponent getDisplayName() {
-        return player.getHeldItem(hand).getDisplayName();
+        return player.getItemInHand(hand).getHoverName();
     }
 
     @Nullable
     @Override
     public Container createMenu(final int windowId, final PlayerInventory inventory, final PlayerEntity player) {
-        final LazyOptional<IItemHandler> capability = player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+        final LazyOptional<IItemHandler> capability = player.getItemInHand(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
         final IItemHandler itemHandler = LazyOptionalUtil.orNull(capability);
         return createContainer(windowId, inventory, hand, itemHandler);
     }

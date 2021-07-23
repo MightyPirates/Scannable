@@ -43,6 +43,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.item.Item.Properties;
+
 @ObjectHolder(API.MOD_ID)
 public final class ItemScanner extends AbstractItem {
     @ObjectHolder(Constants.NAME_SCANNER)
@@ -55,7 +57,7 @@ public final class ItemScanner extends AbstractItem {
     // --------------------------------------------------------------------- //
 
     public ItemScanner() {
-        super(new Properties().maxStackSize(1));
+        super(new Properties().stacksTo(1));
     }
 
     // --------------------------------------------------------------------- //
@@ -67,14 +69,14 @@ public final class ItemScanner extends AbstractItem {
     }
 
     @Override
-    public void fillItemGroup(final ItemGroup group, final NonNullList<ItemStack> items) {
-        super.fillItemGroup(group, items);
+    public void fillItemCategory(final ItemGroup group, final NonNullList<ItemStack> items) {
+        super.fillItemCategory(group, items);
 
-        if (!isInGroup(group)) {
+        if (!allowdedIn(group)) {
             return;
         }
 
-        if (group == ItemGroup.SEARCH) {
+        if (group == ItemGroup.TAB_SEARCH) {
             return; // Called before capabilities have been initialized...
         }
 
@@ -89,8 +91,8 @@ public final class ItemScanner extends AbstractItem {
     }
 
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
-        super.addInformation(stack, world, tooltip, flag);
+    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+        super.appendHoverText(stack, world, tooltip, flag);
 
         tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_SCANNER));
 
@@ -133,38 +135,38 @@ public final class ItemScanner extends AbstractItem {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(final World world, final PlayerEntity player, final Hand hand) {
-        final ItemStack stack = player.getHeldItem(hand);
-        if (player.isSneaking()) {
-            if (!world.isRemote) {
+    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+        final ItemStack stack = player.getItemInHand(hand);
+        if (player.isShiftKeyDown()) {
+            if (!world.isClientSide) {
                 final INamedContainerProvider containerProvider = new ScannerContainerProvider(player, hand);
-                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnumValue(hand));
+                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnum(hand));
             }
         } else {
             final List<ItemStack> modules = new ArrayList<>();
             if (!collectModules(stack, modules)) {
-                if (world.isRemote) {
-                    Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
+                if (world.isClientSide) {
+                    Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
                 }
-                player.getCooldownTracker().setCooldown(this, 10);
-                return ActionResult.resultFail(stack);
+                player.getCooldowns().addCooldown(this, 10);
+                return ActionResult.fail(stack);
             }
 
             if (!tryConsumeEnergy(player, stack, modules, true)) {
-                if (world.isRemote) {
-                    Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TranslationTextComponent(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
+                if (world.isClientSide) {
+                    Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
                 }
-                player.getCooldownTracker().setCooldown(this, 10);
-                return ActionResult.resultFail(stack);
+                player.getCooldowns().addCooldown(this, 10);
+                return ActionResult.fail(stack);
             }
 
-            player.setActiveHand(hand);
-            if (world.isRemote) {
+            player.startUsingItem(hand);
+            if (world.isClientSide) {
                 ScanManager.INSTANCE.beginScan(player, modules);
                 SoundManager.INSTANCE.playChargingSound();
             }
         }
-        return ActionResult.resultSuccess(stack);
+        return ActionResult.success(stack);
     }
 
     @Override
@@ -179,27 +181,27 @@ public final class ItemScanner extends AbstractItem {
 
     @Override
     public void onUsingTick(final ItemStack stack, final LivingEntity entity, final int count) {
-        if (entity.getEntityWorld().isRemote) {
+        if (entity.getCommandSenderWorld().isClientSide) {
             ScanManager.INSTANCE.updateScan(entity, false);
         }
     }
 
     @Override
-    public void onPlayerStoppedUsing(final ItemStack stack, final World world, final LivingEntity entity, final int timeLeft) {
-        if (world.isRemote) {
+    public void releaseUsing(final ItemStack stack, final World world, final LivingEntity entity, final int timeLeft) {
+        if (world.isClientSide) {
             ScanManager.INSTANCE.cancelScan();
             SoundManager.INSTANCE.stopChargingSound();
         }
-        super.onPlayerStoppedUsing(stack, world, entity, timeLeft);
+        super.releaseUsing(stack, world, entity, timeLeft);
     }
 
     @Override
-    public ItemStack onItemUseFinish(final ItemStack stack, final World world, final LivingEntity entity) {
+    public ItemStack finishUsingItem(final ItemStack stack, final World world, final LivingEntity entity) {
         if (!(entity instanceof PlayerEntity)) {
             return stack;
         }
 
-        if (world.isRemote) {
+        if (world.isClientSide) {
             SoundCanceler.cancelEquipSound();
         }
 
@@ -209,7 +211,7 @@ public final class ItemScanner extends AbstractItem {
         }
 
         final boolean hasEnergy = tryConsumeEnergy((PlayerEntity) entity, stack, modules, false);
-        if (world.isRemote) {
+        if (world.isClientSide) {
             SoundManager.INSTANCE.stopChargingSound();
 
             if (hasEnergy) {
@@ -221,7 +223,7 @@ public final class ItemScanner extends AbstractItem {
         }
 
         final PlayerEntity player = (PlayerEntity) entity;
-        player.getCooldownTracker().setCooldown(this, 40);
+        player.getCooldowns().addCooldown(this, 40);
 
         return stack;
     }
@@ -297,7 +299,7 @@ public final class ItemScanner extends AbstractItem {
 
         @SubscribeEvent
         public void onPlaySoundAtEntityEvent(final PlaySoundAtEntityEvent event) {
-            if (event.getSound() == SoundEvents.ITEM_ARMOR_EQUIP_GENERIC) {
+            if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
                 event.setCanceled(true);
             }
             MinecraftForge.EVENT_BUS.unregister(this);

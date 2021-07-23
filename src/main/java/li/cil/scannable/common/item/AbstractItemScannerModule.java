@@ -17,7 +17,7 @@ import java.util.List;
 
 public abstract class AbstractItemScannerModule extends AbstractItem {
     AbstractItemScannerModule() {
-        super(new Item.Properties().maxStackSize(1));
+        super(new Item.Properties().stacksTo(1));
     }
 
     // --------------------------------------------------------------------- //
@@ -25,8 +25,8 @@ public abstract class AbstractItemScannerModule extends AbstractItem {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
-        super.addInformation(stack, world, tooltip, flag);
+    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+        super.appendHoverText(stack, world, tooltip, flag);
 
         if (world == null) {
             return; // Presumably from initial search tree population where capabilities have not yet been initialized.

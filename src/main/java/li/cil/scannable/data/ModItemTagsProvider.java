@@ -14,8 +14,8 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
     }
 
     @Override
-    protected void registerTags() {
-        getOrCreateBuilder(ItemTags.MODULES).add(
+    protected void addTags() {
+        tag(ItemTags.MODULES).add(
                 Scannable.MODULE_BLANK.get(),
                 Scannable.MODULE_RANGE.get(),
                 Scannable.MODULE_ENTITY.get(),

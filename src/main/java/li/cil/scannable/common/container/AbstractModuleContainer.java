@@ -20,7 +20,7 @@ public abstract class AbstractModuleContainer extends Container {
 
         this.player = inventory.player;
         this.hand = hand;
-        this.stack = player.getHeldItem(hand);
+        this.stack = player.getItemInHand(hand);
 
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
@@ -49,12 +49,12 @@ public abstract class AbstractModuleContainer extends Container {
     // Container
 
     @Override
-    public boolean canInteractWith(final PlayerEntity player) {
-        return player == this.player && ItemStack.areItemStacksEqual(player.getHeldItem(hand), stack);
+    public boolean stillValid(final PlayerEntity player) {
+        return player == this.player && ItemStack.matches(player.getItemInHand(hand), stack);
     }
 
     @Override
-    public ItemStack transferStackInSlot(final PlayerEntity player, final int index) {
+    public ItemStack quickMoveStack(final PlayerEntity player, final int index) {
         return ItemStack.EMPTY;
     }
 }

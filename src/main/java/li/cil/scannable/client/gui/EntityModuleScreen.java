@@ -42,7 +42,7 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
 
     @Override
     protected ITextComponent getItemName(final EntityType<?> entityType) {
-        return entityType.getName();
+        return entityType.getDescription();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
             if (entityType != null) {
                 final ResourceLocation registryName = entityType.getRegistryName();
                 if (registryName != null) {
-                    Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(container.windowId, slot, registryName.toString()));
+                    Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName.toString()));
                 }
             }
         }
@@ -69,8 +69,8 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
             return;
         }
 
-        entity.setWorld(playerInventory.player.getEntityWorld());
-        final EntitySize bounds = entityType.getSize();
+        entity.setLevel(inventory.player.getCommandSenderWorld());
+        final EntitySize bounds = entityType.getDimensions();
         final float size = Math.max(bounds.width, bounds.height);
         final float scale = 11.0f / size;
 
@@ -81,18 +81,18 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
         matrixStack.translate(0, 0, 1000);
         matrixStack.scale(scale, scale, scale);
         final Quaternion quaternion = Vector3f.ZP.rotationDegrees(180);
-        quaternion.multiply(Vector3f.XN.rotationDegrees(20));
-        quaternion.multiply(Vector3f.YP.rotationDegrees(150));
-        matrixStack.rotate(quaternion);
+        quaternion.mul(Vector3f.XN.rotationDegrees(20));
+        quaternion.mul(Vector3f.YP.rotationDegrees(150));
+        matrixStack.mulPose(quaternion);
 
-        final EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
-        quaternion.conjugate();
-        renderManager.setCameraOrientation(quaternion);
+        final EntityRendererManager renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+        quaternion.conj();
+        renderManager.overrideCameraOrientation(quaternion);
         renderManager.setRenderShadow(false);
 
-        final IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        renderManager.renderEntityStatic(entity, 0, 0, 0, 0, 1, matrixStack, buffer, 0xf000f0);
-        buffer.finish();
+        final IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        renderManager.render(entity, 0, 0, 0, 0, 1, matrixStack, buffer, 0xf000f0);
+        buffer.endBatch();
 
         renderManager.setRenderShadow(true);
 
@@ -101,6 +101,6 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
 
     @Nullable
     private Entity getRenderEntity(final EntityType<?> entityType) {
-        return RENDER_ENTITIES.computeIfAbsent(entityType, t -> t.create(playerInventory.player.getEntityWorld()));
+        return RENDER_ENTITIES.computeIfAbsent(entityType, t -> t.create(inventory.player.getCommandSenderWorld()));
     }
 }

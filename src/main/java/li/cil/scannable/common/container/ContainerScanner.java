@@ -22,8 +22,8 @@ public final class ContainerScanner extends Container {
     }
 
     public static ContainerScanner createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
-        final Hand hand = buffer.readEnumValue(Hand.class);
-        return new ContainerScanner(windowId, inventory, hand, new ItemHandlerScanner(inventory.player.getHeldItem(hand)));
+        final Hand hand = buffer.readEnum(Hand.class);
+        return new ContainerScanner(windowId, inventory, hand, new ItemHandlerScanner(inventory.player.getItemInHand(hand)));
     }
 
     // --------------------------------------------------------------------- //
@@ -33,7 +33,7 @@ public final class ContainerScanner extends Container {
 
         this.player = inventory.player;
         this.hand = hand;
-        this.stack = player.getHeldItem(hand);
+        this.stack = player.getItemInHand(hand);
 
         final IItemHandler activeModules = itemHandler.getActiveModules();
         for (int slot = 0; slot < activeModules.getSlots(); ++slot) {
@@ -64,51 +64,51 @@ public final class ContainerScanner extends Container {
     // Container
 
     @Override
-    public boolean canInteractWith(final PlayerEntity player) {
-        return player == this.player && ItemStack.areItemStacksEqual(player.getHeldItem(hand), stack);
+    public boolean stillValid(final PlayerEntity player) {
+        return player == this.player && ItemStack.matches(player.getItemInHand(hand), stack);
     }
 
     @Override
-    public ItemStack transferStackInSlot(final PlayerEntity player, final int index) {
-        final Slot from = inventorySlots.get(index);
+    public ItemStack quickMoveStack(final PlayerEntity player, final int index) {
+        final Slot from = slots.get(index);
         if (from == null) {
             return ItemStack.EMPTY;
         }
-        final ItemStack stack = from.getStack().copy();
+        final ItemStack stack = from.getItem().copy();
         if (stack.isEmpty()) {
             return ItemStack.EMPTY;
         }
 
-        final boolean intoPlayerInventory = from.inventory != player.inventory;
-        final ItemStack fromStack = from.getStack();
+        final boolean intoPlayerInventory = from.container != player.inventory;
+        final ItemStack fromStack = from.getItem();
 
         final int step, begin;
         if (intoPlayerInventory) {
             step = -1;
-            begin = inventorySlots.size() - 1;
+            begin = slots.size() - 1;
         } else {
             step = 1;
             begin = 0;
         }
 
         if (fromStack.getMaxStackSize() > 1) {
-            for (int i = begin; i >= 0 && i < inventorySlots.size(); i += step) {
-                final Slot into = inventorySlots.get(i);
-                if (into.inventory == from.inventory) {
+            for (int i = begin; i >= 0 && i < slots.size(); i += step) {
+                final Slot into = slots.get(i);
+                if (into.container == from.container) {
                     continue;
                 }
 
-                final ItemStack intoStack = into.getStack();
+                final ItemStack intoStack = into.getItem();
                 if (intoStack.isEmpty()) {
                     continue;
                 }
 
-                final boolean itemsAreEqual = fromStack.isItemEqual(intoStack) && ItemStack.areItemStackTagsEqual(fromStack, intoStack);
+                final boolean itemsAreEqual = fromStack.sameItem(intoStack) && ItemStack.tagMatches(fromStack, intoStack);
                 if (!itemsAreEqual) {
                     continue;
                 }
 
-                final int maxSizeInSlot = Math.min(fromStack.getMaxStackSize(), into.getItemStackLimit(stack));
+                final int maxSizeInSlot = Math.min(fromStack.getMaxStackSize(), into.getMaxStackSize(stack));
                 final int spaceInSlot = maxSizeInSlot - intoStack.getCount();
                 if (spaceInSlot <= 0) {
                     continue;
@@ -119,38 +119,38 @@ public final class ContainerScanner extends Container {
                     continue;
                 }
 
-                intoStack.grow(from.decrStackSize(itemsMoved).getCount());
-                into.onSlotChanged();
+                intoStack.grow(from.remove(itemsMoved).getCount());
+                into.setChanged();
 
-                if (from.getStack().isEmpty()) {
+                if (from.getItem().isEmpty()) {
                     break;
                 }
             }
         }
 
-        for (int i = begin; i >= 0 && i < inventorySlots.size(); i += step) {
-            if (from.getStack().isEmpty()) {
+        for (int i = begin; i >= 0 && i < slots.size(); i += step) {
+            if (from.getItem().isEmpty()) {
                 break;
             }
 
-            final Slot into = inventorySlots.get(i);
-            if (into.inventory == from.inventory) {
+            final Slot into = slots.get(i);
+            if (into.container == from.container) {
                 continue;
             }
 
-            if (into.getHasStack()) {
+            if (into.hasItem()) {
                 continue;
             }
 
-            if (!into.isItemValid(fromStack)) {
+            if (!into.mayPlace(fromStack)) {
                 continue;
             }
 
-            final int maxSizeInSlot = Math.min(fromStack.getMaxStackSize(), into.getItemStackLimit(fromStack));
+            final int maxSizeInSlot = Math.min(fromStack.getMaxStackSize(), into.getMaxStackSize(fromStack));
             final int itemsMoved = Math.min(maxSizeInSlot, fromStack.getCount());
-            into.putStack(from.decrStackSize(itemsMoved));
+            into.set(from.remove(itemsMoved));
         }
 
-        return from.getStack().getCount() < stack.getCount() ? from.getStack() : ItemStack.EMPTY;
+        return from.getItem().getCount() < stack.getCount() ? from.getItem() : ItemStack.EMPTY;
     }
 }

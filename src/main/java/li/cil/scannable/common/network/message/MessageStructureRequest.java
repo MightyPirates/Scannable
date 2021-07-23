@@ -58,7 +58,7 @@ public final class MessageStructureRequest {
                 return;
             }
 
-            final ServerWorld world = server.getWorld(Migration.RegistryKey.getKey(Registry.WORLD_KEY, message.dimension));
+            final ServerWorld world = server.getLevel(Migration.RegistryKey.getKey(Registry.DIMENSION_REGISTRY, message.dimension));
             if (world == null) {
                 return;
             }
@@ -77,7 +77,7 @@ public final class MessageStructureRequest {
                 }
 
                 final BlockPos pos = Migration.World.findNearestStructure(world, structure, center, radius, skipExistingChunks);
-                if (pos != null && center.distanceSq(pos) <= sqRadius) {
+                if (pos != null && center.distSqr(pos) <= sqRadius) {
                     final ITextComponent localizedName = new TranslationTextComponent("structure." + name);
                     structures.add(new ScanResultProviderStructure.StructureLocation(localizedName, pos));
                 }
@@ -97,7 +97,7 @@ public final class MessageStructureRequest {
 
     public void fromBytes(final ByteBuf buf) {
         final PacketBuffer packet = new PacketBuffer(buf);
-        dimension = new ResourceLocation(packet.readString(1024));
+        dimension = new ResourceLocation(packet.readUtf(1024));
         center = packet.readBlockPos();
         radius = packet.readVarInt();
         skipExistingChunks = packet.readBoolean();
@@ -105,7 +105,7 @@ public final class MessageStructureRequest {
 
     public void toBytes(final ByteBuf buf) {
         final PacketBuffer packet = new PacketBuffer(buf);
-        packet.writeString(dimension.toString());
+        packet.writeUtf(dimension.toString());
         packet.writeBlockPos(center);
         packet.writeVarInt(radius);
         packet.writeBoolean(skipExistingChunks);

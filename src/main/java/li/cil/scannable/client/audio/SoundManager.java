@@ -21,18 +21,18 @@ public enum SoundManager {
     private SimpleSound currentChargingSound;
 
     public void playChargingSound() {
-        currentChargingSound = SimpleSound.master(SCANNER_CHARGE, 1);
-        Minecraft.getInstance().getSoundHandler().play(currentChargingSound);
+        currentChargingSound = SimpleSound.forUI(SCANNER_CHARGE, 1);
+        Minecraft.getInstance().getSoundManager().play(currentChargingSound);
     }
 
     public void stopChargingSound() {
         if (currentChargingSound != null) {
-            Minecraft.getInstance().getSoundHandler().stop(currentChargingSound);
+            Minecraft.getInstance().getSoundManager().stop(currentChargingSound);
             currentChargingSound = null;
         }
     }
 
     public void playActivateSound() {
-        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SCANNER_ACTIVATE, 1));
+        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SCANNER_ACTIVATE, 1));
     }
 }

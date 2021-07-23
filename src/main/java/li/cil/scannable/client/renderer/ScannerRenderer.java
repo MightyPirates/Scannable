@@ -64,7 +64,7 @@ public enum ScannerRenderer {
                 createDepthCopyFramebuffer();
             }
 
-            render(matrixStack.getLast().getMatrix(), projectionMatrix);
+            render(matrixStack.last().pose(), projectionMatrix);
         } else {
             if (depthCopyFbo != 0) {
                 deleteDepthCopyFramebuffer();
@@ -76,7 +76,7 @@ public enum ScannerRenderer {
 
     private void render(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
         final Minecraft mc = Minecraft.getInstance();
-        final Framebuffer framebuffer = mc.getFramebuffer();
+        final Framebuffer framebuffer = mc.getMainRenderTarget();
 
         updateDepthTexture(framebuffer);
 
@@ -88,7 +88,7 @@ public enum ScannerRenderer {
         invertedProjectionMatrix.invert();
         ScanEffectShader.INSTANCE.setInverseProjectionMatrix(invertedProjectionMatrix);
 
-        final Vector3d position = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+        final Vector3d position = mc.gameRenderer.getMainCamera().getPosition();
         ScanEffectShader.INSTANCE.setPosition(position);
 
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
@@ -108,30 +108,30 @@ public enum ScannerRenderer {
     }
 
     private void updateDepthTexture(final Framebuffer framebuffer) {
-        GlStateManager.bindFramebuffer(GL30.GL_READ_FRAMEBUFFER, framebuffer.framebufferObject);
-        GlStateManager.bindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, depthCopyFbo);
-        GL30.glBlitFramebuffer(0, 0, framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight,
-                0, 0, framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight,
+        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, framebuffer.frameBufferId);
+        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, depthCopyFbo);
+        GL30.glBlitFramebuffer(0, 0, framebuffer.width, framebuffer.height,
+                0, 0, framebuffer.width, framebuffer.height,
                 GL30.GL_DEPTH_BUFFER_BIT, GL30.GL_NEAREST);
     }
 
     // --------------------------------------------------------------------- //
 
     private void createDepthCopyFramebuffer() {
-        final Framebuffer framebuffer = Minecraft.getInstance().getFramebuffer();
+        final Framebuffer framebuffer = Minecraft.getInstance().getMainRenderTarget();
 
-        depthCopyFbo = GlStateManager.genFramebuffers();
+        depthCopyFbo = GlStateManager.glGenFramebuffers();
 
         // We don't use the color attachment on this FBO, but it's required for a complete FBO.
-        depthCopyColorBuffer = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE);
+        depthCopyColorBuffer = createTexture(framebuffer.width, framebuffer.height, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE);
 
         // Main reason why we create this FBO: readable depth buffer into which we can copy the MC one.
-        depthCopyDepthBuffer = createTexture(framebuffer.framebufferTextureWidth, framebuffer.framebufferTextureHeight, GL30.GL_DEPTH_COMPONENT, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT);
+        depthCopyDepthBuffer = createTexture(framebuffer.width, framebuffer.height, GL30.GL_DEPTH_COMPONENT, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT);
 
-        GlStateManager.bindFramebuffer(FramebufferConstants.GL_FRAMEBUFFER, depthCopyFbo);
-        GlStateManager.framebufferTexture2D(FramebufferConstants.GL_FRAMEBUFFER, FramebufferConstants.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, depthCopyColorBuffer, 0);
-        GlStateManager.framebufferTexture2D(FramebufferConstants.GL_FRAMEBUFFER, FramebufferConstants.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, depthCopyDepthBuffer, 0);
-        GlStateManager.bindFramebuffer(FramebufferConstants.GL_FRAMEBUFFER, 0);
+        GlStateManager._glBindFramebuffer(FramebufferConstants.GL_FRAMEBUFFER, depthCopyFbo);
+        GlStateManager._glFramebufferTexture2D(FramebufferConstants.GL_FRAMEBUFFER, FramebufferConstants.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, depthCopyColorBuffer, 0);
+        GlStateManager._glFramebufferTexture2D(FramebufferConstants.GL_FRAMEBUFFER, FramebufferConstants.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, depthCopyDepthBuffer, 0);
+        GlStateManager._glBindFramebuffer(FramebufferConstants.GL_FRAMEBUFFER, 0);
 
         ScanEffectShader.INSTANCE.setDepthBuffer(depthCopyDepthBuffer);
     }
@@ -139,7 +139,7 @@ public enum ScannerRenderer {
     private void deleteDepthCopyFramebuffer() {
         ScanEffectShader.INSTANCE.setDepthBuffer(0);
 
-        GlStateManager.deleteFramebuffers(depthCopyFbo);
+        GlStateManager._glDeleteFramebuffers(depthCopyFbo);
         depthCopyFbo = 0;
 
         TextureUtil.releaseTextureId(depthCopyColorBuffer);
@@ -151,38 +151,38 @@ public enum ScannerRenderer {
 
     private int createTexture(final int width, final int height, final int internalFormat, final int format, final int type) {
         final int texture = TextureUtil.generateTextureId();
-        GlStateManager.bindTexture(texture);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL14.GL_DEPTH_TEXTURE_MODE, GL11.GL_LUMINANCE);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL14.GL_NONE);
-        GlStateManager.texParameter(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_LEQUAL);
-        GlStateManager.texImage2D(GL11.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null);
-        GlStateManager.bindTexture(0);
+        GlStateManager._bindTexture(texture);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL14.GL_DEPTH_TEXTURE_MODE, GL11.GL_LUMINANCE);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL14.GL_NONE);
+        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_LEQUAL);
+        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null);
+        GlStateManager._bindTexture(0);
         return texture;
     }
 
     private void blit(final Framebuffer framebuffer) {
-        final int width = framebuffer.framebufferTextureWidth;
-        final int height = framebuffer.framebufferTextureHeight;
+        final int width = framebuffer.width;
+        final int height = framebuffer.height;
 
         RenderSystem.depthMask(false);
         RenderSystem.disableDepthTest();
 
         setupMatrices(width, height);
 
-        framebuffer.bindFramebuffer(false);
+        framebuffer.bindWrite(false);
 
         final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder buffer = tessellator.getBuffer();
+        final BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(0, height, 0).tex(0, 0).endVertex();
-        buffer.pos(width, height, 0).tex(1, 0).endVertex();
-        buffer.pos(width, 0, 0).tex(1, 1).endVertex();
-        buffer.pos(0, 0, 0).tex(0, 1).endVertex();
-        tessellator.draw();
+        buffer.vertex(0, height, 0).uv(0, 0).endVertex();
+        buffer.vertex(width, height, 0).uv(1, 0).endVertex();
+        buffer.vertex(width, 0, 0).uv(1, 1).endVertex();
+        buffer.vertex(0, 0, 0).uv(0, 1).endVertex();
+        tessellator.end();
 
         restoreMatrices();
 

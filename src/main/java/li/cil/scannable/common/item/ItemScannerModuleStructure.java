@@ -43,26 +43,26 @@ public final class ItemScannerModuleStructure extends AbstractItemScannerModule 
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
         tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_STRUCTURE));
         if (shouldHideExplored(stack)) {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_STRUCTURE_HIDE_EXPLORED));
         } else {
             tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_STRUCTURE_SHOW_EXPLORED));
         }
-        super.addInformation(stack, world, tooltip, flag);
+        super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(final World world, final PlayerEntity player, final Hand hand) {
-        final ItemStack stack = player.getHeldItem(hand);
+    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+        final ItemStack stack = player.getItemInHand(hand);
 
-        if (!player.isSneaking()) {
-            return ActionResult.resultPass(stack);
+        if (!player.isShiftKeyDown()) {
+            return ActionResult.pass(stack);
         }
 
         setHideExplored(stack, !shouldHideExplored(stack));
 
-        return ActionResult.resultSuccess(stack);
+        return ActionResult.success(stack);
     }
 }

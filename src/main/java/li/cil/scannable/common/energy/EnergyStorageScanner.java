@@ -35,7 +35,7 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
 
         final int energyReceived = super.receiveEnergy(maxReceive, simulate);
         if (!simulate && energyReceived != 0) {
-            container.setTagInfo(TAG_ENERGY, serializeNBT());
+            container.addTagElement(TAG_ENERGY, serializeNBT());
         }
 
         return energyReceived;
@@ -49,7 +49,7 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
 
         final int energyExtracted = super.extractEnergy(maxExtract, simulate);
         if (!simulate && energyExtracted != 0) {
-            container.setTagInfo(TAG_ENERGY, serializeNBT());
+            container.addTagElement(TAG_ENERGY, serializeNBT());
         }
 
         return energyExtracted;
@@ -65,6 +65,6 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
 
     @Override
     public void deserializeNBT(final IntNBT nbt) {
-        energy = nbt.getInt();
+        energy = nbt.getAsInt();
     }
 }
