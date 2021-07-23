@@ -1,1 +1,1 @@
-* Fixed potential server crash.
+* Fixed effect not rendering in some versions.
