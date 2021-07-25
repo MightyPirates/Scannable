@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,8 +74,8 @@ public final class Settings {
 
     public static Set<ResourceLocation> ignoredFluidTags = new HashSet<>();
 
-    public static Set<String> structures = Util.make(new HashSet<>(), c -> {
-        c.addAll(GameData.getStructureMap().keySet());
+    public static Set<ResourceLocation> structures = Util.make(new HashSet<>(), c -> {
+        c.addAll(ForgeRegistries.STRUCTURE_FEATURES.getKeys());
     });
 
     // --------------------------------------------------------------------- //
@@ -164,7 +164,7 @@ public final class Settings {
 
             ignoredFluidTags = deserializeSet(SERVER_INSTANCE.ignoredFluidTags.get(), ResourceLocation::new);
 
-            structures = deserializeSet(SERVER_INSTANCE.structures.get(), s -> s);
+            structures = deserializeSet(SERVER_INSTANCE.structures.get(), ResourceLocation::new);
         }
 
         if (isClientConfig(configEvent.getConfig().getSpec())) {
@@ -344,7 +344,7 @@ public final class Settings {
             structures = builder
                     .comment("The list of structures the structure module scans for.")
                     .worldRestart()
-                    .defineList("structures", serializeSet(Settings.structures, v -> v), o -> GameData.getStructureMap().containsKey(o));
+                    .defineList("structures", serializeSet(Settings.structures, ResourceLocation::toString), Settings::validateResourceLocation);
 
             builder.pop();
         }

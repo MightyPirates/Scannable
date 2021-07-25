@@ -23,7 +23,7 @@ public final class Items {
     public static final RegistryObject<Item> COMMON_ORES_MODULE = ITEMS.register("common_ores_module", () -> new ScannerModuleItem(CommonOresBlockScannerModule.INSTANCE));
     public static final RegistryObject<Item> RARE_ORES_MODULE = ITEMS.register("rare_ores_module", () -> new ScannerModuleItem(RareOresBlockScannerModule.INSTANCE));
     public static final RegistryObject<Item> FLUID_MODULE = ITEMS.register("fluid_module", () -> new ScannerModuleItem(FluidBlockScannerModule.INSTANCE));
-//    public static final RegistryObject<Item> STRUCTURES_MODULE = ITEMS.register("structures_module", StructureScannerModuleItem::new);
+    public static final RegistryObject<Item> STRUCTURES_MODULE = ITEMS.register("structures_module", StructureScannerModuleItem::new);
 
     // --------------------------------------------------------------------- //
 

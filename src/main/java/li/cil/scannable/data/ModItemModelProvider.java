@@ -31,7 +31,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
         registerModule(Items.COMMON_ORES_MODULE.get());
         registerModule(Items.RARE_ORES_MODULE.get());
         registerModule(Items.FLUID_MODULE.get());
-//        registerModule(Items.STRUCTURES_MODULE.get());
+        registerModule(Items.STRUCTURES_MODULE.get());
     }
 
     private ItemModelBuilder begin(final Item item) {

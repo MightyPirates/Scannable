@@ -1,6 +1,5 @@
 package li.cil.scannable.common.network.message;
 
-import com.google.common.collect.BiMap;
 import li.cil.scannable.client.scanning.ScanResultProviderStructure;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.network.Network;
@@ -17,7 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
-import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,18 +60,18 @@ public final class StructureRequestMessage extends AbstractMessage {
             return;
         }
 
-        final BiMap<String, StructureFeature<?>> structureMap = GameData.getStructureMap();
+        final IForgeRegistry<StructureFeature<?>> structureMap = ForgeRegistries.STRUCTURE_FEATURES;
         final List<ScanResultProviderStructure.StructureLocation> structures = new ArrayList<>();
         final float sqRadius = radius * radius;
-        for (final String name : Settings.structures) {
-            final StructureFeature<?> structure = structureMap.get(name);
+        for (final ResourceLocation name : Settings.structures) {
+            final StructureFeature<?> structure = structureMap.getValue(name);
             if (structure == null) {
                 continue;
             }
 
             final BlockPos pos = level.findNearestMapFeature(structure, center, radius, skipExistingChunks);
             if (pos != null && center.distSqr(pos) <= sqRadius) {
-                final Component localizedName = new TranslatableComponent("structure." + name);
+                final Component localizedName = new TranslatableComponent("structure." + name.getNamespace() + "." + name.getPath());
                 structures.add(new ScanResultProviderStructure.StructureLocation(localizedName, pos));
             }
         }
