@@ -1,16 +1,15 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.BlockModuleContainerMenu;
 import li.cil.scannable.common.scanning.ConfigurableBlockScannerModule;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.minecraft.ResourceLocationException;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -40,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ConfigurableBlockScannerModuleItem extends AbstractScannerModuleItem {
+public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String TAG_BLOCKS = "blocks";
@@ -165,14 +164,13 @@ public final class ConfigurableBlockScannerModuleItem extends AbstractScannerMod
     @OnlyIn(Dist.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
-        final List<Block> blocks = getBlocks(stack);
-        if (blocks.size() == 0) {
-            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_BLOCK));
-        } else {
-            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_BLOCK_LIST));
-            blocks.forEach(b -> tooltip.add(new TranslatableComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getName())));
-        }
         super.appendHoverText(stack, level, tooltip, flag);
+
+        final List<Block> blocks = getBlocks(stack);
+        if (!blocks.isEmpty()) {
+            tooltip.add(Strings.TOOLTIP_BLOCKS_LIST_CAPTION);
+            blocks.forEach(b -> tooltip.add(Strings.listItem(b.getName())));
+        }
     }
 
     @Override
@@ -215,16 +213,16 @@ public final class ConfigurableBlockScannerModuleItem extends AbstractScannerMod
         final BlockState state = level.getBlockState(context.getClickedPos());
 
         if (IgnoredBlocks.contains(state)) {
-            if (level.isClientSide()) {
-                Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_BLOCK_BLACKLISTED), Constants.CHAT_LINE_ID);
+            if (!level.isClientSide()) {
+                player.displayClientMessage(Strings.MESSAGE_BLOCK_IGNORED, true);
             }
             player.getCooldowns().addCooldown(this, 10);
             return InteractionResult.sidedSuccess(context.getLevel().isClientSide());
         }
 
         if (!addBlock(stack, state.getBlock())) {
-            if (level.isClientSide() && !ConfigurableBlockScannerModuleItem.isLocked(stack)) {
-                Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
+            if (!level.isClientSide() && !ConfigurableBlockScannerModuleItem.isLocked(stack)) {
+                player.displayClientMessage(Strings.MESSAGE_NO_FREE_SLOTS, true);
             }
         }
 

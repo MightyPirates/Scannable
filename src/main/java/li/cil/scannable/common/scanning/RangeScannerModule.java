@@ -15,7 +15,7 @@ public enum RangeScannerModule implements ScannerModule {
     INSTANCE;
 
     @Override
-    public int getEnergyCost(final Player player, final ItemStack module) {
+    public int getEnergyCost(final ItemStack module) {
         return Settings.energyCostModuleRange;
     }
 

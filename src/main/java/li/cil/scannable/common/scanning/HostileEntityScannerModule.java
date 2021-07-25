@@ -20,7 +20,7 @@ public enum HostileEntityScannerModule implements EntityScannerModule {
     INSTANCE;
 
     @Override
-    public int getEnergyCost(final Player player, final ItemStack module) {
+    public int getEnergyCost(final ItemStack module) {
         return Settings.energyCostModuleMonster;
     }
 

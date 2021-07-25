@@ -1,14 +1,13 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.EntityModuleContainerMenu;
 import li.cil.scannable.common.scanning.ConfigurableEntityScannerModule;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -34,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class ConfigurableEntityScannerModuleItem extends AbstractScannerModuleItem {
+public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem {
     private static final String TAG_ENTITY_DEPRECATED = "entity";
     private static final String TAG_ENTITIES = "entities";
     private static final String TAG_IS_LOCKED = "isLocked";
@@ -162,14 +161,13 @@ public final class ConfigurableEntityScannerModuleItem extends AbstractScannerMo
     @OnlyIn(Dist.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
-        final List<EntityType<?>> entities = getEntityTypes(stack);
-        if (entities.size() == 0) {
-            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_ENTITY));
-        } else {
-            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_ENTITY_LIST));
-            entities.forEach(e -> tooltip.add(new TranslatableComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, e.getDescription())));
-        }
         super.appendHoverText(stack, level, tooltip, flag);
+
+        final List<EntityType<?>> entities = getEntityTypes(stack);
+        if (!entities.isEmpty()) {
+            tooltip.add(Strings.TOOLTIP_ENTITIES_LIST_CAPTION);
+            entities.forEach(e -> tooltip.add(Strings.listItem(e.getDescription())));
+        }
     }
 
     @Override
@@ -203,8 +201,8 @@ public final class ConfigurableEntityScannerModuleItem extends AbstractScannerMo
             player.swing(hand);
             player.getInventory().setChanged();
         } else {
-            if (player.level.isClientSide() && !ConfigurableEntityScannerModuleItem.isLocked(stack)) {
-                Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
+            if (!player.level.isClientSide() && !ConfigurableEntityScannerModuleItem.isLocked(stack)) {
+                player.displayClientMessage(Strings.MESSAGE_NO_FREE_SLOTS, true);
             }
         }
 

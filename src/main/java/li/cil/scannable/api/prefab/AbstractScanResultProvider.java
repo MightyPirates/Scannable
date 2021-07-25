@@ -1,6 +1,5 @@
 package li.cil.scannable.api.prefab;
 
-import com.google.common.base.Strings;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -8,7 +7,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import li.cil.scannable.api.scanning.ScanResultProvider;
-import li.cil.scannable.common.config.Constants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
@@ -16,7 +14,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -88,10 +85,10 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
         poseStack.mulPose(Vector3f.XP.rotationDegrees(pitch));
         poseStack.scale(-scale, -scale, scale);
 
-        if (lookDirDot > 0.999f && label != null && !Strings.isNullOrEmpty(label.getString())) {
+        if (lookDirDot > 0.999f && label != null) {
             final Component text;
             if (displayDistance > 0) {
-                text = new TranslatableComponent(Constants.GUI_OVERLAY_LABEL_DISTANCE, label, Mth.ceil(displayDistance));
+                text = li.cil.scannable.common.config.Strings.withDistance(label, Mth.ceil(displayDistance));
             } else {
                 text = label;
             }

@@ -7,13 +7,13 @@ import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.capabilities.ScannerWrapper;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
-import li.cil.scannable.common.inventory.ItemHandlerScanner;
-import net.minecraft.client.Minecraft;
+import li.cil.scannable.common.energy.ScannerEnergyStorage;
+import li.cil.scannable.common.inventory.ScannerItemHandler;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ScannerItem extends AbstractItem {
+public final class ScannerItem extends ModItem {
     public static boolean isScanner(final ItemStack stack) {
         return stack.getItem() == Items.SCANNER.get();
     }
@@ -65,45 +65,21 @@ public final class ScannerItem extends AbstractItem {
     public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
 
-        if (!allowdedIn(group)) {
-            return;
+        if (allowdedIn(group) && Settings.useEnergy) {
+            final ItemStack stack = new ItemStack(this);
+            ScannerEnergyStorage.of(stack).receiveEnergy(Integer.MAX_VALUE, false);
+            items.add(stack);
         }
-
-        if (group == CreativeModeTab.TAB_SEARCH) {
-            return; // Called before capabilities have been initialized...
-        }
-
-        final ItemStack stack = new ItemStack(this);
-        final LazyOptional<IEnergyStorage> energyStorage = stack.getCapability(CapabilityEnergy.ENERGY);
-        if (!energyStorage.isPresent()) {
-            return;
-        }
-
-        energyStorage.ifPresent(storage -> storage.receiveEnergy(storage.getMaxEnergyStored(), false));
-        items.add(stack);
     }
 
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
 
-        tooltip.add(new TranslatableComponent(Constants.TOOLTIP_SCANNER));
-
-        if (level == null) {
-            return; // Presumably from initial search tree population where capabilities have not yet been initialized.
+        if (Settings.useEnergy) {
+            final ScannerEnergyStorage energyStorage = ScannerEnergyStorage.of(stack);
+            tooltip.add(Strings.energyStorage(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored()));
         }
-
-        if (!Settings.useEnergy) {
-            return;
-        }
-
-        final LazyOptional<IEnergyStorage> energyStorage = stack.getCapability(CapabilityEnergy.ENERGY);
-        if (!energyStorage.isPresent()) {
-            return;
-        }
-
-        energyStorage.ifPresent(storage -> tooltip.add(
-                new TranslatableComponent(Constants.TOOLTIP_SCANNER_ENERGY, storage.getEnergyStored(), storage.getMaxEnergyStored())));
     }
 
     @Override
@@ -117,13 +93,9 @@ public final class ScannerItem extends AbstractItem {
             return 0;
         }
 
-        final LazyOptional<IEnergyStorage> energyStorage = stack.getCapability(CapabilityEnergy.ENERGY);
-        if (energyStorage.isPresent()) { // NB: map() has a breaking API change 1.16.3.
-            final IEnergyStorage storage = energyStorage.orElseThrow(AssertionError::new);
-            return 1 - storage.getEnergyStored() / (float) storage.getMaxEnergyStored();
-        } else {
-            return 1.0f;
-        }
+        return stack.getCapability(CapabilityEnergy.ENERGY)
+                .map(storage -> 1f - storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
+                .orElse(1f);
     }
 
     @Override
@@ -132,7 +104,7 @@ public final class ScannerItem extends AbstractItem {
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
                 stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(itemHandler -> {
-                    if (itemHandler instanceof ItemHandlerScanner scannerItemHandler) {
+                    if (itemHandler instanceof ScannerItemHandler scannerItemHandler) {
                         NetworkHooks.openGui(serverPlayer, new MenuProvider() {
                             @Override
                             public Component getDisplayName() {
@@ -150,16 +122,16 @@ public final class ScannerItem extends AbstractItem {
         } else {
             final List<ItemStack> modules = new ArrayList<>();
             if (!collectModules(stack, modules)) {
-                if (level.isClientSide()) {
-                    Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
+                if (!level.isClientSide()) {
+                    player.displayClientMessage(Strings.MESSAGE_NO_SCAN_MODULES, true);
                 }
                 player.getCooldowns().addCooldown(this, 10);
                 return InteractionResultHolder.fail(stack);
             }
 
             if (!tryConsumeEnergy(player, stack, modules, true)) {
-                if (level.isClientSide()) {
-                    Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
+                if (!level.isClientSide()) {
+                    player.displayClientMessage(Strings.MESSAGE_NOT_ENOUGH_ENERGY, true);
                 }
                 player.getCooldowns().addCooldown(this, 10);
                 return InteractionResultHolder.fail(stack);
@@ -235,9 +207,13 @@ public final class ScannerItem extends AbstractItem {
 
     // --------------------------------------------------------------------- //
 
-    static int getModuleEnergyCost(final Player player, final ItemStack stack) {
-        final LazyOptional<ScannerModule> module = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
-        return module.map(p -> p.getEnergyCost(player, stack)).orElse(0);
+    static int getModuleEnergyCost(final ItemStack stack) {
+        if (!Settings.useEnergy || Capabilities.SCANNER_MODULE_CAPABILITY == null) {
+            return 0;
+        }
+
+        return stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
+                .map(module -> module.getEnergyCost(stack)).orElse(0);
     }
 
     private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
@@ -256,7 +232,7 @@ public final class ScannerItem extends AbstractItem {
 
         int totalCostAccumulator = 0;
         for (final ItemStack module : modules) {
-            totalCostAccumulator += getModuleEnergyCost(player, module);
+            totalCostAccumulator += getModuleEnergyCost(module);
         }
         final int totalCost = totalCostAccumulator;
 
@@ -269,27 +245,24 @@ public final class ScannerItem extends AbstractItem {
     }
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {
-        final LazyOptional<IItemHandler> itemHandler = scanner.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-        return itemHandler
-                .filter(handler -> handler instanceof ItemHandlerScanner)
-                .map(handler -> {
-                    final IItemHandler activeModules = ((ItemHandlerScanner) handler).getActiveModules();
-                    boolean hasScannerModules = false;
-                    for (int slot = 0; slot < activeModules.getSlots(); slot++) {
-                        final ItemStack module = activeModules.getStackInSlot(slot);
-                        if (module.isEmpty()) {
-                            continue;
-                        }
-
-                        modules.add(module);
-
-                        final LazyOptional<ScannerModule> capability = module.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
-                        hasScannerModules |= capability.map(ScannerModule::hasResultProvider).orElse(false);
+        return scanner.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(itemHandler -> {
+            boolean hasScannerModules = false;
+            if (itemHandler instanceof ScannerItemHandler scannerItemHandler) {
+                final IItemHandler activeModules = scannerItemHandler.getActiveModules();
+                for (int slot = 0; slot < activeModules.getSlots(); slot++) {
+                    final ItemStack module = activeModules.getStackInSlot(slot);
+                    if (module.isEmpty()) {
+                        continue;
                     }
 
-                    return hasScannerModules;
-                })
-                .orElse(false);
+                    modules.add(module);
+
+                    hasScannerModules |= module.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
+                            .map(ScannerModule::hasResultProvider).orElse(false);
+                }
+            }
+            return hasScannerModules;
+        }).orElse(false);
     }
 
     // --------------------------------------------------------------------- //

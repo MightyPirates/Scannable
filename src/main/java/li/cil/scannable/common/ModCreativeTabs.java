@@ -6,7 +6,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
 public final class ModCreativeTabs {
-    public static final CreativeModeTab COMMON = new CreativeModeTab(API.MOD_ID) {
+    public static final CreativeModeTab COMMON = new CreativeModeTab(API.MOD_ID + ".common") {
         @Override
         public ItemStack makeIcon() {
             return new ItemStack(Items.SCANNER.get());

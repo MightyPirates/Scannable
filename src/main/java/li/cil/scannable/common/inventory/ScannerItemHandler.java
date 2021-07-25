@@ -3,7 +3,7 @@ package li.cil.scannable.common.inventory;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.AbstractScannerModuleItem;
+import li.cil.scannable.common.item.ScannerModuleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -16,12 +16,12 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ItemHandlerScanner extends ItemStackHandler {
+public final class ScannerItemHandler extends ItemStackHandler {
     private static final String TAG_ITEMS = "items";
 
     private final ItemStack container;
 
-    public ItemHandlerScanner(final ItemStack container) {
+    public ScannerItemHandler(final ItemStack container) {
         super(Constants.SCANNER_TOTAL_MODULE_COUNT);
         this.container = container;
     }
@@ -59,7 +59,7 @@ public final class ItemHandlerScanner extends ItemStackHandler {
         }
 
         // All built-in modules, including those without capability such as the range module.
-        if (stack.getItem() instanceof AbstractScannerModuleItem) {
+        if (stack.getItem() instanceof ScannerModuleItem) {
             return 64;
         }
 

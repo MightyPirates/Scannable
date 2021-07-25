@@ -1,8 +1,8 @@
 package li.cil.scannable.common.capabilities;
 
 import li.cil.scannable.common.config.Settings;
-import li.cil.scannable.common.energy.EnergyStorageScanner;
-import li.cil.scannable.common.inventory.ItemHandlerScanner;
+import li.cil.scannable.common.energy.ScannerEnergyStorage;
+import li.cil.scannable.common.inventory.ScannerItemHandler;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
@@ -17,8 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public final class ScannerWrapper implements ICapabilityProvider {
-    private final ItemHandlerScanner itemHandler;
-    private final EnergyStorageScanner energyStorage;
+    private final ScannerItemHandler itemHandler;
+    private final ScannerEnergyStorage energyStorage;
 
     private final LazyOptional<IItemHandler> itemHandlerHolder;
     private final LazyOptional<IEnergyStorage> energyStorageHolder;
@@ -26,8 +26,8 @@ public final class ScannerWrapper implements ICapabilityProvider {
     // --------------------------------------------------------------------- //
 
     public ScannerWrapper(final ItemStack container) {
-        itemHandler = new ItemHandlerScanner(container);
-        energyStorage = new EnergyStorageScanner(container);
+        itemHandler = new ScannerItemHandler(container);
+        energyStorage = new ScannerEnergyStorage(container);
 
         itemHandlerHolder = LazyOptional.of(() -> {
             itemHandler.updateFromNBT();

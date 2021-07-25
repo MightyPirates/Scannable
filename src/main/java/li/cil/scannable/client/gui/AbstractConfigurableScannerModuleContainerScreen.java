@@ -9,7 +9,6 @@ import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.RemoveConfiguredModuleItemAtMessage;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,20 +19,20 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class AbstractConfigurableModuleScreen<TContainer extends AbstractModuleContainerMenu, TItem> extends AbstractContainerScreen<TContainer> {
+public abstract class AbstractConfigurableScannerModuleContainerScreen<TContainer extends AbstractModuleContainerMenu, TItem> extends AbstractContainerScreen<TContainer> {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/module_configurable.png");
     public static final int SLOTS_ORIGIN_X = 62;
     public static final int SLOTS_ORIGIN_Y = 20;
     public static final int SLOT_SIZE = 18;
 
-    private final String listCaptionTranslationKey;
+    private final Component listCaption;
     private final Inventory inventory;
 
     // --------------------------------------------------------------------- //
 
-    public AbstractConfigurableModuleScreen(final TContainer container, final Inventory inventory, final Component title, final String listCaptionTranslationKey) {
+    public AbstractConfigurableScannerModuleContainerScreen(final TContainer container, final Inventory inventory, final Component title, final Component listCaption) {
         super(container, inventory, title);
-        this.listCaptionTranslationKey = listCaptionTranslationKey;
+        this.listCaption = listCaption;
         this.inventory = inventory;
 
         imageHeight = 133;
@@ -79,7 +78,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     @Override
     protected void renderLabels(final PoseStack poseStack, final int mouseX, final int mouseY) {
         super.renderLabels(poseStack, mouseX, mouseY);
-        font.draw(poseStack, I18n.get(listCaptionTranslationKey), 8, 23, 0x404040);
+        font.draw(poseStack, listCaption, 8, 23, 0x404040);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);

@@ -3,7 +3,7 @@ package li.cil.scannable.client.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.EntityModuleContainerMenu;
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
 import li.cil.scannable.common.network.Network;
@@ -25,11 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityModuleContainerMenu, EntityType<?>> {
+public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConfigurableScannerModuleContainerScreen<EntityModuleContainerMenu, EntityType<?>> {
     private static final Map<EntityType<?>, Entity> RENDER_ENTITIES = new HashMap<>();
 
-    public EntityModuleScreen(final EntityModuleContainerMenu container, final Inventory inventory, final Component title) {
-        super(container, inventory, title, Constants.GUI_MODULE_ENTITY_LIST);
+    public ConfigurableEntityScannerModuleContainerScreen(final EntityModuleContainerMenu container, final Inventory inventory, final Component title) {
+        super(container, inventory, title, Strings.GUI_ENTITIES_LIST_CAPTION);
     }
 
     // --------------------------------------------------------------------- //

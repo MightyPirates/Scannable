@@ -1,6 +1,6 @@
 package li.cil.scannable.client.gui;
 
-import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.BlockModuleContainerMenu;
 import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
 import li.cil.scannable.common.network.Network;
@@ -14,9 +14,9 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
-public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockModuleContainerMenu, Block> {
-    public BlockModuleScreen(final BlockModuleContainerMenu container, final Inventory inventory, final Component title) {
-        super(container, inventory, title, Constants.GUI_MODULE_BLOCK_LIST);
+public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfigurableScannerModuleContainerScreen<BlockModuleContainerMenu, Block> {
+    public ConfigurableBlockScannerModuleContainerScreen(final BlockModuleContainerMenu container, final Inventory inventory, final Component title) {
+        super(container, inventory, title, Strings.GUI_BLOCKS_LIST_CAPTION);
     }
 
     // --------------------------------------------------------------------- //

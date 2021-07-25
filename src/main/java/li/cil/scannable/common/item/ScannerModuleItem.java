@@ -2,11 +2,12 @@ package li.cil.scannable.common.item;
 
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.capabilities.ScannerModuleWrapper;
-import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
-import net.minecraft.client.Minecraft;
+import li.cil.scannable.common.config.Strings;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,12 +20,12 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class AbstractScannerModuleItem extends AbstractItem {
+public class ScannerModuleItem extends ModItem {
     private final ICapabilityProvider capabilityProvider;
 
     // --------------------------------------------------------------------- //
 
-    AbstractScannerModuleItem(final ScannerModule module) {
+    ScannerModuleItem(final ScannerModule module) {
         super(new Item.Properties().stacksTo(1));
         this.capabilityProvider = new ScannerModuleWrapper(module);
     }
@@ -45,28 +46,9 @@ public abstract class AbstractScannerModuleItem extends AbstractItem {
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
 
-        if (level == null) {
-            return; // Presumably from initial search tree population where capabilities have not yet been initialized.
+        final int cost = ScannerItem.getModuleEnergyCost(stack);
+        if (cost > 0) {
+            tooltip.add(Strings.energyUsage(cost));
         }
-
-        if (!Settings.useEnergy) {
-            return;
-        }
-
-        if (stack.isEmpty()) {
-            return;
-        }
-
-        final Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
-            return;
-        }
-
-        final int cost = ScannerItem.getModuleEnergyCost(mc.player, stack);
-        if (cost <= 0) {
-            return;
-        }
-
-        tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_ENERGY_COST, cost));
     }
 }

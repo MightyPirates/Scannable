@@ -6,11 +6,11 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.config.Constants;
+import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -131,7 +131,7 @@ public final class OverlayRenderer {
 
         tesselator.end();
 
-        final TranslatableComponent label = new TranslatableComponent(Constants.GUI_SCANNER_PROGRESS, Mth.floor(progress * 100));
+        final Component label = Strings.progress(Mth.floor(progress * 100));
         mc.font.drawShadow(event.getMatrixStack(), label, right + 12, midY - mc.font.lineHeight * 0.5f, 0xCCAACCEE);
     }
 }

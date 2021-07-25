@@ -208,67 +208,56 @@ public final class Settings {
             builder.push("energy");
 
             useEnergy = builder
-                    .translation(Constants.CONFIG_USE_ENERGY)
                     .comment("Whether to consume energy when performing a scan. Will make the scanner a chargeable item.")
                     .worldRestart()
                     .define("useEnergy", Settings.useEnergy);
 
             energyCapacityScanner = builder
-                    .translation(Constants.CONFIG_ENERGY_CAPACITY_SCANNER)
                     .comment("Amount of energy that can be stored in a scanner.")
                     .worldRestart()
                     .defineInRange("energyCapacityScanner", Settings.energyCapacityScanner, 0, Integer.MAX_VALUE);
 
             energyCostModuleRange = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_RANGE)
                     .comment("Amount of energy used by the range module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleRange", Settings.energyCostModuleRange, 0, Integer.MAX_VALUE);
 
             energyCostModuleAnimal = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_ANIMAL)
                     .comment("Amount of energy used by the animal module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleAnimal", Settings.energyCostModuleAnimal, 0, Integer.MAX_VALUE);
 
             energyCostModuleMonster = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_MONSTER)
                     .comment("Amount of energy used by the monster module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleMonster", Settings.energyCostModuleMonster, 0, Integer.MAX_VALUE);
 
             energyCostModuleOreCommon = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_ORE_COMMON)
                     .comment("Amount of energy used by the common ore module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleOreCommon", Settings.energyCostModuleOreCommon, 0, Integer.MAX_VALUE);
 
             energyCostModuleOreRare = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_ORE_RARE)
                     .comment("Amount of energy used by the rare ore module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleOreRare", Settings.energyCostModuleOreRare, 0, Integer.MAX_VALUE);
 
             energyCostModuleBlock = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_BLOCK)
                     .comment("Amount of energy used by the block module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleBlock", Settings.energyCostModuleBlock, 0, Integer.MAX_VALUE);
 
             energyCostModuleStructure = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_STRUCTURE)
                     .comment("Amount of energy used by the structure module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleStructure", Settings.energyCostModuleStructure, 0, Integer.MAX_VALUE);
 
             energyCostModuleFluid = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_FLUID)
                     .comment("Amount of energy used by the fluid module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleFluid", Settings.energyCostModuleFluid, 0, Integer.MAX_VALUE);
 
             energyCostModuleEntity = builder
-                    .translation(Constants.CONFIG_ENERGY_MODULE_ENTITY)
                     .comment("Amount of energy used by the entity module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleEntity", Settings.energyCostModuleEntity, 0, Integer.MAX_VALUE);
@@ -278,7 +267,6 @@ public final class Settings {
             builder.push("general");
 
             baseScanRadius = builder
-                    .translation(Constants.CONFIG_BASE_SCAN_RADIUS)
                     .comment("The basic scan radius without range modules. Higher values mean more computational\n" +
                              "overhead and thus potentially worse performance while scanning.\n" +
                              "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
@@ -289,7 +277,6 @@ public final class Settings {
                     .defineInRange("baseScanRadius", Settings.baseScanRadius, 16, 128);
 
             scanStayDuration = builder
-                    .translation(Constants.CONFIG_SCAN_STAY_DURATION)
                     .comment("How long the results from a scan should remain visible, in milliseconds.")
                     .worldRestart()
                     .defineInRange("scanStayDuration", Settings.scanStayDuration, 1000, 60000 * 5);
@@ -299,7 +286,6 @@ public final class Settings {
             builder.push("blocks");
 
             ignoredBlocks = builder
-                    .translation(Constants.CONFIG_IGNORED_BLOCKS)
                     .comment("""
                             Registry names of blocks that should be ignored.
                             Blocks in this list will be excluded from the default ore list based on the forge:ores
@@ -308,7 +294,6 @@ public final class Settings {
                     .defineList("ignoredBlocks", serializeSet(Settings.ignoredBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             ignoredBlockTags = builder
-                    .translation(Constants.CONFIG_IGNORED_BLOCK_TAGS)
                     .comment("""
                             Tag names of block tags that should be ignored.
                             Blocks matching a tag in this list will be excluded from the default ore list based on the
@@ -321,25 +306,21 @@ public final class Settings {
             builder.push("ores");
 
             commonOreBlocks = builder
-                    .translation(Constants.CONFIG_ORE_COMMON_BLOCKS)
                     .comment("Registry names of blocks considered 'common ores', requiring the common ore scanner module.")
                     .worldRestart()
                     .defineList("commonOreBlocks", serializeSet(Settings.commonOreBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             commonOreBlockTags = builder
-                    .translation(Constants.CONFIG_ORE_COMMON_BLOCK_TAGS)
                     .comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
                     .worldRestart()
                     .defineList("commonOreBlockTags", serializeSet(Settings.commonOreBlockTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
             rareOreBlocks = builder
-                    .translation(Constants.CONFIG_ORE_RARE_BLOCKS)
                     .comment("Registry names of blocks considered 'rare ores', requiring the common ore scanner module.")
                     .worldRestart()
                     .defineList("rareOreBlocks", serializeSet(Settings.rareOreBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             rareOreBlockTags = builder
-                    .translation(Constants.CONFIG_ORE_RARE_BLOCK_TAGS)
                     .comment("""
                             Block tags of blocks considered 'rare ores', requiring the common ore scanner module.
                             Any block with the forge:ores tag is implicitly in this list, unless the block also
@@ -352,7 +333,6 @@ public final class Settings {
             builder.push("fluids");
 
             ignoredFluidTags = builder
-                    .translation(Constants.CONFIG_IGNORED_FLUID_TAGS)
                     .comment("Fluid tags of fluids that should be ignored.")
                     .worldRestart()
                     .defineList("ignoredFluidTags", serializeSet(Settings.ignoredFluidTags, ResourceLocation::toString), Settings::validateResourceLocation);
@@ -362,7 +342,6 @@ public final class Settings {
             builder.push("structures");
 
             structures = builder
-                    .translation(Constants.CONFIG_STRUCTURES)
                     .comment("The list of structures the structure module scans for.")
                     .worldRestart()
                     .defineList("structures", serializeSet(Settings.structures, v -> v), o -> GameData.getStructureMap().containsKey(o));
@@ -379,7 +358,6 @@ public final class Settings {
 
         public ClientSettings(final ForgeConfigSpec.Builder builder) {
             blockColors = builder
-                    .translation(Constants.CONFIG_BLOCK_COLORS)
                     .comment("""
                             The colors for blocks used when rendering their result bounding box
                             by block name. Each entry must be a key-value pair separated by a `=`,
@@ -389,7 +367,6 @@ public final class Settings {
                     .defineList("blockColors", serializeMap(Settings.blockColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
             blockTagColors = builder
-                    .translation(Constants.CONFIG_BLOCK_TAG_COLORS)
                     .comment("The colors for blocks used when rendering their result bounding box\n" +
                              "by block tag. See `blockColors` for format entries have to be in.")
                     .worldRestart()
@@ -397,14 +374,12 @@ public final class Settings {
                             Settings::validateResourceLocationMapEntry);
 
             fluidColors = builder
-                    .translation(Constants.CONFIG_FLUID_COLORS)
                     .comment("The colors for fluids used when rendering their result bounding box\n" +
                              "by fluid name. See `blockColors` for format entries have to be in.")
                     .worldRestart()
                     .defineList("fluidColors", serializeMap(Settings.fluidColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
             fluidTagColors = builder
-                    .translation(Constants.CONFIG_FLUID_TAG_COLORS)
                     .comment("The colors for fluids used when rendering their result bounding box\n" +
                              "by fluid tag. See `blockColors` for format entries have to be in.")
                     .worldRestart()

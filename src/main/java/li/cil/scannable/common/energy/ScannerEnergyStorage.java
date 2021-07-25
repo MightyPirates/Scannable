@@ -5,12 +5,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.EnergyStorage;
 
-public final class EnergyStorageScanner extends EnergyStorage {
+public final class ScannerEnergyStorage extends EnergyStorage {
     private static final String TAG_ENERGY = "energy";
 
     private final ItemStack container;
 
-    public EnergyStorageScanner(final ItemStack container) {
+    public static ScannerEnergyStorage of(final ItemStack stack) {
+        final ScannerEnergyStorage energyStorage = new ScannerEnergyStorage(stack);
+        energyStorage.updateFromNBT();
+        return energyStorage;
+    }
+
+    public ScannerEnergyStorage(final ItemStack container) {
         super(Settings.energyCapacityScanner);
         this.container = container;
     }

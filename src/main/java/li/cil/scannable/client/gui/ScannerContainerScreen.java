@@ -3,7 +3,6 @@ package li.cil.scannable.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -16,16 +15,16 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 
-public class GuiScanner extends AbstractContainerScreen<ScannerContainerMenu> {
+public class ScannerContainerScreen extends AbstractContainerScreen<ScannerContainerMenu> {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/scanner.png");
-    private static final TranslatableComponent SCANNER_MODULES_TEXT = new TranslatableComponent(Constants.GUI_SCANNER_MODULES);
-    private static final TranslatableComponent SCANNER_MODULES_TOOLTIP = new TranslatableComponent(Constants.GUI_SCANNER_MODULES_TOOLTIP);
-    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TEXT = new TranslatableComponent(Constants.GUI_SCANNER_MODULES_INACTIVE);
-    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TOOLTIP = new TranslatableComponent(Constants.GUI_SCANNER_MODULES_INACTIVE_TOOLTIP);
+    private static final TranslatableComponent SCANNER_MODULES_TEXT = new TranslatableComponent("gui.scannable.scanner.active_modules");
+    private static final TranslatableComponent SCANNER_MODULES_TOOLTIP = new TranslatableComponent("gui.scannable.scanner.active_modules.desc");
+    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TEXT = new TranslatableComponent("gui.scannable.scanner.inactive_modules");
+    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TOOLTIP = new TranslatableComponent("gui.scannable.scanner.inactive_modules.desc");
 
     // --------------------------------------------------------------------- //
 
-    public GuiScanner(final ScannerContainerMenu container, final Inventory inventory, final Component title) {
+    public ScannerContainerScreen(final ScannerContainerMenu container, final Inventory inventory, final Component title) {
         super(container, inventory, title);
         imageHeight = 159;
         passEvents = false;

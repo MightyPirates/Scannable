@@ -1,6 +1,5 @@
 package li.cil.scannable.api.scanning;
 
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -14,7 +13,7 @@ import javax.annotation.Nullable;
  * scanner. Once installed, it will be queried when the scanner is used.
  * <p>
  * Note that all of the scanning behavior is <em>client side only</em>. Only the
- * methods for energy cost ({@link #getEnergyCost(Player, ItemStack)} and
+ * methods for energy cost ({@link #getEnergyCost(ItemStack)} and
  * for checking whether this module can be used on its own ({@link #hasResultProvider()})
  * will be called on the server.
  * <p>
@@ -33,11 +32,10 @@ public interface ScannerModule {
      * built-in animal provider requires 25 energy whereas the rare ore scanner
      * requires 100.
      *
-     * @param player the player that is scanning.
      * @param module the module to get the energy cost for.
      * @return the energy cost contributed by this provider.
      */
-    int getEnergyCost(final Player player, final ItemStack module);
+    int getEnergyCost(final ItemStack module);
 
     /**
      * Whether this module has a result provider, i.e. can be used to perform scans

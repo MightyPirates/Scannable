@@ -31,7 +31,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
     private Predicate<BlockState> filter;
 
     @Override
-    public int getEnergyCost(final Player player, final ItemStack module) {
+    public int getEnergyCost(final ItemStack module) {
         return Settings.energyCostModuleFluid;
     }
 
