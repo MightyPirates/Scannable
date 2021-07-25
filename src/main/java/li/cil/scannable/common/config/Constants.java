@@ -8,8 +8,6 @@ public final class Constants {
     public static final float ORE_MODULE_RADIUS_MULTIPLIER = 0.25f;
     // By how much to scale the base scan range when scanning for specific blocks.
     public static final float BLOCK_MODULE_RADIUS_MULTIPLIER = 0.5f;
-    // By how much to scale the base scan range when scanning for structures.
-    public static final float STRUCTURE_MODULE_RADIUS_MULTIPLIER = 2.0f;
 
     // Number of slots we have in configurable modules (block and entity modules).
     public static final int CONFIGURABLE_MODULE_SLOTS = 5;

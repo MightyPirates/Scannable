@@ -13,8 +13,6 @@ public final class Strings {
 
     public static final Component TOOLTIP_BLOCKS_LIST_CAPTION = new TranslatableComponent("item.scannable.block_module.list").withStyle(GRAY);
     public static final Component TOOLTIP_ENTITIES_LIST_CAPTION = new TranslatableComponent("item.scannable.entity_module.list").withStyle(GRAY);
-    public static final Component TOOLTIP_SHOW_EXPLORED = new TranslatableComponent("item.scannable.structures_module.show_explored");
-    public static final Component TOOLTIP_HIDE_EXPLORED = new TranslatableComponent("item.scannable.structures_module.hide_explored");
 
     public static final Component GUI_BLOCKS_LIST_CAPTION = new TranslatableComponent("gui.scannable.block_module.list");
     public static final Component GUI_ENTITIES_LIST_CAPTION = new TranslatableComponent("gui.scannable.entity_module.list");

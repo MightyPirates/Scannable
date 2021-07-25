@@ -19,8 +19,6 @@ public final class ScanResultProviders {
             API.SCAN_RESULT_PROVIDER_BLOCKS.getPath(), ScanResultProviderBlock::new);
     public static final RegistryObject<ScanResultProviderEntity> ENTITIES = DEFERRED_REGISTER.register(
             API.SCAN_RESULT_PROVIDER_ENTITIES.getPath(), ScanResultProviderEntity::new);
-    public static final RegistryObject<ScanResultProviderStructure> STRUCTURES = DEFERRED_REGISTER.register(
-            "structures", ScanResultProviderStructure::new);
 
     // --------------------------------------------------------------------- //
 

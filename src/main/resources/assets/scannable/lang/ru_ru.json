@@ -18,10 +18,6 @@
   "item.scannable.block_module": "Модуль Сканера: Блок",
   "item.scannable.block_module.desc": "Используйте на блоке для настройки модуля.",
   "item.scannable.block_module.list": "Выбранный Блок:",
-  "item.scannable.structures_module": "Модуль Сканера: Структур",
-  "item.scannable.structures_module.desc": "Определяет ближайшие структуры в округе.",
-  "item.scannable.structures_module.show_explored": "§aВключая§f посещённые структуры.",
-  "item.scannable.structures_module.hide_explored": "§cИсключая§f посещённые структуры.",
   "item.scannable.fluid_module": "Модуль Сканера: Жидкости",
   "item.scannable.fluid_module.desc": "Определяет жидкости (к примеру: вода, лава).",
   "item.scannable.entity_module": "Модуль Сканера: Живые Сущности",
@@ -39,21 +35,5 @@
 
   "message.scannable.no_scan_modules": "Модуль сканирования не установлен.",
   "message.scannable.not_enough_energy": "Недостаточно энергии.",
-  "message.scannable.block_ignored": "Блок запрещён для сканирования.",
-
-  "structure.pillager_outpost": "Аванпост Разбойников",
-  "structure.mineshaft": "Заброшенная Шахта",
-  "structure.mansion": "Особняк",
-  "structure.jungle_pyramid": "Храм В Джунглях",
-  "structure.desert_pyramid": "Храм В Пустыне",
-  "structure.igloo": "Иглу",
-  "structure.shipwreck": "Обломки Корабля",
-  "structure.swamp_hut": "Хижина Ведьмы",
-  "structure.stronghold": "Крепость",
-  "structure.monument": "Подводная Крепость",
-  "structure.ocean_ruin": "Подводные Руины",
-  "structure.fortress": "Адская Крепость",
-  "structure.endcity": "Город Края",
-  "structure.buried_treasure": "Зарытое Сокровище",
-  "structure.village": "Деревня"
+  "message.scannable.block_ignored": "Блок запрещён для сканирования."
 }

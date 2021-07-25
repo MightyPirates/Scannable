@@ -18,10 +18,6 @@
   "item.scannable.block_module": "Scannermodul: Block",
   "item.scannable.block_module.desc": "Wende das Modul auf einen Block an um es zu konfigurieren.",
   "item.scannable.block_module.list": "Gesuchte Blöcke:",
-  "item.scannable.structures_module": "Scannermodul: Strukturen",
-  "item.scannable.structures_module.desc": "Entdeckt Strukturen in der näheren Umgebung.",
-  "item.scannable.structures_module.show_explored": "§aInklusive§f entdeckter Strukturen.",
-  "item.scannable.structures_module.hide_explored": "§cExklusive§f entdeckter Strukturen.",
   "item.scannable.fluid_module": "Scannermodul: Flüssigkeiten",
   "item.scannable.fluid_module.desc": "Entdeckt Flüssigkeiten (z.B. Wasser, Lava).",
   "item.scannable.entity_module": "Scannermodul: Lebewesen",
@@ -42,21 +38,5 @@
   "message.scannable.no_scan_modules": "Kein scannendes Modul installiert.",
   "message.scannable.not_enough_energy": "Nicht genug Energie.",
   "message.scannable.block_ignored": "Für diesen Block nicht erlaubt.",
-  "message.scannable.no_free_slots": "Keine freien slots.",
-
-  "structure.pillager_outpost": "Plünderer-Außenposten",
-  "structure.mineshaft": "Mine",
-  "structure.mansion": "Waldanwesen",
-  "structure.jungle_pyramid": "Dschungeltempel",
-  "structure.desert_pyramid": "Wüstentempel",
-  "structure.igloo": "Iglu",
-  "structure.shipwreck": "Schiffswrack",
-  "structure.swamp_hut": "Sumpfhütte",
-  "structure.stronghold": "Festung",
-  "structure.monument": "Ozeanmonument",
-  "structure.ocean_ruin": "Ozeanruine",
-  "structure.fortress": "Netherfestung",
-  "structure.endcity": "Endsiedlung",
-  "structure.buried_treasure": "Vergrabener Schatz",
-  "structure.village": "Dorf"
+  "message.scannable.no_free_slots": "Keine freien slots."
 }

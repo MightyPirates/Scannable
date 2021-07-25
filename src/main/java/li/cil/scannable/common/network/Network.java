@@ -1,7 +1,9 @@
 package li.cil.scannable.common.network;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.network.message.*;
+import li.cil.scannable.common.network.message.AbstractMessage;
+import li.cil.scannable.common.network.message.RemoveConfiguredModuleItemAtMessage;
+import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
@@ -27,8 +29,6 @@ public final class Network {
     // --------------------------------------------------------------------- //
 
     public static void initialize() {
-        registerMessage(StructureRequestMessage.class, StructureRequestMessage::new, NetworkDirection.PLAY_TO_SERVER);
-        registerMessage(StructureResponseMessage.class, StructureResponseMessage::new, NetworkDirection.PLAY_TO_CLIENT);
         registerMessage(RemoveConfiguredModuleItemAtMessage.class, RemoveConfiguredModuleItemAtMessage::new, NetworkDirection.PLAY_TO_SERVER);
         registerMessage(SetConfiguredModuleItemAtMessage.class, SetConfiguredModuleItemAtMessage::new, NetworkDirection.PLAY_TO_SERVER);
     }

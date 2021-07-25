@@ -24,8 +24,7 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
                 Items.BLOCK_MODULE.get(),
                 Items.COMMON_ORES_MODULE.get(),
                 Items.RARE_ORES_MODULE.get(),
-                Items.FLUID_MODULE.get(),
-                Items.STRUCTURES_MODULE.get()
+                Items.FLUID_MODULE.get()
         );
     }
 }

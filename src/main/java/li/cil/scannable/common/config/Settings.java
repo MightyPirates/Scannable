@@ -17,7 +17,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +45,6 @@ public final class Settings {
     public static int energyCostModuleOreCommon = 75;
     public static int energyCostModuleOreRare = 100;
     public static int energyCostModuleBlock = 100;
-    public static int energyCostModuleStructure = 150;
     public static int energyCostModuleFluid = 50;
     public static int energyCostModuleEntity = 75;
 
@@ -73,10 +71,6 @@ public final class Settings {
     public static Set<ResourceLocation> rareOreBlockTags = new HashSet<>();
 
     public static Set<ResourceLocation> ignoredFluidTags = new HashSet<>();
-
-    public static Set<ResourceLocation> structures = Util.make(new HashSet<>(), c -> {
-        c.addAll(ForgeRegistries.STRUCTURE_FEATURES.getKeys());
-    });
 
     // --------------------------------------------------------------------- //
     // Client settings
@@ -147,7 +141,6 @@ public final class Settings {
             energyCostModuleOreCommon = SERVER_INSTANCE.energyCostModuleOreCommon.get();
             energyCostModuleOreRare = SERVER_INSTANCE.energyCostModuleOreRare.get();
             energyCostModuleBlock = SERVER_INSTANCE.energyCostModuleBlock.get();
-            energyCostModuleStructure = SERVER_INSTANCE.energyCostModuleStructure.get();
             energyCostModuleFluid = SERVER_INSTANCE.energyCostModuleFluid.get();
             energyCostModuleEntity = SERVER_INSTANCE.energyCostModuleEntity.get();
 
@@ -163,8 +156,6 @@ public final class Settings {
             rareOreBlockTags = deserializeSet(SERVER_INSTANCE.rareOreBlockTags.get(), ResourceLocation::new);
 
             ignoredFluidTags = deserializeSet(SERVER_INSTANCE.ignoredFluidTags.get(), ResourceLocation::new);
-
-            structures = deserializeSet(SERVER_INSTANCE.structures.get(), ResourceLocation::new);
         }
 
         if (isClientConfig(configEvent.getConfig().getSpec())) {
@@ -185,7 +176,6 @@ public final class Settings {
         public ForgeConfigSpec.IntValue energyCostModuleOreCommon;
         public ForgeConfigSpec.IntValue energyCostModuleOreRare;
         public ForgeConfigSpec.IntValue energyCostModuleBlock;
-        public ForgeConfigSpec.IntValue energyCostModuleStructure;
         public ForgeConfigSpec.IntValue energyCostModuleFluid;
         public ForgeConfigSpec.IntValue energyCostModuleEntity;
 
@@ -201,8 +191,6 @@ public final class Settings {
         public ForgeConfigSpec.ConfigValue<List<? extends String>> rareOreBlockTags;
 
         public ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredFluidTags;
-
-        public ForgeConfigSpec.ConfigValue<List<? extends String>> structures;
 
         public ServerSettings(final ForgeConfigSpec.Builder builder) {
             builder.push("energy");
@@ -246,11 +234,6 @@ public final class Settings {
                     .comment("Amount of energy used by the block module per scan.")
                     .worldRestart()
                     .defineInRange("energyCostModuleBlock", Settings.energyCostModuleBlock, 0, Integer.MAX_VALUE);
-
-            energyCostModuleStructure = builder
-                    .comment("Amount of energy used by the structure module per scan.")
-                    .worldRestart()
-                    .defineInRange("energyCostModuleStructure", Settings.energyCostModuleStructure, 0, Integer.MAX_VALUE);
 
             energyCostModuleFluid = builder
                     .comment("Amount of energy used by the fluid module per scan.")
@@ -336,15 +319,6 @@ public final class Settings {
                     .comment("Fluid tags of fluids that should be ignored.")
                     .worldRestart()
                     .defineList("ignoredFluidTags", serializeSet(Settings.ignoredFluidTags, ResourceLocation::toString), Settings::validateResourceLocation);
-
-            builder.pop();
-
-            builder.push("structures");
-
-            structures = builder
-                    .comment("The list of structures the structure module scans for.")
-                    .worldRestart()
-                    .defineList("structures", serializeSet(Settings.structures, ResourceLocation::toString), Settings::validateResourceLocation);
 
             builder.pop();
         }

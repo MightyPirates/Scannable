@@ -18,10 +18,6 @@
   "item.scannable.block_module": "Scanner Module: Block",
   "item.scannable.block_module.desc": "Detects configured blocks. Use on a block to add it to the configuration. Use on air to manage configuration.",
   "item.scannable.block_module.list": "Configured blocks:",
-  "item.scannable.structures_module": "Scanner Module: Structures",
-  "item.scannable.structures_module.desc": "Detects nearby structures in the world.",
-  "item.scannable.structures_module.show_explored": "§aIncluding§f explored structures.",
-  "item.scannable.structures_module.hide_explored": "§cExcluding§f explored structures.",
   "item.scannable.fluid_module": "Scanner Module: Fluids",
   "item.scannable.fluid_module.desc": "Detects fluids (e.g. water, lava).",
   "item.scannable.entity_module": "Scanner Module: Living Entity",
@@ -43,21 +39,5 @@
   "message.scannable.no_scan_modules": "No scanning module installed.",
   "message.scannable.not_enough_energy": "Not enough energy.",
   "message.scannable.block_ignored": "Invalid block.",
-  "message.scannable.no_free_slots": "No free slots.",
-
-  "structure.pillager_outpost": "Pillager Outpost",
-  "structure.mineshaft": "Mineshaft",
-  "structure.mansion": "Mansion",
-  "structure.jungle_pyramid": "Jungle Pyramid",
-  "structure.desert_pyramid": "Desert Pyramid",
-  "structure.igloo": "Igloo",
-  "structure.shipwreck": "Shipwreck",
-  "structure.swamp_hut": "Swamp Hut",
-  "structure.stronghold": "Stronghold",
-  "structure.monument": "Monument",
-  "structure.ocean_ruin": "Ocean Ruin",
-  "structure.fortress": "Fortress",
-  "structure.endcity": "End City",
-  "structure.buried_treasure": "Buried Treasure",
-  "structure.village": "Village"
+  "message.scannable.no_free_slots": "No free slots."
 }
