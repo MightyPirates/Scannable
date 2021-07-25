@@ -1,45 +1,39 @@
 package li.cil.scannable.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
-import li.cil.scannable.common.capabilities.CapabilityScannerModule;
+import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.culling.ClippingHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 @OnlyIn(Dist.CLIENT)
-public enum ScanManager {
-    INSTANCE;
-
-    // --------------------------------------------------------------------- //
-
+public final class ScanManager {
     private static float computeTargetRadius() {
         return Minecraft.getInstance().gameRenderer.getRenderDistance();
     }
@@ -72,35 +66,34 @@ public enum ScanManager {
     // --------------------------------------------------------------------- //
 
     // List of providers currently used to scan.
-    private final Set<ScanResultProvider> collectingProviders = new HashSet<>();
+    private static final Set<ScanResultProvider> collectingProviders = new HashSet<>();
     // List for collecting results during an active scan.
-    private final Map<ScanResultProvider, List<ScanResult>> collectingResults = new HashMap<>();
+    private static final Map<ScanResultProvider, List<ScanResult>> collectingResults = new HashMap<>();
 
     // Results get copied from the collectingResults list in here when a scan
     // completes. This is to avoid clearing active results by *starting* a scan.
-    private final Map<ScanResultProvider, List<ScanResult>> pendingResults = new HashMap<>();
-    private final Map<ScanResultProvider, List<ScanResult>> renderingResults = new HashMap<>();
+    private static final Map<ScanResultProvider, List<ScanResult>> pendingResults = new HashMap<>();
+    private static final Map<ScanResultProvider, List<ScanResult>> renderingResults = new HashMap<>();
     // Temporary, re-used list to collect visible results each frame.
-    private final List<ScanResult> renderingList = new ArrayList<>();
+    private static final List<ScanResult> renderingList = new ArrayList<>();
 
-    private int scanningTicks = -1;
-    private long currentStart = -1;
-    @Nullable
-    private Vector3d lastScanCenter;
+    private static int scanningTicks = -1;
+    private static long currentStart = -1;
+    @Nullable private static Vec3 lastScanCenter;
 
-    private MatrixStack viewMatrix;
-    private Matrix4f projectionMatrix;
+    private static PoseStack viewModelStack;
+    private static Matrix4f projectionMatrix;
 
     // --------------------------------------------------------------------- //
 
-    public void beginScan(final PlayerEntity player, final List<ItemStack> stacks) {
+    public static void beginScan(final Player player, final List<ItemStack> stacks) {
         cancelScan();
 
         float scanRadius = Settings.baseScanRadius;
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
-            final LazyOptional<ScannerModule> module = stack.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
+            final LazyOptional<ScannerModule> module = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
             module.ifPresent(modules::add);
         }
         for (final ScannerModule module : modules) {
@@ -116,13 +109,13 @@ public enum ScanManager {
             return;
         }
 
-        final Vector3d center = player.position();
+        final Vec3 center = player.position();
         for (final ScanResultProvider provider : collectingProviders) {
             provider.initialize(player, stacks, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
         }
     }
 
-    public void updateScan(final Entity entity, final boolean finish) {
+    public static void updateScan(final Entity entity, final boolean finish) {
         final int remaining = Constants.SCAN_COMPUTE_DURATION - scanningTicks;
 
         if (!finish) {
@@ -163,19 +156,18 @@ public enum ScanManager {
         cancelScan();
     }
 
-    public void cancelScan() {
+    public static void cancelScan() {
         collectingProviders.clear();
         collectingResults.clear();
         scanningTicks = 0;
     }
 
-    @SubscribeEvent
-    public void onClientTick(final TickEvent.ClientTickEvent event) {
+    public static void onClientTick(final TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
 
-        final IBlockReader world = Minecraft.getInstance().level;
+        final BlockGetter world = Minecraft.getInstance().level;
         if (world == null) {
             return;
         }
@@ -192,7 +184,7 @@ public enum ScanManager {
                     for (final Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = renderingResults.entrySet().iterator(); iterator.hasNext(); ) {
                         final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
                         final List<ScanResult> list = entry.getValue();
-                        for (int i = MathHelper.ceil(list.size() / 2f); i > 0; i--) {
+                        for (int i = Mth.ceil(list.size() * 0.5f); i > 0; i--) {
                             list.get(list.size() - 1).close();
                             list.remove(list.size() - 1);
                         }
@@ -224,7 +216,7 @@ public enum ScanManager {
 
             while (results.size() > 0) {
                 final ScanResult result = results.get(results.size() - 1);
-                final Vector3d position = result.getPosition();
+                final Vec3 position = result.getPosition();
                 if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
                     results.remove(results.size() - 1);
                     synchronized (renderingResults) {
@@ -241,21 +233,19 @@ public enum ScanManager {
         }
     }
 
-    @SubscribeEvent
-    public void onRenderLast(final RenderWorldLastEvent event) {
+    public static void onRenderLast(final RenderWorldLastEvent event) {
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
             }
 
-            viewMatrix = new MatrixStack();
-            viewMatrix.last().pose().set(event.getMatrixStack().last().pose());
+            viewModelStack = new PoseStack();
+            viewModelStack.last().pose().load(event.getMatrixStack().last().pose());
             projectionMatrix = event.getProjectionMatrix();
         }
     }
 
-    @SubscribeEvent
-    public void onPreRenderGameOverlay(final RenderGameOverlayEvent.Pre event) {
+    public static void onPreRenderGameOverlay(final RenderGameOverlayEvent.Pre event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
             return;
         }
@@ -266,31 +256,29 @@ public enum ScanManager {
             }
 
             // Using shaders so we render as game overlay; restore matrices as used for world rendering.
-            RenderSystem.matrixMode(GL11.GL_PROJECTION);
-            RenderSystem.pushMatrix();
-            RenderSystem.loadIdentity();
-            RenderSystem.multMatrix(projectionMatrix);
-            RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-            RenderSystem.pushMatrix();
-            RenderSystem.loadIdentity();
+            RenderSystem.backupProjectionMatrix();
+            RenderSystem.setProjectionMatrix(projectionMatrix);
+            RenderSystem.getModelViewStack().pushPose();
+            RenderSystem.getModelViewStack().last().pose().setIdentity();
+            RenderSystem.applyModelViewMatrix();
 
-            render(event.getPartialTicks(), viewMatrix, projectionMatrix);
+            render(event.getPartialTicks(), viewModelStack, RenderSystem.getProjectionMatrix());
 
-            RenderSystem.matrixMode(GL11.GL_PROJECTION);
-            RenderSystem.popMatrix();
-            RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-            RenderSystem.popMatrix();
+            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.applyModelViewMatrix();
+            RenderSystem.restoreProjectionMatrix();
         }
     }
 
-    private void render(final float partialTicks, final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
-        final ActiveRenderInfo activeRenderInfo = Minecraft.getInstance().gameRenderer.getMainCamera();
-        final Vector3d pos = activeRenderInfo.getPosition();
+    private static void render(final float partialTicks, final PoseStack matrixStack, final Matrix4f projectionMatrix) {
+        final Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        final Vec3 pos = camera.getPosition();
 
-        final ClippingHelper frustum = new ClippingHelper(matrixStack.last().pose(), projectionMatrix);
+        final Frustum frustum = new Frustum(matrixStack.last().pose(), projectionMatrix);
         frustum.prepare(pos.x(), pos.y(), pos.z());
 
         RenderSystem.disableDepthTest();
+        RenderSystem.setShaderColor(1, 1, 1, 1);
 
         matrixStack.pushPose();
         matrixStack.translate(-pos.x, -pos.y, -pos.z);
@@ -299,18 +287,18 @@ public enum ScanManager {
         // This allows providers to do more optimized rendering, in e.g.
         // setting up the render state once before rendering all visuals,
         // or even set up display lists or VBOs.
-        final IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        final MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
             // Quick and dirty frustum culling.
             for (final ScanResult result : entry.getValue()) {
-                final AxisAlignedBB bounds = result.getRenderBounds();
+                final AABB bounds = result.getRenderBounds();
                 if (bounds == null || frustum.isVisible(bounds)) {
                     renderingList.add(result);
                 }
             }
 
             if (!renderingList.isEmpty()) {
-                entry.getKey().render(renderTypeBuffer, matrixStack, projectionMatrix, activeRenderInfo, partialTicks, renderingList);
+                entry.getKey().render(renderTypeBuffer, matrixStack, camera, partialTicks, renderingList);
                 renderingList.clear();
             }
         }
@@ -323,7 +311,7 @@ public enum ScanManager {
 
     // --------------------------------------------------------------------- //
 
-    private void clear() {
+    private static void clear() {
         pendingResults.clear();
 
         synchronized (renderingResults) {

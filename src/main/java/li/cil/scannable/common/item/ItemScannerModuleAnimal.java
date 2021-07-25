@@ -1,27 +1,19 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.api.API;
-import li.cil.scannable.api.scanning.ScanFilterEntity;
-import li.cil.scannable.api.scanning.ScanResultProvider;
-import li.cil.scannable.api.scanning.ScannerModuleEntity;
-import li.cil.scannable.client.scanning.filter.ScanFilterEntityAnimal;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import li.cil.scannable.common.scanning.ScannerModuleAnimal;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
-public final class ItemScannerModuleAnimal extends AbstractItemScannerModuleEntity {
+public final class ItemScannerModuleAnimal extends AbstractItemScannerModule {
     public ItemScannerModuleAnimal() {
         super(ScannerModuleAnimal.INSTANCE);
     }
@@ -31,31 +23,8 @@ public final class ItemScannerModuleAnimal extends AbstractItemScannerModuleEnti
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
-        tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_ANIMAL));
+    public void appendHoverText(final ItemStack stack, @Nullable final Level world, final List<Component> tooltip, final TooltipFlag flag) {
+        tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_ANIMAL));
         super.appendHoverText(stack, world, tooltip, flag);
-    }
-
-    // --------------------------------------------------------------------- //
-
-    private enum ScannerModuleAnimal implements ScannerModuleEntity {
-        INSTANCE;
-
-        @Override
-        public int getEnergyCost(final PlayerEntity player, final ItemStack module) {
-            return Settings.energyCostModuleAnimal;
-        }
-
-        @OnlyIn(Dist.CLIENT)
-        @Override
-        public ScanResultProvider getResultProvider() {
-            return GameRegistry.findRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_ENTITIES);
-        }
-
-        @OnlyIn(Dist.CLIENT)
-        @Override
-        public Optional<ScanFilterEntity> getFilter(final ItemStack module) {
-            return Optional.of(ScanFilterEntityAnimal.INSTANCE);
-        }
     }
 }

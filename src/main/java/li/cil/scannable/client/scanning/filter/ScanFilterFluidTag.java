@@ -1,18 +1,12 @@
 package li.cil.scannable.client.scanning.filter;
 
 import li.cil.scannable.api.scanning.ScanFilterBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 
-public final class ScanFilterFluidTag implements ScanFilterBlock {
-    private final ITag<Fluid> tag;
-
-    public ScanFilterFluidTag(final ITag<Fluid> tag) {
-        this.tag = tag;
-    }
-
+public record ScanFilterFluidTag(Tag<Fluid> tag) implements ScanFilterBlock {
     @Override
     public boolean matches(final BlockState state) {
         final FluidState fluidState = state.getFluidState();

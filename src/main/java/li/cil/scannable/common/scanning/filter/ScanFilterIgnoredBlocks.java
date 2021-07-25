@@ -2,14 +2,14 @@ package li.cil.scannable.common.scanning.filter;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Settings;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -41,9 +41,9 @@ public enum ScanFilterIgnoredBlocks {
             }
         }
 
-        final List<ITag<Block>> ignoredTags = new ArrayList<>();
+        final List<Tag<Block>> ignoredTags = new ArrayList<>();
         for (final ResourceLocation location : Settings.ignoredBlockTags) {
-            final ITag<Block> tag = BlockTags.getAllTags().getTag(location);
+            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
             if (tag != null) {
                 ignoredTags.add(tag);
             }
@@ -60,7 +60,7 @@ public enum ScanFilterIgnoredBlocks {
     }
 
     @SubscribeEvent
-    public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
+    public static void onModConfigEvent(final ModConfigEvent configEvent) {
         // Reset on any config change so we also rebuild the filter when resource reload
         // kicks in which can result in ids changing and thus our cache being invalid.
         ScanFilterIgnoredBlocks.INSTANCE.filter = null;

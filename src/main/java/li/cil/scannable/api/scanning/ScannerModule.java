@@ -1,7 +1,7 @@
 package li.cil.scannable.api.scanning;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
  * scanner. Once installed, it will be queried when the scanner is used.
  * <p>
  * Note that all of the scanning behavior is <em>client side only</em>. Only the
- * methods for energy cost ({@link #getEnergyCost(PlayerEntity, ItemStack)} and
+ * methods for energy cost ({@link #getEnergyCost(Player, ItemStack)} and
  * for checking whether this module can be used on its own ({@link #hasResultProvider()})
  * will be called on the server.
  * <p>
@@ -37,7 +37,7 @@ public interface ScannerModule {
      * @param module the module to get the energy cost for.
      * @return the energy cost contributed by this provider.
      */
-    int getEnergyCost(final PlayerEntity player, final ItemStack module);
+    int getEnergyCost(final Player player, final ItemStack module);
 
     /**
      * Whether this module has a result provider, i.e. can be used to perform scans
@@ -57,9 +57,9 @@ public interface ScannerModule {
      * <p>
      * This is the id of a provider in the scan provider registry. Built-in ones
      * include <code>scannable:blocks</code> and <code>scannable:entities</code>
-     * and can be obtained from the {@link ScanResultProvider} registry:
+     * and can be obtained from the {@link ScanResultProvider} registry, e.g.:
      * <pre>
-     * GameRegistry.findRegistry(ScanResultProvider.class).getValue(new ResourceLocation("scannable:blocks"));
+     * RegistryManager.ACTIVE.getRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_BLOCKS);
      * </pre>
      * <p>
      * May return <code>null</code> if this module does not provide results on its

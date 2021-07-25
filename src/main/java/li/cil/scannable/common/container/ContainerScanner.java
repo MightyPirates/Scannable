@@ -1,35 +1,32 @@
 package li.cil.scannable.common.container;
 
-import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.inventory.ItemHandlerScanner;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-public final class ContainerScanner extends Container {
-    private final PlayerEntity player;
-    private final Hand hand;
-    private final ItemStack stack;
-
-    public static ContainerScanner createForServer(final int windowId, final PlayerInventory inventory, final Hand hand, final ItemHandlerScanner itemHandler) {
-        return new ContainerScanner(windowId, inventory, hand, itemHandler);
-    }
-
-    public static ContainerScanner createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
-        final Hand hand = buffer.readEnum(Hand.class);
+public final class ContainerScanner extends AbstractContainerMenu {
+    public static ContainerScanner create(final int windowId, final Inventory inventory, final FriendlyByteBuf buffer) {
+        final InteractionHand hand = buffer.readEnum(InteractionHand.class);
         return new ContainerScanner(windowId, inventory, hand, new ItemHandlerScanner(inventory.player.getItemInHand(hand)));
     }
 
     // --------------------------------------------------------------------- //
 
-    public ContainerScanner(final int windowId, final PlayerInventory inventory, final Hand hand, final ItemHandlerScanner itemHandler) {
-        super(Scannable.SCANNER_CONTAINER.get(), windowId);
+    private final Player player;
+    private final InteractionHand hand;
+    private final ItemStack stack;
+
+    // --------------------------------------------------------------------- //
+
+    public ContainerScanner(final int windowId, final Inventory inventory, final InteractionHand hand, final ItemHandlerScanner itemHandler) {
+        super(Containers.SCANNER_CONTAINER.get(), windowId);
 
         this.player = inventory.player;
         this.hand = hand;
@@ -56,7 +53,11 @@ public final class ContainerScanner extends Container {
         }
     }
 
-    public Hand getHand() {
+    public Player getPlayer() {
+        return player;
+    }
+
+    public InteractionHand getHand() {
         return hand;
     }
 
@@ -64,12 +65,12 @@ public final class ContainerScanner extends Container {
     // Container
 
     @Override
-    public boolean stillValid(final PlayerEntity player) {
+    public boolean stillValid(final Player player) {
         return player == this.player && ItemStack.matches(player.getItemInHand(hand), stack);
     }
 
     @Override
-    public ItemStack quickMoveStack(final PlayerEntity player, final int index) {
+    public ItemStack quickMoveStack(final Player player, final int index) {
         final Slot from = slots.get(index);
         if (from == null) {
             return ItemStack.EMPTY;
@@ -79,7 +80,7 @@ public final class ContainerScanner extends Container {
             return ItemStack.EMPTY;
         }
 
-        final boolean intoPlayerInventory = from.container != player.inventory;
+        final boolean intoPlayerInventory = from.container != player.getInventory();
         final ItemStack fromStack = from.getItem();
 
         final int step, begin;

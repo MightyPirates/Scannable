@@ -1,19 +1,18 @@
 package li.cil.scannable.common.scanning;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
+import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.ScanFilterBlockCache;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,14 +21,14 @@ public enum ScannerModuleBlockConfigurable implements ScannerModuleBlock {
     INSTANCE;
 
     @Override
-    public int getEnergyCost(final PlayerEntity player, final ItemStack module) {
+    public int getEnergyCost(final Player player, final ItemStack module) {
         return Settings.energyCostModuleBlock;
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return GameRegistry.findRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_BLOCKS);
+        return ScanResultProviders.BLOCKS.get();
     }
 
     @OnlyIn(Dist.CLIENT)

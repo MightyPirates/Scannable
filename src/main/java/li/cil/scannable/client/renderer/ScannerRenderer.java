@@ -1,24 +1,21 @@
 package li.cil.scannable.client.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import li.cil.scannable.client.ScanManager;
-import li.cil.scannable.client.shader.ScanEffectShader;
+import li.cil.scannable.client.shader.Shaders;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.client.shader.FramebufferConstants;
-import net.minecraft.client.util.JSONBlendingMode;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 
 @OnlyIn(Dist.CLIENT)
@@ -29,45 +26,41 @@ public enum ScannerRenderer {
     // Settings
 
     // --------------------------------------------------------------------- //
-    // Framebuffer and depth texture IDs.
+    // Frame buffer and depth texture IDs.
 
     private int depthCopyFbo;
     private int depthCopyColorBuffer;
     private int depthCopyDepthBuffer;
 
     // --------------------------------------------------------------------- //
-    // Effect shader and uniforms.
-
-    private static final JSONBlendingMode RESET_BLEND_STATE = new JSONBlendingMode();
-
-    // --------------------------------------------------------------------- //
     // State of the scanner, set when triggering a ping.
 
     private long currentStart;
+    private Vec3 currentCenter;
 
     // --------------------------------------------------------------------- //
 
-    public void ping(final Vector3d pos) {
+    public void ping(final Vec3 pos) {
         currentStart = System.currentTimeMillis();
-        ScanEffectShader.INSTANCE.setCenter(pos);
+        currentCenter = pos;
     }
 
-    public static void render(final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
+    public static void render(final PoseStack matrixStack, final Matrix4f projectionMatrix) {
         INSTANCE.doRender(matrixStack, projectionMatrix);
     }
 
-    public void doRender(final MatrixStack matrixStack, final Matrix4f projectionMatrix) {
+    public void doRender(final PoseStack matrixStack, final Matrix4f projectionMatrix) {
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
         final boolean shouldRender = currentStart > 0 && adjustedDuration > (int) (System.currentTimeMillis() - currentStart);
         if (shouldRender) {
             if (depthCopyFbo == 0) {
-                createDepthCopyFramebuffer();
+                createDepthCopyBuffer();
             }
 
             render(matrixStack.last().pose(), projectionMatrix);
         } else {
             if (depthCopyFbo != 0) {
-                deleteDepthCopyFramebuffer();
+                deleteDepthCopyBuffer();
             }
 
             currentStart = 0;
@@ -75,70 +68,103 @@ public enum ScannerRenderer {
     }
 
     private void render(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
-        final Minecraft mc = Minecraft.getInstance();
-        final Framebuffer framebuffer = mc.getMainRenderTarget();
+        final ShaderInstance shader = Shaders.getScanEffectShader();
+        if (shader == null) {
+            return;
+        }
 
-        updateDepthTexture(framebuffer);
+        final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 
+        updateDepthTexture(target);
+
+        updateShaderUniforms(shader, viewMatrix, projectionMatrix);
+
+        blit(target);
+    }
+
+    private void updateDepthTexture(final RenderTarget target) {
+        final int oldBuffer = GlStateManager.getBoundFramebuffer();
+        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, target.frameBufferId);
+        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, depthCopyFbo);
+        GL30.glBlitFramebuffer(0, 0, target.width, target.height,
+                0, 0, target.width, target.height,
+                GL30.GL_DEPTH_BUFFER_BIT, GL30.GL_NEAREST);
+        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, oldBuffer);
+    }
+
+    private void updateShaderUniforms(final ShaderInstance shader, final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
         final Matrix4f invertedViewMatrix = new Matrix4f(viewMatrix);
         invertedViewMatrix.invert();
-        ScanEffectShader.INSTANCE.setInverseViewMatrix(invertedViewMatrix);
 
         final Matrix4f invertedProjectionMatrix = new Matrix4f(projectionMatrix);
         invertedProjectionMatrix.invert();
-        ScanEffectShader.INSTANCE.setInverseProjectionMatrix(invertedProjectionMatrix);
 
-        final Vector3d position = mc.gameRenderer.getMainCamera().getPosition();
-        ScanEffectShader.INSTANCE.setPosition(position);
+        final Vec3 cameraPosition = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
         final float radius = ScanManager.computeRadius(currentStart, (float) adjustedDuration);
-        ScanEffectShader.INSTANCE.setRadius(radius);
 
-        // This is a bit of a hack; blend state is changed from many places in MC, and if there's
-        // no other shader active at all, our shader will not properly apply its blend settings.
-        // So we use a dummy blend state to change the reference to the last applied one to force it.
-        RESET_BLEND_STATE.apply();
-
-        ScanEffectShader.INSTANCE.bind();
-
-        blit(framebuffer);
-
-        ScanEffectShader.INSTANCE.unbind();
+        shader.setSampler("depthTex", depthCopyDepthBuffer);
+        shader.safeGetUniform("center").set(new Vector3f(currentCenter));
+        shader.safeGetUniform("invViewMat").set(invertedViewMatrix);
+        shader.safeGetUniform("invProjMat").set(invertedProjectionMatrix);
+        shader.safeGetUniform("pos").set(new Vector3f(cameraPosition));
+        shader.safeGetUniform("radius").set(radius);
     }
 
-    private void updateDepthTexture(final Framebuffer framebuffer) {
-        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, framebuffer.frameBufferId);
-        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, depthCopyFbo);
-        GL30.glBlitFramebuffer(0, 0, framebuffer.width, framebuffer.height,
-                0, 0, framebuffer.width, framebuffer.height,
-                GL30.GL_DEPTH_BUFFER_BIT, GL30.GL_NEAREST);
+    private void blit(final RenderTarget target) {
+        final int width = target.width;
+        final int height = target.height;
+
+        RenderSystem.depthMask(false);
+        RenderSystem.disableDepthTest();
+        RenderSystem.enableBlend();
+
+        final ShaderInstance oldShader = RenderSystem.getShader();
+        RenderSystem.setShader(Shaders::getScanEffectShader);
+
+        RenderSystem.backupProjectionMatrix();
+        RenderSystem.setProjectionMatrix(Matrix4f.orthographic(0, width, 0, height, 1, 100));
+
+        final Tesselator buffer = Tesselator.getInstance();
+        final BufferBuilder builder = buffer.getBuilder();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        builder.vertex(0, height, -50).uv(0, 0).endVertex();
+        builder.vertex(width, height, -50).uv(1, 0).endVertex();
+        builder.vertex(width, 0, -50).uv(1, 1).endVertex();
+        builder.vertex(0, 0, -50).uv(0, 1).endVertex();
+        buffer.end();
+
+        RenderSystem.restoreProjectionMatrix();
+
+        RenderSystem.setShader(() -> oldShader);
+
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
     }
 
     // --------------------------------------------------------------------- //
 
-    private void createDepthCopyFramebuffer() {
-        final Framebuffer framebuffer = Minecraft.getInstance().getMainRenderTarget();
+    private void createDepthCopyBuffer() {
+        final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 
         depthCopyFbo = GlStateManager.glGenFramebuffers();
 
         // We don't use the color attachment on this FBO, but it's required for a complete FBO.
-        depthCopyColorBuffer = createTexture(framebuffer.width, framebuffer.height, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE);
+        depthCopyColorBuffer = createTexture(target.width, target.height, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE);
 
         // Main reason why we create this FBO: readable depth buffer into which we can copy the MC one.
-        depthCopyDepthBuffer = createTexture(framebuffer.width, framebuffer.height, GL30.GL_DEPTH_COMPONENT, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT);
+        depthCopyDepthBuffer = createTexture(target.width, target.height, GL30.GL_DEPTH_COMPONENT, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT);
 
-        GlStateManager._glBindFramebuffer(FramebufferConstants.GL_FRAMEBUFFER, depthCopyFbo);
-        GlStateManager._glFramebufferTexture2D(FramebufferConstants.GL_FRAMEBUFFER, FramebufferConstants.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, depthCopyColorBuffer, 0);
-        GlStateManager._glFramebufferTexture2D(FramebufferConstants.GL_FRAMEBUFFER, FramebufferConstants.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, depthCopyDepthBuffer, 0);
-        GlStateManager._glBindFramebuffer(FramebufferConstants.GL_FRAMEBUFFER, 0);
-
-        ScanEffectShader.INSTANCE.setDepthBuffer(depthCopyDepthBuffer);
+        final int oldBuffer = GlStateManager.getBoundFramebuffer();
+        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, depthCopyFbo);
+        GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, depthCopyColorBuffer, 0);
+        GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, depthCopyDepthBuffer, 0);
+        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, oldBuffer);
     }
 
-    private void deleteDepthCopyFramebuffer() {
-        ScanEffectShader.INSTANCE.setDepthBuffer(0);
-
+    private void deleteDepthCopyBuffer() {
         GlStateManager._glDeleteFramebuffers(depthCopyFbo);
         depthCopyFbo = 0;
 
@@ -156,56 +182,8 @@ public enum ScannerRenderer {
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
         GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL14.GL_DEPTH_TEXTURE_MODE, GL11.GL_LUMINANCE);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_MODE, GL14.GL_NONE);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_LEQUAL);
         GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null);
         GlStateManager._bindTexture(0);
         return texture;
-    }
-
-    private void blit(final Framebuffer framebuffer) {
-        final int width = framebuffer.width;
-        final int height = framebuffer.height;
-
-        RenderSystem.depthMask(false);
-        RenderSystem.disableDepthTest();
-
-        setupMatrices(width, height);
-
-        framebuffer.bindWrite(false);
-
-        final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(0, height, 0).uv(0, 0).endVertex();
-        buffer.vertex(width, height, 0).uv(1, 0).endVertex();
-        buffer.vertex(width, 0, 0).uv(1, 1).endVertex();
-        buffer.vertex(0, 0, 0).uv(0, 1).endVertex();
-        tessellator.end();
-
-        restoreMatrices();
-
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-    }
-
-    private void setupMatrices(final int width, final int height) {
-        RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0, width, height, 0, 1000, 3000);
-        RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
-        RenderSystem.translated(0, 0, -2000);
-        RenderSystem.viewport(0, 0, width, height);
-    }
-
-    private void restoreMatrices() {
-        RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.popMatrix();
     }
 }

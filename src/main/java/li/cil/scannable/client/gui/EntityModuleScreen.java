@@ -1,25 +1,24 @@
 package li.cil.scannable.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.container.EntityModuleContainer;
 import li.cil.scannable.common.item.ItemScannerModuleEntityConfigurable;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.MessageSetConfiguredModuleItemAt;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import java.util.Map;
 public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityModuleContainer, EntityType<?>> {
     private static final Map<EntityType<?>, Entity> RENDER_ENTITIES = new HashMap<>();
 
-    public EntityModuleScreen(final EntityModuleContainer container, final PlayerInventory inventory, final ITextComponent title) {
+    public EntityModuleScreen(final EntityModuleContainer container, final Inventory inventory, final Component title) {
         super(container, inventory, title, Constants.GUI_MODULE_ENTITY_LIST);
     }
 
@@ -41,7 +40,7 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
     }
 
     @Override
-    protected ITextComponent getItemName(final EntityType<?> entityType) {
+    protected Component getItemName(final EntityType<?> entityType) {
         return entityType.getDescription();
     }
 
@@ -54,11 +53,9 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         if (value.getItem() instanceof SpawnEggItem) {
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
-            if (entityType != null) {
-                final ResourceLocation registryName = entityType.getRegistryName();
-                if (registryName != null) {
-                    Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName.toString()));
-                }
+            final ResourceLocation registryName = entityType.getRegistryName();
+            if (registryName != null) {
+                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName));
             }
         }
     }
@@ -69,38 +66,33 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
             return;
         }
 
-        entity.setLevel(inventory.player.getCommandSenderWorld());
-        final EntitySize bounds = entityType.getDimensions();
+        entity.level = menu.getPlayer().getCommandSenderWorld();
+        final EntityDimensions bounds = entityType.getDimensions();
         final float size = Math.max(bounds.width, bounds.height);
         final float scale = 11.0f / size;
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(x, y, 1050);
-        RenderSystem.scalef(1, 1, -1);
-        final MatrixStack matrixStack = new MatrixStack();
-        matrixStack.translate(0, 0, 1000);
-        matrixStack.scale(scale, scale, scale);
+        final PoseStack poseStack = new PoseStack();
+        poseStack.translate(x, y, 0);
+        poseStack.scale(scale, scale, scale);
         final Quaternion quaternion = Vector3f.ZP.rotationDegrees(180);
-        quaternion.mul(Vector3f.XN.rotationDegrees(20));
-        quaternion.mul(Vector3f.YP.rotationDegrees(150));
-        matrixStack.mulPose(quaternion);
+        quaternion.mul(Vector3f.XN.rotationDegrees(-20));
+        quaternion.mul(Vector3f.YP.rotationDegrees(30));
+        poseStack.mulPose(quaternion);
 
-        final EntityRendererManager renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+        final EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
         quaternion.conj();
         renderManager.overrideCameraOrientation(quaternion);
         renderManager.setRenderShadow(false);
 
-        final IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        renderManager.render(entity, 0, 0, 0, 0, 1, matrixStack, buffer, 0xf000f0);
+        final MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        renderManager.render(entity, 0, 0, 0, 0, 1, poseStack, buffer, 0xf000f0);
         buffer.endBatch();
 
         renderManager.setRenderShadow(true);
-
-        RenderSystem.popMatrix();
     }
 
     @Nullable
     private Entity getRenderEntity(final EntityType<?> entityType) {
-        return RENDER_ENTITIES.computeIfAbsent(entityType, t -> t.create(inventory.player.getCommandSenderWorld()));
+        return RENDER_ENTITIES.computeIfAbsent(entityType, t -> t.create(menu.getPlayer().level));
     }
 }

@@ -1,32 +1,33 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.audio.SoundManager;
-import li.cil.scannable.common.capabilities.CapabilityProviderScanner;
-import li.cil.scannable.common.capabilities.CapabilityScannerModule;
+import li.cil.scannable.common.capabilities.Capabilities;
+import li.cil.scannable.common.capabilities.ScannerWrapper;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
-import li.cil.scannable.common.container.ScannerContainerProvider;
+import li.cil.scannable.common.container.ContainerScanner;
 import li.cil.scannable.common.inventory.ItemHandlerScanner;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -34,24 +35,17 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.registries.ObjectHolder;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.item.Item.Properties;
-
-@ObjectHolder(API.MOD_ID)
 public final class ItemScanner extends AbstractItem {
-    @ObjectHolder(Constants.NAME_SCANNER)
-    public static final Item INSTANCE = null;
-
     public static boolean isScanner(final ItemStack stack) {
-        return stack.getItem() == INSTANCE;
+        return stack.getItem() == Items.SCANNER.get();
     }
 
     // --------------------------------------------------------------------- //
@@ -64,19 +58,19 @@ public final class ItemScanner extends AbstractItem {
     // Item
 
     @Override
-    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final CompoundNBT nbt) {
-        return new CapabilityProviderScanner(stack);
+    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final CompoundTag nbt) {
+        return new ScannerWrapper(stack);
     }
 
     @Override
-    public void fillItemCategory(final ItemGroup group, final NonNullList<ItemStack> items) {
+    public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
 
         if (!allowdedIn(group)) {
             return;
         }
 
-        if (group == ItemGroup.TAB_SEARCH) {
+        if (group == CreativeModeTab.TAB_SEARCH) {
             return; // Called before capabilities have been initialized...
         }
 
@@ -91,10 +85,10 @@ public final class ItemScanner extends AbstractItem {
     }
 
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final Level world, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, world, tooltip, flag);
 
-        tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_SCANNER));
+        tooltip.add(new TranslatableComponent(Constants.TOOLTIP_SCANNER));
 
         if (world == null) {
             return; // Presumably from initial search tree population where capabilities have not yet been initialized.
@@ -109,9 +103,8 @@ public final class ItemScanner extends AbstractItem {
             return;
         }
 
-        energyStorage.ifPresent(storage -> {
-            tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_SCANNER_ENERGY, storage.getEnergyStored(), storage.getMaxEnergyStored()));
-        });
+        energyStorage.ifPresent(storage -> tooltip.add(
+                new TranslatableComponent(Constants.TOOLTIP_SCANNER_ENERGY, storage.getEnergyStored(), storage.getMaxEnergyStored())));
     }
 
     @Override
@@ -135,38 +128,51 @@ public final class ItemScanner extends AbstractItem {
     }
 
     @Override
-    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+    public InteractionResultHolder<ItemStack> use(final Level world, final Player player, final InteractionHand hand) {
         final ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
-            if (!world.isClientSide) {
-                final INamedContainerProvider containerProvider = new ScannerContainerProvider(player, hand);
-                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnum(hand));
+            if (!world.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(itemHandler -> {
+                    if (itemHandler instanceof ItemHandlerScanner scannerItemHandler) {
+                        NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+                            @Override
+                            public Component getDisplayName() {
+                                return stack.getHoverName();
+                            }
+
+                            @Override
+                            public AbstractContainerMenu createMenu(final int id, final Inventory inventory, final Player player) {
+                                return new ContainerScanner(id, inventory, hand, scannerItemHandler);
+                            }
+                        }, buffer -> buffer.writeEnum(hand));
+                    }
+                });
             }
         } else {
             final List<ItemStack> modules = new ArrayList<>();
             if (!collectModules(stack, modules)) {
                 if (world.isClientSide) {
-                    Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
+                    Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
                 }
                 player.getCooldowns().addCooldown(this, 10);
-                return ActionResult.fail(stack);
+                return InteractionResultHolder.fail(stack);
             }
 
             if (!tryConsumeEnergy(player, stack, modules, true)) {
                 if (world.isClientSide) {
-                    Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
+                    Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
                 }
                 player.getCooldowns().addCooldown(this, 10);
-                return ActionResult.fail(stack);
+                return InteractionResultHolder.fail(stack);
             }
 
             player.startUsingItem(hand);
             if (world.isClientSide) {
-                ScanManager.INSTANCE.beginScan(player, modules);
-                SoundManager.INSTANCE.playChargingSound();
+                ScanManager.beginScan(player, modules);
+                SoundManager.playChargingSound();
             }
         }
-        return ActionResult.success(stack);
+        return InteractionResultHolder.success(stack);
     }
 
     @Override
@@ -182,22 +188,22 @@ public final class ItemScanner extends AbstractItem {
     @Override
     public void onUsingTick(final ItemStack stack, final LivingEntity entity, final int count) {
         if (entity.getCommandSenderWorld().isClientSide) {
-            ScanManager.INSTANCE.updateScan(entity, false);
+            ScanManager.updateScan(entity, false);
         }
     }
 
     @Override
-    public void releaseUsing(final ItemStack stack, final World world, final LivingEntity entity, final int timeLeft) {
+    public void releaseUsing(final ItemStack stack, final Level world, final LivingEntity entity, final int timeLeft) {
         if (world.isClientSide) {
-            ScanManager.INSTANCE.cancelScan();
-            SoundManager.INSTANCE.stopChargingSound();
+            ScanManager.cancelScan();
+            SoundManager.stopChargingSound();
         }
         super.releaseUsing(stack, world, entity, timeLeft);
     }
 
     @Override
-    public ItemStack finishUsingItem(final ItemStack stack, final World world, final LivingEntity entity) {
-        if (!(entity instanceof PlayerEntity)) {
+    public ItemStack finishUsingItem(final ItemStack stack, final Level world, final LivingEntity entity) {
+        if (!(entity instanceof final Player player)) {
             return stack;
         }
 
@@ -210,19 +216,18 @@ public final class ItemScanner extends AbstractItem {
             return stack;
         }
 
-        final boolean hasEnergy = tryConsumeEnergy((PlayerEntity) entity, stack, modules, false);
+        final boolean hasEnergy = tryConsumeEnergy((Player) entity, stack, modules, false);
         if (world.isClientSide) {
-            SoundManager.INSTANCE.stopChargingSound();
+            SoundManager.stopChargingSound();
 
             if (hasEnergy) {
-                ScanManager.INSTANCE.updateScan(entity, true);
-                SoundManager.INSTANCE.playActivateSound();
+                ScanManager.updateScan(entity, true);
+                SoundManager.playActivateSound();
             } else {
-                ScanManager.INSTANCE.cancelScan();
+                ScanManager.cancelScan();
             }
         }
 
-        final PlayerEntity player = (PlayerEntity) entity;
         player.getCooldowns().addCooldown(this, 40);
 
         return stack;
@@ -230,12 +235,12 @@ public final class ItemScanner extends AbstractItem {
 
     // --------------------------------------------------------------------- //
 
-    static int getModuleEnergyCost(final PlayerEntity player, final ItemStack stack) {
-        final LazyOptional<ScannerModule> module = stack.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
+    static int getModuleEnergyCost(final Player player, final ItemStack stack) {
+        final LazyOptional<ScannerModule> module = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
         return module.map(p -> p.getEnergyCost(player, stack)).orElse(0);
     }
 
-    private static boolean tryConsumeEnergy(final PlayerEntity player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
+    private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
         if (!Settings.useEnergy) {
             return true;
         }
@@ -278,7 +283,7 @@ public final class ItemScanner extends AbstractItem {
 
                         modules.add(module);
 
-                        final LazyOptional<ScannerModule> capability = module.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
+                        final LazyOptional<ScannerModule> capability = module.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
                         hasScannerModules |= capability.map(ScannerModule::hasResultProvider).orElse(false);
                     }
 

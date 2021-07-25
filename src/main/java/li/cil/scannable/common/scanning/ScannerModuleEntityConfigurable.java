@@ -1,19 +1,18 @@
 package li.cil.scannable.common.scanning;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterEntity;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleEntity;
+import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.ScanFilterEntityList;
 import li.cil.scannable.client.scanning.filter.ScanFilterEntityType;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.item.ItemScannerModuleEntityConfigurable;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,14 +22,14 @@ public enum ScannerModuleEntityConfigurable implements ScannerModuleEntity {
     INSTANCE;
 
     @Override
-    public int getEnergyCost(final PlayerEntity player, final ItemStack module) {
+    public int getEnergyCost(final Player player, final ItemStack module) {
         return Settings.energyCostModuleEntity;
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return GameRegistry.findRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_ENTITIES);
+        return ScanResultProviders.ENTITIES.get();
     }
 
     @OnlyIn(Dist.CLIENT)

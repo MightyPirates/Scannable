@@ -1,55 +1,51 @@
 package li.cil.scannable.common.network.message;
 
-import io.netty.buffer.ByteBuf;
 import li.cil.scannable.common.container.AbstractModuleContainer;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.function.Supplier;
-
-public final class MessageSetConfiguredModuleItemAt {
+public final class MessageSetConfiguredModuleItemAt extends AbstractMessage {
     private int windowId;
     private int index;
-    private String value;
+    private ResourceLocation value;
 
     // --------------------------------------------------------------------- //
 
-    public MessageSetConfiguredModuleItemAt(final int windowId, final int index, final String value) {
+    public MessageSetConfiguredModuleItemAt(final int windowId, final int index, final ResourceLocation value) {
         this.windowId = windowId;
         this.index = index;
         this.value = value;
     }
 
-    public MessageSetConfiguredModuleItemAt(final ByteBuf buffer) {
-        fromBytes(buffer);
+    public MessageSetConfiguredModuleItemAt(final FriendlyByteBuf buffer) {
+        super(buffer);
     }
 
     // --------------------------------------------------------------------- //
 
-    public static boolean handle(final MessageSetConfiguredModuleItemAt message, final Supplier<NetworkEvent.Context> context) {
-        final ServerPlayerEntity player = context.get().getSender();
-        if (player != null && player.containerMenu != null && player.containerMenu.containerId == message.windowId) {
+    @Override
+    protected void handleMessage(final NetworkEvent.Context context) {
+        final ServerPlayer player = context.getSender();
+        if (player != null && player.containerMenu != null && player.containerMenu.containerId == windowId) {
             if (player.containerMenu instanceof AbstractModuleContainer) {
-                ((AbstractModuleContainer) player.containerMenu).setItemAt(message.index, message.value);
+                ((AbstractModuleContainer) player.containerMenu).setItemAt(index, value);
             }
         }
-        return true;
     }
 
-    // --------------------------------------------------------------------- //
-
-    public void fromBytes(final ByteBuf buffer) {
-        final PacketBuffer packet = new PacketBuffer(buffer);
-        windowId = packet.readByte();
-        index = packet.readByte();
-        value = packet.readUtf(1024);
+    @Override
+    public void fromBytes(final FriendlyByteBuf buffer) {
+        windowId = buffer.readByte();
+        index = buffer.readByte();
+        value = buffer.readResourceLocation();
     }
 
-    public void toBytes(final ByteBuf buffer) {
-        final PacketBuffer packet = new PacketBuffer(buffer);
-        packet.writeByte(windowId);
-        packet.writeByte(index);
-        packet.writeUtf(value);
+    @Override
+    public void toBytes(final FriendlyByteBuf buffer) {
+        buffer.writeByte(windowId);
+        buffer.writeByte(index);
+        buffer.writeResourceLocation(value);
     }
 }

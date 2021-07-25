@@ -1,7 +1,7 @@
 package li.cil.scannable.data;
 
 import li.cil.scannable.api.API;
-import net.minecraft.data.BlockTagsProvider;
+import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
 

@@ -4,21 +4,21 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
+import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.ScanFilterBlockCache;
 import li.cil.scannable.client.scanning.filter.ScanFilterFluidTag;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,14 +32,14 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
     private ScanFilterBlock filter;
 
     @Override
-    public int getEnergyCost(final PlayerEntity player, final ItemStack module) {
+    public int getEnergyCost(final Player player, final ItemStack module) {
         return Settings.energyCostModuleFluid;
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return GameRegistry.findRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_BLOCKS);
+        return ScanResultProviders.BLOCKS.get();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -62,9 +62,11 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
         }
 
         final List<ScanFilterBlock> filters = new ArrayList<>();
-        for (final ITag.INamedTag<Fluid> tag : FluidTags.getWrappers()) {
-            if (!Settings.ignoredFluidTags.contains(tag.getName())) {
-                filters.add(new ScanFilterFluidTag(tag));
+        for (final Tag<Fluid> tag : FluidTags.getStaticTags()) {
+            if (tag instanceof Tag.Named<Fluid> namedTag) {
+                if (!Settings.ignoredFluidTags.contains(namedTag.getName())) {
+                    filters.add(new ScanFilterFluidTag(tag));
+                }
             }
         }
         filter = new ScanFilterBlockCache(filters);
@@ -72,7 +74,7 @@ public enum ScannerModuleFluid implements ScannerModuleBlock {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
+    public static void onModConfigEvent(final ModConfigEvent configEvent) {
         // Reset on any config change so we also rebuild the filter when resource reload
         // kicks in which can result in ids changing and thus our cache being invalid.
         ScannerModuleFluid.INSTANCE.filter = null;

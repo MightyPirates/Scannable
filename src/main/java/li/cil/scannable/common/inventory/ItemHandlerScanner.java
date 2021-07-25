@@ -1,11 +1,11 @@
 package li.cil.scannable.common.inventory;
 
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.common.capabilities.CapabilityScannerModule;
+import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.AbstractItemScannerModule;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
@@ -27,7 +27,7 @@ public final class ItemHandlerScanner extends ItemStackHandler {
     }
 
     public void updateFromNBT() {
-        final CompoundNBT nbt = container.getTag();
+        final CompoundTag nbt = container.getTag();
         if (nbt != null && nbt.contains(TAG_ITEMS, NBT.TAG_COMPOUND)) {
             deserializeNBT(nbt.getCompound(TAG_ITEMS));
             if (stacks.size() != Constants.SCANNER_TOTAL_MODULE_COUNT) {
@@ -64,7 +64,7 @@ public final class ItemHandlerScanner extends ItemStackHandler {
         }
 
         // External modules declared via capability.
-        final LazyOptional<ScannerModule> module = stack.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
+        final LazyOptional<ScannerModule> module = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
         if (module.isPresent()) {
             return 64;
         }

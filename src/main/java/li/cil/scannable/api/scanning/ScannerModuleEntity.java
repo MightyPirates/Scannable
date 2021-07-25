@@ -1,6 +1,6 @@
 package li.cil.scannable.api.scanning;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
  * When implementing this interface, return the result provider implementation
  * obtained from the provider registry like so:
  * <pre>
- * GameRegistry.findRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_ENTITIES);
+ * RegistryManager.ACTIVE.getRegistry(ScanResultProvider.class).getValue(API.SCAN_RESULT_PROVIDER_ENTITIES);
  * </pre>
  */
 public interface ScannerModuleEntity extends ScannerModule {

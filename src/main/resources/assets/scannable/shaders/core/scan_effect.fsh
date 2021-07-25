@@ -1,4 +1,4 @@
-#version 120
+#version 150
 
 uniform mat4 invViewMat;
 uniform mat4 invProjMat;
@@ -7,7 +7,9 @@ uniform vec3 center;
 uniform float radius;
 uniform sampler2D depthTex;
 
-varying vec2 texCoord;
+in vec2 texCoord0;
+
+out vec4 fragColor;
 
 const float width = 10;
 const float sharpness = 10;
@@ -22,7 +24,7 @@ float scanlines() {
 
 vec3 worldpos(float depth) {
     float z = depth * 2.0 - 1.0;
-    vec4 clipSpacePosition = vec4(texCoord * 2.0 - 1.0, z, 1.0);
+    vec4 clipSpacePosition = vec4(texCoord0 * 2.0 - 1.0, z, 1.0);
     vec4 viewSpacePosition = invProjMat * clipSpacePosition;
     viewSpacePosition /= viewSpacePosition.w;
     vec4 worldSpacePosition = invViewMat * viewSpacePosition;
@@ -33,7 +35,7 @@ vec3 worldpos(float depth) {
 void main() {
     vec4 color = vec4(0, 0, 0, 0);
 
-    float depth = texture2D(depthTex, texCoord).r;
+    float depth = texture2D(depthTex, texCoord0).r;
     vec3 pos = worldpos(depth);
     float dist = distance(pos, center);
 
@@ -44,5 +46,5 @@ void main() {
         color *= diff;
     }
 
-    gl_FragColor = color;
+    fragColor = color;
 }

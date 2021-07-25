@@ -1,37 +1,37 @@
 package li.cil.scannable.data;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.Scannable;
+import li.cil.scannable.common.item.Items;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.Objects;
 
-public class Items extends ItemModelProvider {
-    public Items(final DataGenerator generator, final ExistingFileHelper existingFileHelper) {
+public final class ModItemModelProvider extends ItemModelProvider {
+    public ModItemModelProvider(final DataGenerator generator, final ExistingFileHelper existingFileHelper) {
         super(generator, API.MOD_ID, existingFileHelper);
     }
 
     @Override
     protected void registerModels() {
-        begin(Scannable.SCANNER.get())
+        begin(Items.SCANNER.get())
                 .texture("layer0", new ResourceLocation(API.MOD_ID, "items/scanner"));
-        begin(Scannable.MODULE_BLANK.get())
+        begin(Items.MODULE_BLANK.get())
                 .texture("layer0", new ResourceLocation(API.MOD_ID, "items/module_blank"));
 
-        registerModule(Scannable.MODULE_RANGE.get(), "items/module_range");
-        registerModule(Scannable.MODULE_ENTITY.get(), "items/module_entity");
-        registerModule(Scannable.MODULE_ANIMAL.get(), "items/module_animal");
-        registerModule(Scannable.MODULE_MONSTER.get(), "items/module_monster");
-        registerModule(Scannable.MODULE_BLOCK.get(), "items/module_block");
-        registerModule(Scannable.MODULE_ORE_COMMON.get(), "items/module_ore_common");
-        registerModule(Scannable.MODULE_ORE_RARE.get(), "items/module_ore_rare");
-        registerModule(Scannable.MODULE_FLUID.get(), "items/module_fluid");
-        // registerModule(Scannable.MODULE_STRUCTURE.get(), "items/module_structure");
+        registerModule(Items.MODULE_RANGE.get(), "items/module_range");
+        registerModule(Items.MODULE_ENTITY.get(), "items/module_entity");
+        registerModule(Items.MODULE_ANIMAL.get(), "items/module_animal");
+        registerModule(Items.MODULE_MONSTER.get(), "items/module_monster");
+        registerModule(Items.MODULE_BLOCK.get(), "items/module_block");
+        registerModule(Items.MODULE_ORE_COMMON.get(), "items/module_ore_common");
+        registerModule(Items.MODULE_ORE_RARE.get(), "items/module_ore_rare");
+        registerModule(Items.MODULE_FLUID.get(), "items/module_fluid");
+        // registerModule(Items.MODULE_STRUCTURE.get(), "items/module_structure");
     }
 
     private ItemModelBuilder begin(final Item item) {

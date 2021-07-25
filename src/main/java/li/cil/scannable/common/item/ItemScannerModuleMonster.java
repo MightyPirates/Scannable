@@ -2,18 +2,18 @@ package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.scanning.ScannerModuleMonster;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public final class ItemScannerModuleMonster extends AbstractItemScannerModuleEntity {
+public final class ItemScannerModuleMonster extends AbstractItemScannerModule {
     public ItemScannerModuleMonster() {
         super(ScannerModuleMonster.INSTANCE);
     }
@@ -23,8 +23,8 @@ public final class ItemScannerModuleMonster extends AbstractItemScannerModuleEnt
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
-        tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_MONSTER));
+    public void appendHoverText(final ItemStack stack, @Nullable final Level world, final List<Component> tooltip, final TooltipFlag flag) {
+        tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_MONSTER));
         super.appendHoverText(stack, world, tooltip, flag);
     }
 }

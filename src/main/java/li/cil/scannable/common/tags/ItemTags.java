@@ -1,13 +1,13 @@
 package li.cil.scannable.common.tags;
 
 import li.cil.scannable.api.API;
-import net.minecraft.item.Item;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.tags.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.Tags;
 
 public final class ItemTags {
-    public static final ITag.INamedTag<Item> MODULES = tag("modules");
+    public static final Tag.Named<Item> MODULES = tag("modules");
 
     // --------------------------------------------------------------------- //
 

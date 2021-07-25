@@ -1,15 +1,12 @@
 package li.cil.scannable.common.network.message;
 
-import io.netty.buffer.ByteBuf;
 import li.cil.scannable.client.scanning.ScanResultProviderStructure;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.function.Supplier;
-
-public final class MessageStructureResponse {
+public final class MessageStructureResponse extends AbstractMessage {
     private ScanResultProviderStructure.StructureLocation[] structures;
 
     // --------------------------------------------------------------------- //
@@ -18,37 +15,34 @@ public final class MessageStructureResponse {
         this.structures = structures;
     }
 
-    public MessageStructureResponse(final ByteBuf buffer) {
-        fromBytes(buffer);
+    public MessageStructureResponse(final FriendlyByteBuf buffer) {
+        super(buffer);
     }
 
     // --------------------------------------------------------------------- //
 
-    public static boolean handle(final MessageStructureResponse message, final Supplier<NetworkEvent.Context> context) {
-        ScanResultProviderStructure.INSTANCE.setStructures(message.structures);
-
-        return true;
+    @Override
+    protected void handleMessage(final NetworkEvent.Context context) {
+        ScanResultProviderStructure.INSTANCE.setStructures(structures);
     }
 
-    // --------------------------------------------------------------------- //
-
-    public void fromBytes(final ByteBuf buffer) {
-        final PacketBuffer packet = new PacketBuffer(buffer);
-        final int length = packet.readInt();
+    @Override
+    public void fromBytes(final FriendlyByteBuf buffer) {
+        final int length = buffer.readInt();
         structures = new ScanResultProviderStructure.StructureLocation[length];
         for (int i = 0; i < length; i++) {
-            final ITextComponent name = packet.readComponent();
-            final BlockPos pos = packet.readBlockPos();
+            final Component name = buffer.readComponent();
+            final BlockPos pos = buffer.readBlockPos();
             structures[i] = new ScanResultProviderStructure.StructureLocation(name, pos);
         }
     }
 
-    public void toBytes(final ByteBuf buffer) {
-        final PacketBuffer packet = new PacketBuffer(buffer);
-        packet.writeInt(structures.length);
+    @Override
+    public void toBytes(final FriendlyByteBuf buffer) {
+        buffer.writeInt(structures.length);
         for (final ScanResultProviderStructure.StructureLocation structure : structures) {
-            packet.writeComponent(structure.name);
-            packet.writeBlockPos(structure.pos);
+            buffer.writeComponent(structure.name());
+            buffer.writeBlockPos(structure.pos());
         }
     }
 }

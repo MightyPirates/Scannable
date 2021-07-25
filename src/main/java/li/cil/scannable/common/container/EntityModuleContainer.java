@@ -1,29 +1,24 @@
 package li.cil.scannable.common.container;
 
-import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.item.ItemScannerModuleEntityConfigurable;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-
-import java.util.Optional;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class EntityModuleContainer extends AbstractModuleContainer {
-    public static EntityModuleContainer createForServer(final int windowId, final PlayerInventory inventory, final Hand hand) {
-        return new EntityModuleContainer(windowId, inventory, hand);
-    }
-
-    public static EntityModuleContainer createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
-        final Hand hand = buffer.readEnum(Hand.class);
+    public static EntityModuleContainer create(final int windowId, final Inventory inventory, final FriendlyByteBuf buffer) {
+        final InteractionHand hand = buffer.readEnum(InteractionHand.class);
         return new EntityModuleContainer(windowId, inventory, hand);
     }
 
     // --------------------------------------------------------------------- //
 
-    public EntityModuleContainer(final int windowId, final PlayerInventory inventory, final Hand hand) {
-        super(Scannable.ENTITY_MODULE_CONTAINER.get(), windowId, inventory, hand);
+    public EntityModuleContainer(final int windowId, final Inventory inventory, final InteractionHand hand) {
+        super(Containers.ENTITY_MODULE_CONTAINER.get(), windowId, inventory, hand);
     }
 
     @Override
@@ -33,11 +28,11 @@ public class EntityModuleContainer extends AbstractModuleContainer {
     }
 
     @Override
-    public void setItemAt(final int index, final String value) {
+    public void setItemAt(final int index, final ResourceLocation name) {
         final ItemStack stack = getPlayer().getItemInHand(getHand());
-        final Optional<EntityType<?>> entityType = EntityType.byString(value);
-        entityType.ifPresent(e -> {
-            ItemScannerModuleEntityConfigurable.setEntityTypeAt(stack, index, e);
-        });
+        final EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(name);
+        if (entityType != null) {
+            ItemScannerModuleEntityConfigurable.setEntityTypeAt(stack, index, entityType);
+        }
     }
 }

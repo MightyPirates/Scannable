@@ -1,9 +1,9 @@
 package li.cil.scannable.client.scanning;
 
 import com.google.common.base.Strings;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import io.netty.util.collection.IntObjectHashMap;
 import io.netty.util.collection.IntObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -14,40 +14,40 @@ import li.cil.scannable.api.scanning.ScanFilterBlock;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
-import li.cil.scannable.client.shader.ScanResultShader;
-import li.cil.scannable.common.capabilities.CapabilityScannerModule;
+import li.cil.scannable.client.shader.Shaders;
+import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.scanning.filter.ScanFilterIgnoredBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.palette.PalettedContainer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
-import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -55,10 +55,6 @@ import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
-    public static final ScanResultProviderBlock INSTANCE = new ScanResultProviderBlock();
-
-    // --------------------------------------------------------------------- //
-
     // Sanity performance check. Maybe some day I'll do some research on how to
     // do the clustering more efficiently, but for now this is good enough. We
     // really only need this when scanning for stupid stuff like stone.
@@ -71,28 +67,28 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private final Map<Block, Map<BlockPos, BlockScanResult>> resultClusters = new HashMap<>();
     private final List<BlockScanResult> results = new ArrayList<>();
 
+    private long renderStartTime;
+
     // --------------------------------------------------------------------- //
     // ScanResultProvider
 
     @Override
-    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks) {
+    public void initialize(final Player player, final Collection<ItemStack> modules, final Vec3 center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
 
         scanFilterLayers.clear();
 
         final IntObjectMap<List<ScanFilterBlock>> filterByRadius = new IntObjectHashMap<>();
-        for (final ItemStack module : modules) {
-            final LazyOptional<ScannerModule> capability = module.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY);
-            capability
-                    .filter(c -> c instanceof ScannerModuleBlock)
-                    .ifPresent(c -> {
-                        final ScannerModuleBlock m = (ScannerModuleBlock) c;
-                        final Optional<ScanFilterBlock> filter = m.getFilter(module);
-                        filter.ifPresent(f -> {
-                            final int localRadius = (int) Math.ceil(m.adjustLocalRange(this.radius));
-                            filterByRadius.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(f);
-                        });
+        for (final ItemStack stack : modules) {
+            final LazyOptional<ScannerModule> capability = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
+            capability.ifPresent(module -> {
+                if (module instanceof ScannerModuleBlock blockModule) {
+                    blockModule.getFilter(stack).ifPresent(f -> {
+                        final int localRadius = (int) Math.ceil(blockModule.adjustLocalRange(this.radius));
+                        filterByRadius.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(f);
                     });
+                }
+            });
         }
 
         final IntList scanFilterKeys = new IntArrayList();
@@ -131,14 +127,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             pendingChunkSections.sort(Comparator.comparingDouble(p -> p.squareDistToCenter));
 
-            chunkSectionsPerTick = MathHelper.ceil(pendingChunkSections.size() / (float) scanTicks);
+            chunkSectionsPerTick = Mth.ceil(pendingChunkSections.size() / (float) scanTicks);
             this.currentChunkSection = 0;
         }
     }
 
     @Override
     public void computeScanResults() {
-        final World world = player.getCommandSenderWorld();
+        final Level world = player.getCommandSenderWorld();
         for (int i = 0; i < chunkSectionsPerTick; i++) {
             if (currentChunkSection >= pendingChunkSections.size()) {
                 return;
@@ -151,15 +147,15 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final int chunkZ = chunkSectionPos.chunkZ;
             final int chunkSectionIndex = chunkSectionPos.chunkSectionIndex;
 
-            final IChunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+            final ChunkAccess chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
             if (chunk == null) {
                 continue;
             }
 
-            final ChunkSection[] sections = chunk.getSections();
+            final LevelChunkSection[] sections = chunk.getSections();
             assert sections.length == 16;
 
-            final ChunkSection section = sections[chunkSectionIndex];
+            final LevelChunkSection section = sections[chunkSectionIndex];
             if (section == null || section.isEmpty()) {
                 continue;
             }
@@ -214,44 +210,49 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     }
 
     @Override
-    public void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback) {
+    public void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback) {
         for (final BlockScanResult result : results) {
             if (result.isRoot()) {
                 result.bake(world);
                 callback.accept(result);
             }
         }
+
+        renderStartTime = System.currentTimeMillis();
     }
 
     @Override
-    public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
-        // Re-render hands into depth buffer to avoid rendering overlay on top of player hands.
-        if (Minecraft.getInstance().gameRenderer.renderHand) {
-            RenderSystem.colorMask(false, false, false, false);
-            matrixStack.pushPose();
-            Minecraft.getInstance().gameRenderer.renderItemInHand(matrixStack, renderInfo, partialTicks);
-            matrixStack.popPose();
-            RenderSystem.colorMask(true, true, true, true);
+    public void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+        final ShaderInstance shader = Shaders.getScanResultShader();
+        if (shader == null) {
+            return;
         }
 
-        ScanResultShader.setProjectionMatrix(projectionMatrix);
-        ScanResultShader.setViewMatrix(matrixStack.last().pose());
+        // Re-render hands into depth buffer to avoid rendering overlay on top of player hands.
+        if (Minecraft.getInstance().gameRenderer.renderHand) {
+            final Matrix4f oldProjectionMatrix = RenderSystem.getProjectionMatrix();
+            RenderSystem.colorMask(false, false, false, false);
+            poseStack.pushPose();
+            Minecraft.getInstance().gameRenderer.renderItemInHand(poseStack, renderInfo, partialTicks);
+            poseStack.popPose();
+            RenderSystem.colorMask(true, true, true, true);
+            RenderSystem.setProjectionMatrix(oldProjectionMatrix);
+        }
+
+        shader.safeGetUniform("time").set((System.currentTimeMillis() - renderStartTime) / 1000.0f);
 
         final RenderType renderType = getBlockScanResultRenderLayer();
         renderType.setupRenderState();
         for (final ScanResult result : results) {
             final BlockScanResult blockResult = (BlockScanResult) result;
             final VertexBuffer vbo = blockResult.vbo;
-            vbo.bind();
-            DefaultVertexFormats.POSITION_COLOR_TEX.setupBufferState(0);
-            vbo.draw(matrixStack.last().pose(), GL11.GL_QUADS);
+            vbo.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), shader);
             VertexBuffer.unbind();
-            DefaultVertexFormats.POSITION_COLOR_TEX.clearBufferState();
         }
         renderType.clearRenderState();
 
-        final Vector3d lookVec = new Vector3d(renderInfo.getLookVector());
-        final Vector3d viewerEyes = renderInfo.getPosition();
+        final Vec3 lookVec = new Vec3(renderInfo.getLookVector());
+        final Vec3 viewerEyes = renderInfo.getPosition();
         final float yaw = renderInfo.getYRot();
         final float pitch = renderInfo.getXRot();
         final boolean showDistance = renderInfo.getEntity().isShiftKeyDown();
@@ -260,23 +261,23 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         // vector) so that labels we're looking at are in front of others.
         results.sort(Comparator.comparing(result -> {
             final BlockScanResult blockResult = (BlockScanResult) result;
-            final Vector3d resultPos = blockResult.getPosition();
-            final Vector3d toResult = resultPos.subtract(viewerEyes);
+            final Vec3 resultPos = blockResult.getPosition();
+            final Vec3 toResult = resultPos.subtract(viewerEyes);
             return lookVec.dot(toResult.normalize());
         }));
 
         for (final ScanResult result : results) {
             final BlockScanResult blockResult = (BlockScanResult) result;
 
-            final Vector3d resultPos = result.getPosition();
-            final Vector3d toResult = resultPos.subtract(viewerEyes);
+            final Vec3 resultPos = result.getPosition();
+            final Vec3 toResult = resultPos.subtract(viewerEyes);
             final float lookDirDot = (float) lookVec.dot(toResult.normalize());
 
             final Block block = blockResult.block;
-            final ITextComponent label = block.getName();
+            final Component label = block.getName();
             if (lookDirDot > 0.98f && !Strings.isNullOrEmpty(label.getString())) {
                 final float distance = showDistance ? (float) resultPos.subtract(viewerEyes).length() : 0f;
-                renderIconLabel(renderTypeBuffer, matrixStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, API.ICON_INFO, label);
+                renderIconLabel(bufferSource, poseStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, API.ICON_INFO, label);
             }
         }
     }
@@ -293,17 +294,18 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     // --------------------------------------------------------------------- //
 
-    private static RenderType getBlockScanResultRenderLayer() {
+    public static RenderType getBlockScanResultRenderLayer() {
         return RenderType.create("scan_result",
-                DefaultVertexFormats.POSITION_COLOR_TEX,
-                GL11.GL_QUADS,
+                DefaultVertexFormat.POSITION_COLOR_TEX,
+                VertexFormat.Mode.QUADS,
                 65536,
-                RenderType.State.builder()
-                        .setTransparencyState(RenderState.LIGHTNING_TRANSPARENCY)
-                        .setWriteMaskState(RenderState.COLOR_WRITE)
-                        .setCullState(RenderState.NO_CULL)
-                        .setTexturingState(new RenderState.TexturingState("shader",
-                                ScanResultShader.INSTANCE::bind, ScanResultShader.INSTANCE::unbind))
+                false,
+                false,
+                RenderType.CompositeState.builder()
+                        .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
+                        .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
+                        .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                        .setCullState(RenderStateShard.NO_CULL)
                         .createCompositeState(false));
     }
 
@@ -336,49 +338,30 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         return root;
     }
 
-    private static final class ScanFilterLayer {
-        public final int radius;
-        public final List<ScanFilterBlock> filters;
-
-        public ScanFilterLayer(final int radius, final List<ScanFilterBlock> filters) {
-            this.radius = radius;
-            this.filters = filters;
-        }
+    private record ScanFilterLayer(int radius, List<ScanFilterBlock> filters) {
     }
 
-    private static final class ChunkSectionPos {
-        public final int chunkX;
-        public final int chunkZ;
-        public final int chunkSectionIndex;
-        public double squareDistToCenter;
-
-        private ChunkSectionPos(final int chunkX, final int chunkZ, final int chunkSectionIndex, final double squareDistToCenter) {
-            this.chunkX = chunkX;
-            this.chunkZ = chunkZ;
-            this.chunkSectionIndex = chunkSectionIndex;
-            this.squareDistToCenter = squareDistToCenter;
-        }
+    private record ChunkSectionPos(int chunkX, int chunkZ, int chunkSectionIndex, double squareDistToCenter) {
     }
 
     // --------------------------------------------------------------------- //
 
     private static final class BlockScanResult implements ScanResult {
         private final Block block;
-        private AxisAlignedBB bounds;
-        @Nullable
-        private BlockScanResult parent;
+        private AABB bounds;
+        @Nullable private BlockScanResult parent;
         private final Set<BlockPos> blocks;
         private int color;
         private VertexBuffer vbo;
 
         BlockScanResult(final Block block, final BlockPos pos) {
             this.block = block;
-            bounds = new AxisAlignedBB(pos);
+            bounds = new AABB(pos);
             blocks = new HashSet<>();
             blocks.add(pos);
         }
 
-        void bake(final IBlockReader world) {
+        void bake(final BlockGetter world) {
             final BlockState blockState = block.defaultBlockState();
 
             color = blockState.getMapColor(world, new BlockPos(bounds.getCenter())).col;
@@ -392,7 +375,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     color = Settings.fluidColors.getInt(fluidState.getType());
                 } else {
                     Settings.fluidTagColors.forEach((k, v) -> {
-                        final ITag<Fluid> tag = FluidTags.getAllTags().getTag(k);
+                        final Tag<Fluid> tag = FluidTags.getAllTags().getTag(k);
                         if (tag != null && tag.contains(fluidState.getType())) {
                             color = v;
                         }
@@ -403,7 +386,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     color = Settings.blockColors.getInt(blockState.getBlock());
                 } else {
                     Settings.blockTagColors.forEach((k, v) -> {
-                        final ITag<Block> tag = BlockTags.getAllTags().getTag(k);
+                        final Tag<Block> tag = BlockTags.getAllTags().getTag(k);
                         if (tag != null && tag.contains(blockState.getBlock())) {
                             color = v;
                         }
@@ -411,13 +394,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 }
             }
 
-            final Tessellator tessellator = Tessellator.getInstance();
-            final BufferBuilder buffer = tessellator.getBuilder();
-            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
-            final MatrixStack matrixStack = new MatrixStack();
-            render(buffer, matrixStack);
+            final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            render(buffer, new PoseStack());
             buffer.end();
-            vbo = new VertexBuffer(DefaultVertexFormats.POSITION_COLOR_TEX);
+            vbo = new VertexBuffer();
             vbo.upload(buffer);
         }
 
@@ -447,11 +428,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         void add(final BlockPos pos) {
             assert parent == null : "Trying to add to non-root node.";
-            bounds = bounds.minmax(new AxisAlignedBB(pos));
+            bounds = bounds.minmax(new AABB(pos));
             blocks.add(pos);
         }
 
-        void render(final IVertexBuilder buffer, final MatrixStack matrixStack) {
+        void render(final VertexConsumer buffer, final PoseStack matrixStack) {
             final Matrix4f matrix = matrixStack.last().pose();
 
             final float colorNormalizer = 1 / 255f;
@@ -473,10 +454,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvY;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, x, minY, minZ).color(r, g, b, 0.8f).uv(u0, v0).endVertex();
-                    buffer.vertex(matrix, x, minY, maxZ).color(r, g, b, 0.8f).uv(u0, v1).endVertex();
-                    buffer.vertex(matrix, x, maxY, maxZ).color(r, g, b, 0.8f).uv(u1, v1).endVertex();
-                    buffer.vertex(matrix, x, maxY, minZ).color(r, g, b, 0.8f).uv(u1, v0).endVertex();
+                    buffer.vertex(matrix, x, minY, minZ).uv(u0, v0).color(r, g, b, 0.8f).endVertex();
+                    buffer.vertex(matrix, x, minY, maxZ).uv(u0, v1).color(r, g, b, 0.8f).endVertex();
+                    buffer.vertex(matrix, x, maxY, maxZ).uv(u1, v1).color(r, g, b, 0.8f).endVertex();
+                    buffer.vertex(matrix, x, maxY, minZ).uv(u1, v0).color(r, g, b, 0.8f).endVertex();
                 }
                 if (!blocks.contains(cell.offset(1, 0, 0))) {
                     final float x = cell.getX() + 1;
@@ -488,10 +469,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvY;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, x, minY, minZ).color(r, g, b, 0.8f).uv(u0, v0).endVertex();
-                    buffer.vertex(matrix, x, maxY, minZ).color(r, g, b, 0.8f).uv(u1, v0).endVertex();
-                    buffer.vertex(matrix, x, maxY, maxZ).color(r, g, b, 0.8f).uv(u1, v1).endVertex();
-                    buffer.vertex(matrix, x, minY, maxZ).color(r, g, b, 0.8f).uv(u0, v1).endVertex();
+                    buffer.vertex(matrix, x, minY, minZ).uv(u0, v0).color(r, g, b, 0.8f).endVertex();
+                    buffer.vertex(matrix, x, maxY, minZ).uv(u1, v0).color(r, g, b, 0.8f).endVertex();
+                    buffer.vertex(matrix, x, maxY, maxZ).uv(u1, v1).color(r, g, b, 0.8f).endVertex();
+                    buffer.vertex(matrix, x, minY, maxZ).uv(u0, v1).color(r, g, b, 0.8f).endVertex();
                 }
                 if (!blocks.contains(cell.offset(0, -1, 0))) {
                     final float y = cell.getY();
@@ -503,10 +484,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, minX, y, minZ).color(r, g, b, 0.7f).uv(u0, v0).endVertex();
-                    buffer.vertex(matrix, maxX, y, minZ).color(r, g, b, 0.7f).uv(u1, v0).endVertex();
-                    buffer.vertex(matrix, maxX, y, maxZ).color(r, g, b, 0.7f).uv(u1, v1).endVertex();
-                    buffer.vertex(matrix, minX, y, maxZ).color(r, g, b, 0.7f).uv(u0, v1).endVertex();
+                    buffer.vertex(matrix, minX, y, minZ).uv(u0, v0).color(r, g, b, 0.7f).endVertex();
+                    buffer.vertex(matrix, maxX, y, minZ).uv(u1, v0).color(r, g, b, 0.7f).endVertex();
+                    buffer.vertex(matrix, maxX, y, maxZ).uv(u1, v1).color(r, g, b, 0.7f).endVertex();
+                    buffer.vertex(matrix, minX, y, maxZ).uv(u0, v1).color(r, g, b, 0.7f).endVertex();
                 }
                 if (!blocks.contains(cell.offset(0, 1, 0))) {
                     final float y = cell.getY() + 1;
@@ -518,10 +499,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, minX, y, minZ).color(r, g, b, 1.0f).uv(u0, v0).endVertex();
-                    buffer.vertex(matrix, minX, y, maxZ).color(r, g, b, 1.0f).uv(u0, v1).endVertex();
-                    buffer.vertex(matrix, maxX, y, maxZ).color(r, g, b, 1.0f).uv(u1, v1).endVertex();
-                    buffer.vertex(matrix, maxX, y, minZ).color(r, g, b, 1.0f).uv(u1, v0).endVertex();
+                    buffer.vertex(matrix, minX, y, minZ).uv(u0, v0).color(r, g, b, 1.0f).endVertex();
+                    buffer.vertex(matrix, minX, y, maxZ).uv(u0, v1).color(r, g, b, 1.0f).endVertex();
+                    buffer.vertex(matrix, maxX, y, maxZ).uv(u1, v1).color(r, g, b, 1.0f).endVertex();
+                    buffer.vertex(matrix, maxX, y, minZ).uv(u1, v0).color(r, g, b, 1.0f).endVertex();
                 }
                 if (!blocks.contains(cell.offset(0, 0, -1))) {
                     final float z = cell.getZ();
@@ -533,10 +514,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minY - (float) bounds.minY) * sizeUvY;
                     final float v1 = v0 + sizeUvY;
-                    buffer.vertex(matrix, minX, minY, z).color(r, g, b, 0.9f).uv(u0, v0).endVertex();
-                    buffer.vertex(matrix, minX, maxY, z).color(r, g, b, 0.9f).uv(u0, v1).endVertex();
-                    buffer.vertex(matrix, maxX, maxY, z).color(r, g, b, 0.9f).uv(u1, v1).endVertex();
-                    buffer.vertex(matrix, maxX, minY, z).color(r, g, b, 0.9f).uv(u1, v0).endVertex();
+                    buffer.vertex(matrix, minX, minY, z).uv(u0, v0).color(r, g, b, 0.9f).endVertex();
+                    buffer.vertex(matrix, minX, maxY, z).uv(u0, v1).color(r, g, b, 0.9f).endVertex();
+                    buffer.vertex(matrix, maxX, maxY, z).uv(u1, v1).color(r, g, b, 0.9f).endVertex();
+                    buffer.vertex(matrix, maxX, minY, z).uv(u1, v0).color(r, g, b, 0.9f).endVertex();
                 }
                 if (!blocks.contains(cell.offset(0, 0, 1))) {
                     final float z = cell.getZ() + 1;
@@ -548,10 +529,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minY - (float) bounds.minY) * sizeUvY;
                     final float v1 = v0 + sizeUvY;
-                    buffer.vertex(matrix, minX, minY, z).color(r, g, b, 0.9f).uv(u0, v0).endVertex();
-                    buffer.vertex(matrix, maxX, minY, z).color(r, g, b, 0.9f).uv(u1, v0).endVertex();
-                    buffer.vertex(matrix, maxX, maxY, z).color(r, g, b, 0.9f).uv(u1, v1).endVertex();
-                    buffer.vertex(matrix, minX, maxY, z).color(r, g, b, 0.9f).uv(u0, v1).endVertex();
+                    buffer.vertex(matrix, minX, minY, z).uv(u0, v0).color(r, g, b, 0.9f).endVertex();
+                    buffer.vertex(matrix, maxX, minY, z).uv(u1, v0).color(r, g, b, 0.9f).endVertex();
+                    buffer.vertex(matrix, maxX, maxY, z).uv(u1, v1).color(r, g, b, 0.9f).endVertex();
+                    buffer.vertex(matrix, minX, maxY, z).uv(u0, v1).color(r, g, b, 0.9f).endVertex();
                 }
             }
         }
@@ -561,12 +542,12 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         @Nullable
         @Override
-        public AxisAlignedBB getRenderBounds() {
+        public AABB getRenderBounds() {
             return bounds;
         }
 
         @Override
-        public Vector3d getPosition() {
+        public Vec3 getPosition() {
             return bounds.getCenter();
         }
 
@@ -577,10 +558,5 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 vbo = null;
             }
         }
-    }
-
-    // --------------------------------------------------------------------- //
-
-    private ScanResultProviderBlock() {
     }
 }

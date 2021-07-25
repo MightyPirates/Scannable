@@ -1,10 +1,10 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -41,7 +41,10 @@ version = "${semver}+${build_number}"
 group = 'li.cil.scannable'
 archivesBaseName = "${rootProject.name}-MC${minecraft_version}-Forge"
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(16)
+    vendor = JvmVendorSpec.ADOPTOPENJDK
+}
 
 repositories {
     maven { url 'https://dvs1.progwml6.com/files/maven' } // JEI
@@ -50,8 +53,8 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}")
+//    compileOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}:api")
+//    runtimeOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}")
 }
 
 processResources {
@@ -62,6 +65,7 @@ processResources {
                 'mod_version': version,
         ])
     }
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
 
 minecraft {
@@ -173,7 +177,7 @@ curseforge {
         changelog = file('changelog.md')
         addGameVersion 'Forge'
         addGameVersion minecraft_version
-        addGameVersion 'Java 8'
+        addGameVersion 'Java 16'
     }
 }
 

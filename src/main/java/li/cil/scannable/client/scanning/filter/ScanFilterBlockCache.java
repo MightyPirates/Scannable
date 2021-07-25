@@ -1,8 +1,8 @@
 package li.cil.scannable.client.scanning.filter;
 
 import li.cil.scannable.api.scanning.ScanFilterBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;

@@ -1,7 +1,7 @@
 package li.cil.scannable.api.scanning;
 
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -19,7 +19,7 @@ public interface ScanResult extends Closeable {
      *
      * @return the in-world position of the scan result.
      */
-    Vector3d getPosition();
+    Vec3 getPosition();
 
     /**
      * A bounding box encompassing anything the result may render.
@@ -29,7 +29,7 @@ public interface ScanResult extends Closeable {
      * @return the render bounding box for the result.
      */
     @Nullable
-    AxisAlignedBB getRenderBounds();
+    AABB getRenderBounds();
 
     /**
      * Called when results are disposed to allow freeing non-managed resources

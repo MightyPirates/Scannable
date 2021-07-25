@@ -1,13 +1,12 @@
 package li.cil.scannable.api.scanning;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -24,10 +23,10 @@ import java.util.function.Consumer;
  * advancement so as to allow distributing scan workload over multiple ticks.
  * <p>
  * If your implementation is not that computationally expensive, it is fine to
- * just collect all scan results in {@link #collectScanResults(IBlockReader, Consumer)}.
+ * just collect all scan results in {@link #collectScanResults(BlockGetter, Consumer)}.
  * <p>
  * Otherwise, the implementation should prepare for spread out collection of
- * results in {@link #initialize(PlayerEntity, Collection, Vector3d, float, int)},
+ * results in {@link #initialize(Player, Collection, Vec3, float, int)},
  * over the specified number of ticks. Each tick until the scan is complete,
  * {@link #computeScanResults()} will be called. Implementations should gather
  * results and return all valid results when <code>collectScanResults</code>
@@ -49,7 +48,7 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * @param radius    the maximum radius of the scanned sphere.
      * @param scanTicks the total number of ticks the scan will take.
      */
-    void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks);
+    void initialize(final Player player, final Collection<ItemStack> modules, final Vec3 center, final float radius, final int scanTicks);
 
     /**
      * Called each tick during an ongoing scan. Perform internal computations
@@ -65,7 +64,7 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * @param world    the world to check for.
      * @param callback the callback to feed results to.
      */
-    void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback);
+    void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback);
 
     /**
      * Render the specified results.
@@ -73,19 +72,18 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * This is delegated as a batch call to the provider to allow optimized
      * rendering of large numbers of results. The provided results are
      * guaranteed to have been produced by this provider via its
-     * {@link #collectScanResults(IBlockReader, Consumer)} method.
+     * {@link #collectScanResults(BlockGetter, Consumer)} method.
      * <p>
      * The specified list has been frustum culled using the results' bounds
      * provided from {@link ScanResult#getRenderBounds()}.
      *
-     * @param renderTypeBuffer the buffer to use for batched rendering.
-     * @param matrixStack      the matrix stack for rendering.
-     * @param projectionMatrix the current projection matrix.
-     * @param renderInfo       the active render info.
-     * @param partialTicks     partial ticks of the currently rendered frame.
-     * @param results          the results to render.
+     * @param bufferSource the buffer source to use for batched rendering.
+     * @param poseStack    the pose stack for rendering.
+     * @param renderInfo   the active render info.
+     * @param partialTicks partial ticks of the currently rendered frame.
+     * @param results      the results to render.
      */
-    void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results);
+    void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results);
 
     /**
      * Called when a scan is complete or is canceled.

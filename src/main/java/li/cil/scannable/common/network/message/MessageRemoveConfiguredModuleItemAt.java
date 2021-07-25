@@ -1,14 +1,11 @@
 package li.cil.scannable.common.network.message;
 
-import io.netty.buffer.ByteBuf;
 import li.cil.scannable.common.container.AbstractModuleContainer;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
-import java.util.function.Supplier;
-
-public final class MessageRemoveConfiguredModuleItemAt {
+public final class MessageRemoveConfiguredModuleItemAt extends AbstractMessage {
     private int windowId;
     private int index;
 
@@ -19,33 +16,31 @@ public final class MessageRemoveConfiguredModuleItemAt {
         this.index = index;
     }
 
-    public MessageRemoveConfiguredModuleItemAt(final ByteBuf buffer) {
-        fromBytes(buffer);
+    public MessageRemoveConfiguredModuleItemAt(final FriendlyByteBuf buffer) {
+        super(buffer);
     }
 
     // --------------------------------------------------------------------- //
 
-    public static boolean handle(final MessageRemoveConfiguredModuleItemAt message, final Supplier<NetworkEvent.Context> context) {
-        final ServerPlayerEntity player = context.get().getSender();
-        if (player != null && player.containerMenu != null && player.containerMenu.containerId == message.windowId) {
+    @Override
+    protected void handleMessage(final NetworkEvent.Context context) {
+        final ServerPlayer player = context.getSender();
+        if (player != null && player.containerMenu != null && player.containerMenu.containerId == windowId) {
             if (player.containerMenu instanceof AbstractModuleContainer) {
-                ((AbstractModuleContainer) player.containerMenu).removeItemAt(message.index);
+                ((AbstractModuleContainer) player.containerMenu).removeItemAt(index);
             }
         }
-        return true;
     }
 
-    // --------------------------------------------------------------------- //
-
-    public void fromBytes(final ByteBuf buffer) {
-        final PacketBuffer packet = new PacketBuffer(buffer);
-        windowId = packet.readByte();
-        index = packet.readByte();
+    @Override
+    public void fromBytes(final FriendlyByteBuf buffer) {
+        windowId = buffer.readByte();
+        index = buffer.readByte();
     }
 
-    public void toBytes(final ByteBuf buffer) {
-        final PacketBuffer packet = new PacketBuffer(buffer);
-        packet.writeByte(windowId);
-        packet.writeByte(index);
+    @Override
+    public void toBytes(final FriendlyByteBuf buffer) {
+        buffer.writeByte(windowId);
+        buffer.writeByte(index);
     }
 }

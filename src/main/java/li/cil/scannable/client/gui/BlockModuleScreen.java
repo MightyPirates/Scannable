@@ -5,17 +5,17 @@ import li.cil.scannable.common.container.BlockModuleContainer;
 import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.MessageSetConfiguredModuleItemAt;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
 public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockModuleContainer, Block> {
-    public BlockModuleScreen(final BlockModuleContainer container, final PlayerInventory inventory, final ITextComponent title) {
+    public BlockModuleScreen(final BlockModuleContainer container, final Inventory inventory, final Component title) {
         super(container, inventory, title, Constants.GUI_MODULE_BLOCK_LIST);
     }
 
@@ -27,7 +27,7 @@ public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockMod
     }
 
     @Override
-    protected ITextComponent getItemName(final Block block) {
+    protected Component getItemName(final Block block) {
         return block.getName();
     }
 
@@ -39,10 +39,11 @@ public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockMod
     @Override
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         final Block block = Block.byItem(value.getItem());
+        //noinspection ConstantConditions Non-null for byItem is a lie because BlockItem.getBlock can return null.
         if (block != null && block != Blocks.AIR) {
             final ResourceLocation registryName = block.getRegistryName();
             if (registryName != null) {
-                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName.toString()));
+                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName));
             }
         }
     }

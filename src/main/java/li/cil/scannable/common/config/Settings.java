@@ -3,21 +3,24 @@ package li.cil.scannable.common.config;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.Scannable;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.Util;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.ResourceLocationException;
-import net.minecraft.util.Util;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.GameData;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,11 +28,13 @@ import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = API.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Settings {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     // --------------------------------------------------------------------- //
     // Server settings
 
     private static final ServerSettings SERVER_INSTANCE;
-    private static final ForgeConfigSpec SERVER_SPEC;
+    private static final IConfigSpec<ForgeConfigSpec> SERVER_SPEC;
 
     // --------------------------------------------------------------------- //
 
@@ -77,7 +82,7 @@ public final class Settings {
     // Client settings
 
     private static final ClientSettings CLIENT_INSTANCE;
-    private static final ForgeConfigSpec CLIENT_SPEC;
+    private static final IConfigSpec<ForgeConfigSpec> CLIENT_SPEC;
 
     public static Object2IntMap<ResourceLocation> blockColors = new Object2IntOpenHashMap<>();
     public static Object2IntMap<ResourceLocation> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
@@ -123,16 +128,16 @@ public final class Settings {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Settings.CLIENT_SPEC);
     }
 
-    public static boolean isServerConfig(final ForgeConfigSpec spec) {
+    public static boolean isServerConfig(final IConfigSpec<ForgeConfigSpec> spec) {
         return spec == SERVER_SPEC;
     }
 
-    public static boolean isClientConfig(final ForgeConfigSpec spec) {
+    public static boolean isClientConfig(final IConfigSpec<ForgeConfigSpec> spec) {
         return spec == CLIENT_SPEC;
     }
 
     @SubscribeEvent
-    public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
+    public static void onModConfigEvent(final ModConfigEvent configEvent) {
         if (isServerConfig(configEvent.getConfig().getSpec())) {
             useEnergy = SERVER_INSTANCE.useEnergy.get();
             energyCapacityScanner = SERVER_INSTANCE.energyCapacityScanner.get();
@@ -295,17 +300,19 @@ public final class Settings {
 
             ignoredBlocks = builder
                     .translation(Constants.CONFIG_IGNORED_BLOCKS)
-                    .comment("Registry names of blocks that should be ignored.\n" +
-                             "Blocks in this list will be excluded from the default ore list based on the forge:ores\n" +
-                             "tag and it will be impossible to tune the entity module to this block.")
+                    .comment("""
+                            Registry names of blocks that should be ignored.
+                            Blocks in this list will be excluded from the default ore list based on the forge:ores
+                            tag and it will be impossible to tune the entity module to this block.""")
                     .worldRestart()
                     .defineList("ignoredBlocks", serializeSet(Settings.ignoredBlocks, ResourceLocation::toString), Settings::validateResourceLocation);
 
             ignoredBlockTags = builder
                     .translation(Constants.CONFIG_IGNORED_BLOCK_TAGS)
-                    .comment("Tag names of block tags that should be ignored.\n" +
-                             "Blocks matching a tag in this list will be excluded from the default ore list based on the" +
-                             "forge:ores tag and it will be impossible to tune the entity module to this block.")
+                    .comment("""
+                            Tag names of block tags that should be ignored.
+                            Blocks matching a tag in this list will be excluded from the default ore list based on the
+                            forge:ores tag and it will be impossible to tune the entity module to this block.""")
                     .worldRestart()
                     .defineList("ignoredBlockTags", serializeSet(Settings.ignoredBlockTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
@@ -333,9 +340,10 @@ public final class Settings {
 
             rareOreBlockTags = builder
                     .translation(Constants.CONFIG_ORE_RARE_BLOCK_TAGS)
-                    .comment("Block tags of blocks considered 'rare ores', requiring the common ore scanner module.\n" +
-                             "Any block with the forge:ores tag is implicitly in this list, unless the block also\n" +
-                             "matches an ignored or common ore block tag, or is an ignored or common block.")
+                    .comment("""
+                            Block tags of blocks considered 'rare ores', requiring the common ore scanner module.
+                            Any block with the forge:ores tag is implicitly in this list, unless the block also
+                            matches an ignored or common ore block tag, or is an ignored or common block.""")
                     .worldRestart()
                     .defineList("rareOreBlockTags", serializeSet(Settings.rareOreBlockTags, ResourceLocation::toString), Settings::validateResourceLocation);
 
@@ -372,10 +380,11 @@ public final class Settings {
         public ClientSettings(final ForgeConfigSpec.Builder builder) {
             blockColors = builder
                     .translation(Constants.CONFIG_BLOCK_COLORS)
-                    .comment("The colors for blocks used when rendering their result bounding box\n" +
-                             "by block name. Each entry must be a key-value pair separated by a `=`,\n" +
-                             "with the key being the tag name and the value being the hexadecimal\n" +
-                             "RGB value of the color.")
+                    .comment("""
+                            The colors for blocks used when rendering their result bounding box
+                            by block name. Each entry must be a key-value pair separated by a `=`,
+                            with the key being the tag name and the value being the hexadecimal
+                            RGB value of the color.""")
                     .worldRestart()
                     .defineList("blockColors", serializeMap(Settings.blockColors, ResourceLocation::toString, c -> "0x" + Integer.toHexString(c)),
                             Settings::validateResourceLocationMapEntry);
@@ -432,7 +441,7 @@ public final class Settings {
             new ResourceLocation((String) value);
             return true;
         } catch (final ResourceLocationException e) {
-            Scannable.getLog().error(e);
+            LOGGER.error(e);
             return false;
         }
     }
@@ -476,7 +485,7 @@ public final class Settings {
         for (final String v : list) {
             final String[] keyValue = v.split("=", 2);
             if (keyValue.length != 2) {
-                Scannable.getLog().error("Failed parsing setting value [{}].", v);
+                LOGGER.error("Failed parsing setting value [{}].", v);
                 continue;
             }
 

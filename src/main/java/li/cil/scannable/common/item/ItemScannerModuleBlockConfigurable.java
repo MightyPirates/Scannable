@@ -1,57 +1,64 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.container.BlockModuleContainerProvider;
+import li.cil.scannable.common.container.BlockModuleContainer;
 import li.cil.scannable.common.scanning.ScannerModuleBlockConfigurable;
 import li.cil.scannable.common.scanning.filter.ScanFilterIgnoredBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.*;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ItemScannerModuleBlockConfigurable extends AbstractItemScannerModuleBlock {
-    private static final String TAG_BLOCK_DEPRECATED = "block";
+public final class ItemScannerModuleBlockConfigurable extends AbstractItemScannerModule {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private static final String TAG_BLOCKS = "blocks";
     private static final String TAG_IS_LOCKED = "isLocked";
 
     public static boolean isLocked(final ItemStack stack) {
-        final CompoundNBT nbt = stack.getTag();
+        final CompoundTag nbt = stack.getTag();
         return nbt != null && nbt.getBoolean(TAG_IS_LOCKED);
     }
 
     public static List<Block> getBlocks(final ItemStack stack) {
-        final CompoundNBT nbt = stack.getTag();
-        if (nbt == null || !(nbt.contains(TAG_BLOCK_DEPRECATED, NBT.TAG_STRING) || nbt.contains(TAG_BLOCKS, NBT.TAG_LIST))) {
+        final CompoundTag nbt = stack.getTag();
+        if (nbt == null || !nbt.contains(TAG_BLOCKS, NBT.TAG_LIST)) {
             return Collections.emptyList();
         }
 
-        upgradeData(nbt);
-
-        final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         final List<Block> result = new ArrayList<>();
         list.forEach(tag -> {
             try {
@@ -61,7 +68,7 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
                     result.add(block);
                 }
             } catch (final ResourceLocationException e) {
-                Scannable.getLog().error(e);
+                LOGGER.error(e);
             }
         });
 
@@ -74,14 +81,14 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return false;
         }
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
+        final CompoundTag nbt = stack.getOrCreateTag();
         if (nbt.getBoolean(TAG_IS_LOCKED)) {
             return false;
         }
 
-        final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         if (list.contains(itemNbt)) {
             return true;
         }
@@ -96,27 +103,27 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
         return true;
     }
 
-    public static boolean setBlockAt(final ItemStack stack, final int index, final Block block) {
+    public static void setBlockAt(final ItemStack stack, final int index, final Block block) {
         if (index < 0 || index >= Constants.CONFIGURABLE_MODULE_SLOTS) {
-            return false;
+            return;
         }
 
         final ResourceLocation registryName = block.getRegistryName();
         if (registryName == null) {
-            return false;
+            return;
         }
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
+        final CompoundTag nbt = stack.getOrCreateTag();
         if (nbt.getBoolean(TAG_IS_LOCKED)) {
-            return false;
+            return;
         }
 
-        final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);
         if (oldIndex == index) {
-            return true;
+            return;
         }
 
         if (index >= list.size()) {
@@ -129,7 +136,6 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             list.remove(oldIndex);
         }
 
-        return true;
     }
 
     public static void removeBlockAt(final ItemStack stack, final int index) {
@@ -137,23 +143,14 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
             return;
         }
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
+        final CompoundTag nbt = stack.getOrCreateTag();
         if (nbt.getBoolean(TAG_IS_LOCKED)) {
             return;
         }
 
-        final ListNBT list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_BLOCKS, NBT.TAG_STRING);
         if (index < list.size()) {
             list.remove(index);
-        }
-    }
-
-    private static void upgradeData(final CompoundNBT nbt) {
-        if (nbt.contains(TAG_BLOCK_DEPRECATED, NBT.TAG_STRING)) {
-            final ListNBT list = new ListNBT();
-            list.add(nbt.get(TAG_BLOCK_DEPRECATED));
-            nbt.put(TAG_BLOCKS, list);
-            nbt.remove(TAG_BLOCK_DEPRECATED);
         }
     }
 
@@ -168,40 +165,49 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final Level world, final List<Component> tooltip, final TooltipFlag flag) {
         final List<Block> blocks = getBlocks(stack);
         if (blocks.size() == 0) {
-            tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_BLOCK));
+            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_BLOCK));
         } else {
-            tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_BLOCK_LIST));
-            blocks.forEach(b -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getName())));
+            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_BLOCK_LIST));
+            blocks.forEach(b -> tooltip.add(new TranslatableComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, b.getName())));
         }
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+    public InteractionResultHolder<ItemStack> use(final Level level, final Player player, final InteractionHand hand) {
         final ItemStack stack = player.getItemInHand(hand);
         if (!player.isShiftKeyDown()) {
-            if (!world.isClientSide) {
-                final INamedContainerProvider containerProvider = new BlockModuleContainerProvider(player, hand);
-                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnum(hand));
+            if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+                    @Override
+                    public Component getDisplayName() {
+                        return stack.getHoverName();
+                    }
+
+                    @Override
+                    public AbstractContainerMenu createMenu(final int id, final Inventory inventory, final Player player) {
+                        return new BlockModuleContainer(id, inventory, hand);
+                    }
+                }, buffer -> buffer.writeEnum(hand));
             }
-            return ActionResult.success(stack);
+            return InteractionResultHolder.success(stack);
         }
-        return ActionResult.pass(stack);
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override
-    public ActionResultType useOn(final ItemUseContext context) {
-        final World world = context.getLevel();
+    public InteractionResult useOn(final UseOnContext context) {
+        final Level world = context.getLevel();
         if (world.isEmptyBlock(context.getClickedPos())) {
-            return ActionResultType.PASS;
+            return InteractionResult.PASS;
         }
 
-        final PlayerEntity player = context.getPlayer();
+        final Player player = context.getPlayer();
         if (player == null) {
-            return ActionResultType.PASS;
+            return InteractionResult.PASS;
         }
 
         final ItemStack stack = context.getItemInHand();
@@ -209,19 +215,19 @@ public final class ItemScannerModuleBlockConfigurable extends AbstractItemScanne
 
         if (ScanFilterIgnoredBlocks.shouldIgnore(state)) {
             if (world.isClientSide) {
-                Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_BLOCK_BLACKLISTED), Constants.CHAT_LINE_ID);
+                Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_BLOCK_BLACKLISTED), Constants.CHAT_LINE_ID);
             }
             player.getCooldowns().addCooldown(this, 10);
-            return ActionResultType.SUCCESS;
+            return InteractionResult.sidedSuccess(context.getLevel().isClientSide());
         }
 
-        if (addBlock(stack, state.getBlock())) {
-            return ActionResultType.SUCCESS;
-        } else {
+        if (!addBlock(stack, state.getBlock())) {
             if (world.isClientSide && !ItemScannerModuleBlockConfigurable.isLocked(stack)) {
-                Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
+                Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
-            return ActionResultType.SUCCESS; // Prevent opening item UI.
         }
+
+        // Always succeed to prevent opening item UI.
+        return InteractionResult.sidedSuccess(context.getLevel().isClientSide());
     }
 }

@@ -1,17 +1,11 @@
 package li.cil.scannable.client.scanning.filter;
 
 import li.cil.scannable.api.scanning.ScanFilterBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
-public final class ScanFilterBlockTag implements ScanFilterBlock {
-    private final ITag<Block> tag;
-
-    public ScanFilterBlockTag(final ITag<Block> tag) {
-        this.tag = tag;
-    }
-
+public record ScanFilterBlockTag(Tag<Block> tag) implements ScanFilterBlock {
     @Override
     public boolean matches(final BlockState state) {
         return tag.contains(state.getBlock());

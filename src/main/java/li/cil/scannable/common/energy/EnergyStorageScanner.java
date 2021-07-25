@@ -1,13 +1,11 @@
 package li.cil.scannable.common.energy;
 
 import li.cil.scannable.common.config.Settings;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.EnergyStorage;
 
-public final class EnergyStorageScanner extends EnergyStorage implements INBTSerializable<IntNBT> {
+public final class EnergyStorageScanner extends EnergyStorage {
     private static final String TAG_ENERGY = "energy";
 
     private final ItemStack container;
@@ -18,9 +16,9 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
     }
 
     public void updateFromNBT() {
-        final CompoundNBT nbt = container.getTag();
+        final CompoundTag nbt = container.getTag();
         if (nbt != null && nbt.contains(TAG_ENERGY, net.minecraftforge.common.util.Constants.NBT.TAG_INT)) {
-            deserializeNBT((IntNBT) nbt.get(TAG_ENERGY));
+            deserializeNBT(nbt.get(TAG_ENERGY));
         }
     }
 
@@ -53,18 +51,5 @@ public final class EnergyStorageScanner extends EnergyStorage implements INBTSer
         }
 
         return energyExtracted;
-    }
-
-    // --------------------------------------------------------------------- //
-    // INBTSerializable
-
-    @Override
-    public IntNBT serializeNBT() {
-        return IntNBT.valueOf(energy);
-    }
-
-    @Override
-    public void deserializeNBT(final IntNBT nbt) {
-        energy = nbt.getAsInt();
     }
 }

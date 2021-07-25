@@ -4,21 +4,6 @@ import li.cil.scannable.api.API;
 
 public final class Constants {
     // --------------------------------------------------------------------- //
-    // Block, item, entity and container names
-
-    public static final String NAME_SCANNER = "scanner";
-    public static final String NAME_MODULE_BLANK = "module_blank";
-    public static final String NAME_MODULE_RANGE = "module_range";
-    public static final String NAME_MODULE_ANIMAL = "module_animal";
-    public static final String NAME_MODULE_MONSTER = "module_monster";
-    public static final String NAME_MODULE_ORE_COMMON = "module_ore_common";
-    public static final String NAME_MODULE_ORE_RARE = "module_ore_rare";
-    public static final String NAME_MODULE_BLOCK = "module_block";
-    public static final String NAME_MODULE_STRUCTURE = "module_structure";
-    public static final String NAME_MODULE_FLUID = "module_fluid";
-    public static final String NAME_MODULE_ENTITY = "module_entity";
-
-    // --------------------------------------------------------------------- //
     // Config
 
     public static final String CONFIG_USE_ENERGY = "config.scannable.useEnergy";

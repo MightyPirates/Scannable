@@ -1,17 +1,17 @@
 package li.cil.scannable.common.network;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.network.message.MessageRemoveConfiguredModuleItemAt;
-import li.cil.scannable.common.network.message.MessageSetConfiguredModuleItemAt;
-import li.cil.scannable.common.network.message.MessageStructureRequest;
-import li.cil.scannable.common.network.message.MessageStructureResponse;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import li.cil.scannable.common.network.message.*;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+
+import java.util.function.Function;
 
 public final class Network {
     private static final String PROTOCOL_VERSION = "1";
-    private static int nextPacketId = 1;
 
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(API.MOD_ID, "main"),
@@ -20,35 +20,30 @@ public final class Network {
             PROTOCOL_VERSION::equals
     );
 
-    private static int getNextPacketId() {
-        return nextPacketId++;
+    // --------------------------------------------------------------------- //
+
+    private static int nextPacketId = 1;
+
+    // --------------------------------------------------------------------- //
+
+    public static void initialize() {
+        registerMessage(MessageStructureRequest.class, MessageStructureRequest::new, NetworkDirection.PLAY_TO_SERVER);
+        registerMessage(MessageStructureResponse.class, MessageStructureResponse::new, NetworkDirection.PLAY_TO_CLIENT);
+        registerMessage(MessageRemoveConfiguredModuleItemAt.class, MessageRemoveConfiguredModuleItemAt::new, NetworkDirection.PLAY_TO_SERVER);
+        registerMessage(MessageSetConfiguredModuleItemAt.class, MessageSetConfiguredModuleItemAt::new, NetworkDirection.PLAY_TO_SERVER);
     }
 
     // --------------------------------------------------------------------- //
 
-    public static void register() {
-        INSTANCE.messageBuilder(MessageStructureRequest.class, getNextPacketId())
-                .encoder(MessageStructureRequest::toBytes)
-                .decoder(MessageStructureRequest::new)
-                .consumer(MessageStructureRequest::handle)
+    private static <T extends AbstractMessage> void registerMessage(final Class<T> type, final Function<FriendlyByteBuf, T> decoder, final NetworkDirection direction) {
+        INSTANCE.messageBuilder(type, getNextPacketId(), direction)
+                .encoder(AbstractMessage::toBytes)
+                .decoder(decoder)
+                .consumer(AbstractMessage::handleMessage)
                 .add();
+    }
 
-        INSTANCE.messageBuilder(MessageStructureResponse.class, getNextPacketId())
-                .encoder(MessageStructureResponse::toBytes)
-                .decoder(MessageStructureResponse::new)
-                .consumer(MessageStructureResponse::handle)
-                .add();
-
-        INSTANCE.messageBuilder(MessageRemoveConfiguredModuleItemAt.class, getNextPacketId())
-                .encoder(MessageRemoveConfiguredModuleItemAt::toBytes)
-                .decoder(MessageRemoveConfiguredModuleItemAt::new)
-                .consumer(MessageRemoveConfiguredModuleItemAt::handle)
-                .add();
-
-        INSTANCE.messageBuilder(MessageSetConfiguredModuleItemAt.class, getNextPacketId())
-                .encoder(MessageSetConfiguredModuleItemAt::toBytes)
-                .decoder(MessageSetConfiguredModuleItemAt::new)
-                .consumer(MessageSetConfiguredModuleItemAt::handle)
-                .add();
+    private static int getNextPacketId() {
+        return nextPacketId++;
     }
 }

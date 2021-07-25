@@ -1,31 +1,32 @@
 package li.cil.scannable.common.container;
 
-import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.ResourceLocationException;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class BlockModuleContainer extends AbstractModuleContainer {
-    public static BlockModuleContainer createForServer(final int windowId, final PlayerInventory inventory, final Hand hand) {
-        return new BlockModuleContainer(windowId, inventory, hand);
-    }
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    public static BlockModuleContainer createForClient(final int windowId, final PlayerInventory inventory, final PacketBuffer buffer) {
-        final Hand hand = buffer.readEnum(Hand.class);
-        return new BlockModuleContainer(windowId, inventory, hand);
+    // --------------------------------------------------------------------- //
+
+    public static BlockModuleContainer create(final int id, final Inventory playerInventory, final FriendlyByteBuf data) {
+        final InteractionHand hand = data.readEnum(InteractionHand.class);
+        return new BlockModuleContainer(id, playerInventory, hand);
     }
 
     // --------------------------------------------------------------------- //
 
-    public BlockModuleContainer(final int windowId, final PlayerInventory inventory, final Hand hand) {
-        super(Scannable.BLOCK_MODULE_CONTAINER.get(), windowId, inventory, hand);
+    public BlockModuleContainer(final int windowId, final Inventory inventory, final InteractionHand hand) {
+        super(Containers.BLOCK_MODULE_CONTAINER.get(), windowId, inventory, hand);
     }
 
     @Override
@@ -34,16 +35,15 @@ public class BlockModuleContainer extends AbstractModuleContainer {
     }
 
     @Override
-    public void setItemAt(final int index, final String value) {
+    public void setItemAt(final int index, final ResourceLocation name) {
         try {
-            final ResourceLocation registryName = new ResourceLocation(value);
-            final Block block = ForgeRegistries.BLOCKS.getValue(registryName);
+            final Block block = ForgeRegistries.BLOCKS.getValue(name);
             if (block != null && block != Blocks.AIR) {
                 final ItemStack stack = getPlayer().getItemInHand(getHand());
                 ItemScannerModuleBlockConfigurable.setBlockAt(stack, index, block);
             }
         } catch (final ResourceLocationException e) {
-            Scannable.getLog().error(e);
+            LOGGER.error(e);
         }
     }
 }

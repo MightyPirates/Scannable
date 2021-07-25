@@ -1,21 +1,22 @@
 package li.cil.scannable.common.container;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
 
-public abstract class AbstractModuleContainer extends Container {
-    private final PlayerEntity player;
-    private final Hand hand;
+public abstract class AbstractModuleContainer extends AbstractContainerMenu {
+    private final Player player;
+    private final InteractionHand hand;
     private final ItemStack stack;
 
     // --------------------------------------------------------------------- //
 
-    protected AbstractModuleContainer(final ContainerType<?> type, final int windowId, final PlayerInventory inventory, final Hand hand) {
+    protected AbstractModuleContainer(final MenuType<?> type, final int windowId, final Inventory inventory, final InteractionHand hand) {
         super(type, windowId);
 
         this.player = inventory.player;
@@ -33,28 +34,28 @@ public abstract class AbstractModuleContainer extends Container {
         }
     }
 
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
-    public Hand getHand() {
+    public InteractionHand getHand() {
         return hand;
     }
 
     public abstract void removeItemAt(final int index);
 
-    public abstract void setItemAt(final int index, final String value);
+    public abstract void setItemAt(final int index, final ResourceLocation value);
 
     // --------------------------------------------------------------------- //
     // Container
 
     @Override
-    public boolean stillValid(final PlayerEntity player) {
+    public boolean stillValid(final Player player) {
         return player == this.player && ItemStack.matches(player.getItemInHand(hand), stack);
     }
 
     @Override
-    public ItemStack quickMoveStack(final PlayerEntity player, final int index) {
+    public ItemStack quickMoveStack(final Player player, final int index) {
         return ItemStack.EMPTY;
     }
 }

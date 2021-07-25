@@ -1,50 +1,54 @@
 package li.cil.scannable.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.container.AbstractModuleContainer;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.MessageRemoveConfiguredModuleItemAt;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class AbstractConfigurableModuleScreen<TContainer extends AbstractModuleContainer, TItem> extends ContainerScreen<TContainer> {
+public abstract class AbstractConfigurableModuleScreen<TContainer extends AbstractModuleContainer, TItem> extends AbstractContainerScreen<TContainer> {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/module_configurable.png");
     public static final int SLOTS_ORIGIN_X = 62;
     public static final int SLOTS_ORIGIN_Y = 20;
     public static final int SLOT_SIZE = 18;
 
     private final String listCaptionTranslationKey;
+    private final Inventory inventory;
 
     // --------------------------------------------------------------------- //
 
-    public AbstractConfigurableModuleScreen(final TContainer container, final PlayerInventory inventory, final ITextComponent title, final String listCaptionTranslationKey) {
+    public AbstractConfigurableModuleScreen(final TContainer container, final Inventory inventory, final Component title, final String listCaptionTranslationKey) {
         super(container, inventory, title);
+        this.listCaptionTranslationKey = listCaptionTranslationKey;
+        this.inventory = inventory;
+
         imageHeight = 133;
         passEvents = false;
-        this.listCaptionTranslationKey = listCaptionTranslationKey;
         inventoryLabelX = 8;
         inventoryLabelY = 39;
     }
 
     private ItemStack getHeldItem() {
-        return inventory.player.getItemInHand(menu.getHand());
+        return menu.getPlayer().getItemInHand(menu.getHand());
     }
 
     protected abstract List<TItem> getConfiguredItems(final ItemStack stack);
 
-    protected abstract ITextComponent getItemName(final TItem item);
+    protected abstract Component getItemName(final TItem item);
 
     protected abstract void renderConfiguredItem(final TItem item, final int x, final int y);
 
@@ -54,7 +58,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     // --------------------------------------------------------------------- //
 
     @Override
-    public void render(final MatrixStack matrixStack, final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(final PoseStack matrixStack, final int mouseX, final int mouseY, final float partialTicks) {
         renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         renderTooltip(matrixStack, mouseX, mouseY);
@@ -73,7 +77,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     }
 
     @Override
-    protected void renderLabels(final MatrixStack matrixStack, final int mouseX, final int mouseY) {
+    protected void renderLabels(final PoseStack matrixStack, final int mouseX, final int mouseY) {
         super.renderLabels(matrixStack, mouseX, mouseY);
         font.draw(matrixStack, I18n.get(listCaptionTranslationKey), 8, 23, 0x404040);
 
@@ -95,12 +99,12 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
     }
 
     @Override
-    protected void renderBg(final MatrixStack matrixStack, final float partialTicks, final int mouseX, final int mouseY) {
-        RenderSystem.color4f(1, 1, 1, 1);
-        minecraft.getTextureManager().bind(BACKGROUND);
+    protected void renderBg(final PoseStack poseStack, final float partialTicks, final int mouseX, final int mouseY) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, BACKGROUND);
         final int x = (width - imageWidth) / 2;
         final int y = (height - imageHeight) / 2;
-        blit(matrixStack, x, y, 0, 0, imageWidth, imageHeight);
+        blit(poseStack, x, y, 0, 0, imageWidth, imageHeight);
     }
 
     @Override
@@ -110,7 +114,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
             final int y = SLOTS_ORIGIN_Y;
 
             if (isHovering(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
-                final ItemStack heldItemStack = inventory.getCarried();
+                final ItemStack heldItemStack = menu.getCarried();
                 if (!heldItemStack.isEmpty()) {
                     configureItemAt(getHeldItem(), slot, heldItemStack);
                 } else {
@@ -140,7 +144,7 @@ public abstract class AbstractConfigurableModuleScreen<TContainer extends Abstra
 
     // --------------------------------------------------------------------- //
 
-    private void drawHoverHighlight(final MatrixStack matrixStack, final int x, final int y, final int width, final int height) {
+    private void drawHoverHighlight(final PoseStack matrixStack, final int x, final int y, final int width, final int height) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         this.fillGradient(matrixStack, x, y, x + width, y + height, slotColor, slotColor);

@@ -1,27 +1,26 @@
 package li.cil.scannable.client.scanning;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
-import li.cil.scannable.common.capabilities.CapabilityScannerModule;
+import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.ItemScannerModuleStructure;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.MessageStructureRequest;
 import li.cil.scannable.common.scanning.ScannerModuleStructure;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -35,14 +34,7 @@ import java.util.function.Consumer;
 public final class ScanResultProviderStructure extends AbstractScanResultProvider {
     public static final ScanResultProviderStructure INSTANCE = new ScanResultProviderStructure();
 
-    public static final class StructureLocation {
-        public final ITextComponent name;
-        public final BlockPos pos;
-
-        public StructureLocation(final ITextComponent name, final BlockPos pos) {
-            this.name = name;
-            this.pos = pos;
-        }
+    public record StructureLocation(Component name, BlockPos pos) {
     }
 
     // --------------------------------------------------------------------- //
@@ -71,15 +63,15 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     // ScanResultProvider
 
     @Override
-    public void initialize(final PlayerEntity player, final Collection<ItemStack> modules, final Vector3d center, final float radius, final int scanTicks) {
+    public void initialize(final Player player, final Collection<ItemStack> modules, final Vec3 center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius * Constants.MODULE_STRUCTURE_RADIUS_MULTIPLIER, scanTicks);
         hideExplored = false;
-        for (final ItemStack module : modules) {
-            module.getCapability(CapabilityScannerModule.SCANNER_MODULE_CAPABILITY)
-                    .filter(c -> c instanceof ScannerModuleStructure)
-                    .ifPresent(c -> {
-                        hideExplored |= ItemScannerModuleStructure.shouldHideExplored(module);
-                    });
+        for (final ItemStack stack : modules) {
+            stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY).ifPresent(module -> {
+                if (module instanceof ScannerModuleStructure) {
+                    hideExplored |= ItemScannerModuleStructure.shouldHideExplored(stack);
+                }
+            });
         }
         requestDelay = scanTicks / 4; // delay a little to avoid making spamming the server *too* easy.
         state = State.WAIT_REQUEST;
@@ -89,7 +81,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     @Override
     public void computeScanResults() {
         switch (state) {
-            case WAIT_REQUEST: {
+            case WAIT_REQUEST -> {
                 if (requestDelay-- > 0) {
                     return;
                 }
@@ -97,17 +89,15 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                 Network.INSTANCE.sendToServer(new MessageStructureRequest(player.getCommandSenderWorld(), new BlockPos(center), radius, hideExplored));
 
                 state = State.WAIT_RESPONSE;
-
-                break;
             }
-            case WAIT_RESULT: {
+            case WAIT_RESULT -> {
                 final float renderDistance = Minecraft.getInstance().options.renderDistance * Constants.CHUNK_SIZE;
                 final float sqRenderDistance = renderDistance * renderDistance;
                 for (final StructureLocation structure : structures) {
-                    final Vector3d structureCenter = new Vector3d(structure.pos.getX(), structure.pos.getY(), structure.pos.getZ());
-                    final Vector3d toStructure = structureCenter.subtract(center);
+                    final Vec3 structureCenter = new Vec3(structure.pos.getX(), structure.pos.getY(), structure.pos.getZ());
+                    final Vec3 toStructure = structureCenter.subtract(center);
                     if (toStructure.lengthSqr() > sqRenderDistance) {
-                        final Vector3d clippedPos = center.add(toStructure.normalize().scale(renderDistance - 4));
+                        final Vec3 clippedPos = center.add(toStructure.normalize().scale(renderDistance - 4));
                         results.add(new ScanResultStructure(structure, clippedPos));
                     } else {
                         results.add(new ScanResultStructure(structure, structureCenter));
@@ -116,24 +106,22 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                 structures = EMPTY;
 
                 state = State.COMPLETE;
-
-                break;
             }
         }
     }
 
     @Override
-    public void collectScanResults(final IBlockReader world, final Consumer<ScanResult> callback) {
+    public void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback) {
         results.forEach(callback);
     }
 
     @Override
-    public void render(final IRenderTypeBuffer renderTypeBuffer, final MatrixStack matrixStack, final Matrix4f projectionMatrix, final ActiveRenderInfo renderInfo, final float partialTicks, final List<ScanResult> results) {
+    public void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
         final float yaw = renderInfo.getYRot();
         final float pitch = renderInfo.getXRot();
 
-        final Vector3d lookVec = new Vector3d(renderInfo.getLookVector());
-        final Vector3d viewerEyes = renderInfo.getPosition();
+        final Vec3 lookVec = new Vec3(renderInfo.getLookVector());
+        final Vec3 viewerEyes = renderInfo.getPosition();
 
         final boolean showDistance = renderInfo.getEntity().isShiftKeyDown();
 
@@ -142,20 +130,20 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
         for (final ScanResult result : results) {
             final ScanResultStructure resultStructure = (ScanResultStructure) result;
-            final Vector3d structureCenter = new Vector3d(resultStructure.structure.pos.getX() + 0.5,
+            final Vec3 structureCenter = new Vec3(resultStructure.structure.pos.getX() + 0.5,
                     resultStructure.structure.pos.getY() + 0.5,
                     resultStructure.structure.pos.getZ() + 0.5);
-            final Vector3d toStructure = structureCenter.subtract(viewerEyes);
-            final Vector3d resultPos;
+            final Vec3 toStructure = structureCenter.subtract(viewerEyes);
+            final Vec3 resultPos;
             if (toStructure.lengthSqr() > sqRenderDistance) {
                 resultPos = viewerEyes.add(toStructure.normalize().scale(renderDistance / 2));
             } else {
                 resultPos = structureCenter;
             }
-            final ITextComponent name = resultStructure.structure.name;
+            final Component name = resultStructure.structure.name;
             final ResourceLocation icon = API.ICON_INFO;
             final float distance = showDistance ? (float) structureCenter.subtract(viewerEyes).length() : 0f;
-            renderIconLabel(renderTypeBuffer, matrixStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
+            renderIconLabel(bufferSource, poseStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, icon, name);
         }
     }
 
@@ -179,23 +167,23 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
     private static final class ScanResultStructure implements ScanResult {
         private final StructureLocation structure;
-        private final Vector3d center;
-        private final AxisAlignedBB bounds;
+        private final Vec3 center;
+        private final AABB bounds;
 
-        ScanResultStructure(final StructureLocation structure, final Vector3d renderCenter) {
+        ScanResultStructure(final StructureLocation structure, final Vec3 renderCenter) {
             this.structure = structure;
             this.center = renderCenter;
-            this.bounds = new AxisAlignedBB(new BlockPos(renderCenter)).inflate(8, 8, 8);
+            this.bounds = new AABB(new BlockPos(renderCenter)).inflate(8, 8, 8);
         }
 
         @Override
-        public Vector3d getPosition() {
+        public Vec3 getPosition() {
             return center;
         }
 
         @Nullable
         @Override
-        public AxisAlignedBB getRenderBounds() {
+        public AABB getRenderBounds() {
             return bounds;
         }
     }

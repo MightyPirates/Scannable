@@ -1,30 +1,32 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.container.EntityModuleContainerProvider;
+import li.cil.scannable.common.container.EntityModuleContainer;
 import li.cil.scannable.common.scanning.ScannerModuleEntityConfigurable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -32,25 +34,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class ItemScannerModuleEntityConfigurable extends AbstractItemScannerModuleEntity {
+public final class ItemScannerModuleEntityConfigurable extends AbstractItemScannerModule {
     private static final String TAG_ENTITY_DEPRECATED = "entity";
     private static final String TAG_ENTITIES = "entities";
     private static final String TAG_IS_LOCKED = "isLocked";
 
     public static boolean isLocked(final ItemStack stack) {
-        final CompoundNBT nbt = stack.getTag();
+        final CompoundTag nbt = stack.getTag();
         return nbt != null && nbt.getBoolean(TAG_IS_LOCKED);
     }
 
     public static List<EntityType<?>> getEntityTypes(final ItemStack stack) {
-        final CompoundNBT nbt = stack.getTag();
+        final CompoundTag nbt = stack.getTag();
         if (nbt == null || !(nbt.contains(TAG_ENTITY_DEPRECATED, NBT.TAG_STRING) || nbt.contains(TAG_ENTITIES, NBT.TAG_LIST))) {
             return Collections.emptyList();
         }
 
         upgradeData(nbt);
 
-        final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         final List<EntityType<?>> result = new ArrayList<>();
         list.forEach(tag -> {
             final Optional<EntityType<?>> entityType = EntityType.byString(tag.getAsString());
@@ -66,14 +68,14 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
             return false;
         }
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
+        final CompoundTag nbt = stack.getOrCreateTag();
         if (nbt.getBoolean(TAG_IS_LOCKED)) {
             return false;
         }
 
-        final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         if (list.contains(itemNbt)) {
             return true;
         }
@@ -88,27 +90,27 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
         return true;
     }
 
-    public static boolean setEntityTypeAt(final ItemStack stack, final int index, final EntityType<?> entityType) {
+    public static void setEntityTypeAt(final ItemStack stack, final int index, final EntityType<?> entityType) {
         if (index < 0 || index >= Constants.CONFIGURABLE_MODULE_SLOTS) {
-            return false;
+            return;
         }
 
         final ResourceLocation registryName = entityType.getRegistryName();
         if (registryName == null) {
-            return false;
+            return;
         }
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
+        final CompoundTag nbt = stack.getOrCreateTag();
         if (nbt.getBoolean(TAG_IS_LOCKED)) {
-            return false;
+            return;
         }
 
-        final StringNBT itemNbt = StringNBT.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);
         if (oldIndex == index) {
-            return true;
+            return;
         }
 
         if (index >= list.size()) {
@@ -121,7 +123,6 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
             list.remove(oldIndex);
         }
 
-        return true;
     }
 
     public static void removeEntityTypeAt(final ItemStack stack, final int index) {
@@ -129,20 +130,20 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
             return;
         }
 
-        final CompoundNBT nbt = stack.getOrCreateTag();
+        final CompoundTag nbt = stack.getOrCreateTag();
         if (nbt.getBoolean(TAG_IS_LOCKED)) {
             return;
         }
 
-        final ListNBT list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = nbt.getList(TAG_ENTITIES, NBT.TAG_STRING);
         if (index < list.size()) {
             list.remove(index);
         }
     }
 
-    private static void upgradeData(final CompoundNBT nbt) {
+    private static void upgradeData(final CompoundTag nbt) {
         if (nbt.contains(TAG_ENTITY_DEPRECATED, NBT.TAG_STRING)) {
-            final ListNBT list = new ListNBT();
+            final ListTag list = new ListTag();
             list.add(nbt.get(TAG_ENTITY_DEPRECATED));
             nbt.put(TAG_ENTITIES, list);
             nbt.remove(TAG_ENTITY_DEPRECATED);
@@ -160,42 +161,51 @@ public final class ItemScannerModuleEntityConfigurable extends AbstractItemScann
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final World world, final List<ITextComponent> tooltip, final ITooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, @Nullable final Level world, final List<Component> tooltip, final TooltipFlag flag) {
         final List<EntityType<?>> entities = getEntityTypes(stack);
         if (entities.size() == 0) {
-            tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_ENTITY));
+            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_ENTITY));
         } else {
-            tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_MODULE_ENTITY_LIST));
-            entities.forEach(e -> tooltip.add(new TranslationTextComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, e.getDescription())));
+            tooltip.add(new TranslatableComponent(Constants.TOOLTIP_MODULE_ENTITY_LIST));
+            entities.forEach(e -> tooltip.add(new TranslatableComponent(Constants.TOOLTIP_LIST_ITEM_FORMAT, e.getDescription())));
         }
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    public ActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
+    public InteractionResultHolder<ItemStack> use(final Level world, final Player player, final InteractionHand hand) {
         final ItemStack stack = player.getItemInHand(hand);
         if (!player.isShiftKeyDown()) {
-            if (!world.isClientSide()) {
-                final INamedContainerProvider containerProvider = new EntityModuleContainerProvider(player, hand);
-                NetworkHooks.openGui((ServerPlayerEntity) player, containerProvider, buffer -> buffer.writeEnum(hand));
+            if (!world.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+                    @Override
+                    public Component getDisplayName() {
+                        return stack.getHoverName();
+                    }
+
+                    @Override
+                    public AbstractContainerMenu createMenu(final int id, final Inventory inventory, final Player player) {
+                        return new EntityModuleContainer(id, inventory, hand);
+                    }
+                }, buffer -> buffer.writeEnum(hand));
             }
-            return ActionResult.success(stack);
+            return InteractionResultHolder.success(stack);
         }
-        return ActionResult.pass(stack);
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override
-    public ActionResultType interactLivingEntity(final ItemStack stack, final PlayerEntity player, final LivingEntity target, final Hand hand) {
+    public InteractionResult interactLivingEntity(final ItemStack stack, final Player player, final LivingEntity target, final InteractionHand hand) {
         // NOT adding to `stack` parameter, because that's a copy in creative mode.
         if (addEntityType(player.getItemInHand(hand), target.getType())) {
             player.swing(hand);
-            player.inventory.setChanged();
-            return ActionResultType.SUCCESS;
+            player.getInventory().setChanged();
+            return InteractionResult.SUCCESS;
         } else {
             if (player.getCommandSenderWorld().isClientSide && !ItemScannerModuleEntityConfigurable.isLocked(stack)) {
-                Minecraft.getInstance().gui.getChat().addMessage(new TranslationTextComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
+                Minecraft.getInstance().gui.getChat().addMessage(new TranslatableComponent(Constants.MESSAGE_NO_FREE_SLOTS), Constants.CHAT_LINE_ID);
             }
-            return ActionResultType.SUCCESS; // Prevent opening item UI.
+            return InteractionResult.SUCCESS; // Prevent opening item UI.
         }
     }
 }

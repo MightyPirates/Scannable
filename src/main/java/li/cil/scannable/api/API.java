@@ -1,7 +1,6 @@
 package li.cil.scannable.api;
 
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public final class API {
     public static final String MOD_ID = "scannable";
@@ -18,11 +17,6 @@ public final class API {
     public static final ResourceLocation SCAN_RESULT_PROVIDER_REGISTRY = new ResourceLocation(MOD_ID, "scan_result_providers");
     public static final ResourceLocation SCAN_RESULT_PROVIDER_BLOCKS = new ResourceLocation(MOD_ID, "blocks");
     public static final ResourceLocation SCAN_RESULT_PROVIDER_ENTITIES = new ResourceLocation(MOD_ID, "entities");
-
-    // --------------------------------------------------------------------- //
-    // The creative tab holding all the good stuff.
-
-    public static ItemGroup itemGroup;
 
     // --------------------------------------------------------------------- //
 
