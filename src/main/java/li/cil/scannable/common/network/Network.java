@@ -27,10 +27,10 @@ public final class Network {
     // --------------------------------------------------------------------- //
 
     public static void initialize() {
-        registerMessage(MessageStructureRequest.class, MessageStructureRequest::new, NetworkDirection.PLAY_TO_SERVER);
-        registerMessage(MessageStructureResponse.class, MessageStructureResponse::new, NetworkDirection.PLAY_TO_CLIENT);
-        registerMessage(MessageRemoveConfiguredModuleItemAt.class, MessageRemoveConfiguredModuleItemAt::new, NetworkDirection.PLAY_TO_SERVER);
-        registerMessage(MessageSetConfiguredModuleItemAt.class, MessageSetConfiguredModuleItemAt::new, NetworkDirection.PLAY_TO_SERVER);
+        registerMessage(StructureRequestMessage.class, StructureRequestMessage::new, NetworkDirection.PLAY_TO_SERVER);
+        registerMessage(StructureResponseMessage.class, StructureResponseMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        registerMessage(RemoveConfiguredModuleItemAtMessage.class, RemoveConfiguredModuleItemAtMessage::new, NetworkDirection.PLAY_TO_SERVER);
+        registerMessage(SetConfiguredModuleItemAtMessage.class, SetConfiguredModuleItemAtMessage::new, NetworkDirection.PLAY_TO_SERVER);
     }
 
     // --------------------------------------------------------------------- //

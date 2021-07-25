@@ -16,9 +16,9 @@ public final class EnergyStorageScanner extends EnergyStorage {
     }
 
     public void updateFromNBT() {
-        final CompoundTag nbt = container.getTag();
-        if (nbt != null && nbt.contains(TAG_ENERGY, net.minecraftforge.common.util.Constants.NBT.TAG_INT)) {
-            deserializeNBT(nbt.get(TAG_ENERGY));
+        final CompoundTag tag = container.getTag();
+        if (tag != null && tag.contains(TAG_ENERGY, net.minecraftforge.common.util.Constants.NBT.TAG_INT)) {
+            deserializeNBT(tag.get(TAG_ENERGY));
         }
     }
 

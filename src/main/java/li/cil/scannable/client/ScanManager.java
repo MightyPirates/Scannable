@@ -19,7 +19,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -139,7 +138,7 @@ public final class ScanManager {
         }
 
         for (final ScanResultProvider provider : collectingProviders) {
-            provider.collectScanResults(entity.getCommandSenderWorld(), result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+            provider.collectScanResults(entity.level, result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             provider.reset();
         }
 
@@ -164,11 +163,6 @@ public final class ScanManager {
 
     public static void onClientTick(final TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
-        final BlockGetter world = Minecraft.getInstance().level;
-        if (world == null) {
             return;
         }
 
@@ -255,7 +249,7 @@ public final class ScanManager {
                 return;
             }
 
-            // Using shaders so we render as game overlay; restore matrices as used for world rendering.
+            // Using shaders so we render as game overlay; restore matrices as used for level rendering.
             RenderSystem.backupProjectionMatrix();
             RenderSystem.setProjectionMatrix(projectionMatrix);
             RenderSystem.getModelViewStack().pushPose();
@@ -270,18 +264,18 @@ public final class ScanManager {
         }
     }
 
-    private static void render(final float partialTicks, final PoseStack matrixStack, final Matrix4f projectionMatrix) {
+    private static void render(final float partialTicks, final PoseStack poseStack, final Matrix4f projectionMatrix) {
         final Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         final Vec3 pos = camera.getPosition();
 
-        final Frustum frustum = new Frustum(matrixStack.last().pose(), projectionMatrix);
+        final Frustum frustum = new Frustum(poseStack.last().pose(), projectionMatrix);
         frustum.prepare(pos.x(), pos.y(), pos.z());
 
         RenderSystem.disableDepthTest();
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        matrixStack.pushPose();
-        matrixStack.translate(-pos.x, -pos.y, -pos.z);
+        poseStack.pushPose();
+        poseStack.translate(-pos.x, -pos.y, -pos.z);
 
         // We render all results in batches, grouped by their provider.
         // This allows providers to do more optimized rendering, in e.g.
@@ -298,13 +292,13 @@ public final class ScanManager {
             }
 
             if (!renderingList.isEmpty()) {
-                entry.getKey().render(renderTypeBuffer, matrixStack, camera, partialTicks, renderingList);
+                entry.getKey().render(renderTypeBuffer, poseStack, camera, partialTicks, renderingList);
                 renderingList.clear();
             }
         }
         renderTypeBuffer.endBatch();
 
-        matrixStack.popPose();
+        poseStack.popPose();
 
         RenderSystem.enableDepthTest();
     }

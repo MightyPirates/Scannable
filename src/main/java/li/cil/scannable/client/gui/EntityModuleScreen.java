@@ -4,10 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.container.EntityModuleContainer;
-import li.cil.scannable.common.item.ItemScannerModuleEntityConfigurable;
+import li.cil.scannable.common.container.EntityModuleContainerMenu;
+import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
 import li.cil.scannable.common.network.Network;
-import li.cil.scannable.common.network.message.MessageSetConfiguredModuleItemAt;
+import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -25,10 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityModuleContainer, EntityType<?>> {
+public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityModuleContainerMenu, EntityType<?>> {
     private static final Map<EntityType<?>, Entity> RENDER_ENTITIES = new HashMap<>();
 
-    public EntityModuleScreen(final EntityModuleContainer container, final Inventory inventory, final Component title) {
+    public EntityModuleScreen(final EntityModuleContainerMenu container, final Inventory inventory, final Component title) {
         super(container, inventory, title, Constants.GUI_MODULE_ENTITY_LIST);
     }
 
@@ -36,7 +36,7 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
 
     @Override
     protected List<EntityType<?>> getConfiguredItems(final ItemStack stack) {
-        return ItemScannerModuleEntityConfigurable.getEntityTypes(stack);
+        return ConfigurableEntityScannerModuleItem.getEntityTypes(stack);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
             final ResourceLocation registryName = entityType.getRegistryName();
             if (registryName != null) {
-                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName));
+                Network.INSTANCE.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
             }
         }
     }
@@ -66,7 +66,7 @@ public class EntityModuleScreen extends AbstractConfigurableModuleScreen<EntityM
             return;
         }
 
-        entity.level = menu.getPlayer().getCommandSenderWorld();
+        entity.level = menu.getPlayer().level;
         final EntityDimensions bounds = entityType.getDimensions();
         final float size = Math.max(bounds.width, bounds.height);
         final float scale = 11.0f / size;

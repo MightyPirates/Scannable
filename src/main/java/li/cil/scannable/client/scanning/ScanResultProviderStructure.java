@@ -6,10 +6,10 @@ import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.ItemScannerModuleStructure;
+import li.cil.scannable.common.item.StructureScannerModuleItem;
 import li.cil.scannable.common.network.Network;
-import li.cil.scannable.common.network.message.MessageStructureRequest;
-import li.cil.scannable.common.scanning.ScannerModuleStructure;
+import li.cil.scannable.common.network.message.StructureRequestMessage;
+import li.cil.scannable.common.scanning.StructureScannerModule;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -68,8 +68,8 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         hideExplored = false;
         for (final ItemStack stack : modules) {
             stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY).ifPresent(module -> {
-                if (module instanceof ScannerModuleStructure) {
-                    hideExplored |= ItemScannerModuleStructure.shouldHideExplored(stack);
+                if (module instanceof StructureScannerModule) {
+                    hideExplored |= StructureScannerModuleItem.shouldHideExplored(stack);
                 }
             });
         }
@@ -86,7 +86,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                     return;
                 }
 
-                Network.INSTANCE.sendToServer(new MessageStructureRequest(player.getCommandSenderWorld(), new BlockPos(center), radius, hideExplored));
+                Network.INSTANCE.sendToServer(new StructureRequestMessage(player.level, new BlockPos(center), radius, hideExplored));
 
                 state = State.WAIT_RESPONSE;
             }
@@ -111,7 +111,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
     }
 
     @Override
-    public void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback) {
+    public void collectScanResults(final BlockGetter level, final Consumer<ScanResult> callback) {
         results.forEach(callback);
     }
 

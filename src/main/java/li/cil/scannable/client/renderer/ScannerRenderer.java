@@ -45,11 +45,11 @@ public enum ScannerRenderer {
         currentCenter = pos;
     }
 
-    public static void render(final PoseStack matrixStack, final Matrix4f projectionMatrix) {
-        INSTANCE.doRender(matrixStack, projectionMatrix);
+    public static void render(final PoseStack poseStack) {
+        INSTANCE.doRender(poseStack);
     }
 
-    public void doRender(final PoseStack matrixStack, final Matrix4f projectionMatrix) {
+    public void doRender(final PoseStack poseStack) {
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
         final boolean shouldRender = currentStart > 0 && adjustedDuration > (int) (System.currentTimeMillis() - currentStart);
         if (shouldRender) {
@@ -57,7 +57,7 @@ public enum ScannerRenderer {
                 createDepthCopyBuffer();
             }
 
-            render(matrixStack.last().pose(), projectionMatrix);
+            render(poseStack.last().pose());
         } else {
             if (depthCopyFbo != 0) {
                 deleteDepthCopyBuffer();
@@ -67,7 +67,7 @@ public enum ScannerRenderer {
         }
     }
 
-    private void render(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
+    private void render(final Matrix4f viewMatrix) {
         final ShaderInstance shader = Shaders.getScanEffectShader();
         if (shader == null) {
             return;
@@ -77,7 +77,7 @@ public enum ScannerRenderer {
 
         updateDepthTexture(target);
 
-        updateShaderUniforms(shader, viewMatrix, projectionMatrix);
+        updateShaderUniforms(shader, viewMatrix);
 
         blit(target);
     }
@@ -92,11 +92,11 @@ public enum ScannerRenderer {
         GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, oldBuffer);
     }
 
-    private void updateShaderUniforms(final ShaderInstance shader, final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
+    private void updateShaderUniforms(final ShaderInstance shader, final Matrix4f viewMatrix) {
         final Matrix4f invertedViewMatrix = new Matrix4f(viewMatrix);
         invertedViewMatrix.invert();
 
-        final Matrix4f invertedProjectionMatrix = new Matrix4f(projectionMatrix);
+        final Matrix4f invertedProjectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
         invertedProjectionMatrix.invert();
 
         final Vec3 cameraPosition = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
@@ -126,14 +126,14 @@ public enum ScannerRenderer {
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(Matrix4f.orthographic(0, width, 0, height, 1, 100));
 
-        final Tesselator buffer = Tesselator.getInstance();
-        final BufferBuilder builder = buffer.getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        builder.vertex(0, height, -50).uv(0, 0).endVertex();
-        builder.vertex(width, height, -50).uv(1, 0).endVertex();
-        builder.vertex(width, 0, -50).uv(1, 1).endVertex();
-        builder.vertex(0, 0, -50).uv(0, 1).endVertex();
-        buffer.end();
+        final Tesselator tesselator = Tesselator.getInstance();
+        final BufferBuilder buffer = tesselator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.vertex(0, height, -50).uv(0, 0).endVertex();
+        buffer.vertex(width, height, -50).uv(1, 0).endVertex();
+        buffer.vertex(width, 0, -50).uv(1, 1).endVertex();
+        buffer.vertex(0, 0, -50).uv(0, 1).endVertex();
+        tesselator.end();
 
         RenderSystem.restoreProjectionMatrix();
 

@@ -1,10 +1,10 @@
 package li.cil.scannable.client.gui;
 
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.container.BlockModuleContainer;
-import li.cil.scannable.common.item.ItemScannerModuleBlockConfigurable;
+import li.cil.scannable.common.container.BlockModuleContainerMenu;
+import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
 import li.cil.scannable.common.network.Network;
-import li.cil.scannable.common.network.message.MessageSetConfiguredModuleItemAt;
+import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,8 +14,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
-public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockModuleContainer, Block> {
-    public BlockModuleScreen(final BlockModuleContainer container, final Inventory inventory, final Component title) {
+public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockModuleContainerMenu, Block> {
+    public BlockModuleScreen(final BlockModuleContainerMenu container, final Inventory inventory, final Component title) {
         super(container, inventory, title, Constants.GUI_MODULE_BLOCK_LIST);
     }
 
@@ -23,7 +23,7 @@ public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockMod
 
     @Override
     protected List<Block> getConfiguredItems(final ItemStack stack) {
-        return ItemScannerModuleBlockConfigurable.getBlocks(stack);
+        return ConfigurableBlockScannerModuleItem.getBlocks(stack);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class BlockModuleScreen extends AbstractConfigurableModuleScreen<BlockMod
         if (block != null && block != Blocks.AIR) {
             final ResourceLocation registryName = block.getRegistryName();
             if (registryName != null) {
-                Network.INSTANCE.sendToServer(new MessageSetConfiguredModuleItemAt(menu.containerId, slot, registryName));
+                Network.INSTANCE.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
             }
         }
     }

@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.ItemScanner;
+import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -39,7 +39,7 @@ public final class OverlayRenderer {
             return;
         }
 
-        if (!ItemScanner.isScanner(stack)) {
+        if (!ScannerItem.isScanner(stack)) {
             return;
         }
 
@@ -56,10 +56,10 @@ public final class OverlayRenderer {
         RenderSystem.setShaderColor(0.66f, 0.8f, 0.93f, 0.66f);
         RenderSystem.setShaderTexture(0, PROGRESS);
 
-        final Tesselator buffer = Tesselator.getInstance();
-        final BufferBuilder builder = buffer.getBuilder();
+        final Tesselator tesselator = Tesselator.getInstance();
+        final BufferBuilder buffer = tesselator.getBuilder();
 
-        builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_TEX);
+        buffer.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_TEX);
 
         final int width = 64;
         final int height = 64;
@@ -74,62 +74,62 @@ public final class OverlayRenderer {
         final float tx = Mth.sin(angle);
         final float ty = Mth.cos(angle);
 
-        builder.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
+        buffer.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
         if (progress < 0.125) { // Top right.
-            builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
             final float x = tx / ty * 0.5f;
-            builder.vertex(midX + x * width, top, 0).uv(0.5f + x, 1).endVertex();
+            buffer.vertex(midX + x * width, top, 0).uv(0.5f + x, 1).endVertex();
         } else {
-            builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-            builder.vertex(right, top, 0).uv(1, 1).endVertex();
+            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+            buffer.vertex(right, top, 0).uv(1, 1).endVertex();
 
-            builder.vertex(right, top, 0).uv(1, 1).endVertex();
+            buffer.vertex(right, top, 0).uv(1, 1).endVertex();
             if (progress < 0.375) { // Right.
-                builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                 final float y = Math.abs(ty / tx - 1) * 0.5f;
-                builder.vertex(right, top + y * height, 0).uv(1, 1 - y).endVertex();
+                buffer.vertex(right, top + y * height, 0).uv(1, 1 - y).endVertex();
             } else {
-                builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                builder.vertex(right, bottom, 0).uv(1, 0).endVertex();
+                buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                buffer.vertex(right, bottom, 0).uv(1, 0).endVertex();
 
-                builder.vertex(right, bottom, 0).uv(1, 0).endVertex();
+                buffer.vertex(right, bottom, 0).uv(1, 0).endVertex();
                 if (progress < 0.625) { // Bottom.
-                    builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                    buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                     final float x = Math.abs(tx / ty - 1) * 0.5f;
-                    builder.vertex(left + x * width, bottom, 0).uv(x, 0).endVertex();
+                    buffer.vertex(left + x * width, bottom, 0).uv(x, 0).endVertex();
                 } else {
-                    builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                    builder.vertex(left, bottom, 0).uv(0, 0).endVertex();
+                    buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                    buffer.vertex(left, bottom, 0).uv(0, 0).endVertex();
 
-                    builder.vertex(left, bottom, 0).uv(0, 0).endVertex();
+                    buffer.vertex(left, bottom, 0).uv(0, 0).endVertex();
                     if (progress < 0.875) { // Left.
-                        builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                        buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                         final float y = (ty / tx + 1) * 0.5f;
-                        builder.vertex(left, top + y * height, 0).uv(0, 1 - y).endVertex();
+                        buffer.vertex(left, top + y * height, 0).uv(0, 1 - y).endVertex();
                     } else {
-                        builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                        builder.vertex(left, top, 0).uv(0, 1).endVertex();
+                        buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                        buffer.vertex(left, top, 0).uv(0, 1).endVertex();
 
-                        builder.vertex(left, top, 0).uv(0, 1).endVertex();
+                        buffer.vertex(left, top, 0).uv(0, 1).endVertex();
                         if (progress < 1) { // Top left.
-                            builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
 
                             final float x = Math.abs(tx / ty) * 0.5f;
-                            builder.vertex(midX - x * width, top, 0).uv(0.5f - x, 1).endVertex();
+                            buffer.vertex(midX - x * width, top, 0).uv(0.5f - x, 1).endVertex();
                         } else {
-                            builder.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                            builder.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
+                            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                            buffer.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
                         }
                     }
                 }
             }
         }
 
-        buffer.end();
+        tesselator.end();
 
         final TranslatableComponent label = new TranslatableComponent(Constants.GUI_SCANNER_PROGRESS, Mth.floor(progress * 100));
         mc.font.drawShadow(event.getMatrixStack(), label, right + 12, midY - mc.font.lineHeight * 0.5f, 0xCCAACCEE);

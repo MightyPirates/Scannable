@@ -61,10 +61,10 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * any post-scan filtering and baking here and report results using the
      * provided callback.
      *
-     * @param world    the world to check for.
+     * @param level    the level to check for.
      * @param callback the callback to feed results to.
      */
-    void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback);
+    void collectScanResults(final BlockGetter level, final Consumer<ScanResult> callback);
 
     /**
      * Render the specified results.

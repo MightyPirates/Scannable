@@ -116,12 +116,12 @@ public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<Scan
     // --------------------------------------------------------------------- //
     // Drawing simple primitives in an existing buffer.
 
-    protected static void drawQuad(final VertexConsumer buffer, final PoseStack matrixStack, final float width, final float height) {
-        drawQuad(buffer, matrixStack, width, height, 1, 1, 1, 1);
+    protected static void drawQuad(final VertexConsumer buffer, final PoseStack poseStack, final float width, final float height) {
+        drawQuad(buffer, poseStack, width, height, 1, 1, 1, 1);
     }
 
-    protected static void drawQuad(final VertexConsumer buffer, final PoseStack matrixStack, final float width, final float height, final float r, final float g, final float b, final float a) {
-        final Matrix4f matrix = matrixStack.last().pose();
+    protected static void drawQuad(final VertexConsumer buffer, final PoseStack poseStack, final float width, final float height, final float r, final float g, final float b, final float a) {
+        final Matrix4f matrix = poseStack.last().pose();
         buffer.vertex(matrix, -width * 0.5f, height * 0.5f, 0).color(r, g, b, a).uv(0, 1f).endVertex();
         buffer.vertex(matrix, width * 0.5f, height * 0.5f, 0).color(r, g, b, a).uv(1f, 1f).endVertex();
         buffer.vertex(matrix, width * 0.5f, -height * 0.5f, 0).color(r, g, b, a).uv(1f, 0).endVertex();

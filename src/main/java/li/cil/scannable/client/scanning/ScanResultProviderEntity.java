@@ -1,13 +1,11 @@
 package li.cil.scannable.client.scanning;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
-import li.cil.scannable.api.scanning.ScanFilterEntity;
+import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.api.scanning.ScannerModuleEntity;
 import li.cil.scannable.common.capabilities.Capabilities;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,10 +24,12 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderEntity extends AbstractScanResultProvider {
-    private final List<ScanFilterEntity> scanFilters = new ArrayList<>();
+    private final List<Predicate<Entity>> filters = new ArrayList<>();
+    private final Map<Predicate<Entity>, EntityScannerModule> filterToModule = new HashMap<>();
     private final ArrayList<Entity> entities = new ArrayList<>();
     private int currentEntityIndex, entitiesStep;
     private final List<ScanResultEntity> results = new ArrayList<>();
@@ -41,12 +41,15 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     public void initialize(final Player player, final Collection<ItemStack> modules, final Vec3 center, final float radius, final int scanTicks) {
         super.initialize(player, modules, center, radius, scanTicks);
 
-        scanFilters.clear();
+        filters.clear();
+        filterToModule.clear();
         for (final ItemStack stack : modules) {
             final LazyOptional<ScannerModule> capability = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
             capability.ifPresent(module -> {
-                if (module instanceof ScannerModuleEntity entityModule) {
-                    entityModule.getFilter(stack).ifPresent(scanFilters::add);
+                if (module instanceof EntityScannerModule entityModule) {
+                    final Predicate<Entity> filter = entityModule.getFilter(stack);
+                    filters.add(filter);
+                    filterToModule.put(filter, entityModule);
                 }
             });
         }
@@ -71,10 +74,10 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             if (center.distanceToSqr(position) < radius * radius) {
                 ResourceLocation icon = API.ICON_INFO;
                 boolean hasMatch = false;
-                for (final ScanFilterEntity filter : scanFilters) {
-                    if (filter.matches(entity)) {
+                for (final Predicate<Entity> filter : filters) {
+                    if (filter.test(entity)) {
                         hasMatch = true;
-                        final Optional<ResourceLocation> filterIcon = filter.getIcon(entity);
+                        final Optional<ResourceLocation> filterIcon = filterToModule.get(filter).getIcon(entity);
                         if (filterIcon.isPresent()) {
                             icon = filterIcon.get();
                             break;
@@ -89,7 +92,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     }
 
     @Override
-    public void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback) {
+    public void collectScanResults(final BlockGetter level, final Consumer<ScanResult> callback) {
         results.forEach(callback);
     }
 
@@ -125,7 +128,8 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     @Override
     public void reset() {
         super.reset();
-        scanFilters.clear();
+        filters.clear();
+        filterToModule.clear();
         currentEntityIndex = 0;
         entitiesStep = 0;
         entities.clear();

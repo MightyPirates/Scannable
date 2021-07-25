@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  * For efficiency via batching, some modules may wish to reuse one of the built-in
  * {@link ScanResultProvider}s. This will usually require implementing a specialization
  * of this interface specific to that provider. For example, to use the built-in
- * module result provider (<code>scannable:blocks</code>) the {@link ScannerModuleBlock}
+ * module result provider (<code>scannable:blocks</code>) the {@link BlockScannerModule}
  * interface must be implemented.
  */
 public interface ScannerModule {

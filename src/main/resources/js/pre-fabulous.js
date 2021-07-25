@@ -23,8 +23,7 @@ function initializeCoreMod() {
                     // The method we inject into gets these as parameters, too, so we luckily load them by their indices.
                     ASMAPI.listOf(
                         new VarInsnNode(Opcodes.ALOAD, 1), // Load MatrixStack (first argument)
-                        new VarInsnNode(Opcodes.ALOAD, 9), // Load projection matrix (last argument)
-                        ASMAPI.buildMethodCall("li/cil/scannable/client/renderer/ScannerRenderer", "render", "(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;)V", ASMAPI.MethodType.STATIC)
+                        ASMAPI.buildMethodCall("li/cil/scannable/client/renderer/ScannerRenderer", "render", "(Lcom/mojang/blaze3d/vertex/PoseStack;)V", ASMAPI.MethodType.STATIC)
                     ),
                     ASMAPI.InsertMode.INSERT_BEFORE);
 

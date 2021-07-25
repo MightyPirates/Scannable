@@ -3,7 +3,7 @@ package li.cil.scannable.common.inventory;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.item.AbstractItemScannerModule;
+import li.cil.scannable.common.item.AbstractScannerModuleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -27,9 +27,9 @@ public final class ItemHandlerScanner extends ItemStackHandler {
     }
 
     public void updateFromNBT() {
-        final CompoundTag nbt = container.getTag();
-        if (nbt != null && nbt.contains(TAG_ITEMS, NBT.TAG_COMPOUND)) {
-            deserializeNBT(nbt.getCompound(TAG_ITEMS));
+        final CompoundTag tag = container.getTag();
+        if (tag != null && tag.contains(TAG_ITEMS, NBT.TAG_COMPOUND)) {
+            deserializeNBT(tag.getCompound(TAG_ITEMS));
             if (stacks.size() != Constants.SCANNER_TOTAL_MODULE_COUNT) {
                 final List<ItemStack> oldStacks = new ArrayList<>(stacks);
                 setSize(Constants.SCANNER_TOTAL_MODULE_COUNT);
@@ -59,7 +59,7 @@ public final class ItemHandlerScanner extends ItemStackHandler {
         }
 
         // All built-in modules, including those without capability such as the range module.
-        if (stack.getItem() instanceof AbstractItemScannerModule) {
+        if (stack.getItem() instanceof AbstractScannerModuleItem) {
             return 64;
         }
 

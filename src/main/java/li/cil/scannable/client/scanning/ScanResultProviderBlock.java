@@ -10,14 +10,13 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
-import li.cil.scannable.api.scanning.ScanFilterBlock;
+import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.api.scanning.ScannerModuleBlock;
 import li.cil.scannable.client.shader.Shaders;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.Settings;
-import li.cil.scannable.common.scanning.filter.ScanFilterIgnoredBlocks;
+import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -52,6 +51,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
@@ -78,15 +78,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         scanFilterLayers.clear();
 
-        final IntObjectMap<List<ScanFilterBlock>> filterByRadius = new IntObjectHashMap<>();
+        final IntObjectMap<List<Predicate<BlockState>>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack stack : modules) {
             final LazyOptional<ScannerModule> capability = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
             capability.ifPresent(module -> {
-                if (module instanceof ScannerModuleBlock blockModule) {
-                    blockModule.getFilter(stack).ifPresent(f -> {
-                        final int localRadius = (int) Math.ceil(blockModule.adjustLocalRange(this.radius));
-                        filterByRadius.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(f);
-                    });
+                if (module instanceof BlockScannerModule blockModule) {
+                    final Predicate<BlockState> filter = blockModule.getFilter(stack);
+                    final int localRadius = (int) Math.ceil(blockModule.adjustLocalRange(this.radius));
+                    filterByRadius.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(filter);
                 }
             });
         }
@@ -134,7 +133,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     @Override
     public void computeScanResults() {
-        final Level world = player.getCommandSenderWorld();
+        final Level level = player.level;
         for (int i = 0; i < chunkSectionsPerTick; i++) {
             if (currentChunkSection >= pendingChunkSections.size()) {
                 return;
@@ -147,7 +146,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final int chunkZ = chunkSectionPos.chunkZ;
             final int chunkSectionIndex = chunkSectionPos.chunkSectionIndex;
 
-            final ChunkAccess chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+            final ChunkAccess chunk = level.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
             if (chunk == null) {
                 continue;
             }
@@ -173,7 +172,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     continue;
                 }
 
-                if (ScanFilterIgnoredBlocks.shouldIgnore(state)) {
+                if (IgnoredBlocks.contains(state)) {
                     continue;
                 }
 
@@ -193,8 +192,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         break; // Filters radii only get smaller in the sorted filter list.
                     }
 
-                    for (final ScanFilterBlock filter : layer.filters) {
-                        if (filter.matches(state)) {
+                    for (final Predicate<BlockState> filter : layer.filters) {
+                        if (filter.test(state)) {
                             final BlockPos pos = new BlockPos(globalX, globalY, globalZ);
                             if (!tryAddToCluster(clusters, pos)) {
                                 final BlockScanResult result = new BlockScanResult(state.getBlock(), pos);
@@ -210,10 +209,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     }
 
     @Override
-    public void collectScanResults(final BlockGetter world, final Consumer<ScanResult> callback) {
+    public void collectScanResults(final BlockGetter level, final Consumer<ScanResult> callback) {
         for (final BlockScanResult result : results) {
             if (result.isRoot()) {
-                result.bake(world);
+                result.bake(level);
                 callback.accept(result);
             }
         }
@@ -338,7 +337,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         return root;
     }
 
-    private record ScanFilterLayer(int radius, List<ScanFilterBlock> filters) {
+    private record ScanFilterLayer(int radius, List<Predicate<BlockState>> filters) {
     }
 
     private record ChunkSectionPos(int chunkX, int chunkZ, int chunkSectionIndex, double squareDistToCenter) {
@@ -361,10 +360,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             blocks.add(pos);
         }
 
-        void bake(final BlockGetter world) {
+        void bake(final BlockGetter level) {
             final BlockState blockState = block.defaultBlockState();
 
-            color = blockState.getMapColor(world, new BlockPos(bounds.getCenter())).col;
+            color = blockState.getMapColor(level, new BlockPos(bounds.getCenter())).col;
             if (color == 0) { // E.g. glass.
                 color = DEFAULT_COLOR;
             }
@@ -432,8 +431,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             blocks.add(pos);
         }
 
-        void render(final VertexConsumer buffer, final PoseStack matrixStack) {
-            final Matrix4f matrix = matrixStack.last().pose();
+        void render(final VertexConsumer buffer, final PoseStack poseStack) {
+            final Matrix4f matrix = poseStack.last().pose();
 
             final float colorNormalizer = 1 / 255f;
             final float r = ((color >> 16) & 0xFF) * colorNormalizer;
