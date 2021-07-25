@@ -393,6 +393,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 }
             }
 
+            // Fix up alpha if it's zero.
+            if ((color & 0xFF000000) == 0) {
+                color |= 0xFF000000;
+            }
+
             final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             render(buffer, new PoseStack());
