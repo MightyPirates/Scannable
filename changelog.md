@@ -1,1 +1,1 @@
-* Fixed effect not rendering in some versions.
+* Ported to Minecraft 1.17.1.
