@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class AbstractConfigurableScannerModuleContainerScreen<TContainer extends AbstractModuleContainerMenu, TItem> extends AbstractContainerScreen<TContainer> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/module_configurable.png");
+    private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/configurable_module.png");
     public static final int SLOTS_ORIGIN_X = 62;
     public static final int SLOTS_ORIGIN_Y = 20;
     public static final int SLOT_SIZE = 18;

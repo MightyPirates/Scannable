@@ -3,13 +3,13 @@
   "group": "scanner_module",
   "ingredients": [
     {
-      "item": "scannable:module_blank"
+      "item": "scannable:blank_module"
     },
     {
-      "item": "minecraft:coal"
+      "tag": "forge:ender_pearls"
     }
   ],
   "result": {
-    "item": "scannable:module_ore_common"
+    "item": "scannable:range_module"
   }
 }

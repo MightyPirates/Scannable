@@ -5,7 +5,6 @@ import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.audio.SoundManager;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.capabilities.ScannerWrapper;
-import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
@@ -154,7 +153,7 @@ public final class ScannerItem extends ModItem {
 
     @Override
     public int getUseDuration(final ItemStack stack) {
-        return Constants.SCAN_COMPUTE_DURATION;
+        return ScanManager.SCAN_COMPUTE_DURATION;
     }
 
     @Override

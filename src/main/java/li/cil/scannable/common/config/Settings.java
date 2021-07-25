@@ -271,7 +271,7 @@ public final class Settings {
                              "overhead and thus potentially worse performance while scanning.\n" +
                              "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
                              "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
-                             "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
+                             "value by " + Constants.ORE_MODULE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.BLOCK_MODULE_RADIUS_MULTIPLIER + ".\n" +
                              "Range modules will boost the range by half this value.")
                     .worldRestart()
                     .defineInRange("baseScanRadius", Settings.baseScanRadius, 16, 128);

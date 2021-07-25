@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "scannable:items/module_blank"
+    "layer0": "scannable:items/blank_module"
   }
 }

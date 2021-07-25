@@ -20,28 +20,28 @@ public final class ModItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         begin(Items.SCANNER.get())
                 .texture("layer0", new ResourceLocation(API.MOD_ID, "items/scanner"));
-        begin(Items.MODULE_BLANK.get())
-                .texture("layer0", new ResourceLocation(API.MOD_ID, "items/module_blank"));
+        begin(Items.BLANK_MODULE.get())
+                .texture("layer0", new ResourceLocation(API.MOD_ID, "items/blank_module"));
 
-        registerModule(Items.MODULE_RANGE.get(), "items/module_range");
-        registerModule(Items.MODULE_ENTITY.get(), "items/module_entity");
-        registerModule(Items.MODULE_ANIMAL.get(), "items/module_animal");
-        registerModule(Items.MODULE_MONSTER.get(), "items/module_monster");
-        registerModule(Items.MODULE_BLOCK.get(), "items/module_block");
-        registerModule(Items.MODULE_ORE_COMMON.get(), "items/module_ore_common");
-        registerModule(Items.MODULE_ORE_RARE.get(), "items/module_ore_rare");
-        registerModule(Items.MODULE_FLUID.get(), "items/module_fluid");
-        // registerModule(Items.MODULE_STRUCTURE.get(), "items/module_structure");
+        registerModule(Items.RANGE_MODULE.get());
+        registerModule(Items.ENTITY_MODULE.get());
+        registerModule(Items.FRIENDLY_ENTITY_MODULE.get());
+        registerModule(Items.HOSTILE_ENTITY_MODULE.get());
+        registerModule(Items.BLOCK_MODULE.get());
+        registerModule(Items.COMMON_ORES_MODULE.get());
+        registerModule(Items.RARE_ORES_MODULE.get());
+        registerModule(Items.FLUID_MODULE.get());
+//        registerModule(Items.STRUCTURES_MODULE.get());
     }
 
     private ItemModelBuilder begin(final Item item) {
         return withExistingParent(Objects.requireNonNull(item.getRegistryName()).getPath(), new ResourceLocation("item/generated"));
     }
 
-    private void registerModule(final Item item, final String texture) {
+    private void registerModule(final Item item) {
         begin(item)
-                .texture("layer0", new ResourceLocation(API.MOD_ID, "items/module_blank"))
+                .texture("layer0", new ResourceLocation(API.MOD_ID, "items/blank_module"))
                 .texture("layer1", new ResourceLocation(API.MOD_ID, "items/module_slot"))
-                .texture("layer2", new ResourceLocation(API.MOD_ID, texture));
+                .texture("layer2", new ResourceLocation(API.MOD_ID, "items/" + Objects.requireNonNull(item.getRegistryName()).getPath()));
     }
 }

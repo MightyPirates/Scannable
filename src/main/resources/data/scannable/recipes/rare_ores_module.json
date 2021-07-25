@@ -3,13 +3,13 @@
   "group": "scanner_module",
   "ingredients": [
     {
-      "item": "scannable:module_blank"
+      "item": "scannable:blank_module"
     },
     {
-      "item": "minecraft:water_bucket"
+      "tag": "forge:gems/diamond"
     }
   ],
   "result": {
-    "item": "scannable:module_fluid"
+    "item": "scannable:rare_ores_module"
   }
 }

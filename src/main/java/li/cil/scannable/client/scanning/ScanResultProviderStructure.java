@@ -32,13 +32,12 @@ import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderStructure extends AbstractScanResultProvider {
-    public static final ScanResultProviderStructure INSTANCE = new ScanResultProviderStructure();
-
     public record StructureLocation(Component name, BlockPos pos) {
     }
 
     // --------------------------------------------------------------------- //
 
+    private static final int CHUNK_SIZE = 16;
     private static final StructureLocation[] EMPTY = new StructureLocation[0];
 
     private boolean hideExplored;
@@ -64,7 +63,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
     @Override
     public void initialize(final Player player, final Collection<ItemStack> modules, final Vec3 center, final float radius, final int scanTicks) {
-        super.initialize(player, modules, center, radius * Constants.MODULE_STRUCTURE_RADIUS_MULTIPLIER, scanTicks);
+        super.initialize(player, modules, center, radius * Constants.STRUCTURE_MODULE_RADIUS_MULTIPLIER, scanTicks);
         hideExplored = false;
         for (final ItemStack stack : modules) {
             stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY).ifPresent(module -> {
@@ -91,7 +90,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
                 state = State.WAIT_RESPONSE;
             }
             case WAIT_RESULT -> {
-                final float renderDistance = Minecraft.getInstance().options.renderDistance * Constants.CHUNK_SIZE;
+                final float renderDistance = Minecraft.getInstance().options.renderDistance * CHUNK_SIZE;
                 final float sqRenderDistance = renderDistance * renderDistance;
                 for (final StructureLocation structure : structures) {
                     final Vec3 structureCenter = new Vec3(structure.pos.getX(), structure.pos.getY(), structure.pos.getZ());
@@ -125,7 +124,7 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
 
         final boolean showDistance = renderInfo.getEntity().isShiftKeyDown();
 
-        final float renderDistance = Minecraft.getInstance().options.renderDistance * Constants.CHUNK_SIZE;
+        final float renderDistance = Minecraft.getInstance().options.renderDistance * CHUNK_SIZE;
         final float sqRenderDistance = renderDistance * renderDistance;
 
         for (final ScanResult result : results) {
@@ -186,10 +185,5 @@ public final class ScanResultProviderStructure extends AbstractScanResultProvide
         public AABB getRenderBounds() {
             return bounds;
         }
-    }
-
-    // --------------------------------------------------------------------- //
-
-    private ScanResultProviderStructure() {
     }
 }

@@ -9,7 +9,6 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.Capabilities;
-import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -33,12 +32,26 @@ import java.util.*;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanManager {
+    // The number of ticks over which to compute scan results. Which is at the
+    // same time the use time of the scanner item.
+    public static final int SCAN_COMPUTE_DURATION = 40;
+    // Initial radius of the scan wave.
+    private static final int SCAN_INITIAL_RADIUS = 10;
+    // Scan wave growth time offset to avoid super slow start speed.
+    private static final int SCAN_TIME_OFFSET = 200;
+    // How long the ping takes to reach the end of the visible area.
+    private static final int SCAN_GROWTH_DURATION = 2000;
+    // Reference render distance the above constants are relative to.
+    private static final int REFERENCE_RENDER_DISTANCE = 12;
+
+    // --------------------------------------------------------------------- //
+
     private static float computeTargetRadius() {
         return Minecraft.getInstance().gameRenderer.getRenderDistance();
     }
 
     public static int computeScanGrowthDuration() {
-        return Constants.SCAN_GROWTH_DURATION * Minecraft.getInstance().options.renderDistance / Constants.REFERENCE_RENDER_DISTANCE;
+        return SCAN_GROWTH_DURATION * Minecraft.getInstance().options.renderDistance / REFERENCE_RENDER_DISTANCE;
     }
 
     public static float computeRadius(final long start, final float duration) {
@@ -52,14 +65,14 @@ public final class ScanManager {
 
         final float r1 = computeTargetRadius();
         final float t1 = duration;
-        final float b = Constants.SCAN_TIME_OFFSET;
+        final float b = SCAN_TIME_OFFSET;
         final float n = 1f / ((t1 + b) * (t1 + b) - b * b);
         final float a = -r1 * b * b * n;
         final float c = r1 * n;
 
         final float t = (float) (System.currentTimeMillis() - start);
 
-        return Constants.SCAN_INITIAL_RADIUS + a + (t + b) * (t + b) * c;
+        return SCAN_INITIAL_RADIUS + a + (t + b) * (t + b) * c;
     }
 
     // --------------------------------------------------------------------- //
@@ -110,12 +123,12 @@ public final class ScanManager {
 
         final Vec3 center = player.position();
         for (final ScanResultProvider provider : collectingProviders) {
-            provider.initialize(player, stacks, center, scanRadius, Constants.SCAN_COMPUTE_DURATION);
+            provider.initialize(player, stacks, center, scanRadius, SCAN_COMPUTE_DURATION);
         }
     }
 
     public static void updateScan(final Entity entity, final boolean finish) {
-        final int remaining = Constants.SCAN_COMPUTE_DURATION - scanningTicks;
+        final int remaining = SCAN_COMPUTE_DURATION - scanningTicks;
 
         if (!finish) {
             if (remaining <= 0) {

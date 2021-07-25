@@ -3,13 +3,13 @@
   "group": "scanner_module",
   "ingredients": [
     {
-      "item": "scannable:module_blank"
+      "item": "scannable:blank_module"
     },
     {
-      "item": "minecraft:lead"
+      "item": "minecraft:coal"
     }
   ],
   "result": {
-    "item": "scannable:module_entity"
+    "item": "scannable:common_ores_module"
   }
 }

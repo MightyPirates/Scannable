@@ -2,10 +2,9 @@ package li.cil.scannable.common.inventory;
 
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.capabilities.Capabilities;
-import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.item.ScannerModuleItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
@@ -17,12 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ScannerItemHandler extends ItemStackHandler {
+    private static final int ACTIVE_MODULE_COUNT = 3;
+    private static final int INACTIVE_MODULE_COUNT = 6;
+    private static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT + INACTIVE_MODULE_COUNT;
+
     private static final String TAG_ITEMS = "items";
 
     private final ItemStack container;
 
     public ScannerItemHandler(final ItemStack container) {
-        super(Constants.SCANNER_TOTAL_MODULE_COUNT);
+        super(TOTAL_MODULE_COUNT);
         this.container = container;
     }
 
@@ -30,10 +33,10 @@ public final class ScannerItemHandler extends ItemStackHandler {
         final CompoundTag tag = container.getTag();
         if (tag != null && tag.contains(TAG_ITEMS, NBT.TAG_COMPOUND)) {
             deserializeNBT(tag.getCompound(TAG_ITEMS));
-            if (stacks.size() != Constants.SCANNER_TOTAL_MODULE_COUNT) {
+            if (stacks.size() != TOTAL_MODULE_COUNT) {
                 final List<ItemStack> oldStacks = new ArrayList<>(stacks);
-                setSize(Constants.SCANNER_TOTAL_MODULE_COUNT);
-                final int count = Math.min(Constants.SCANNER_TOTAL_MODULE_COUNT, oldStacks.size());
+                setSize(TOTAL_MODULE_COUNT);
+                final int count = Math.min(TOTAL_MODULE_COUNT, oldStacks.size());
                 for (int slot = 0; slot < count; slot++) {
                     stacks.set(slot, oldStacks.get(slot));
                 }
@@ -42,11 +45,11 @@ public final class ScannerItemHandler extends ItemStackHandler {
     }
 
     public IItemHandler getActiveModules() {
-        return new RangedWrapper(this, 0, Constants.SCANNER_ACTIVE_MODULE_COUNT);
+        return new RangedWrapper(this, 0, ACTIVE_MODULE_COUNT);
     }
 
     public IItemHandler getInactiveModules() {
-        return new RangedWrapper(this, Constants.SCANNER_ACTIVE_MODULE_COUNT, Constants.SCANNER_TOTAL_MODULE_COUNT);
+        return new RangedWrapper(this, ACTIVE_MODULE_COUNT, TOTAL_MODULE_COUNT);
     }
 
     // --------------------------------------------------------------------- //

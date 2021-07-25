@@ -38,7 +38,7 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("is_delving", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.MINESHAFT)))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(MODULE_BLANK.get())
+        ShapedRecipeBuilder.shaped(BLANK_MODULE.get())
                 .pattern("ggg")
                 .pattern("crc")
                 .pattern("cnc")
@@ -50,30 +50,30 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_scanner", InventoryChangeTrigger.TriggerInstance.hasItems(SCANNER.get()))
                 .save(consumer);
 
-        registerModule(MODULE_RANGE.get(), Tags.Items.ENDER_PEARLS).save(consumer);
-        registerModule(MODULE_ENTITY.get(), Items.LEAD).save(consumer);
-        registerModule(MODULE_ANIMAL.get(), Tags.Items.LEATHER).save(consumer);
-        registerModule(MODULE_MONSTER.get(), Tags.Items.BONES).save(consumer);
-        registerModule(MODULE_BLOCK.get(), Tags.Items.STONE).save(consumer);
-        registerModule(MODULE_ORE_COMMON.get(), Items.COAL).save(consumer);
-        registerModule(MODULE_ORE_RARE.get(), Tags.Items.GEMS_DIAMOND).save(consumer);
-        registerModule(MODULE_FLUID.get(), Items.WATER_BUCKET).save(consumer);
-//        registerModule(Scannable.MODULE_STRUCTURE.get(), Tags.Items.GEMS_EMERALD).build(consumer);
+        registerModule(RANGE_MODULE.get(), Tags.Items.ENDER_PEARLS).save(consumer);
+        registerModule(ENTITY_MODULE.get(), Items.LEAD).save(consumer);
+        registerModule(FRIENDLY_ENTITY_MODULE.get(), Tags.Items.LEATHER).save(consumer);
+        registerModule(HOSTILE_ENTITY_MODULE.get(), Tags.Items.BONES).save(consumer);
+        registerModule(BLOCK_MODULE.get(), Tags.Items.STONE).save(consumer);
+        registerModule(COMMON_ORES_MODULE.get(), Items.COAL).save(consumer);
+        registerModule(RARE_ORES_MODULE.get(), Tags.Items.GEMS_DIAMOND).save(consumer);
+        registerModule(FLUID_MODULE.get(), Items.WATER_BUCKET).save(consumer);
+//        registerModule(Scannable.STRUCTURES_MODULE.get(), Tags.Items.GEMS_EMERALD).build(consumer);
     }
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final Tag<Item> ingredient) {
         return ShapelessRecipeBuilder.shapeless(item)
-                .requires(MODULE_BLANK.get())
+                .requires(BLANK_MODULE.get())
                 .requires(ingredient)
                 .group("scanner_module")
-                .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(MODULE_BLANK.get()));
+                .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(BLANK_MODULE.get()));
     }
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final Item ingredient) {
         return ShapelessRecipeBuilder.shapeless(item)
-                .requires(MODULE_BLANK.get())
+                .requires(BLANK_MODULE.get())
                 .requires(ingredient)
                 .group("scanner_module")
-                .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(MODULE_BLANK.get()));
+                .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(BLANK_MODULE.get()));
     }
 }

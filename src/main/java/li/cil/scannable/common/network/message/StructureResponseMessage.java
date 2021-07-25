@@ -1,6 +1,7 @@
 package li.cil.scannable.common.network.message;
 
 import li.cil.scannable.client.scanning.ScanResultProviderStructure;
+import li.cil.scannable.client.scanning.ScanResultProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,7 +24,7 @@ public final class StructureResponseMessage extends AbstractMessage {
 
     @Override
     protected void handleMessage(final NetworkEvent.Context context) {
-        ScanResultProviderStructure.INSTANCE.setStructures(structures);
+        ScanResultProviders.STRUCTURES.get().setStructures(structures);
     }
 
     @Override

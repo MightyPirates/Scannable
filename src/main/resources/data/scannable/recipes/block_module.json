@@ -3,13 +3,13 @@
   "group": "scanner_module",
   "ingredients": [
     {
-      "item": "scannable:module_blank"
+      "item": "scannable:blank_module"
     },
     {
-      "tag": "forge:ender_pearls"
+      "tag": "forge:stone"
     }
   ],
   "result": {
-    "item": "scannable:module_range"
+    "item": "scannable:block_module"
   }
 }

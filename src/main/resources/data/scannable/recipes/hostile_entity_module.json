@@ -3,13 +3,13 @@
   "group": "scanner_module",
   "ingredients": [
     {
-      "item": "scannable:module_blank"
+      "item": "scannable:blank_module"
     },
     {
       "tag": "forge:bones"
     }
   ],
   "result": {
-    "item": "scannable:module_monster"
+    "item": "scannable:hostile_entity_module"
   }
 }

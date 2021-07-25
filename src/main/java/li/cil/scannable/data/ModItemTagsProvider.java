@@ -16,16 +16,16 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
     @Override
     protected void addTags() {
         tag(ItemTags.MODULES).add(
-                Items.MODULE_BLANK.get(),
-                Items.MODULE_RANGE.get(),
-                Items.MODULE_ENTITY.get(),
-                Items.MODULE_ANIMAL.get(),
-                Items.MODULE_MONSTER.get(),
-                Items.MODULE_BLOCK.get(),
-                Items.MODULE_ORE_COMMON.get(),
-                Items.MODULE_ORE_RARE.get(),
-                Items.MODULE_FLUID.get()
-                // Items.MODULE_STRUCTURE.get()
+                Items.BLANK_MODULE.get(),
+                Items.RANGE_MODULE.get(),
+                Items.ENTITY_MODULE.get(),
+                Items.FRIENDLY_ENTITY_MODULE.get(),
+                Items.HOSTILE_ENTITY_MODULE.get(),
+                Items.BLOCK_MODULE.get(),
+                Items.COMMON_ORES_MODULE.get(),
+                Items.RARE_ORES_MODULE.get(),
+                Items.FLUID_MODULE.get()
+                // Items.STRUCTURES_MODULE.get()
         );
     }
 }

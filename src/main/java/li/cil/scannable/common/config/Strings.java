@@ -11,13 +11,13 @@ import static net.minecraft.ChatFormatting.*;
 public final class Strings {
     private static final String TOOLTIP_LIST_ITEM_FORMAT = "tooltip.scannable.list_item";
 
-    public static final Component TOOLTIP_BLOCKS_LIST_CAPTION = new TranslatableComponent("item.scannable.module_block.list").withStyle(GRAY);
-    public static final Component TOOLTIP_ENTITIES_LIST_CAPTION = new TranslatableComponent("item.scannable.module_entity.list").withStyle(GRAY);
-    public static final Component TOOLTIP_SHOW_EXPLORED = new TranslatableComponent("item.scannable.module_structure.show_explored");
-    public static final Component TOOLTIP_HIDE_EXPLORED = new TranslatableComponent("item.scannable.module_structure.hide_explored");
+    public static final Component TOOLTIP_BLOCKS_LIST_CAPTION = new TranslatableComponent("item.scannable.block_module.list").withStyle(GRAY);
+    public static final Component TOOLTIP_ENTITIES_LIST_CAPTION = new TranslatableComponent("item.scannable.entity_module.list").withStyle(GRAY);
+    public static final Component TOOLTIP_SHOW_EXPLORED = new TranslatableComponent("item.scannable.structures_module.show_explored");
+    public static final Component TOOLTIP_HIDE_EXPLORED = new TranslatableComponent("item.scannable.structures_module.hide_explored");
 
-    public static final Component GUI_BLOCKS_LIST_CAPTION = new TranslatableComponent("gui.scannable.module_block.list");
-    public static final Component GUI_ENTITIES_LIST_CAPTION = new TranslatableComponent("gui.scannable.module_entity.list");
+    public static final Component GUI_BLOCKS_LIST_CAPTION = new TranslatableComponent("gui.scannable.block_module.list");
+    public static final Component GUI_ENTITIES_LIST_CAPTION = new TranslatableComponent("gui.scannable.entity_module.list");
 
     public static final Component MESSAGE_NO_SCAN_MODULES = new TranslatableComponent("message.scannable.no_scan_modules").withStyle(RED);
     public static final Component MESSAGE_NOT_ENOUGH_ENERGY = new TranslatableComponent("message.scannable.not_enough_energy").withStyle(RED);

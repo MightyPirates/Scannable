@@ -2,16 +2,18 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "scannable:module_fluid"
+      "scannable:blank_module"
     ]
   },
   "criteria": {
-    "has_blank_module": {
+    "has_scanner": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "item": "scannable:module_blank"
+            "items": [
+              "scannable:scanner"
+            ]
           }
         ]
       }
@@ -19,13 +21,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "scannable:module_fluid"
+        "recipe": "scannable:blank_module"
       }
     }
   },
   "requirements": [
     [
-      "has_blank_module",
+      "has_scanner",
       "has_the_recipe"
     ]
   ]

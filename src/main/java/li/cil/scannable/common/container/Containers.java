@@ -13,8 +13,8 @@ public final class Containers {
     // --------------------------------------------------------------------- //
 
     public static final RegistryObject<MenuType<ScannerContainerMenu>> SCANNER_CONTAINER = CONTAINERS.register("scanner", () -> IForgeContainerType.create(ScannerContainerMenu::create));
-    public static final RegistryObject<MenuType<BlockModuleContainerMenu>> BLOCK_MODULE_CONTAINER = CONTAINERS.register("module_block", () -> IForgeContainerType.create(BlockModuleContainerMenu::create));
-    public static final RegistryObject<MenuType<EntityModuleContainerMenu>> ENTITY_MODULE_CONTAINER = CONTAINERS.register("module_entity", () -> IForgeContainerType.create(EntityModuleContainerMenu::create));
+    public static final RegistryObject<MenuType<BlockModuleContainerMenu>> BLOCK_MODULE_CONTAINER = CONTAINERS.register("block_module", () -> IForgeContainerType.create(BlockModuleContainerMenu::create));
+    public static final RegistryObject<MenuType<EntityModuleContainerMenu>> ENTITY_MODULE_CONTAINER = CONTAINERS.register("entity_module", () -> IForgeContainerType.create(EntityModuleContainerMenu::create));
 
     // --------------------------------------------------------------------- //
 

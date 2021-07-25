@@ -10,7 +10,6 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -44,7 +43,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
     @OnlyIn(Dist.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
-        return range * Constants.MODULE_BLOCK_RADIUS_MULTIPLIER;
+        return range * Constants.BLOCK_MODULE_RADIUS_MULTIPLIER;
     }
 
     @OnlyIn(Dist.CLIENT)

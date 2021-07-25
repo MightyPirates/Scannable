@@ -1,14 +1,14 @@
 {
   "replace": false,
   "values": [
-    "scannable:module_blank",
-    "scannable:module_range",
-    "scannable:module_entity",
-    "scannable:module_animal",
-    "scannable:module_monster",
-    "scannable:module_block",
-    "scannable:module_ore_common",
-    "scannable:module_ore_rare",
-    "scannable:module_fluid"
+    "scannable:blank_module",
+    "scannable:range_module",
+    "scannable:entity_module",
+    "scannable:friendly_entity_module",
+    "scannable:hostile_entity_module",
+    "scannable:block_module",
+    "scannable:common_ores_module",
+    "scannable:rare_ores_module",
+    "scannable:fluid_module"
   ]
 }
