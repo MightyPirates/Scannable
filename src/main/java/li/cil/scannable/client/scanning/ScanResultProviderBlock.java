@@ -364,14 +364,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BlockState blockState = block.defaultBlockState();
 
             color = blockState.getMapColor(level, new BlockPos(bounds.getCenter())).col;
-            if (color == 0) { // E.g. glass.
-                color = DEFAULT_COLOR;
-            }
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
                 if (Settings.fluidColors.containsKey(fluidState.getType().getRegistryName())) {
-                    color = Settings.fluidColors.getInt(fluidState.getType());
+                    color = Settings.fluidColors.getInt(fluidState.getType().getRegistryName());
                 } else {
                     Settings.fluidTagColors.forEach((k, v) -> {
                         final Tag<Fluid> tag = FluidTags.getAllTags().getTag(k);
@@ -382,7 +379,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 }
             } else {
                 if (Settings.blockColors.containsKey(blockState.getBlock().getRegistryName())) {
-                    color = Settings.blockColors.getInt(blockState.getBlock());
+                    color = Settings.blockColors.getInt(blockState.getBlock().getRegistryName());
                 } else {
                     Settings.blockTagColors.forEach((k, v) -> {
                         final Tag<Block> tag = BlockTags.getAllTags().getTag(k);
@@ -393,9 +390,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 }
             }
 
-            // Fix up alpha if it's zero.
-            if ((color & 0xFF000000) == 0) {
-                color |= 0xFF000000;
+            if (color == 0) { // E.g. glass.
+                color = DEFAULT_COLOR;
             }
 
             final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
