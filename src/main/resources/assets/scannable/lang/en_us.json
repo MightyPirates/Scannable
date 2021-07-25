@@ -32,8 +32,8 @@
   "gui.scannable.scanner.inactive_modules": "Inactive",
   "gui.scannable.scanner.inactive_modules.desc": "These are convenience slots for storing additional modules. They are not used when performing a scan.",
   "gui.scannable.scanner.progress": "Charging... %s%%",
-  "gui.scannable.module_block.list": "Blocks",
-  "gui.scannable.module_entity.list": "Entities",
+  "gui.scannable.block_module.list": "Blocks",
+  "gui.scannable.entity_module.list": "Entities",
   "gui.scannable.overlay.distance": "%s (%sm)",
 
   "message.scannable.no_scan_modules": "No scanning module installed.",

@@ -31,8 +31,8 @@
   "gui.scannable.scanner.inactive_modules": "Inaktiv",
   "gui.scannable.scanner.inactive_modules.desc": "Hier können zusätzliche Module gelagert werden. Sie werden bei Scans nicht verwendet.",
   "gui.scannable.scanner.progress": "Lade... %s%%",
-  "gui.scannable.module_block.list": "Blöcke",
-  "gui.scannable.module_entity.list": "Lebewesen",
+  "gui.scannable.block_module.list": "Blöcke",
+  "gui.scannable.entity_module.list": "Lebewesen",
   "gui.scannable.overlay.distance": "%s (%sm)",
 
   "message.scannable.no_scan_modules": "Kein scannendes Modul installiert.",
