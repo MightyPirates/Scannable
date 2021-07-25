@@ -9,7 +9,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RegistryUtils {
+public final class RegistryUtils {
     private enum Phase {
         PRE_INIT,
         INIT,
