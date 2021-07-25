@@ -122,6 +122,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             list.remove(oldIndex);
         }
 
+        tag.put(TAG_ENTITIES, list);
     }
 
     public static void removeEntityTypeAt(final ItemStack stack, final int index) {

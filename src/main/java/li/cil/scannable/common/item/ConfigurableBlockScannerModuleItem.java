@@ -134,6 +134,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             list.remove(oldIndex);
         }
 
+        tag.put(TAG_BLOCKS, list);
     }
 
     public static void removeBlockAt(final ItemStack stack, final int index) {
