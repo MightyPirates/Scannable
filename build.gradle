@@ -130,20 +130,20 @@ jar {
 
     manifest {
         attributes([
-                FMLAT                     : 'accesstransformer.cfg',
-                "Specification-Title"     : 'Scannable',
-                "Specification-Vendor"    : 'Sangar',
-                "Specification-Version"   : '1',
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${semver}",
-                "Implementation-Vendor"   : 'Sangar',
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'FMLAT'                   : 'accesstransformer.cfg',
+                'Specification-Title'     : 'Scannable',
+                'Specification-Vendor'    : 'Sangar',
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : "${semver}",
+                'Implementation-Vendor'   : 'Sangar',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
 
 task apiJar(type: Jar) {
-    classifier 'api'
+    archiveClassifier.set('api')
     from sourceSets.main.allSource
     from sourceSets.main.output
     include 'li/cil/scannable/api/**'
@@ -169,7 +169,7 @@ publishing {
 }
 
 curseforge {
-    apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
+    apiKey = project.hasProperty('curseForgeApiKey') ? project.curseForgeApiKey : ''
     project {
         id = curse_project_id
         releaseType = curse_project_releaseType
