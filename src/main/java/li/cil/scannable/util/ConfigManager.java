@@ -1,15 +1,13 @@
 package li.cil.scannable.util;
 
 import com.google.common.base.Strings;
-import li.cil.scannable.api.API;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +28,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(modid = API.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class ConfigManager {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
@@ -144,12 +141,13 @@ public final class ConfigManager {
             final ModConfig.Type configType = typeAnnotation != null ? typeAnnotation.value() : ModConfig.Type.COMMON;
             ModLoadingContext.get().registerConfig(configType, spec);
         });
+
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigManager::handleModConfigEvent);
     }
 
     // --------------------------------------------------------------------- //
 
-    @SubscribeEvent
-    public static void handleModConfigEvent(final ModConfigEvent event) {
+    private static void handleModConfigEvent(final ModConfigEvent event) {
         final ConfigDefinition config = CONFIGS.get(event.getConfig().getSpec());
         if (config != null) {
             config.apply();
