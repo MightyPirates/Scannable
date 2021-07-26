@@ -15,7 +15,7 @@ import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.shader.Shaders;
 import li.cil.scannable.common.capabilities.Capabilities;
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -367,10 +367,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
-                if (Settings.fluidColors.containsKey(fluidState.getType().getRegistryName())) {
-                    color = Settings.fluidColors.getInt(fluidState.getType().getRegistryName());
+                if (ClientConfig.fluidColors.containsKey(fluidState.getType().getRegistryName())) {
+                    color = ClientConfig.fluidColors.getInt(fluidState.getType().getRegistryName());
                 } else {
-                    Settings.fluidTagColors.forEach((k, v) -> {
+                    ClientConfig.fluidTagColors.forEach((k, v) -> {
                         final Tag<Fluid> tag = FluidTags.getAllTags().getTag(k);
                         if (tag != null && tag.contains(fluidState.getType())) {
                             color = v;
@@ -378,10 +378,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     });
                 }
             } else {
-                if (Settings.blockColors.containsKey(blockState.getBlock().getRegistryName())) {
-                    color = Settings.blockColors.getInt(blockState.getBlock().getRegistryName());
+                if (ClientConfig.blockColors.containsKey(blockState.getBlock().getRegistryName())) {
+                    color = ClientConfig.blockColors.getInt(blockState.getBlock().getRegistryName());
                 } else {
-                    Settings.blockTagColors.forEach((k, v) -> {
+                    ClientConfig.blockTagColors.forEach((k, v) -> {
                         final Tag<Block> tag = BlockTags.getAllTags().getTag(k);
                         if (tag != null && tag.contains(blockState.getBlock())) {
                             color = v;

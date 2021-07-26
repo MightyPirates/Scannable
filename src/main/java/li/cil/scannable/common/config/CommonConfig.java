@@ -1,0 +1,120 @@
+package li.cil.scannable.common.config;
+
+import li.cil.scannable.util.ConfigManager.*;
+import net.minecraft.Util;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.common.Tags;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public final class CommonConfig {
+    @Path("energy") @WorldRestart
+    @Comment("Whether to consume energy when performing a scan. Will make the scanner a chargeable item.")
+    public static boolean useEnergy = true;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy that can be stored in a scanner.")
+    public static int energyCapacityScanner = 5000;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the range module per scan.")
+    public static int energyCostModuleRange = 100;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the animal module per scan.")
+    public static int energyCostModuleAnimal = 25;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the monster module per scan.")
+    public static int energyCostModuleMonster = 50;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the common ore module per scan.")
+    public static int energyCostModuleOreCommon = 75;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the rare ore module per scan.")
+    public static int energyCostModuleOreRare = 100;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the block module per scan.")
+    public static int energyCostModuleBlock = 100;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the fluid module per scan.")
+    public static int energyCostModuleFluid = 50;
+
+    @Path("energy") @WorldRestart @Min(0)
+    @Comment("Amount of energy used by the entity module per scan.")
+    public static int energyCostModuleEntity = 75;
+
+    @Path("general") @WorldRestart @Min(16) @Max(128)
+    @Comment("The basic scan radius without range modules. Higher values mean more computational\n" +
+             "overhead and thus potentially worse performance while scanning.\n" +
+             "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
+             "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
+             "value by " + Constants.ORE_MODULE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.BLOCK_MODULE_RADIUS_MULTIPLIER + ".\n" +
+             "Range modules will boost the range by half this value.")
+    public static int baseScanRadius = 64;
+
+    @Path("general") @WorldRestart @Min(1000) @Max(60000 * 5)
+    @Comment("How long the results from a scan should remain visible, in milliseconds.")
+    public static int scanStayDuration = 10000;
+
+    @Path("blocks") @WorldRestart
+    @Comment("""
+            Registry names of blocks that should be ignored.
+            Blocks in this list will be excluded from the default ore list based on the forge:ores
+            tag and it will be impossible to tune the entity module to this block.""")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> ignoredBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.COMMAND_BLOCK.getRegistryName());
+    });
+
+    @Path("blocks") @WorldRestart
+    @Comment("""
+            Tag names of block tags that should be ignored.
+            Blocks matching a tag in this list will be excluded from the default ore list based on the
+            forge:ores tag and it will be impossible to tune the entity module to this block.""")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> ignoredBlockTags = new HashSet<>();
+
+    @Path("ores") @WorldRestart
+    @Comment("Registry names of blocks considered 'common ores', requiring the common ore scanner module.")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> commonOreBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.CLAY.getRegistryName());
+    });
+
+    @Path("ores") @WorldRestart
+    @Comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> commonOreBlockTags = Util.make(new HashSet<>(), c -> {
+        c.add(Tags.Blocks.ORES_COAL.getName());
+        c.add(Tags.Blocks.ORES_IRON.getName());
+        c.add(Tags.Blocks.ORES_REDSTONE.getName());
+        c.add(Tags.Blocks.ORES_QUARTZ.getName());
+    });
+
+    @Path("ores") @WorldRestart
+    @Comment("Registry names of blocks considered 'rare ores', requiring the common ore scanner module.")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> rareOreBlocks = Util.make(new HashSet<>(), c -> {
+        c.add(Blocks.GLOWSTONE.getRegistryName());
+    });
+
+    @Path("ores") @WorldRestart
+    @Comment("""
+            Block tags of blocks considered 'rare ores', requiring the common ore scanner module.
+            Any block with the forge:ores tag is implicitly in this list, unless the block also
+            matches an ignored or common ore block tag, or is an ignored or common block.""")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> rareOreBlockTags = new HashSet<>();
+
+    @Path("fluids") @WorldRestart
+    @Comment("Fluid tags of fluids that should be ignored.")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> ignoredFluidTags = new HashSet<>();
+}

@@ -1,6 +1,6 @@
 package li.cil.scannable.common.capabilities;
 
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.energy.ScannerEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerItemHandler;
 import net.minecraft.core.Direction;
@@ -51,7 +51,7 @@ public final class ScannerWrapper implements ICapabilityProvider {
         }
 
         final LazyOptional<T> energyCapability = CapabilityEnergy.ENERGY.orEmpty(capability, energyStorageHolder);
-        if (Settings.useEnergy && energyCapability.isPresent()) {
+        if (CommonConfig.useEnergy && energyCapability.isPresent()) {
             return energyCapability;
         }
         return LazyOptional.empty();

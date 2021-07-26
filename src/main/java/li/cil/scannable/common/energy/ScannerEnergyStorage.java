@@ -1,6 +1,6 @@
 package li.cil.scannable.common.energy;
 
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.EnergyStorage;
@@ -17,7 +17,7 @@ public final class ScannerEnergyStorage extends EnergyStorage {
     }
 
     public ScannerEnergyStorage(final ItemStack container) {
-        super(Settings.energyCapacityScanner);
+        super(CommonConfig.energyCapacityScanner);
         this.container = container;
     }
 
@@ -33,7 +33,7 @@ public final class ScannerEnergyStorage extends EnergyStorage {
 
     @Override
     public int receiveEnergy(final int maxReceive, final boolean simulate) {
-        if (!Settings.useEnergy) {
+        if (!CommonConfig.useEnergy) {
             return 0;
         }
 
@@ -47,7 +47,7 @@ public final class ScannerEnergyStorage extends EnergyStorage {
 
     @Override
     public int extractEnergy(final int maxExtract, final boolean simulate) {
-        if (!Settings.useEnergy) {
+        if (!CommonConfig.useEnergy) {
             return 0;
         }
 

@@ -7,8 +7,8 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -36,7 +36,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return Settings.energyCostModuleOreCommon;
+        return CommonConfig.energyCostModuleOreCommon;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -65,13 +65,13 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final ResourceLocation location : Settings.rareOreBlocks) {
+        for (final ResourceLocation location : CommonConfig.rareOreBlocks) {
             final Block block = ForgeRegistries.BLOCKS.getValue(location);
             if (block != null) {
                 filters.add(new BlockScanFilter(block));
             }
         }
-        for (final ResourceLocation location : Settings.rareOreBlockTags) {
+        for (final ResourceLocation location : CommonConfig.rareOreBlockTags) {
             final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
             if (tag != null) {
                 filters.add(new BlockTagScanFilter(tag));

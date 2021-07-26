@@ -9,7 +9,7 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.Capabilities;
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -101,7 +101,7 @@ public final class ScanManager {
     public static void beginScan(final Player player, final List<ItemStack> stacks) {
         cancelScan();
 
-        float scanRadius = Settings.baseScanRadius;
+        float scanRadius = CommonConfig.baseScanRadius;
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
@@ -183,7 +183,7 @@ public final class ScanManager {
             return;
         }
 
-        if (Settings.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
+        if (CommonConfig.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
             pendingResults.forEach((provider, results) -> results.forEach(ScanResult::close));
             pendingResults.clear();
             synchronized (renderingResults) {

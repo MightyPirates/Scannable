@@ -4,9 +4,8 @@ import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.FriendlyEntityScanFilter;
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -18,7 +17,7 @@ public enum FriendlyEntityScannerModule implements EntityScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return Settings.energyCostModuleAnimal;
+        return CommonConfig.energyCostModuleAnimal;
     }
 
     @OnlyIn(Dist.CLIENT)

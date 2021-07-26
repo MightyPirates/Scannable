@@ -1,7 +1,7 @@
 package li.cil.scannable.common.scanning.filter;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
@@ -34,7 +34,7 @@ public enum IgnoredBlocks {
         }
 
         final Set<Block> ignoredBlocks = new HashSet<>();
-        for (final ResourceLocation location : Settings.ignoredBlocks) {
+        for (final ResourceLocation location : CommonConfig.ignoredBlocks) {
             final Block block = ForgeRegistries.BLOCKS.getValue(location);
             if (block != null) {
                 ignoredBlocks.add(block);
@@ -42,7 +42,7 @@ public enum IgnoredBlocks {
         }
 
         final List<Tag<Block>> ignoredTags = new ArrayList<>();
-        for (final ResourceLocation location : Settings.ignoredBlockTags) {
+        for (final ResourceLocation location : CommonConfig.ignoredBlockTags) {
             final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
             if (tag != null) {
                 ignoredTags.add(tag);

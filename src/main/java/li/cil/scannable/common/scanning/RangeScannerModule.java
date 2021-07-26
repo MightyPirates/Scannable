@@ -2,9 +2,8 @@ package li.cil.scannable.common.scanning;
 
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -16,7 +15,7 @@ public enum RangeScannerModule implements ScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return Settings.energyCostModuleRange;
+        return CommonConfig.energyCostModuleRange;
     }
 
     @Override
@@ -34,6 +33,6 @@ public enum RangeScannerModule implements ScannerModule {
     @OnlyIn(Dist.CLIENT)
     @Override
     public float adjustGlobalRange(final float range) {
-        return range + Mth.ceil(Settings.baseScanRadius / 2f);
+        return range + Mth.ceil(CommonConfig.baseScanRadius / 2f);
     }
 }

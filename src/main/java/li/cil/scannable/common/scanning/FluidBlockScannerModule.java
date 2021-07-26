@@ -6,8 +6,8 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return Settings.energyCostModuleFluid;
+        return CommonConfig.energyCostModuleFluid;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -62,7 +62,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
         final List<Predicate<BlockState>> filters = new ArrayList<>();
         for (final Tag<Fluid> tag : FluidTags.getStaticTags()) {
             if (tag instanceof Tag.Named<Fluid> namedTag) {
-                if (!Settings.ignoredFluidTags.contains(namedTag.getName())) {
+                if (!CommonConfig.ignoredFluidTags.contains(namedTag.getName())) {
                     filters.add(new FluidTagScanFilter(tag));
                 }
             }

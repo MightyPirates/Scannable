@@ -5,10 +5,10 @@ import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
-import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
+import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.config.Settings;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
@@ -34,7 +34,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return Settings.energyCostModuleOreCommon;
+        return CommonConfig.energyCostModuleOreCommon;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -63,13 +63,13 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final ResourceLocation location : Settings.commonOreBlocks) {
+        for (final ResourceLocation location : CommonConfig.commonOreBlocks) {
             final Block block = ForgeRegistries.BLOCKS.getValue(location);
             if (block != null) {
                 filters.add(new BlockScanFilter(block));
             }
         }
-        for (final ResourceLocation location : Settings.commonOreBlockTags) {
+        for (final ResourceLocation location : CommonConfig.commonOreBlockTags) {
             final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
             if (tag != null) {
                 filters.add(new BlockTagScanFilter(tag));

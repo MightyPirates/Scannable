@@ -5,7 +5,7 @@ import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.audio.SoundManager;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.capabilities.ScannerWrapper;
-import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import li.cil.scannable.common.energy.ScannerEnergyStorage;
@@ -64,7 +64,7 @@ public final class ScannerItem extends ModItem {
     public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
 
-        if (allowdedIn(group) && Settings.useEnergy) {
+        if (allowdedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
             ScannerEnergyStorage.of(stack).receiveEnergy(Integer.MAX_VALUE, false);
             items.add(stack);
@@ -75,7 +75,7 @@ public final class ScannerItem extends ModItem {
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
 
-        if (Settings.useEnergy) {
+        if (CommonConfig.useEnergy) {
             final ScannerEnergyStorage energyStorage = ScannerEnergyStorage.of(stack);
             tooltip.add(Strings.energyStorage(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored()));
         }
@@ -83,12 +83,12 @@ public final class ScannerItem extends ModItem {
 
     @Override
     public boolean showDurabilityBar(final ItemStack stack) {
-        return Settings.useEnergy;
+        return CommonConfig.useEnergy;
     }
 
     @Override
     public double getDurabilityForDisplay(final ItemStack stack) {
-        if (!Settings.useEnergy) {
+        if (!CommonConfig.useEnergy) {
             return 0;
         }
 
@@ -207,7 +207,7 @@ public final class ScannerItem extends ModItem {
     // --------------------------------------------------------------------- //
 
     static int getModuleEnergyCost(final ItemStack stack) {
-        if (!Settings.useEnergy || Capabilities.SCANNER_MODULE_CAPABILITY == null) {
+        if (!CommonConfig.useEnergy || Capabilities.SCANNER_MODULE_CAPABILITY == null) {
             return 0;
         }
 
@@ -216,7 +216,7 @@ public final class ScannerItem extends ModItem {
     }
 
     private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
-        if (!Settings.useEnergy) {
+        if (!CommonConfig.useEnergy) {
             return true;
         }
 
