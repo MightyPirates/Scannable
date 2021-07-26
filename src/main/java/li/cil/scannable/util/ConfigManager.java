@@ -19,7 +19,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.invoke.*;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -394,8 +397,9 @@ public final class ConfigManager {
         return Pair.of(serializer, deserializer);
     }
 
+    @Nullable
     @SuppressWarnings("unchecked")
-    private static Function<Object, String> getSerializerMethod(final Object instance, final String methodName, final Function<Object, String> defaultSerializer) {
+    private static Function<Object, String> getSerializerMethod(final Object instance, final String methodName, @Nullable final Function<Object, String> defaultSerializer) {
         if (Strings.isNullOrEmpty(methodName)) {
             return defaultSerializer;
         }
@@ -417,8 +421,9 @@ public final class ConfigManager {
         }
     }
 
+    @Nullable
     @SuppressWarnings("unchecked")
-    private static Function<String, Object> getDeserializerMethod(final Object instance, final String methodName, final Function<String, Object> defaultDeserializer) {
+    private static Function<String, Object> getDeserializerMethod(final Object instance, final String methodName, @Nullable final Function<String, Object> defaultDeserializer) {
         if (Strings.isNullOrEmpty(methodName)) {
             return defaultDeserializer;
         }
