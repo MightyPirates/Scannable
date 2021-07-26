@@ -91,7 +91,6 @@ public final class ConfigManager {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
     public @interface CustomSerializer {
         String serializer() default "";
 
