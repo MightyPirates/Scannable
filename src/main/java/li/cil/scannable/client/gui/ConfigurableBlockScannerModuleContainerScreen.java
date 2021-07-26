@@ -11,9 +11,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
+@OnlyIn(Dist.CLIENT)
 public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfigurableScannerModuleContainerScreen<BlockModuleContainerMenu, Block> {
     public ConfigurableBlockScannerModuleContainerScreen(final BlockModuleContainerMenu container, final Inventory inventory, final Component title) {
         super(container, inventory, title, Strings.GUI_BLOCKS_LIST_CAPTION);

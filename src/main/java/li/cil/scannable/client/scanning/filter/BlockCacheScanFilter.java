@@ -2,6 +2,8 @@ package li.cil.scannable.client.scanning.filter;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+@OnlyIn(Dist.CLIENT)
 public final class BlockCacheScanFilter implements Predicate<BlockState> {
     private final Collection<Block> blocks;
 
