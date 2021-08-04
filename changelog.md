@@ -1,1 +1,1 @@
-* Fixed effect not rendering in some versions.
+* Added copper and tin to default common ore config.
