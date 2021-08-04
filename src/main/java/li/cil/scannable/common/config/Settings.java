@@ -61,6 +61,8 @@ public final class Settings {
         c.add(Tags.Blocks.ORES_IRON.getName());
         c.add(Tags.Blocks.ORES_REDSTONE.getName());
         c.add(Tags.Blocks.ORES_QUARTZ.getName());
+        c.add(new ResourceLocation("forge", "ores/copper"));
+        c.add(new ResourceLocation("forge", "ores/tin"));
     });
     public static Set<ResourceLocation> rareOreBlocks = Util.make(new HashSet<>(), c -> {
         c.add(Blocks.GLOWSTONE.getRegistryName());
