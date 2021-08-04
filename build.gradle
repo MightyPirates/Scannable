@@ -1,10 +1,10 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 
@@ -39,7 +39,7 @@ if (build_number == null)
 
 version = "${semver}+${build_number}"
 group = 'li.cil.scannable'
-archivesBaseName = "${rootProject.name}-MC${minecraft_version}-Forge"
+archivesBaseName = "scannable"
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -54,16 +54,6 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}")
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include 'META-INF/mods.toml'
-
-        expand([
-                'mod_version': version,
-        ])
-    }
-}
-
 minecraft {
     mappings channel: mappings_channel, version: mappings_version
 
@@ -74,7 +64,7 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             mods {
                 scannable {
@@ -87,7 +77,7 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             mods {
                 scannable {
@@ -100,11 +90,9 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             args '--mod', 'scannable', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
-
-            environment 'target', 'fmluserdevdata'
 
             mods {
                 scannable {
@@ -126,20 +114,20 @@ jar {
 
     manifest {
         attributes([
-                FMLAT                     : 'accesstransformer.cfg',
-                "Specification-Title"     : 'Scannable',
-                "Specification-Vendor"    : 'Sangar',
-                "Specification-Version"   : '1',
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${semver}",
-                "Implementation-Vendor"   : 'Sangar',
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'FMLAT'                   : 'accesstransformer.cfg',
+                'Specification-Title'     : 'scannable',
+                'Specification-Vendor'    : 'Sangar',
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : "${semver}",
+                'Implementation-Vendor'   : 'Sangar',
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
 
 task apiJar(type: Jar) {
-    classifier 'api'
+    archiveClassifier.set('api')
     from sourceSets.main.allSource
     from sourceSets.main.output
     include 'li/cil/scannable/api/**'
@@ -152,7 +140,6 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            version "MC${minecraft_version}-Forge-${version}"
             artifact jar
             artifact apiJar
         }
@@ -165,7 +152,7 @@ publishing {
 }
 
 curseforge {
-    apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
+    apiKey = project.hasProperty('curseForgeApiKey') ? project.curseForgeApiKey : ''
     project {
         id = curse_project_id
         releaseType = curse_project_releaseType

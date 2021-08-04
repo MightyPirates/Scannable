@@ -1,11 +1,11 @@
 modLoader = "javafml"
-loaderVersion = "[31,)"
+loaderVersion = "[36,)"
 issueTrackerURL = "https://github.com/MightyPirates/Scannable/issues"
 license = "MIT"
 
 [[mods]]
 modId = "scannable"
-version = "${mod_version}"
+version = "${file.jarVersion}"
 displayName = "Scannable"
 displayURL = "https://github.com/MightyPirates/Scannable"
 logoFile = "logo.png"
@@ -17,12 +17,12 @@ Scan the area for points of interest.
 [[dependencies.scannable]]
 modId = "forge"
 mandatory = true
-versionRange = "[31,)"
+versionRange = "[36.2.0,)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.scannable]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16,1.17)"
+versionRange = "[1.16.5,1.17)"
 ordering = "NONE"
 side = "BOTH"
