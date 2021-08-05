@@ -15,11 +15,11 @@ To add a dependency to Scannable for use in your mod, add the following to your 
 ```groovy
 repositories {
   maven {
-    url = "http://maven.cil.li/"
+    url = 'https://maven.cil.li/'
   }
 }
 dependencies {
-  compile "li.cil.scannable:Scannable:${config.scannable.version}"
+  compile "li.cil.scannable:scannable-1.16.5-forge:${config.scannable.version}"
 }
 ```
 
