@@ -39,7 +39,7 @@ if (build_number == null)
 
 version = "${semver}+${build_number}"
 group = 'li.cil.scannable'
-archivesBaseName = "${rootProject.name}-MC${minecraft_version}-Forge"
+archivesBaseName = "scannable"
 
 java.toolchain {
     languageVersion = JavaLanguageVersion.of(16)
@@ -57,17 +57,6 @@ dependencies {
 //    runtimeOnly fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}")
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include 'META-INF/mods.toml'
-
-        expand([
-                'mod_version': version,
-        ])
-    }
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
-}
-
 minecraft {
     mappings channel: mappings_channel, version: mappings_version
 
@@ -78,7 +67,7 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             mods {
                 scannable {
@@ -91,7 +80,7 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             mods {
                 scannable {
@@ -104,11 +93,9 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             args '--mod', 'scannable', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
-
-            environment 'target', 'fmluserdevdata'
 
             mods {
                 scannable {
@@ -131,7 +118,7 @@ jar {
     manifest {
         attributes([
                 'FMLAT'                   : 'accesstransformer.cfg',
-                'Specification-Title'     : 'Scannable',
+                'Specification-Title'     : 'scannable',
                 'Specification-Vendor'    : 'Sangar',
                 'Specification-Version'   : '1',
                 'Implementation-Title'    : project.name,
@@ -156,7 +143,6 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            version "MC${minecraft_version}-Forge-${version}"
             artifact jar
             artifact apiJar
         }

@@ -1,1 +1,1 @@
-* Ported to Minecraft 1.17.1.
+* Added copper and tin to default common ore config.

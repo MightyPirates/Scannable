@@ -96,6 +96,8 @@ public final class CommonConfig {
         c.add(Tags.Blocks.ORES_IRON.getName());
         c.add(Tags.Blocks.ORES_REDSTONE.getName());
         c.add(Tags.Blocks.ORES_QUARTZ.getName());
+        c.add(new ResourceLocation("forge", "ores/copper"));
+        c.add(new ResourceLocation("forge", "ores/tin"));
     });
 
     @Path("ores") @WorldRestart
