@@ -2,16 +2,18 @@ package li.cil.scannable.common.capabilities;
 
 import li.cil.scannable.api.scanning.ScannerModule;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public final class Capabilities {
-    @CapabilityInject(ScannerModule.class)
-    public static Capability<ScannerModule> SCANNER_MODULE_CAPABILITY = null;
+    public static Capability<ScannerModule> SCANNER_MODULE_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() { });
 
     // --------------------------------------------------------------------- //
 
-    public static void initialize() {
-        CapabilityManager.INSTANCE.register(ScannerModule.class);
+    @SubscribeEvent
+    public static void initialize(final RegisterCapabilitiesEvent event) {
+        event.register(ScannerModule.class);
     }
 }

@@ -62,7 +62,7 @@ public final class Shaders implements ResourceManagerReloadListener {
     }
 
     private static void reloadShaders(final ResourceProvider provider) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        RenderSystem.assertOnRenderThread();
         SHADERS.forEach(reference -> reference.reload(provider));
     }
 

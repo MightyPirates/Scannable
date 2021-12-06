@@ -9,6 +9,7 @@ import net.minecraft.ResourceLocationException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,8 +29,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,11 +52,11 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
 
     public static List<Block> getBlocks(final ItemStack stack) {
         final CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains(TAG_BLOCKS, NBT.TAG_LIST)) {
+        if (tag == null || !tag.contains(TAG_BLOCKS, Tag.TAG_LIST)) {
             return Collections.emptyList();
         }
 
-        final ListTag list = tag.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
         final List<Block> result = new ArrayList<>();
         list.forEach(item -> {
             try {
@@ -86,7 +86,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
 
         final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListTag list = tag.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
         if (list.contains(itemNbt)) {
             return true;
         }
@@ -118,7 +118,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
 
         final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListTag list = tag.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);
         if (oldIndex == index) {
             return;
@@ -147,7 +147,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final ListTag list = tag.getList(TAG_BLOCKS, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
         if (index < list.size()) {
             list.remove(index);
         }

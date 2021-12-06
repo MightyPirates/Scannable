@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
@@ -33,9 +34,9 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -82,19 +83,18 @@ public final class ScannerItem extends ModItem {
     }
 
     @Override
-    public boolean showDurabilityBar(final ItemStack stack) {
+    public boolean isBarVisible(final ItemStack stack) {
         return CommonConfig.useEnergy;
     }
 
     @Override
-    public double getDurabilityForDisplay(final ItemStack stack) {
-        if (!CommonConfig.useEnergy) {
-            return 0;
-        }
+    public int getBarWidth(final ItemStack stack) {
+        return (int) (getRelativeEnergy(stack) * MAX_BAR_WIDTH);
+    }
 
-        return stack.getCapability(CapabilityEnergy.ENERGY)
-                .map(storage -> 1f - storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
-                .orElse(1f);
+    @Override
+    public int getBarColor(final ItemStack stack) {
+        return Mth.hsvToRgb(getRelativeEnergy(stack) / 3f, 1, 1);
     }
 
     @Override
@@ -213,6 +213,16 @@ public final class ScannerItem extends ModItem {
 
         return stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
                 .map(module -> module.getEnergyCost(stack)).orElse(0);
+    }
+
+    private static float getRelativeEnergy(final ItemStack stack) {
+        if (!CommonConfig.useEnergy) {
+            return 0;
+        }
+
+        return stack.getCapability(CapabilityEnergy.ENERGY)
+                .map(storage -> storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
+                .orElse(0f);
     }
 
     private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {

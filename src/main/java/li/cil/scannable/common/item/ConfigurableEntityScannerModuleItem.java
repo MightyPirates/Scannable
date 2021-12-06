@@ -7,6 +7,7 @@ import li.cil.scannable.common.scanning.ConfigurableEntityScannerModule;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,8 +25,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,13 +45,13 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
 
     public static List<EntityType<?>> getEntityTypes(final ItemStack stack) {
         final CompoundTag tag = stack.getTag();
-        if (tag == null || !(tag.contains(TAG_ENTITY_DEPRECATED, NBT.TAG_STRING) || tag.contains(TAG_ENTITIES, NBT.TAG_LIST))) {
+        if (tag == null || !(tag.contains(TAG_ENTITY_DEPRECATED, Tag.TAG_STRING) || tag.contains(TAG_ENTITIES, Tag.TAG_LIST))) {
             return Collections.emptyList();
         }
 
         upgradeData(tag);
 
-        final ListTag list = tag.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_ENTITIES, Tag.TAG_STRING);
         final List<EntityType<?>> result = new ArrayList<>();
         list.forEach(item -> {
             final Optional<EntityType<?>> entityType = EntityType.byString(item.getAsString());
@@ -74,7 +74,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
 
         final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListTag list = tag.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_ENTITIES, Tag.TAG_STRING);
         if (list.contains(itemNbt)) {
             return true;
         }
@@ -106,7 +106,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
 
         final StringTag itemNbt = StringTag.valueOf(registryName.toString());
 
-        final ListTag list = tag.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_ENTITIES, Tag.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);
         if (oldIndex == index) {
             return;
@@ -135,14 +135,14 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final ListTag list = tag.getList(TAG_ENTITIES, NBT.TAG_STRING);
+        final ListTag list = tag.getList(TAG_ENTITIES, Tag.TAG_STRING);
         if (index < list.size()) {
             list.remove(index);
         }
     }
 
     private static void upgradeData(final CompoundTag tag) {
-        if (tag.contains(TAG_ENTITY_DEPRECATED, NBT.TAG_STRING)) {
+        if (tag.contains(TAG_ENTITY_DEPRECATED, Tag.TAG_STRING)) {
             final ListTag list = new ListTag();
             list.add(tag.get(TAG_ENTITY_DEPRECATED));
             tag.put(TAG_ENTITIES, list);

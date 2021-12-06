@@ -3,7 +3,7 @@ package li.cil.scannable.common.item;
 import li.cil.scannable.common.scanning.*;
 import li.cil.scannable.util.RegistryUtils;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fmllegacy.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 

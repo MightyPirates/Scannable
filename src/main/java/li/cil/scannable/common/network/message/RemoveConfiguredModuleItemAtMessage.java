@@ -3,7 +3,7 @@ package li.cil.scannable.common.network.message;
 import li.cil.scannable.common.container.AbstractModuleContainerMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public final class RemoveConfiguredModuleItemAtMessage extends AbstractMessage {
     private int windowId;

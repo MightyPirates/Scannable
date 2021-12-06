@@ -101,7 +101,7 @@ public final class CommonConfig {
     });
 
     @Path("ores") @WorldRestart
-    @Comment("Registry names of blocks considered 'rare ores', requiring the common ore scanner module.")
+    @Comment("Registry names of blocks considered 'rare ores', requiring the rare ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> rareOreBlocks = Util.make(new HashSet<>(), c -> {
         c.add(Blocks.GLOWSTONE.getRegistryName());

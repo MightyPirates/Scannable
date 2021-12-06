@@ -2,6 +2,7 @@ package li.cil.scannable.common.energy;
 
 import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.EnergyStorage;
 
@@ -23,7 +24,7 @@ public final class ScannerEnergyStorage extends EnergyStorage {
 
     public void updateFromNBT() {
         final CompoundTag tag = container.getTag();
-        if (tag != null && tag.contains(TAG_ENERGY, net.minecraftforge.common.util.Constants.NBT.TAG_INT)) {
+        if (tag != null && tag.contains(TAG_ENERGY, Tag.TAG_INT)) {
             deserializeNBT(tag.get(TAG_ENERGY));
         }
     }

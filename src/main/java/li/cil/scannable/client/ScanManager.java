@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 
@@ -240,14 +240,14 @@ public final class ScanManager {
         }
     }
 
-    public static void onRenderLast(final RenderWorldLastEvent event) {
+    public static void onRenderLast(final RenderLevelLastEvent event) {
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
             }
 
             viewModelStack = new PoseStack();
-            viewModelStack.last().pose().load(event.getMatrixStack().last().pose());
+            viewModelStack.last().pose().load(event.getPoseStack().last().pose());
             projectionMatrix = event.getProjectionMatrix();
         }
     }

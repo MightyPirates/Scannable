@@ -13,9 +13,9 @@ import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
+import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.shader.Shaders;
 import li.cil.scannable.common.capabilities.Capabilities;
-import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -104,15 +105,25 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BlockPos maxBlockPos = new BlockPos(center).offset(this.radius, this.radius, this.radius);
             final ChunkPos minChunkPos = new ChunkPos(minBlockPos);
             final ChunkPos maxChunkPos = new ChunkPos(maxBlockPos);
-            final int minChunkSectionIndex = Math.max(minBlockPos.getY() >> 4, 0);
-            final int maxChunkSectionIndex = Math.min(maxBlockPos.getY() >> 4, 15);
+
+            final int minChunkSectionIndex = Math.max(player.getLevel().getSectionIndex(minBlockPos.getY()), 0);
+            final int maxChunkSectionIndex = Math.min(player.getLevel().getSectionIndex(maxBlockPos.getY()), player.getLevel().getSectionsCount() - 1);
 
             for (int chunkSectionIndex = minChunkSectionIndex; chunkSectionIndex <= maxChunkSectionIndex; chunkSectionIndex++) {
                 for (int chunkZ = minChunkPos.z; chunkZ <= maxChunkPos.z; chunkZ++) {
                     for (int chunkX = minChunkPos.x; chunkX <= maxChunkPos.x; chunkX++) {
-                        final double dx = Math.min(Math.abs((chunkX << 4) - center.x), Math.abs((chunkX << 4) + 15 - center.x));
-                        final double dz = Math.min(Math.abs((chunkZ << 4) - center.z), Math.abs((chunkZ << 4) + 15 - center.z));
-                        final double dy = Math.min(Math.abs((chunkSectionIndex << 4) - center.y), Math.abs((chunkSectionIndex << 4) + 15 - center.y));
+                        final ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+                        final int chunkY = player.getLevel().getSectionYFromSectionIndex(chunkSectionIndex);
+
+                        final double dx = Math.min(
+                                Math.abs(chunkPos.getMinBlockX() - center.x),
+                                Math.abs(chunkPos.getMaxBlockX() - center.x));
+                        final double dz = Math.min(
+                                Math.abs(chunkPos.getMinBlockZ() - center.z),
+                                Math.abs(chunkPos.getMaxBlockZ() - center.z));
+                        final double dy = Math.min(
+                                Math.abs(SectionPos.sectionToBlockCoord(chunkY, 0) - center.y),
+                                Math.abs(SectionPos.sectionToBlockCoord(chunkY, SectionPos.SECTION_MAX_INDEX) - center.y));
                         final double squareDistToCenter = dx * dx + dy * dy + dz * dz;
 
                         if (squareDistToCenter > radius * radius) {
@@ -152,10 +163,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             }
 
             final LevelChunkSection[] sections = chunk.getSections();
-            assert sections.length == 16;
-
             final LevelChunkSection section = sections[chunkSectionIndex];
-            if (section == null || section.isEmpty()) {
+            if (section == null || section.hasOnlyAir()) {
                 continue;
             }
 

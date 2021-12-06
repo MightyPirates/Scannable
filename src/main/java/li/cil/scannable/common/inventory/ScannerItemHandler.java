@@ -4,8 +4,8 @@ import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -31,7 +31,7 @@ public final class ScannerItemHandler extends ItemStackHandler {
 
     public void updateFromNBT() {
         final CompoundTag tag = container.getTag();
-        if (tag != null && tag.contains(TAG_ITEMS, NBT.TAG_COMPOUND)) {
+        if (tag != null && tag.contains(TAG_ITEMS, Tag.TAG_COMPOUND)) {
             deserializeNBT(tag.getCompound(TAG_ITEMS));
             if (stacks.size() != TOTAL_MODULE_COUNT) {
                 final List<ItemStack> oldStacks = new ArrayList<>(stacks);
