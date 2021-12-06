@@ -39,7 +39,6 @@ if (build_number == null)
 
 version = "${semver}+${build_number}"
 group = 'li.cil.scannable'
-archivesBaseName = "scannable"
 
 java.toolchain {
     languageVersion = JavaLanguageVersion.of(17)
