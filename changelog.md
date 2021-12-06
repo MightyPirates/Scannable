@@ -1,1 +1,1 @@
-* Added copper and tin to default common ore config.
+* Ported to MC 1.18.
