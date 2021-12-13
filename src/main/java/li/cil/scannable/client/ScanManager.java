@@ -307,6 +307,7 @@ public final class ScanManager {
 
                 if (!renderingList.isEmpty()) {
                     entry.getKey().render(renderTypeBuffer, poseStack, camera, partialTicks, renderingList);
+                    renderingList.clear();
                 }
             }
         } finally {
