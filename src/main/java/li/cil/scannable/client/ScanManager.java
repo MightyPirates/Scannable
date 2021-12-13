@@ -295,20 +295,24 @@ public final class ScanManager {
         // setting up the render state once before rendering all visuals,
         // or even set up display lists or VBOs.
         final MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
-            // Quick and dirty frustum culling.
-            for (final ScanResult result : entry.getValue()) {
-                final AABB bounds = result.getRenderBounds();
-                if (bounds == null || frustum.isVisible(bounds)) {
-                    renderingList.add(result);
+        try {
+            for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
+                // Quick and dirty frustum culling.
+                for (final ScanResult result : entry.getValue()) {
+                    final AABB bounds = result.getRenderBounds();
+                    if (bounds == null || frustum.isVisible(bounds)) {
+                        renderingList.add(result);
+                    }
+                }
+
+                if (!renderingList.isEmpty()) {
+                    entry.getKey().render(renderTypeBuffer, poseStack, camera, partialTicks, renderingList);
                 }
             }
-
-            if (!renderingList.isEmpty()) {
-                entry.getKey().render(renderTypeBuffer, poseStack, camera, partialTicks, renderingList);
-                renderingList.clear();
-            }
+        } finally {
+            renderingList.clear();
         }
+
         renderTypeBuffer.endBatch();
 
         poseStack.popPose();
