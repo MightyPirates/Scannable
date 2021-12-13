@@ -300,20 +300,24 @@ public enum ScanManager {
         // setting up the render state once before rendering all visuals,
         // or even set up display lists or VBOs.
         final IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
-            // Quick and dirty frustum culling.
-            for (final ScanResult result : entry.getValue()) {
-                final AxisAlignedBB bounds = result.getRenderBounds();
-                if (bounds == null || frustum.isVisible(bounds)) {
-                    renderingList.add(result);
+        try {
+            for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
+                // Quick and dirty frustum culling.
+                for (final ScanResult result : entry.getValue()) {
+                    final AxisAlignedBB bounds = result.getRenderBounds();
+                    if (bounds == null || frustum.isVisible(bounds)) {
+                        renderingList.add(result);
+                    }
+                }
+
+                if (!renderingList.isEmpty()) {
+                    entry.getKey().render(renderTypeBuffer, matrixStack, projectionMatrix, activeRenderInfo, partialTicks, renderingList);
                 }
             }
-
-            if (!renderingList.isEmpty()) {
-                entry.getKey().render(renderTypeBuffer, matrixStack, projectionMatrix, activeRenderInfo, partialTicks, renderingList);
-                renderingList.clear();
-            }
+        } finally {
+            renderingList.clear();
         }
+
         renderTypeBuffer.endBatch();
 
         matrixStack.popPose();
