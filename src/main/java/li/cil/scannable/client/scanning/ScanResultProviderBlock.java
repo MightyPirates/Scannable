@@ -48,6 +48,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -56,6 +58,8 @@ import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     // Sanity performance check. Maybe some day I'll do some research on how to
     // do the clustering more efficiently, but for now this is good enough. We
     // really only need this when scanning for stupid stuff like stone.
@@ -241,7 +245,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final Matrix4f oldProjectionMatrix = RenderSystem.getProjectionMatrix();
             RenderSystem.colorMask(false, false, false, false);
             poseStack.pushPose();
-            Minecraft.getInstance().gameRenderer.renderItemInHand(poseStack, renderInfo, partialTicks);
+            try {
+                Minecraft.getInstance().gameRenderer.renderItemInHand(poseStack, renderInfo, partialTicks);
+            } catch (final Throwable e) {
+                LOGGER.catching(e);
+            }
             poseStack.popPose();
             RenderSystem.colorMask(true, true, true, true);
             RenderSystem.setProjectionMatrix(oldProjectionMatrix);
@@ -304,17 +312,17 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     public static RenderType getBlockScanResultRenderLayer() {
         return RenderType.create("scan_result",
-                DefaultVertexFormat.POSITION_COLOR_TEX,
-                VertexFormat.Mode.QUADS,
-                65536,
-                false,
-                false,
-                RenderType.CompositeState.builder()
-                        .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
-                        .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
-                        .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                        .setCullState(RenderStateShard.NO_CULL)
-                        .createCompositeState(false));
+            DefaultVertexFormat.POSITION_COLOR_TEX,
+            VertexFormat.Mode.QUADS,
+            65536,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
+                .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                .setCullState(RenderStateShard.NO_CULL)
+                .createCompositeState(false));
     }
 
     private boolean tryAddToCluster(final Map<BlockPos, BlockScanResult> clusters, final BlockPos pos) {
