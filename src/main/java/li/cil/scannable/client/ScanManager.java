@@ -312,6 +312,7 @@ public enum ScanManager {
 
                 if (!renderingList.isEmpty()) {
                     entry.getKey().render(renderTypeBuffer, matrixStack, projectionMatrix, activeRenderInfo, partialTicks, renderingList);
+                    renderingList.clear();
                 }
             }
         } finally {
