@@ -15,6 +15,7 @@ import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.api.scanning.ScannerModuleBlock;
 import li.cil.scannable.client.shader.ScanResultShader;
+import li.cil.scannable.common.Scannable;
 import li.cil.scannable.common.capabilities.CapabilityScannerModule;
 import li.cil.scannable.common.config.Settings;
 import li.cil.scannable.common.scanning.filter.ScanFilterIgnoredBlocks;
@@ -229,7 +230,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         if (Minecraft.getInstance().gameRenderer.renderHand) {
             RenderSystem.colorMask(false, false, false, false);
             matrixStack.pushPose();
-            Minecraft.getInstance().gameRenderer.renderItemInHand(matrixStack, renderInfo, partialTicks);
+            try {
+                Minecraft.getInstance().gameRenderer.renderItemInHand(matrixStack, renderInfo, partialTicks);
+            } catch (final Throwable e) {
+                Scannable.getLog().catching(e);
+            }
             matrixStack.popPose();
             RenderSystem.colorMask(true, true, true, true);
         }
