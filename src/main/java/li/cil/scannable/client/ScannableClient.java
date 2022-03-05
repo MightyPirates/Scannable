@@ -22,7 +22,7 @@ public final class ScannableClient implements ClientModInitializer {
         MenuRegistry.registerScreenFactory(Containers.BLOCK_MODULE_CONTAINER.get(), ConfigurableBlockScannerModuleContainerScreen::new);
         MenuRegistry.registerScreenFactory(Containers.ENTITY_MODULE_CONTAINER.get(), ConfigurableEntityScannerModuleContainerScreen::new);
 
-        WorldRenderEvents.AFTER_ENTITIES.register(OverlayRenderer::onOverlayRender);
+        //WorldRenderEvents.BEFORE_DEBUG_RENDER.register(OverlayRenderer::onOverlayRender);
         ClientTickEvents.END_CLIENT_TICK.register(ScanManager::onClientTick);
         WorldRenderEvents.LAST.register(ScanManager::onRenderLast);
         WorldRenderEvents.BEFORE_ENTITIES.register(ScanManager::onPreRenderGameOverlay);

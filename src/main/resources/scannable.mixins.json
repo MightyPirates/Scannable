@@ -1,0 +1,14 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "li.cil.scannable.mixin",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [],
+    "client": [
+        "client.GameRendererMixin"
+    ],
+    "server": [],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

@@ -246,7 +246,6 @@ public final class ScanManager {
     }
 
     public static void onPreRenderGameOverlay(final WorldRenderContext context) {
-        System.out.println("RENDER GAME OVERLAY");
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;

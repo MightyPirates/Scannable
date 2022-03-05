@@ -12,7 +12,9 @@
     "contact": {
         "sources": "https://github.com/MightyPirates/Scannable"
     },
-
+    "mixins": [
+        "scannable.mixins.json"
+    ],
     "license": "MIT",
     "icon": "logo.png",
 
