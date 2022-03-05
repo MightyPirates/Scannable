@@ -40,10 +40,6 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
             addSlot(new Slot(itemHandler, slot, 62 + slot * 18, 20));
         }
 
-        for (int slot = ScannerItemHandler.ACTIVE_MODULE_COUNT; slot < ScannerItemHandler.TOTAL_MODULE_COUNT; ++slot) {
-            addSlot(new Slot(itemHandler, slot, 62 + slot * 18, 46));
-        }
-
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
                 addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, row * 18 + 77));

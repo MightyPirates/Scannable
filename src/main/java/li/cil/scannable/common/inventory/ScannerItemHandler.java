@@ -9,8 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 public final class ScannerItemHandler extends SimpleContainer {
     public static final int ACTIVE_MODULE_COUNT = 3;
-    public static final int INACTIVE_MODULE_COUNT = 6;
-    public static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT + INACTIVE_MODULE_COUNT;
+    public static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT;
 
     private static final String TAG_ITEMS = "items";
 
@@ -38,16 +37,6 @@ public final class ScannerItemHandler extends SimpleContainer {
         final CompoundTag tag = container.getTag();
         if (tag != null && tag.contains(TAG_ITEMS, Tag.TAG_LIST)) {
             this.fromTag(tag.getList(TAG_ITEMS, Tag.TAG_COMPOUND));
-            /*
-            if (stacks.size() != TOTAL_MODULE_COUNT) {
-                final List<ItemStack> oldStacks = new ArrayList<>(stacks);
-                setSize(TOTAL_MODULE_COUNT);
-                final int count = Math.min(TOTAL_MODULE_COUNT, oldStacks.size());
-                for (int slot = 0; slot < count; slot++) {
-                    stacks.set(slot, oldStacks.get(slot));
-                }
-            }
-             */
         }
     }
 
@@ -66,34 +55,4 @@ public final class ScannerItemHandler extends SimpleContainer {
     public NonNullList<ItemStack> getActiveModules() {
         return getItemsInRange(0, ACTIVE_MODULE_COUNT);
     }
-
-    public NonNullList<ItemStack> getInactiveModules() {
-        return getItemsInRange(ACTIVE_MODULE_COUNT, TOTAL_MODULE_COUNT);
-    }
-
-    // --------------------------------------------------------------------- //
-    // IItemHandler
-
-    /*
-    @Override
-    protected int getStackLimit(final int slot, @Nonnull final ItemStack stack) {
-        if (stack.isEmpty()) {
-            return 0;
-        }
-
-        // All built-in modules, including those without capability such as the range module.
-        if (stack.getItem() instanceof ScannerModuleItem) {
-            return 64;
-        }
-
-        // External modules declared via capability.
-        final LazyOptional<ScannerModule> module = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
-        if (module.isPresent()) {
-            return 64;
-        }
-
-        return 0;
-    }
-
-     */
 }
