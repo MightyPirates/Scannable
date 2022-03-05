@@ -8,8 +8,10 @@ import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
-import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.config.CommonConfig;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,17 +22,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.TickEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class ScanManager {
     // The number of ticks over which to compute scan results. Which is at the
     // same time the use time of the scanner item.
@@ -105,8 +101,9 @@ public final class ScanManager {
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
-            final LazyOptional<ScannerModule> module = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
-            module.ifPresent(modules::add);
+            if(stack.getItem() instanceof ScannerModule module) {
+                modules.add(module);
+            }
         }
         for (final ScannerModule module : modules) {
             final ScanResultProvider provider = module.getResultProvider();
@@ -174,11 +171,7 @@ public final class ScanManager {
         scanningTicks = 0;
     }
 
-    public static void onClientTick(final TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
+    public static void onClientTick(final Minecraft minecraft) {
         if (lastScanCenter == null || currentStart < 0) {
             return;
         }
@@ -240,22 +233,19 @@ public final class ScanManager {
         }
     }
 
-    public static void onRenderLast(final RenderLevelLastEvent event) {
+    public static void onRenderLast(final WorldRenderContext context) {
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
             }
 
             viewModelStack = new PoseStack();
-            viewModelStack.last().pose().load(event.getPoseStack().last().pose());
-            projectionMatrix = event.getProjectionMatrix();
+            viewModelStack.last().pose().load(context.matrixStack().last().pose());
+            projectionMatrix = context.projectionMatrix();
         }
     }
 
-    public static void onPreRenderGameOverlay(final RenderGameOverlayEvent.Pre event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
+    public static void onPreRenderGameOverlay(final WorldRenderContext context) {
 
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
@@ -269,7 +259,7 @@ public final class ScanManager {
             RenderSystem.getModelViewStack().last().pose().setIdentity();
             RenderSystem.applyModelViewMatrix();
 
-            render(event.getPartialTicks(), viewModelStack, RenderSystem.getProjectionMatrix());
+            render(context.tickDelta(), viewModelStack, RenderSystem.getProjectionMatrix());
 
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();

@@ -4,8 +4,8 @@ import li.cil.scannable.api.API;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -28,7 +28,7 @@ public interface EntityScannerModule extends ScannerModule {
      * @param entity the entity to get the icon for.
      * @return the icon to use; if an {@link Optional#empty()} is returned {@link API#ICON_INFO} is used.
      */
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     default Optional<ResourceLocation> getIcon(final Entity entity) {
         return Optional.empty();
     }
@@ -40,6 +40,6 @@ public interface EntityScannerModule extends ScannerModule {
      * @param module the module to get the filter for.
      * @return the filter to use.
      */
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     Predicate<Entity> getFilter(final ItemStack module);
 }

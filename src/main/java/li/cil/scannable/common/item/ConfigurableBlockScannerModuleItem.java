@@ -1,11 +1,16 @@
 package li.cil.scannable.common.item;
 
+import dev.architectury.registry.menu.MenuRegistry;
+import dev.architectury.registry.registries.Registries;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.BlockModuleContainerMenu;
 import li.cil.scannable.common.scanning.ConfigurableBlockScannerModule;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -27,10 +32,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,6 +39,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -61,7 +63,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
         list.forEach(item -> {
             try {
                 final ResourceLocation registryName = new ResourceLocation(item.getAsString());
-                final Block block = ForgeRegistries.BLOCKS.getValue(registryName);
+                final Block block = Registry.BLOCK.getOptional(registryName).orElse(null);
                 if (block != null && block != Blocks.AIR) {
                     result.add(block);
                 }
@@ -74,7 +76,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
     }
 
     public static boolean addBlock(final ItemStack stack, final Block block) {
-        final ResourceLocation registryName = block.getRegistryName();
+        final ResourceLocation registryName = Registry.BLOCK.getKey(block);
         if (registryName == null) {
             return false;
         }
@@ -106,7 +108,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final ResourceLocation registryName = block.getRegistryName();
+        final ResourceLocation registryName = Registry.BLOCK.getKey(block);
         if (registryName == null) {
             return;
         }
@@ -162,7 +164,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
     // --------------------------------------------------------------------- //
     // Item
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
@@ -182,7 +184,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
         }
 
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+            MenuRegistry.openExtendedMenu(serverPlayer, new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
                     return stack.getHoverName();

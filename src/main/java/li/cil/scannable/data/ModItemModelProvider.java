@@ -3,22 +3,21 @@ package li.cil.scannable.data;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.item.Items;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.models.ModelProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.Objects;
 
-public final class ModItemModelProvider extends ItemModelProvider {
-    public ModItemModelProvider(final DataGenerator generator, final ExistingFileHelper existingFileHelper) {
-        super(generator, API.MOD_ID, existingFileHelper);
+/*
+public final class ModItemModelProvider extends ModelProvider {
+    public ModItemModelProvider(final DataGenerator generator) {
+        super(generator);
     }
 
     @Override
     protected void registerModels() {
-        begin(Items.SCANNER.get())
+        begin(Items.SCANNER.get()
                 .texture("layer0", new ResourceLocation(API.MOD_ID, "items/scanner"));
         begin(Items.BLANK_MODULE.get())
                 .texture("layer0", new ResourceLocation(API.MOD_ID, "items/blank_module"));
@@ -44,3 +43,4 @@ public final class ModItemModelProvider extends ItemModelProvider {
                 .texture("layer2", new ResourceLocation(API.MOD_ID, "items/" + Objects.requireNonNull(item.getRegistryName()).getPath()));
     }
 }
+*/

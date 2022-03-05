@@ -13,9 +13,9 @@ import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
+import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.shader.Shaders;
-import li.cil.scannable.common.capabilities.Capabilities;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
@@ -45,9 +46,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.LazyOptional;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +56,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -85,14 +85,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         final IntObjectMap<List<Predicate<BlockState>>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack stack : modules) {
-            final LazyOptional<ScannerModule> capability = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
-            capability.ifPresent(module -> {
+            if(stack.getItem() instanceof ScannerModuleProvider provider) {
+                ScannerModule module = provider.getScannerModule();
                 if (module instanceof BlockScannerModule blockModule) {
                     final Predicate<BlockState> filter = blockModule.getFilter(stack);
                     final int localRadius = (int) Math.ceil(blockModule.adjustLocalRange(this.radius));
                     filterByRadius.computeIfAbsent(localRadius, r -> new ArrayList<>()).add(filter);
                 }
-            });
+            }
         }
 
         final IntList scanFilterKeys = new IntArrayList();
@@ -384,8 +384,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
-                if (ClientConfig.fluidColors.containsKey(fluidState.getType().getRegistryName())) {
-                    color = ClientConfig.fluidColors.getInt(fluidState.getType().getRegistryName());
+
+                if (ClientConfig.fluidColors.containsKey(Registry.FLUID.getKey(fluidState.getType()))) {
+                    color = ClientConfig.fluidColors.getInt(Registry.FLUID.getKey(fluidState.getType()));
                 } else {
                     ClientConfig.fluidTagColors.forEach((k, v) -> {
                         final Tag<Fluid> tag = FluidTags.getAllTags().getTag(k);
@@ -395,8 +396,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     });
                 }
             } else {
-                if (ClientConfig.blockColors.containsKey(blockState.getBlock().getRegistryName())) {
-                    color = ClientConfig.blockColors.getInt(blockState.getBlock().getRegistryName());
+                if (ClientConfig.blockColors.containsKey(Registry.BLOCK.getKey(blockState.getBlock()))) {
+                    color = ClientConfig.blockColors.getInt(Registry.BLOCK.getKey(blockState.getBlock()));
                 } else {
                     ClientConfig.blockTagColors.forEach((k, v) -> {
                         final Tag<Block> tag = BlockTags.getAllTags().getTag(k);

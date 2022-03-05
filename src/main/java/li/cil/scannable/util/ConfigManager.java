@@ -1,13 +1,13 @@
 package li.cil.scannable.util;
 
 import com.google.common.base.Strings;
+import li.cil.scannable.api.API;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,16 +138,19 @@ public final class ConfigManager {
         CONFIGS.forEach((spec, config) -> {
             final Type typeAnnotation = config.instance.getClass().getAnnotation(Type.class);
             final ModConfig.Type configType = typeAnnotation != null ? typeAnnotation.value() : ModConfig.Type.COMMON;
-            ModLoadingContext.get().registerConfig(configType, spec);
+            ModLoadingContext.registerConfig(API.MOD_ID, configType, spec);
         });
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigManager::handleModConfigEvent);
+        ModConfigEvent.LOADING.register(ConfigManager::handleModConfigEvent);
+        ModConfigEvent.RELOADING.register(ConfigManager::handleModConfigEvent);
     }
 
     // --------------------------------------------------------------------- //
 
-    private static void handleModConfigEvent(final ModConfigEvent event) {
-        final ConfigDefinition config = CONFIGS.get(event.getConfig().getSpec());
+    private static void handleModConfigEvent(final ModConfig eventConfig) {
+        if(!eventConfig.getModId().equals(API.MOD_ID))
+            return;
+        final ConfigDefinition config = CONFIGS.get(eventConfig.getSpec());
         if (config != null) {
             config.apply();
         }

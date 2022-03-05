@@ -1,20 +1,19 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.api.scanning.ScannerModule;
+import dev.architectury.registry.menu.MenuRegistry;
+import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.audio.SoundManager;
-import li.cil.scannable.common.capabilities.Capabilities;
-import li.cil.scannable.common.capabilities.ScannerWrapper;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
-import li.cil.scannable.common.energy.ScannerEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerItemHandler;
+import net.fabricmc.fabric.api.item.v1.FabricItem;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -27,22 +26,14 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.NetworkHooks;
+import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.base.SimpleBatteryItem;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ScannerItem extends ModItem {
+public final class ScannerItem extends ModItem implements SimpleBatteryItem, FabricItem {
     public static boolean isScanner(final ItemStack stack) {
         return stack.getItem() == Items.SCANNER.get();
     }
@@ -57,17 +48,15 @@ public final class ScannerItem extends ModItem {
     // Item
 
     @Override
-    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final CompoundTag tag) {
-        return new ScannerWrapper(stack);
-    }
-
-    @Override
     public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
 
         if (allowdedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
-            ScannerEnergyStorage.of(stack).receiveEnergy(Integer.MAX_VALUE, false);
+            try (Transaction transaction = Transaction.openOuter()) {
+                ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM).insert(Integer.MAX_VALUE, transaction);
+                transaction.commit();
+            }
             items.add(stack);
         }
     }
@@ -77,8 +66,8 @@ public final class ScannerItem extends ModItem {
         super.appendHoverText(stack, level, tooltip, flag);
 
         if (CommonConfig.useEnergy) {
-            final ScannerEnergyStorage energyStorage = ScannerEnergyStorage.of(stack);
-            tooltip.add(Strings.energyStorage(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored()));
+            EnergyStorage energyStorage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+            tooltip.add(Strings.energyStorage(energyStorage.getAmount(), energyStorage.getCapacity()));
         }
     }
 
@@ -102,21 +91,17 @@ public final class ScannerItem extends ModItem {
         final ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-                stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(itemHandler -> {
-                    if (itemHandler instanceof ScannerItemHandler scannerItemHandler) {
-                        NetworkHooks.openGui(serverPlayer, new MenuProvider() {
-                            @Override
-                            public Component getDisplayName() {
-                                return stack.getHoverName();
-                            }
-
-                            @Override
-                            public AbstractContainerMenu createMenu(final int id, final Inventory inventory, final Player player) {
-                                return new ScannerContainerMenu(id, inventory, hand, scannerItemHandler);
-                            }
-                        }, buffer -> buffer.writeEnum(hand));
+                MenuRegistry.openExtendedMenu(serverPlayer, new MenuProvider() {
+                    @Override
+                    public Component getDisplayName() {
+                        return stack.getHoverName();
                     }
-                });
+
+                    @Override
+                    public AbstractContainerMenu createMenu(final int id, final Inventory inventory, final Player player) {
+                        return new ScannerContainerMenu(id, inventory, hand, ScannerItemHandler.of(stack));
+                    }
+                }, buffer -> buffer.writeEnum(hand));
             }
         } else {
             final List<ItemStack> modules = new ArrayList<>();
@@ -128,7 +113,7 @@ public final class ScannerItem extends ModItem {
                 return InteractionResultHolder.fail(stack);
             }
 
-            if (!tryConsumeEnergy(player, stack, modules, true)) {
+            if (!tryConsumeEnergy(player, hand, modules, true)) {
                 if (!level.isClientSide()) {
                     player.displayClientMessage(Strings.MESSAGE_NOT_ENOUGH_ENERGY, true);
                 }
@@ -147,8 +132,8 @@ public final class ScannerItem extends ModItem {
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(final ItemStack oldStack, final ItemStack newStack, final boolean slotChanged) {
-        return oldStack.getItem() != newStack.getItem() || slotChanged;
+    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, final ItemStack oldStack, final ItemStack newStack) {
+        return oldStack.getItem() != newStack.getItem();
     }
 
     @Override
@@ -157,7 +142,7 @@ public final class ScannerItem extends ModItem {
     }
 
     @Override
-    public void onUsingTick(final ItemStack stack, final LivingEntity entity, final int count) {
+    public void onUseTick(final Level level, final LivingEntity entity, final ItemStack stack, final int count) {
         if (entity.level.isClientSide()) {
             ScanManager.updateScan(entity, false);
         }
@@ -178,16 +163,18 @@ public final class ScannerItem extends ModItem {
             return stack;
         }
 
+        /*
         if (level.isClientSide()) {
             SoundCanceler.cancelEquipSound();
         }
+         */
 
         final List<ItemStack> modules = new ArrayList<>();
         if (!collectModules(stack, modules)) {
             return stack;
         }
 
-        final boolean hasEnergy = tryConsumeEnergy((Player) entity, stack, modules, false);
+        final boolean hasEnergy = tryConsumeEnergy((Player) entity, entity.getUsedItemHand(), modules, false);
         if (level.isClientSide()) {
             SoundManager.stopChargingSound();
 
@@ -207,12 +194,14 @@ public final class ScannerItem extends ModItem {
     // --------------------------------------------------------------------- //
 
     static int getModuleEnergyCost(final ItemStack stack) {
-        if (!CommonConfig.useEnergy || Capabilities.SCANNER_MODULE_CAPABILITY == null) {
+        if (!CommonConfig.useEnergy) {
             return 0;
         }
 
-        return stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
-                .map(module -> module.getEnergyCost(stack)).orElse(0);
+        if(stack.getItem() instanceof ScannerModuleProvider provider) {
+            return provider.getScannerModule().getEnergyCost(stack);
+        }
+        return 0;
     }
 
     private static float getRelativeEnergy(final ItemStack stack) {
@@ -220,12 +209,11 @@ public final class ScannerItem extends ModItem {
             return 0;
         }
 
-        return stack.getCapability(CapabilityEnergy.ENERGY)
-                .map(storage -> storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
-                .orElse(0f);
+        EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+        return storage.getAmount() / (float)storage.getCapacity();
     }
 
-    private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
+    private static boolean tryConsumeEnergy(final Player player, final InteractionHand hand, final List<ItemStack> modules, final boolean simulate) {
         if (!CommonConfig.useEnergy) {
             return true;
         }
@@ -234,18 +222,21 @@ public final class ScannerItem extends ModItem {
             return true;
         }
 
-        final LazyOptional<IEnergyStorage> energyStorage = scanner.getCapability(CapabilityEnergy.ENERGY);
-        if (!energyStorage.isPresent()) {
+        EnergyStorage storage = ContainerItemContext.ofPlayerHand(player, hand).find(EnergyStorage.ITEM);
+        if(storage == null)
             return false;
-        }
 
         int totalCostAccumulator = 0;
         for (final ItemStack module : modules) {
             totalCostAccumulator += getModuleEnergyCost(module);
         }
         final int totalCost = totalCostAccumulator;
-
-        final int extracted = energyStorage.map(storage -> storage.extractEnergy(totalCost, simulate)).orElse(0);
+        final long extracted = 0;
+        try (Transaction transaction = Transaction.openOuter()) {
+            storage.extract(totalCost, transaction);
+            if(!simulate)
+                transaction.commit();
+        }
         if (extracted < totalCost) {
             return false;
         }
@@ -254,42 +245,41 @@ public final class ScannerItem extends ModItem {
     }
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {
-        return scanner.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(itemHandler -> {
-            boolean hasScannerModules = false;
-            if (itemHandler instanceof ScannerItemHandler scannerItemHandler) {
-                final IItemHandler activeModules = scannerItemHandler.getActiveModules();
-                for (int slot = 0; slot < activeModules.getSlots(); slot++) {
-                    final ItemStack module = activeModules.getStackInSlot(slot);
-                    if (module.isEmpty()) {
-                        continue;
-                    }
-
-                    modules.add(module);
-
-                    hasScannerModules |= module.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
-                            .map(ScannerModule::hasResultProvider).orElse(false);
-                }
+        ScannerItemHandler scannerItemHandler = ScannerItemHandler.of(scanner);
+        if(scannerItemHandler == null)
+            return false;
+        boolean hasScannerModules = false;
+        final NonNullList<ItemStack> activeModules = scannerItemHandler.getActiveModules();
+        for (final ItemStack module : activeModules) {
+            if (module.isEmpty()) {
+                continue;
             }
-            return hasScannerModules;
-        }).orElse(false);
+
+            modules.add(module);
+
+            boolean hasAResult = false;
+            if (module.getItem() instanceof ScannerModuleProvider provider) {
+                hasAResult = provider.getScannerModule().hasResultProvider();
+            }
+            hasScannerModules |= hasAResult;
+        }
+        return hasScannerModules;
+    }
+
+    @Override
+    public long getEnergyCapacity() {
+        return CommonConfig.energyCapacityScanner;
+    }
+
+    @Override
+    public long getEnergyMaxInput() {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public long getEnergyMaxOutput() {
+        return Long.MAX_VALUE;
     }
 
     // --------------------------------------------------------------------- //
-
-    // Used to suppress the re-equip sound after finishing a scan (due to potential scanner item stack data change).
-    private enum SoundCanceler {
-        INSTANCE;
-
-        public static void cancelEquipSound() {
-            MinecraftForge.EVENT_BUS.register(SoundCanceler.INSTANCE);
-        }
-
-        @SubscribeEvent
-        public void onPlaySoundAtEntityEvent(final PlaySoundAtEntityEvent event) {
-            if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
-                event.setCanceled(true);
-            }
-            MinecraftForge.EVENT_BUS.unregister(this);
-        }
-    }
 }

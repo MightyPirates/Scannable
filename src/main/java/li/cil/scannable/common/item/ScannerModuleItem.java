@@ -1,47 +1,37 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.common.capabilities.ScannerModuleWrapper;
+import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import li.cil.scannable.common.config.Strings;
-import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ScannerModuleItem extends ModItem {
-    private final ICapabilityProvider capabilityProvider;
+public class ScannerModuleItem extends ModItem implements ScannerModuleProvider {
+    private final ScannerModule module;
 
     // --------------------------------------------------------------------- //
 
     ScannerModuleItem(final ScannerModule module) {
         super(new Item.Properties().stacksTo(1));
-        this.capabilityProvider = new ScannerModuleWrapper(module);
+        this.module = module;
     }
 
-    // --------------------------------------------------------------------- //
-
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable final CompoundTag tag) {
-        return capabilityProvider;
+    public ScannerModule getScannerModule() {
+        return module;
     }
 
     // --------------------------------------------------------------------- //
     // Item
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);

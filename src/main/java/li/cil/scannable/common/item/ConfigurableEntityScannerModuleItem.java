@@ -1,9 +1,11 @@
 package li.cil.scannable.common.item;
 
+import dev.architectury.registry.menu.MenuRegistry;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.EntityModuleContainerMenu;
 import li.cil.scannable.common.scanning.ConfigurableEntityScannerModule;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -23,9 +25,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkHooks;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
     }
 
     private static boolean addEntityType(final ItemStack stack, final EntityType<?> entityType) {
-        final ResourceLocation registryName = entityType.getRegistryName();
+        final ResourceLocation registryName = Registry.ENTITY_TYPE.getKey(entityType);
         if (registryName == null) {
             return false;
         }
@@ -94,7 +95,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final ResourceLocation registryName = entityType.getRegistryName();
+        final ResourceLocation registryName = Registry.ENTITY_TYPE.getKey(entityType);
         if (registryName == null) {
             return;
         }
@@ -159,7 +160,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
     // --------------------------------------------------------------------- //
     // Item
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
@@ -179,7 +180,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
         }
 
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+            MenuRegistry.openExtendedMenu(serverPlayer, new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
                     return stack.getHoverName();

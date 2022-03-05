@@ -1,27 +1,15 @@
 package li.cil.scannable.data;
 
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-public final class DataGenerators {
-    @SubscribeEvent
-    public static void gatherData(final GatherDataEvent event) {
-        final DataGenerator generator = event.getGenerator();
-        final ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
-
-        if (event.includeServer()) {
-            final BlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(generator, existingFileHelper);
-            generator.addProvider(blockTagsProvider);
-            generator.addProvider(new ModItemTagsProvider(generator, blockTagsProvider, existingFileHelper));
-            generator.addProvider(new ModRecipeProvider(generator));
-        }
-        if (event.includeClient()) {
-            generator.addProvider(new ModItemModelProvider(generator, existingFileHelper));
-        }
+public final class DataGenerators implements DataGeneratorEntrypoint {
+    @Override
+    public void onInitializeDataGenerator(FabricDataGenerator generator) {
+        final ModBlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(generator);
+        generator.addProvider(blockTagsProvider);
+        generator.addProvider(new ModItemTagsProvider(generator, blockTagsProvider));
+        generator.addProvider(new ModRecipeProvider(generator));
+        //generator.addProvider(new ModItemModelProvider(generator));
     }
 }

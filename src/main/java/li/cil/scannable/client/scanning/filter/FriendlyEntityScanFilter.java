@@ -3,12 +3,12 @@ package li.cil.scannable.client.scanning.filter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.function.Predicate;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public enum FriendlyEntityScanFilter implements Predicate<Entity> {
     INSTANCE;
 
@@ -16,6 +16,6 @@ public enum FriendlyEntityScanFilter implements Predicate<Entity> {
     public boolean test(final Entity entity) {
         return entity instanceof LivingEntity &&
                !(entity instanceof Player) &&
-               entity.getClassification(false).isFriendly();
+               entity.getType().getCategory().isFriendly();
     }
 }

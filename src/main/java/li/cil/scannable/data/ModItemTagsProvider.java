@@ -1,20 +1,17 @@
 package li.cil.scannable.data;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.tags.ItemTags;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 
-public final class ModItemTagsProvider extends ItemTagsProvider {
-    public ModItemTagsProvider(final DataGenerator generator, final BlockTagsProvider blockTagsProvider, final ExistingFileHelper existingFileHelper) {
-        super(generator, blockTagsProvider, API.MOD_ID, existingFileHelper);
+public final class ModItemTagsProvider extends FabricTagProvider.ItemTagProvider {
+    public ModItemTagsProvider(final FabricDataGenerator generator, final FabricTagProvider.BlockTagProvider blockTagsProvider) {
+        super(generator, blockTagsProvider);
     }
 
     @Override
-    protected void addTags() {
+    protected void generateTags() {
         tag(ItemTags.MODULES).add(
                 Items.BLANK_MODULE.get(),
                 Items.RANGE_MODULE.get(),

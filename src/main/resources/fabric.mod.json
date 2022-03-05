@@ -1,0 +1,35 @@
+{
+    "schemaVersion": 1,
+    "id": "scannable",
+    "version": "${version}",
+
+    "name": "Scannable",
+    "description": "Scan the area for points of interest.",
+    "authors": [
+        "Sangar",
+        "embeddedt"
+    ],
+    "contact": {
+        "sources": "https://github.com/MightyPirates/Scannable"
+    },
+
+    "license": "MIT",
+    "icon": "logo.png",
+
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "li.cil.scannable.common.Scannable"
+        ],
+        "fabric-datagen": [
+            "li.cil.scannable.data.DataGenerators"
+        ]
+    },
+    "accessWidener": "scannable.accesswidener",
+    "depends": {
+        "fabricloader": ">=0.12.12",
+        "fabric": "*",
+        "minecraft": "1.18.x",
+        "java": ">=17"
+    }
+}

@@ -8,6 +8,9 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.item.ScannerItem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -15,20 +18,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class OverlayRenderer {
     private static final ResourceLocation PROGRESS = new ResourceLocation(API.MOD_ID, "textures/gui/overlay/scanner_progress.png");
 
-    public static void onOverlayRender(final RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
-
-        final Minecraft mc = Minecraft.getInstance();
+    public static void onOverlayRender(final WorldRenderContext context) {
+         final Minecraft mc = Minecraft.getInstance();
         final Player player = mc.player;
         if (player == null) {
             return;
@@ -46,7 +42,7 @@ public final class OverlayRenderer {
         final int total = stack.getUseDuration();
         final int remaining = player.getUseItemRemainingTicks();
 
-        final float progress = Mth.clamp(1 - (remaining - event.getPartialTicks()) / (float) total, 0, 1);
+        final float progress = Mth.clamp(1 - (remaining - context.tickDelta()) / (float) total, 0, 1);
 
         final int screenWidth = mc.getWindow().getGuiScaledWidth();
         final int screenHeight = mc.getWindow().getGuiScaledHeight();
@@ -132,6 +128,6 @@ public final class OverlayRenderer {
         tesselator.end();
 
         final Component label = Strings.progress(Mth.floor(progress * 100));
-        mc.font.drawShadow(event.getMatrixStack(), label, right + 12, midY - mc.font.lineHeight * 0.5f, 0xCCAACCEE);
+        mc.font.drawShadow(context.matrixStack(), label, right + 12, midY - mc.font.lineHeight * 0.5f, 0xCCAACCEE);
     }
 }

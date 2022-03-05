@@ -7,9 +7,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,8 +31,8 @@ import java.util.function.Consumer;
  * results and return all valid results when <code>collectScanResults</code>
  * is called.
  */
-@OnlyIn(Dist.CLIENT)
-public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvider> {
+@Environment(EnvType.CLIENT)
+public interface ScanResultProvider {
     /**
      * Called each time a scan is started by the player.
      * <p>

@@ -11,8 +11,8 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @SuppressWarnings("deprecation")
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class Shaders implements ResourceManagerReloadListener {
     private static final Shaders INSTANCE = new Shaders();
     private static final List<ShaderReference> SHADERS = new ArrayList<>();

@@ -1,10 +1,12 @@
 package li.cil.scannable.common.network.message;
 
 import li.cil.scannable.common.container.AbstractModuleContainerMenu;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 public final class SetConfiguredModuleItemAtMessage extends AbstractMessage {
     private int windowId;
@@ -25,9 +27,9 @@ public final class SetConfiguredModuleItemAtMessage extends AbstractMessage {
 
     // --------------------------------------------------------------------- //
 
+
     @Override
-    protected void handleMessage(final NetworkEvent.Context context) {
-        final ServerPlayer player = context.getSender();
+    protected void handleMessage(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender) {
         if (player != null && player.containerMenu != null && player.containerMenu.containerId == windowId) {
             if (player.containerMenu instanceof AbstractModuleContainerMenu) {
                 ((AbstractModuleContainerMenu) player.containerMenu).setItemAt(index, value);
