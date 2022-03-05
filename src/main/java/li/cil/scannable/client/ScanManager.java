@@ -7,6 +7,7 @@ import com.mojang.math.Matrix4f;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
+import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.config.CommonConfig;
 import net.fabricmc.api.EnvType;
@@ -101,10 +102,11 @@ public final class ScanManager {
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
-            if(stack.getItem() instanceof ScannerModule module) {
-                modules.add(module);
+            if(stack.getItem() instanceof ScannerModuleProvider provider) {
+                modules.add(provider.getScannerModule());
             }
         }
+
         for (final ScannerModule module : modules) {
             final ScanResultProvider provider = module.getResultProvider();
             if (provider != null) {
@@ -179,6 +181,7 @@ public final class ScanManager {
         if (CommonConfig.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
             pendingResults.forEach((provider, results) -> results.forEach(ScanResult::close));
             pendingResults.clear();
+
             synchronized (renderingResults) {
                 if (!renderingResults.isEmpty()) {
                     for (final Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = renderingResults.entrySet().iterator(); iterator.hasNext(); ) {
@@ -245,7 +248,7 @@ public final class ScanManager {
         }
     }
 
-    public static void onPreRenderGameOverlay(final WorldRenderContext context) {
+    public static void onPreRenderGameOverlay(final float partialTicks) {
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
@@ -258,7 +261,7 @@ public final class ScanManager {
             RenderSystem.getModelViewStack().last().pose().setIdentity();
             RenderSystem.applyModelViewMatrix();
 
-            render(context.tickDelta(), viewModelStack, RenderSystem.getProjectionMatrix());
+            render(partialTicks, viewModelStack, RenderSystem.getProjectionMatrix());
 
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();

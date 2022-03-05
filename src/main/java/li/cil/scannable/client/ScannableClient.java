@@ -25,7 +25,6 @@ public final class ScannableClient implements ClientModInitializer {
         //WorldRenderEvents.BEFORE_DEBUG_RENDER.register(OverlayRenderer::onOverlayRender);
         ClientTickEvents.END_CLIENT_TICK.register(ScanManager::onClientTick);
         WorldRenderEvents.LAST.register(ScanManager::onRenderLast);
-        WorldRenderEvents.BEFORE_ENTITIES.register(ScanManager::onPreRenderGameOverlay);
 
         Shaders.initialize();
     }
