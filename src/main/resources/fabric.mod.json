@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "scannable",
-    "version": "${version}",
+    "version": "${semver}",
 
     "name": "Scannable",
     "description": "Scan the area for points of interest.",
@@ -34,6 +34,8 @@
     "depends": {
         "fabricloader": ">=0.12.12",
         "fabric": "*",
+        "forgeconfigapiport": "*",
+        "architectury": "*",
         "minecraft": "1.18.x",
         "java": ">=17"
     }

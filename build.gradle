@@ -64,6 +64,12 @@ dependencies {
     // implementation fg.deobf("curse.maven:jei-238222:3564511")
 }
 
+processResources {
+    filesMatching("fabric.mod.json") {
+        expand "semver": semver
+    }
+}
+
 sourceSets {
     main {
         resources {

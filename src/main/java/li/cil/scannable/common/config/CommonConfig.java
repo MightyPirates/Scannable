@@ -96,8 +96,8 @@ public final class CommonConfig {
         c.add(new ResourceLocation("c", "iron_ores"));
         c.add(new ResourceLocation("c", "redstone_ores"));
         c.add(new ResourceLocation("c", "quartz_ores"));
-        c.add(new ResourceLocation("forge", "ores/copper"));
-        c.add(new ResourceLocation("forge", "ores/tin"));
+        c.add(new ResourceLocation("c", "copper_ores"));
+        c.add(new ResourceLocation("c", "tin_ores"));
     });
 
     @Path("ores") @WorldRestart

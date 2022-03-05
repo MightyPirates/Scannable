@@ -36,5 +36,6 @@ public final class ModBlockTagsProvider extends FabricTagProvider.BlockTagProvid
         getOrCreateTagBuilder(TagFactory.BLOCK.create(new ResourceLocation("c", "lapis_ores"))).addTag(BlockTags.LAPIS_ORES);
         getOrCreateTagBuilder(TagFactory.BLOCK.create(new ResourceLocation("c", "coal_ores"))).addTag(BlockTags.COAL_ORES);
         getOrCreateTagBuilder(TagFactory.BLOCK.create(new ResourceLocation("c", "emerald_ores"))).addTag(BlockTags.EMERALD_ORES);
+        getOrCreateTagBuilder(TagFactory.BLOCK.create(new ResourceLocation("c", "copper_ores"))).addTag(BlockTags.COPPER_ORES);
     }
 }
