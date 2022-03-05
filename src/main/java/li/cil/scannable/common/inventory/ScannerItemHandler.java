@@ -29,6 +29,11 @@ public final class ScannerItemHandler extends SimpleContainer {
         return handler;
     }
 
+    @Override
+    public void setChanged() {
+        this.saveToNBT();
+    }
+
     public void updateFromNBT() {
         final CompoundTag tag = container.getTag();
         if (tag != null && tag.contains(TAG_ITEMS, Tag.TAG_LIST)) {
@@ -47,9 +52,7 @@ public final class ScannerItemHandler extends SimpleContainer {
     }
 
     public void saveToNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.put(TAG_ITEMS, this.createTag());
-        this.container.setTag(tag);
+        this.container.getOrCreateTag().put(TAG_ITEMS, this.createTag());
     }
 
     private NonNullList<ItemStack> getItemsInRange(int start, int end) {

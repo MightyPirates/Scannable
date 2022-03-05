@@ -21,6 +21,9 @@
         "main": [
             "li.cil.scannable.common.Scannable"
         ],
+        "client": [
+            "li.cil.scannable.client.ScannableClient"
+        ],
         "fabric-datagen": [
             "li.cil.scannable.data.DataGenerators"
         ]

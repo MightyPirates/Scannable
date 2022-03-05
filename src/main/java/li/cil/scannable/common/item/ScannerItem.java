@@ -53,11 +53,12 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
 
         if (allowdedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
+            ContainerItemContext context = ContainerItemContext.withInitial(stack);
             try (Transaction transaction = Transaction.openOuter()) {
-                ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM).insert(Integer.MAX_VALUE, transaction);
+                context.find(EnergyStorage.ITEM).insert(this.getEnergyCapacity(), transaction);
                 transaction.commit();
             }
-            items.add(stack);
+            items.add(context.getItemVariant().toStack());
         }
     }
 
@@ -231,9 +232,9 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             totalCostAccumulator += getModuleEnergyCost(module);
         }
         final int totalCost = totalCostAccumulator;
-        final long extracted = 0;
+        long extracted;
         try (Transaction transaction = Transaction.openOuter()) {
-            storage.extract(totalCost, transaction);
+            extracted = storage.extract(totalCost, transaction);
             if(!simulate)
                 transaction.commit();
         }

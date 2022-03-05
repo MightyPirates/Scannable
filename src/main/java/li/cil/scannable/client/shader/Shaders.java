@@ -4,9 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.API;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -24,8 +27,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("deprecation")
 @Environment(EnvType.CLIENT)
-public final class Shaders implements ResourceManagerReloadListener {
-    private static final Shaders INSTANCE = new Shaders();
+public final class Shaders {
     private static final List<ShaderReference> SHADERS = new ArrayList<>();
 
     public static ShaderInstance scanEffectShader;
@@ -48,17 +50,19 @@ public final class Shaders implements ResourceManagerReloadListener {
         return scanResultShader;
     }
 
-    @Override
-    public void onResourceManagerReload(final ResourceManager manager) {
-        reloadShaders(manager);
-    }
-
     private static void loadAndListenToReload() {
-        final ResourceManager manager = Minecraft.getInstance().getResourceManager();
-        Minecraft.getInstance().submitAsync(() -> INSTANCE.onResourceManagerReload(manager));
-        if (manager instanceof ReloadableResourceManager) {
-            ((ReloadableResourceManager) manager).registerReloadListener(INSTANCE);
-        }
+        final ResourceManagerHelper manager = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
+        manager.registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            @Override
+            public ResourceLocation getFabricId() {
+                return new ResourceLocation(API.MOD_ID, "resources");
+            }
+
+            @Override
+            public void onResourceManagerReload(ResourceManager resourceManager) {
+                reloadShaders(resourceManager);
+            }
+        });
     }
 
     private static void reloadShaders(final ResourceProvider provider) {
@@ -99,7 +103,8 @@ public final class Shaders implements ResourceManagerReloadListener {
                     }
                 }, name, format);
             } catch (final Exception e) {
-                LOGGER.error(e);
+                e.printStackTrace();
+                //LOGGER.error(e);
             }
 
             reloadAction.accept(shader);
