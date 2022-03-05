@@ -200,7 +200,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
         }
 
         if(stack.getItem() instanceof ScannerModuleProvider provider) {
-            return provider.getScannerModule().getEnergyCost(stack);
+            return provider.getScannerModule(stack).getEnergyCost(stack);
         }
         return 0;
     }
@@ -260,7 +260,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
 
             boolean hasAResult = false;
             if (module.getItem() instanceof ScannerModuleProvider provider) {
-                hasAResult = provider.getScannerModule().hasResultProvider();
+                hasAResult = provider.getScannerModule(module).hasResultProvider();
             }
             hasScannerModules |= hasAResult;
         }

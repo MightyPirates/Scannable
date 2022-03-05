@@ -44,7 +44,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         filterToModule.clear();
         for (final ItemStack stack : modules) {
             if(stack.getItem() instanceof ScannerModuleProvider provider) {
-                ScannerModule module = provider.getScannerModule();
+                ScannerModule module = provider.getScannerModule(stack);
                 if (module instanceof EntityScannerModule entityModule) {
                     final Predicate<Entity> filter = entityModule.getFilter(stack);
                     filters.add(filter);

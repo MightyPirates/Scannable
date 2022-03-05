@@ -86,7 +86,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final IntObjectMap<List<Predicate<BlockState>>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack stack : modules) {
             if(stack.getItem() instanceof ScannerModuleProvider provider) {
-                ScannerModule module = provider.getScannerModule();
+                ScannerModule module = provider.getScannerModule(stack);
                 if (module instanceof BlockScannerModule blockModule) {
                     final Predicate<BlockState> filter = blockModule.getFilter(stack);
                     final int localRadius = (int) Math.ceil(blockModule.adjustLocalRange(this.radius));

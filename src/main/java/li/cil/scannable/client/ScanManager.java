@@ -103,7 +103,7 @@ public final class ScanManager {
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
             if(stack.getItem() instanceof ScannerModuleProvider provider) {
-                modules.add(provider.getScannerModule());
+                modules.add(provider.getScannerModule(stack));
             }
         }
 

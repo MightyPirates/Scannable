@@ -14,6 +14,9 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.List;
 
+/**
+ * Simple item implementation for basic scanner modules.
+ */
 public class ScannerModuleItem extends ModItem implements ScannerModuleProvider {
     private final ScannerModule module;
 
@@ -24,7 +27,7 @@ public class ScannerModuleItem extends ModItem implements ScannerModuleProvider 
         this.module = module;
     }
 
-    public ScannerModule getScannerModule() {
+    public ScannerModule getScannerModule(final ItemStack stack) {
         return module;
     }
 
