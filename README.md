@@ -18,6 +18,6 @@ repositories {
     }
 }
 dependencies {
-    implementation fg.deobf("curse.maven:scannable-266784:3551507")
+    implementation fg.deobf("curse.maven:scannable-266784:3738448")
 }
 ```
