@@ -2,15 +2,16 @@ package li.cil.scannable.common.scanning.filter;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.CommonConfig;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITagManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,17 +42,20 @@ public enum IgnoredBlocks {
             }
         }
 
-        final List<Tag<Block>> ignoredTags = new ArrayList<>();
-        for (final ResourceLocation location : CommonConfig.ignoredBlockTags) {
-            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
-            if (tag != null) {
-                ignoredTags.add(tag);
+        final List<TagKey<Block>> ignoredTags = new ArrayList<>();
+        final ITagManager<Block> tags = ForgeRegistries.BLOCKS.tags();
+        if (tags != null) {
+            for (final ResourceLocation location : CommonConfig.ignoredBlockTags) {
+                final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, location);
+                if (tags.isKnownTagName(tag)) {
+                    ignoredTags.add(tag);
+                }
             }
         }
 
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
             final BlockState blockState = block.defaultBlockState();
-            if (ignoredTags.stream().anyMatch(tag -> tag.contains(block))) {
+            if (ignoredTags.stream().anyMatch(blockState::is)) {
                 ignoredBlocks.add(blockState.getBlock());
             }
         }

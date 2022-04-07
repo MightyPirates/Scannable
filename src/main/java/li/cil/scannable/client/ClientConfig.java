@@ -29,14 +29,14 @@ public final class ClientConfig {
             valueSerializer = @CustomSerializer(serializer = "toHexString", deserializer = "fromHexString"))
     public static Object2IntMap<ResourceLocation> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
         // Minecraft
-        c.put(Tags.Blocks.ORES_COAL.getName(), MaterialColor.COLOR_GRAY.col);
-        c.put(Tags.Blocks.ORES_IRON.getName(), MaterialColor.COLOR_BROWN.col); // MaterialColor.IRON is also gray, so...
-        c.put(Tags.Blocks.ORES_GOLD.getName(), MaterialColor.GOLD.col);
-        c.put(Tags.Blocks.ORES_LAPIS.getName(), MaterialColor.LAPIS.col);
-        c.put(Tags.Blocks.ORES_DIAMOND.getName(), MaterialColor.DIAMOND.col);
-        c.put(Tags.Blocks.ORES_REDSTONE.getName(), MaterialColor.COLOR_RED.col);
-        c.put(Tags.Blocks.ORES_EMERALD.getName(), MaterialColor.EMERALD.col);
-        c.put(Tags.Blocks.ORES_QUARTZ.getName(), MaterialColor.QUARTZ.col);
+        c.put(Tags.Blocks.ORES_COAL.location(), MaterialColor.COLOR_GRAY.col);
+        c.put(Tags.Blocks.ORES_IRON.location(), MaterialColor.COLOR_BROWN.col); // MaterialColor.IRON is also gray, so...
+        c.put(Tags.Blocks.ORES_GOLD.location(), MaterialColor.GOLD.col);
+        c.put(Tags.Blocks.ORES_LAPIS.location(), MaterialColor.LAPIS.col);
+        c.put(Tags.Blocks.ORES_DIAMOND.location(), MaterialColor.DIAMOND.col);
+        c.put(Tags.Blocks.ORES_REDSTONE.location(), MaterialColor.COLOR_RED.col);
+        c.put(Tags.Blocks.ORES_EMERALD.location(), MaterialColor.EMERALD.col);
+        c.put(Tags.Blocks.ORES_QUARTZ.location(), MaterialColor.QUARTZ.col);
 
         // Common modded ores
         c.put(new ResourceLocation("forge", "ores/tin"), MaterialColor.COLOR_CYAN.col);
@@ -61,8 +61,8 @@ public final class ClientConfig {
     @KeyValueTypes(keyType = ResourceLocation.class, valueType = int.class,
             valueSerializer = @CustomSerializer(serializer = "toHexString", deserializer = "fromHexString"))
     public static Object2IntMap<ResourceLocation> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
-        c.put(FluidTags.WATER.getName(), MaterialColor.WATER.col);
-        c.put(FluidTags.LAVA.getName(), MaterialColor.TERRACOTTA_ORANGE.col);
+        c.put(FluidTags.WATER.location(), MaterialColor.WATER.col);
+        c.put(FluidTags.LAVA.location(), MaterialColor.TERRACOTTA_ORANGE.col);
     });
 
     @SuppressWarnings("unused") // Referenced in annotations.

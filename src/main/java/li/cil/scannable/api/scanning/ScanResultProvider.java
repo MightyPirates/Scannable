@@ -1,8 +1,12 @@
 package li.cil.scannable.api.scanning;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import li.cil.scannable.api.API;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -34,6 +38,11 @@ import java.util.function.Consumer;
  */
 @OnlyIn(Dist.CLIENT)
 public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvider> {
+    /**
+     * The registry name of the registry holding scan result providers.
+     */
+    ResourceKey<Registry<ScanResultProvider>> REGISTRY = ResourceKey.createRegistryKey(new ResourceLocation(API.MOD_ID, "scan_result_provider"));
+
     /**
      * Called each time a scan is started by the player.
      * <p>

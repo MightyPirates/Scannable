@@ -24,11 +24,10 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -120,14 +119,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         final int chunkY = player.getLevel().getSectionYFromSectionIndex(chunkSectionIndex);
 
                         final double dx = Math.min(
-                                Math.abs(chunkPos.getMinBlockX() - center.x),
-                                Math.abs(chunkPos.getMaxBlockX() - center.x));
+                            Math.abs(chunkPos.getMinBlockX() - center.x),
+                            Math.abs(chunkPos.getMaxBlockX() - center.x));
                         final double dz = Math.min(
-                                Math.abs(chunkPos.getMinBlockZ() - center.z),
-                                Math.abs(chunkPos.getMaxBlockZ() - center.z));
+                            Math.abs(chunkPos.getMinBlockZ() - center.z),
+                            Math.abs(chunkPos.getMaxBlockZ() - center.z));
                         final double dy = Math.min(
-                                Math.abs(SectionPos.sectionToBlockCoord(chunkY, 0) - center.y),
-                                Math.abs(SectionPos.sectionToBlockCoord(chunkY, SectionPos.SECTION_MAX_INDEX) - center.y));
+                            Math.abs(SectionPos.sectionToBlockCoord(chunkY, 0) - center.y),
+                            Math.abs(SectionPos.sectionToBlockCoord(chunkY, SectionPos.SECTION_MAX_INDEX) - center.y));
                         final double squareDistToCenter = dx * dx + dy * dy + dz * dz;
 
                         if (squareDistToCenter > radius * radius) {
@@ -388,8 +387,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     color = ClientConfig.fluidColors.getInt(fluidState.getType().getRegistryName());
                 } else {
                     ClientConfig.fluidTagColors.forEach((k, v) -> {
-                        final Tag<Fluid> tag = FluidTags.getAllTags().getTag(k);
-                        if (tag != null && tag.contains(fluidState.getType())) {
+                        final TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, k);
+                        if (fluidState.is(tag)) {
                             color = v;
                         }
                     });
@@ -399,8 +398,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     color = ClientConfig.blockColors.getInt(blockState.getBlock().getRegistryName());
                 } else {
                     ClientConfig.blockTagColors.forEach((k, v) -> {
-                        final Tag<Block> tag = BlockTags.getAllTags().getTag(k);
-                        if (tag != null && tag.contains(blockState.getBlock())) {
+                        final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, k);
+                        if (blockState.is(tag)) {
                             color = v;
                         }
                     });

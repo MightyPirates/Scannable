@@ -9,9 +9,9 @@ import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,6 +21,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITagManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,12 +70,16 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
                 filters.add(new BlockScanFilter(block));
             }
         }
-        for (final ResourceLocation location : CommonConfig.commonOreBlockTags) {
-            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
-            if (tag != null) {
-                filters.add(new BlockTagScanFilter(tag));
+        final ITagManager<Block> tags = ForgeRegistries.BLOCKS.tags();
+        if (tags != null) {
+            for (final ResourceLocation location : CommonConfig.commonOreBlockTags) {
+                final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, location);
+                if (tags.isKnownTagName(tag)) {
+                    filters.add(new BlockTagScanFilter(tag));
+                }
             }
         }
+
         filter = new BlockCacheScanFilter(filters);
     }
 

@@ -1,13 +1,13 @@
 package li.cil.scannable.common.tags;
 
 import li.cil.scannable.api.API;
-import net.minecraft.world.item.Item;
-import net.minecraft.tags.Tag;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.Tags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 
 public final class ItemTags {
-    public static final Tag.Named<Item> MODULES = tag("modules");
+    public static final TagKey<Item> MODULES = tag("modules");
 
     // --------------------------------------------------------------------- //
 
@@ -16,7 +16,7 @@ public final class ItemTags {
 
     // --------------------------------------------------------------------- //
 
-    private static Tags.IOptionalNamedTag<Item> tag(final String name) {
-        return net.minecraft.tags.ItemTags.createOptional(new ResourceLocation(API.MOD_ID, name));
+    private static TagKey<Item> tag(final String name) {
+        return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(API.MOD_ID, name));
     }
 }

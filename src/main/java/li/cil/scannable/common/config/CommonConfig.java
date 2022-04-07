@@ -92,10 +92,10 @@ public final class CommonConfig {
     @Comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> commonOreBlockTags = Util.make(new HashSet<>(), c -> {
-        c.add(Tags.Blocks.ORES_COAL.getName());
-        c.add(Tags.Blocks.ORES_IRON.getName());
-        c.add(Tags.Blocks.ORES_REDSTONE.getName());
-        c.add(Tags.Blocks.ORES_QUARTZ.getName());
+        c.add(Tags.Blocks.ORES_COAL.location());
+        c.add(Tags.Blocks.ORES_IRON.location());
+        c.add(Tags.Blocks.ORES_REDSTONE.location());
+        c.add(Tags.Blocks.ORES_QUARTZ.location());
         c.add(new ResourceLocation("forge", "ores/copper"));
         c.add(new ResourceLocation("forge", "ores/tin"));
     });

@@ -5,25 +5,25 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.util.RegistryUtils;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraftforge.registries.RegistryObject;
 
 @OnlyIn(Dist.CLIENT)
 public final class ScanResultProviders {
-    private static final DeferredRegister<ScanResultProvider> DEFERRED_REGISTER = RegistryUtils.create(ScanResultProvider.class);
+    private static final DeferredRegister<ScanResultProvider> DEFERRED_REGISTER = RegistryUtils.getInitializerFor(ScanResultProvider.REGISTRY);
 
     // --------------------------------------------------------------------- //
 
     public static final RegistryObject<ScanResultProviderBlock> BLOCKS = DEFERRED_REGISTER.register(
-            API.SCAN_RESULT_PROVIDER_BLOCKS.getPath(), ScanResultProviderBlock::new);
+        API.SCAN_RESULT_PROVIDER_BLOCKS.getPath(), ScanResultProviderBlock::new);
     public static final RegistryObject<ScanResultProviderEntity> ENTITIES = DEFERRED_REGISTER.register(
-            API.SCAN_RESULT_PROVIDER_ENTITIES.getPath(), ScanResultProviderEntity::new);
+        API.SCAN_RESULT_PROVIDER_ENTITIES.getPath(), ScanResultProviderEntity::new);
 
     // --------------------------------------------------------------------- //
 
     public static void initialize() {
-        DEFERRED_REGISTER.makeRegistry(API.SCAN_RESULT_PROVIDER_REGISTRY.getPath(), () ->
-                new RegistryBuilder<ScanResultProvider>().disableSync().disableSaving());
+        DEFERRED_REGISTER.makeRegistry(ScanResultProvider.class, () ->
+            new RegistryBuilder<ScanResultProvider>().disableSync().disableSaving());
     }
 }

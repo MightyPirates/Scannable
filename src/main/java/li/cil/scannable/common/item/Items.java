@@ -8,7 +8,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public final class Items {
-    private static final DeferredRegister<Item> ITEMS = RegistryUtils.create(ForgeRegistries.ITEMS);
+    private static final DeferredRegister<Item> ITEMS = RegistryUtils.getInitializerFor(ForgeRegistries.ITEMS);
 
     // --------------------------------------------------------------------- //
 

@@ -10,9 +10,9 @@ import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,6 +23,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITagManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,17 +72,20 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
                 filters.add(new BlockScanFilter(block));
             }
         }
-        for (final ResourceLocation location : CommonConfig.rareOreBlockTags) {
-            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
-            if (tag != null) {
-                filters.add(new BlockTagScanFilter(tag));
+        final ITagManager<Block> tags = ForgeRegistries.BLOCKS.tags();
+        if (tags != null) {
+            for (final ResourceLocation location : CommonConfig.rareOreBlockTags) {
+                final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, location);
+                if (tags.isKnownTagName(tag)) {
+                    filters.add(new BlockTagScanFilter(tag));
+                }
             }
         }
 
         // Treat all blocks tagged as ores but not part of the common ore category as rare.
         filters.add(state -> !IgnoredBlocks.contains(state) &&
-                             Tags.Blocks.ORES.contains(state.getBlock()) &&
-                             !CommonOresBlockScannerModule.INSTANCE.getFilter(ItemStack.EMPTY).test(state));
+            state.is(Tags.Blocks.ORES) &&
+            !CommonOresBlockScannerModule.INSTANCE.getFilter(ItemStack.EMPTY).test(state));
 
         filter = new BlockCacheScanFilter(filters);
     }
