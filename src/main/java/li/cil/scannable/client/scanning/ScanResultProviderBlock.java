@@ -30,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -389,8 +390,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     color = ClientConfig.fluidColors.getInt(Registry.FLUID.getKey(fluidState.getType()));
                 } else {
                     ClientConfig.fluidTagColors.forEach((k, v) -> {
-                        final Tag<Fluid> tag = FluidTags.getAllTags().getTag(k);
-                        if (tag != null && tag.contains(fluidState.getType())) {
+                        final TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, k);
+
+                        if (fluidState.getTags().anyMatch(tag::equals)) {
                             color = v;
                         }
                     });
@@ -400,8 +402,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     color = ClientConfig.blockColors.getInt(Registry.BLOCK.getKey(blockState.getBlock()));
                 } else {
                     ClientConfig.blockTagColors.forEach((k, v) -> {
-                        final Tag<Block> tag = BlockTags.getAllTags().getTag(k);
-                        if (tag != null && tag.contains(blockState.getBlock())) {
+                        final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, k);
+                        if (blockState.getTags().anyMatch(tag::equals)) {
                             color = v;
                         }
                     });

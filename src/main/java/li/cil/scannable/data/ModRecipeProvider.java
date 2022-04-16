@@ -1,7 +1,7 @@
 package li.cil.scannable.data;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipesProvider;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LocationTrigger;
@@ -11,15 +11,17 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 import java.util.function.Consumer;
 
 import static li.cil.scannable.common.item.Items.*;
 
-public final class ModRecipeProvider extends FabricRecipesProvider {
+public final class ModRecipeProvider extends FabricRecipeProvider {
     public ModRecipeProvider(final FabricDataGenerator generator) {
         super(generator);
     }
@@ -36,7 +38,7 @@ public final class ModRecipeProvider extends FabricRecipesProvider {
                 .define('g', Items.GOLD_INGOT)
                 .define('q', Items.QUARTZ)
                 .group("scanner")
-                .unlockedBy("is_delving", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.MINESHAFT)))
+                .unlockedBy("is_delving", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.MINESHAFT)))
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(BLANK_MODULE.get())
@@ -61,7 +63,7 @@ public final class ModRecipeProvider extends FabricRecipesProvider {
         registerModule(FLUID_MODULE.get(), Items.WATER_BUCKET).save(consumer);
     }
 
-    private static ShapelessRecipeBuilder registerModule(final Item item, final Tag<Item> ingredient) {
+    private static ShapelessRecipeBuilder registerModule(final Item item, final TagKey<Item> ingredient) {
         return ShapelessRecipeBuilder.shapeless(item)
                 .requires(BLANK_MODULE.get())
                 .requires(ingredient)

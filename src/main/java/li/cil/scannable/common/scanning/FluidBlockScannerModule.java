@@ -8,8 +8,10 @@ import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -56,13 +58,11 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final Tag<Fluid> tag : FluidTags.getStaticTags()) {
-            if (tag instanceof Tag.Named<Fluid> namedTag) {
-                if (!CommonConfig.ignoredFluidTags.contains(namedTag.getName())) {
-                    filters.add(new FluidTagScanFilter(tag));
-                }
+        Registry.FLUID.getTagNames().forEach(namedTag -> {
+            if (!CommonConfig.ignoredFluidTags.contains(namedTag.location())) {
+                filters.add(new FluidTagScanFilter(namedTag));
             }
-        }
+        });
         filter = new BlockCacheScanFilter(filters);
     }
 }

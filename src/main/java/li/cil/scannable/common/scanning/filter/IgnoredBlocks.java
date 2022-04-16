@@ -1,10 +1,12 @@
 package li.cil.scannable.common.scanning.filter;
 
+import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.fml.event.config.ModConfigEvent;
@@ -37,17 +39,16 @@ public enum IgnoredBlocks {
             }
         }
 
-        final List<Tag<Block>> ignoredTags = new ArrayList<>();
-        for (final ResourceLocation location : CommonConfig.ignoredBlockTags) {
-            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
-            if (tag != null) {
-                ignoredTags.add(tag);
+        final List<TagKey<Block>> ignoredTags = new ArrayList<>();
+        Registry.BLOCK.getTagNames().forEach(namedTag -> {
+            if (CommonConfig.ignoredBlockTags.contains(namedTag.location())) {
+                ignoredTags.add(namedTag);
             }
-        }
+        });
 
         for (final Block block : Registry.BLOCK) {
             final BlockState blockState = block.defaultBlockState();
-            if (ignoredTags.stream().anyMatch(tag -> tag.contains(block))) {
+            if (ignoredTags.stream().anyMatch(blockState::is)) {
                 ignoredBlocks.add(blockState.getBlock());
             }
         }

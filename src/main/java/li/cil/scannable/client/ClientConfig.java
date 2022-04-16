@@ -60,8 +60,8 @@ public final class ClientConfig {
     @KeyValueTypes(keyType = ResourceLocation.class, valueType = int.class,
             valueSerializer = @CustomSerializer(serializer = "toHexString", deserializer = "fromHexString"))
     public static Object2IntMap<ResourceLocation> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
-        c.put(FluidTags.WATER.getName(), MaterialColor.WATER.col);
-        c.put(FluidTags.LAVA.getName(), MaterialColor.TERRACOTTA_ORANGE.col);
+        c.put(FluidTags.WATER.location(), MaterialColor.WATER.col);
+        c.put(FluidTags.LAVA.location(), MaterialColor.TERRACOTTA_ORANGE.col);
     });
 
     @SuppressWarnings("unused") // Referenced in annotations.

@@ -68,12 +68,11 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
                 filters.add(new BlockScanFilter(block));
             }
         }
-        for (final ResourceLocation location : CommonConfig.commonOreBlockTags) {
-            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
-            if (tag != null) {
+        Registry.BLOCK.getTagNames().forEach(tag -> {
+            if(CommonConfig.commonOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
-        }
+        });
         filter = new BlockCacheScanFilter(filters);
     }
 

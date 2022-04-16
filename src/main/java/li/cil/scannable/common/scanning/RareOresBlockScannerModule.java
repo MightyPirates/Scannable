@@ -10,11 +10,9 @@ import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
-import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -67,16 +65,15 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
                 filters.add(new BlockScanFilter(block));
             }
         }
-        for (final ResourceLocation location : CommonConfig.rareOreBlockTags) {
-            final Tag<Block> tag = BlockTags.getAllTags().getTag(location);
-            if (tag != null) {
+        Registry.BLOCK.getTagNames().forEach(tag -> {
+            if(CommonConfig.rareOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
-        }
+        });
 
         // Treat all blocks tagged as ores but not part of the common ore category as rare.
         filters.add(state -> !IgnoredBlocks.contains(state) &&
-                             BlockTags.getAllTags().getMatchingTags(state.getBlock()).contains(new ResourceLocation("c", "ores")) &&
+                             state.is(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "ores"))) &&
                              !CommonOresBlockScannerModule.INSTANCE.getFilter(ItemStack.EMPTY).test(state));
 
         filter = new BlockCacheScanFilter(filters);
