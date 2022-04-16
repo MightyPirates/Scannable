@@ -121,14 +121,14 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                         final int chunkY = player.getLevel().getSectionYFromSectionIndex(chunkSectionIndex);
 
                         final double dx = Math.min(
-                                Math.abs(chunkPos.getMinBlockX() - center.x),
-                                Math.abs(chunkPos.getMaxBlockX() - center.x));
+                            Math.abs(chunkPos.getMinBlockX() - center.x),
+                            Math.abs(chunkPos.getMaxBlockX() - center.x));
                         final double dz = Math.min(
-                                Math.abs(chunkPos.getMinBlockZ() - center.z),
-                                Math.abs(chunkPos.getMaxBlockZ() - center.z));
+                            Math.abs(chunkPos.getMinBlockZ() - center.z),
+                            Math.abs(chunkPos.getMaxBlockZ() - center.z));
                         final double dy = Math.min(
-                                Math.abs(SectionPos.sectionToBlockCoord(chunkY, 0) - center.y),
-                                Math.abs(SectionPos.sectionToBlockCoord(chunkY, SectionPos.SECTION_MAX_INDEX) - center.y));
+                            Math.abs(SectionPos.sectionToBlockCoord(chunkY, 0) - center.y),
+                            Math.abs(SectionPos.sectionToBlockCoord(chunkY, SectionPos.SECTION_MAX_INDEX) - center.y));
                         final double squareDistToCenter = dx * dx + dy * dy + dz * dz;
 
                         if (squareDistToCenter > radius * radius) {
@@ -391,8 +391,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 } else {
                     ClientConfig.fluidTagColors.forEach((k, v) -> {
                         final TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, k);
-
-                        if (fluidState.getTags().anyMatch(tag::equals)) {
+                        if (fluidState.is(tag)) {
                             color = v;
                         }
                     });
@@ -403,7 +402,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 } else {
                     ClientConfig.blockTagColors.forEach((k, v) -> {
                         final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, k);
-                        if (blockState.getTags().anyMatch(tag::equals)) {
+                        if (blockState.is(tag)) {
                             color = v;
                         }
                     });

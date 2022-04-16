@@ -33,6 +33,10 @@ java {
 	withSourcesJar()
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'utf-8'
+}
+
 repositories {
     mavenCentral()
     maven {
@@ -61,7 +65,7 @@ dependencies {
 
 
     // Just for in-dev convenience. Mod doesn't use any JEI APIs.
-    // implementation fg.deobf("curse.maven:jei-238222:3564511")
+    //implementation fg.deobf("curse.maven:jei-238222:3735570")
 }
 
 processResources {

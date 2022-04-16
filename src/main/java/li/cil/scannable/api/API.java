@@ -14,7 +14,6 @@ public final class API {
     // --------------------------------------------------------------------- //
     // Registry names of reusable built-in scan providers.
 
-    public static final ResourceLocation SCAN_RESULT_PROVIDER_REGISTRY = new ResourceLocation(MOD_ID, "scan_result_providers");
     public static final ResourceLocation SCAN_RESULT_PROVIDER_BLOCKS = new ResourceLocation(MOD_ID, "blocks");
     public static final ResourceLocation SCAN_RESULT_PROVIDER_ENTITIES = new ResourceLocation(MOD_ID, "entities");
 

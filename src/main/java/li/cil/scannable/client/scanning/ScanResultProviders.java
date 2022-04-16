@@ -12,11 +12,10 @@ import net.minecraft.resources.ResourceKey;
 
 @Environment(EnvType.CLIENT)
 public final class ScanResultProviders {
-    public static final ResourceKey<Registry<ScanResultProvider>> PROVIDER_REGISTRY_KEY = ResourceKey.createRegistryKey(API.SCAN_RESULT_PROVIDER_REGISTRY);
     public static final Registry<ScanResultProvider> PROVIDER_REGISTRY = FabricRegistryBuilder
-        .createSimple(ScanResultProvider.class, API.SCAN_RESULT_PROVIDER_REGISTRY)
+        .createSimple(ScanResultProvider.class, ScanResultProvider.REGISTRY.location())
         .buildAndRegister();
-    private static final DeferredRegister<ScanResultProvider> DEFERRED_REGISTER = DeferredRegister.create(API.MOD_ID, PROVIDER_REGISTRY_KEY);
+    private static final DeferredRegister<ScanResultProvider> DEFERRED_REGISTER = DeferredRegister.create(API.MOD_ID, ScanResultProvider.REGISTRY);
 
     // --------------------------------------------------------------------- //
 

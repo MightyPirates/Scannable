@@ -65,17 +65,17 @@ public final class ModRecipeProvider extends FabricRecipeProvider {
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final TagKey<Item> ingredient) {
         return ShapelessRecipeBuilder.shapeless(item)
-                .requires(BLANK_MODULE.get())
-                .requires(ingredient)
-                .group("scanner_module")
-                .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(BLANK_MODULE.get()));
+            .requires(BLANK_MODULE.get())
+            .requires(ingredient)
+            .group("scanner_module")
+            .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(BLANK_MODULE.get()));
     }
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final Item ingredient) {
         return ShapelessRecipeBuilder.shapeless(item)
-                .requires(BLANK_MODULE.get())
-                .requires(ingredient)
-                .group("scanner_module")
-                .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(BLANK_MODULE.get()));
+            .requires(BLANK_MODULE.get())
+            .requires(ingredient)
+            .group("scanner_module")
+            .unlockedBy("has_blank_module", InventoryChangeTrigger.TriggerInstance.hasItems(BLANK_MODULE.get()));
     }
 }
