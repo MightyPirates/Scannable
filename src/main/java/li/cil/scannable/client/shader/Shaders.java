@@ -103,8 +103,7 @@ public final class Shaders {
                     }
                 }, name, format);
             } catch (final Exception e) {
-                e.printStackTrace();
-                //LOGGER.error(e);
+                LOGGER.error(e);
             }
 
             reloadAction.accept(shader);
