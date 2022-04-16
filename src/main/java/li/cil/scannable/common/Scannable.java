@@ -20,6 +20,5 @@ public final class Scannable implements ModInitializer {
         Containers.initialize();
 
         Network.initialize();
-        //DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().register(ClientSetup.class));
     }
 }
