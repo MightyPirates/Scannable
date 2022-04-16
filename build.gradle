@@ -106,9 +106,9 @@ runDatagen {
 }
 
 task copyGeneratedResources(type: Copy) {
-    from 'src/generated'
-    into 'src/main'
-    exclude 'resources/.cache'
+    from 'src/main/generated'
+    into 'src/main/resources'
+    exclude '.cache'
 }
 
 task apiJar(type: Jar) {
