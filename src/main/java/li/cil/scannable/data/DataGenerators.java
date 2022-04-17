@@ -10,6 +10,6 @@ public final class DataGenerators implements DataGeneratorEntrypoint {
         generator.addProvider(blockTagsProvider);
         generator.addProvider(new ModItemTagsProvider(generator, blockTagsProvider));
         generator.addProvider(new ModRecipeProvider(generator));
-        //generator.addProvider(new ModItemModelProvider(generator));
+        generator.addProvider(new ModItemModelProvider(generator));
     }
 }

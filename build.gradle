@@ -75,21 +75,11 @@ processResources {
     }
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDirs += [
-                'src/main/generated'
-            ]
-        }
-    }
-}
-
 loom {
     accessWidenerPath = file('src/main/resources/scannable.accesswidener')
     runs {
         datagen {
-            inherit server
+            inherit client
             name "Data Generation"
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
@@ -110,6 +100,8 @@ task copyGeneratedResources(type: Copy) {
     into 'src/main/resources'
     exclude '.cache'
 }
+
+runDatagen.finalizedBy(copyGeneratedResources)
 
 task apiJar(type: Jar) {
     archiveClassifier.set('api')
