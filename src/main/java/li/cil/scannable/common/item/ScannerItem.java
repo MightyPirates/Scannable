@@ -7,6 +7,7 @@ import li.cil.scannable.client.audio.SoundManager;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
+import li.cil.scannable.common.inventory.ContainerSlice;
 import li.cil.scannable.common.inventory.ScannerItemHandler;
 import net.fabricmc.fabric.api.item.v1.FabricItem;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -250,7 +251,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {
         final ScannerItemHandler scannerItemHandler = ScannerItemHandler.of(scanner);
         boolean hasScannerModules = false;
-        final NonNullList<ItemStack> activeModules = scannerItemHandler.getActiveModules();
+        final ContainerSlice activeModules = scannerItemHandler.getActiveModules();
         for (final ItemStack module : activeModules) {
             if (module.isEmpty()) {
                 continue;

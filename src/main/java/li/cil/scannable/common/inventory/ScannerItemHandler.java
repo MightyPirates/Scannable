@@ -1,7 +1,7 @@
 package li.cil.scannable.common.inventory;
 
+import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ScannerItem;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -10,7 +10,8 @@ import net.minecraft.world.item.ItemStack;
 
 public final class ScannerItemHandler extends SimpleContainer {
     public static final int ACTIVE_MODULE_COUNT = 3;
-    public static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT;
+    private static final int INACTIVE_MODULE_COUNT = 6;
+    private static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT + INACTIVE_MODULE_COUNT;
 
     private static final String TAG_ITEMS = "items";
     private static final String TAG_SLOT = "slot";
@@ -32,11 +33,6 @@ public final class ScannerItemHandler extends SimpleContainer {
         }
     }
 
-    @Override
-    public void setChanged() {
-        this.saveToNBT();
-    }
-
     public void updateFromNBT() {
         final CompoundTag tag = container.getTag();
         if (tag != null && tag.contains(TAG_ITEMS, Tag.TAG_LIST)) {
@@ -44,20 +40,21 @@ public final class ScannerItemHandler extends SimpleContainer {
         }
     }
 
-    public void saveToNBT() {
+    public ContainerSlice getActiveModules() {
+        return new ContainerSlice(this, 0, ACTIVE_MODULE_COUNT);
+    }
+
+    public ContainerSlice getInactiveModules() {
+        return new ContainerSlice(this, ACTIVE_MODULE_COUNT, INACTIVE_MODULE_COUNT);
+    }
+
+    // --------------------------------------------------------------------- //
+    // Container
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
         this.container.getOrCreateTag().put(TAG_ITEMS, this.createTag());
-    }
-
-    private NonNullList<ItemStack> getItemsInRange(final int start, final int end) {
-        final NonNullList<ItemStack> list = NonNullList.withSize(end - start, ItemStack.EMPTY);
-        for (int i = start; i < end; i++) {
-            list.set(i - start, this.getItem(i));
-        }
-        return list;
-    }
-
-    public NonNullList<ItemStack> getActiveModules() {
-        return getItemsInRange(0, ACTIVE_MODULE_COUNT);
     }
 
     // --------------------------------------------------------------------- //

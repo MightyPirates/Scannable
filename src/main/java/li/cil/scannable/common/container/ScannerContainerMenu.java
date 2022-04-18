@@ -2,6 +2,7 @@ package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.inventory.ScannerItemHandler;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +21,6 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
     private final Player player;
     private final InteractionHand hand;
     private final ItemStack stack;
-    private final ScannerItemHandler handler;
 
     // --------------------------------------------------------------------- //
 
@@ -29,11 +29,16 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
 
         this.player = inventory.player;
         this.hand = hand;
-        this.handler = itemHandler;
         this.stack = player.getItemInHand(hand);
 
-        for (int slot = 0; slot < ScannerItemHandler.ACTIVE_MODULE_COUNT; ++slot) {
-            addSlot(new Slot(itemHandler, slot, 62 + slot * 18, 20));
+        final Container activeModules = itemHandler.getActiveModules();
+        for (int slot = 0; slot < activeModules.getContainerSize(); ++slot) {
+            addSlot(new Slot(activeModules, slot, 62 + slot * 18, 20));
+        }
+
+        final Container storedModules = itemHandler.getInactiveModules();
+        for (int slot = 0; slot < storedModules.getContainerSize(); ++slot) {
+            addSlot(new Slot(storedModules, slot, 62 + slot * 18, 46));
         }
 
         for (int row = 0; row < 3; ++row) {
