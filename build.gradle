@@ -45,6 +45,7 @@ repositories {
         content { includeGroup "curse.maven" }
     }
     maven { url "https://maven.architectury.dev/" }
+    maven { url "https://maven.shedaniel.me" }
 }
 
 dependencies {
@@ -66,7 +67,7 @@ dependencies {
 
 
     // Just for in-dev convenience. Mod doesn't use any JEI APIs.
-    //implementation fg.deobf("curse.maven:jei-238222:3735570")
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.1.449"
 }
 
 processResources {
