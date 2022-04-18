@@ -32,7 +32,9 @@ import team.reborn.energy.api.base.SimpleBatteryItem;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class ScannerItem extends ModItem implements SimpleBatteryItem, FabricItem {
     public static boolean isScanner(final ItemStack stack) {
         return stack.getItem() == Items.SCANNER.get();
@@ -55,7 +57,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             final ItemStack stack = new ItemStack(this);
             final ContainerItemContext context = ContainerItemContext.withInitial(stack);
             try (final Transaction transaction = Transaction.openOuter()) {
-                context.find(EnergyStorage.ITEM).insert(this.getEnergyCapacity(), transaction);
+                Objects.requireNonNull(context.find(EnergyStorage.ITEM)).insert(this.getEnergyCapacity(), transaction);
                 transaction.commit();
             }
             items.add(context.getItemVariant().toStack());
@@ -68,7 +70,9 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
 
         if (CommonConfig.useEnergy) {
             final EnergyStorage energyStorage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
-            tooltip.add(Strings.energyStorage(energyStorage.getAmount(), energyStorage.getCapacity()));
+            if (energyStorage != null) {
+                tooltip.add(Strings.energyStorage(energyStorage.getAmount(), energyStorage.getCapacity()));
+            }
         }
     }
 
@@ -205,6 +209,10 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
         }
 
         final EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+        if (storage == null) {
+            return 0;
+        }
+
         return storage.getAmount() / (float) storage.getCapacity();
     }
 
@@ -241,8 +249,6 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {
         final ScannerItemHandler scannerItemHandler = ScannerItemHandler.of(scanner);
-        if (scannerItemHandler == null)
-            return false;
         boolean hasScannerModules = false;
         final NonNullList<ItemStack> activeModules = scannerItemHandler.getActiveModules();
         for (final ItemStack module : activeModules) {
@@ -252,11 +258,11 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
 
             modules.add(module);
 
-            boolean hasAResult = false;
+            boolean hasResultProvider = false;
             if (module.getItem() instanceof ScannerModuleProvider provider) {
-                hasAResult = provider.getScannerModule(module).hasResultProvider();
+                hasResultProvider = provider.getScannerModule(module).hasResultProvider();
             }
-            hasScannerModules |= hasAResult;
+            hasScannerModules |= hasResultProvider;
         }
         return hasScannerModules;
     }
@@ -275,6 +281,4 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
     public long getEnergyMaxOutput() {
         return Long.MAX_VALUE;
     }
-
-    // --------------------------------------------------------------------- //
 }

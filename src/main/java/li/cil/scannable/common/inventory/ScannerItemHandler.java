@@ -8,8 +8,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nullable;
-
 public final class ScannerItemHandler extends SimpleContainer {
     public static final int ACTIVE_MODULE_COUNT = 3;
     public static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT;
@@ -24,13 +22,14 @@ public final class ScannerItemHandler extends SimpleContainer {
         this.container = container;
     }
 
-    @Nullable
     public static ScannerItemHandler of(final ItemStack container) {
-        if (!(container.getItem() instanceof ScannerItem))
-            return null;
-        final ScannerItemHandler handler = new ScannerItemHandler(container);
-        handler.updateFromNBT();
-        return handler;
+        if (container.getItem() instanceof ScannerItem) {
+            final ScannerItemHandler handler = new ScannerItemHandler(container);
+            handler.updateFromNBT();
+            return handler;
+        } else {
+            return new ScannerItemHandler(new ItemStack(Items.SCANNER.get()));
+        }
     }
 
     @Override
