@@ -23,15 +23,8 @@ version = "${semver}+${getGitRef()}"
 group = 'li.cil.scannable'
 
 tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
-}
-
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
+    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+    it.options.release = 17
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -54,7 +47,7 @@ dependencies {
 
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation ("dev.architectury:architectury-fabric:${project.arch_version}") {
+    modImplementation("dev.architectury:architectury-fabric:${project.arch_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
     include modApi('teamreborn:energy:2.2.0') {
@@ -66,8 +59,8 @@ dependencies {
     implementation 'com.electronwill.night-config:toml:3.6.3'
 
 
-    // Just for in-dev convenience. Mod doesn't use any JEI APIs.
-    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:8.1.449") {
+    // Just for in-dev convenience. Mod doesn't use any REI APIs.
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:8.1.449") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 }
@@ -153,6 +146,13 @@ curseforge {
             requiredDependency 'architectury-fabric'
             requiredDependency 'forge-config-api-port-fabric'
         }
+        afterEvaluate {
+            mainArtifact(remapJar)
+            uploadTask.dependsOn(remapJar)
+        }
+    }
+    options {
+        forgeGradleIntegration = false
     }
 }
 
