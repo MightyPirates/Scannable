@@ -8,16 +8,16 @@
   ],
   "key": {
     "g": {
-      "item": "minecraft:green_dye"
+      "tag": "c:dye_green"
     },
     "c": {
       "item": "minecraft:clay_ball"
     },
     "r": {
-      "item": "minecraft:glowstone_dust"
+      "tag": "c:glowstone_dusts"
     },
     "n": {
-      "item": "minecraft:gold_nugget"
+      "tag": "c:gold_nuggets"
     }
   },
   "result": {

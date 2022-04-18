@@ -6,7 +6,7 @@
       "item": "scannable:blank_module"
     },
     {
-      "item": "minecraft:stone"
+      "tag": "c:stone"
     }
   ],
   "result": {

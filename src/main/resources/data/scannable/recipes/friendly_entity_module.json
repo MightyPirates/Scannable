@@ -6,7 +6,7 @@
       "item": "scannable:blank_module"
     },
     {
-      "item": "minecraft:leather"
+      "tag": "c:leather"
     }
   ],
   "result": {

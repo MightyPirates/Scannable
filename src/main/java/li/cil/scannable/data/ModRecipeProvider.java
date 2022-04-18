@@ -1,5 +1,6 @@
 package li.cil.scannable.data;
 
+import li.cil.scannable.common.tags.ItemTags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
@@ -32,11 +33,11 @@ public final class ModRecipeProvider extends FabricRecipeProvider {
                 .pattern("i i")
                 .pattern("brb")
                 .pattern("gqg")
-                .define('i', Items.IRON_INGOT)
+                .define('i', ItemTags.IRON_INGOTS)
                 .define('b', Items.IRON_BARS)
-                .define('r', Items.REDSTONE)
-                .define('g', Items.GOLD_INGOT)
-                .define('q', Items.QUARTZ)
+                .define('r', ItemTags.REDSTONE_DUSTS)
+                .define('g', ItemTags.GOLD_INGOTS)
+                .define('q', ItemTags.QUARTZ_GEMS)
                 .group("scanner")
                 .unlockedBy("is_delving", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.MINESHAFT)))
                 .save(consumer);
@@ -45,21 +46,21 @@ public final class ModRecipeProvider extends FabricRecipeProvider {
                 .pattern("ggg")
                 .pattern("crc")
                 .pattern("cnc")
-                .define('g', Items.GREEN_DYE)
+                .define('g', ItemTags.GREEN_DYES)
                 .define('c', Items.CLAY_BALL)
-                .define('r', Items.GLOWSTONE_DUST)
-                .define('n', Items.GOLD_NUGGET)
+                .define('r', ItemTags.GLOWSTONE_DUSTS)
+                .define('n', ItemTags.GOLD_NUGGETS)
                 .group("blank_module")
                 .unlockedBy("has_scanner", InventoryChangeTrigger.TriggerInstance.hasItems(SCANNER.get()))
                 .save(consumer);
 
-        registerModule(RANGE_MODULE.get(), Items.ENDER_PEARL).save(consumer);
+        registerModule(RANGE_MODULE.get(), ItemTags.ENDER_PEARLS).save(consumer);
         registerModule(ENTITY_MODULE.get(), Items.LEAD).save(consumer);
-        registerModule(FRIENDLY_ENTITY_MODULE.get(), Items.LEATHER).save(consumer);
-        registerModule(HOSTILE_ENTITY_MODULE.get(), Items.BONE).save(consumer);
-        registerModule(BLOCK_MODULE.get(), Items.STONE).save(consumer);
+        registerModule(FRIENDLY_ENTITY_MODULE.get(), ItemTags.LEATHER).save(consumer);
+        registerModule(HOSTILE_ENTITY_MODULE.get(), ItemTags.BONES).save(consumer);
+        registerModule(BLOCK_MODULE.get(), ItemTags.STONE).save(consumer);
         registerModule(COMMON_ORES_MODULE.get(), Items.COAL).save(consumer);
-        registerModule(RARE_ORES_MODULE.get(), Items.DIAMOND).save(consumer);
+        registerModule(RARE_ORES_MODULE.get(), ItemTags.DIAMOND_GEMS).save(consumer);
         registerModule(FLUID_MODULE.get(), Items.WATER_BUCKET).save(consumer);
     }
 

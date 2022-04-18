@@ -23,5 +23,19 @@ public final class ModItemTagsProvider extends FabricTagProvider.ItemTagProvider
                 Items.RARE_ORES_MODULE.get(),
                 Items.FLUID_MODULE.get()
         );
+
+        tag(ItemTags.IRON_INGOTS).add(net.minecraft.world.item.Items.IRON_INGOT);
+        tag(ItemTags.ENDER_PEARLS).add(net.minecraft.world.item.Items.ENDER_PEARL);
+        tag(ItemTags.GOLD_NUGGETS).add(net.minecraft.world.item.Items.GOLD_NUGGET);
+        tag(ItemTags.GOLD_INGOTS).add(net.minecraft.world.item.Items.GOLD_INGOT);
+        tag(ItemTags.LEATHER).add(net.minecraft.world.item.Items.LEATHER);
+        tag(ItemTags.REDSTONE_DUSTS).add(net.minecraft.world.item.Items.REDSTONE);
+        tag(ItemTags.IRON_INGOTS).add(net.minecraft.world.item.Items.IRON_INGOT);
+        tag(ItemTags.QUARTZ_GEMS).add(net.minecraft.world.item.Items.QUARTZ);
+        tag(ItemTags.GREEN_DYES).add(net.minecraft.world.item.Items.GREEN_DYE);
+        tag(ItemTags.GLOWSTONE_DUSTS).add(net.minecraft.world.item.Items.GLOWSTONE_DUST);
+        tag(ItemTags.BONES).add(net.minecraft.world.item.Items.BONE);
+        tag(ItemTags.STONE).add(net.minecraft.world.item.Items.STONE);
+        tag(ItemTags.DIAMOND_GEMS).add(net.minecraft.world.item.Items.DIAMOND);
     }
 }
