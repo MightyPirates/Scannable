@@ -164,12 +164,6 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             return stack;
         }
 
-        /*
-        if (level.isClientSide()) {
-            SoundCanceler.cancelEquipSound();
-        }
-         */
-
         final List<ItemStack> modules = new ArrayList<>();
         if (!collectModules(stack, modules)) {
             return stack;
