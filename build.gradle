@@ -146,8 +146,8 @@ curseforge {
             requiredDependency 'architectury-fabric'
             requiredDependency 'forge-config-api-port-fabric'
         }
+        mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
         afterEvaluate {
-            mainArtifact(remapJar)
             uploadTask.dependsOn(remapJar)
         }
     }
