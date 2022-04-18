@@ -8,6 +8,7 @@ import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvType;
+import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +66,12 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
             }
         });
         filter = new BlockCacheScanFilter(filters);
+    }
+
+    static {
+        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            ModConfigEvent.LOADING.register((cfg) -> FluidBlockScannerModule.INSTANCE.filter = null);
+            ModConfigEvent.RELOADING.register((cfg) -> FluidBlockScannerModule.INSTANCE.filter = null);
+        }
     }
 }
