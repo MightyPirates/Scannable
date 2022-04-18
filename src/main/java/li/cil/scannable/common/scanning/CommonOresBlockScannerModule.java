@@ -1,6 +1,5 @@
 package li.cil.scannable.common.scanning;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
@@ -9,16 +8,14 @@ import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
-import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
@@ -68,7 +65,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
             }
         }
         Registry.BLOCK.getTagNames().forEach(tag -> {
-            if(CommonConfig.commonOreBlockTags.contains(tag.location())) {
+            if (CommonConfig.commonOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
         });
@@ -76,7 +73,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
     }
 
     static {
-        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ModConfigEvent.LOADING.register((cfg) -> CommonOresBlockScannerModule.INSTANCE.filter = null);
             ModConfigEvent.RELOADING.register((cfg) -> CommonOresBlockScannerModule.INSTANCE.filter = null);
         }

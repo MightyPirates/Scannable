@@ -4,9 +4,6 @@ import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import li.cil.scannable.api.API;
-import li.cil.scannable.client.gui.ConfigurableBlockScannerModuleContainerScreen;
-import li.cil.scannable.client.gui.ConfigurableEntityScannerModuleContainerScreen;
-import li.cil.scannable.client.gui.ScannerContainerScreen;
 import net.minecraft.core.Registry;
 import net.minecraft.world.inventory.MenuType;
 

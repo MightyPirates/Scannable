@@ -4,11 +4,10 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanResultProvider;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 
 @Environment(EnvType.CLIENT)
 public final class ScanResultProviders {

@@ -1,8 +1,8 @@
 package li.cil.scannable.client.scanning.filter;
 
-import net.minecraft.world.entity.Entity;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.world.entity.Entity;
 
 import java.util.List;
 import java.util.function.Predicate;

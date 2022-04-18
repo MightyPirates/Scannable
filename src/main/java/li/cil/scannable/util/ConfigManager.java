@@ -3,9 +3,9 @@ package li.cil.scannable.util;
 import com.google.common.base.Strings;
 import li.cil.scannable.api.API;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
@@ -148,7 +148,7 @@ public final class ConfigManager {
     // --------------------------------------------------------------------- //
 
     private static void handleModConfigEvent(final ModConfig eventConfig) {
-        if(!eventConfig.getModId().equals(API.MOD_ID))
+        if (!eventConfig.getModId().equals(API.MOD_ID))
             return;
         final ConfigDefinition config = CONFIGS.get(eventConfig.getSpec());
         if (config != null) {

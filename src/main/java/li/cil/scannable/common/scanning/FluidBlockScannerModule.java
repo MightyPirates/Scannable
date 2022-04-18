@@ -1,6 +1,5 @@
 package li.cil.scannable.common.scanning;
 
-import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
@@ -8,16 +7,12 @@ import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
@@ -69,7 +64,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
     }
 
     static {
-        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             ModConfigEvent.LOADING.register((cfg) -> FluidBlockScannerModule.INSTANCE.filter = null);
             ModConfigEvent.RELOADING.register((cfg) -> FluidBlockScannerModule.INSTANCE.filter = null);
         }

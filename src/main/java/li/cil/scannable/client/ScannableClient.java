@@ -4,14 +4,12 @@ import dev.architectury.registry.menu.MenuRegistry;
 import li.cil.scannable.client.gui.ConfigurableBlockScannerModuleContainerScreen;
 import li.cil.scannable.client.gui.ConfigurableEntityScannerModuleContainerScreen;
 import li.cil.scannable.client.gui.ScannerContainerScreen;
-import li.cil.scannable.client.renderer.OverlayRenderer;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.shader.Shaders;
 import li.cil.scannable.common.container.Containers;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.client.gui.screens.MenuScreens;
 
 public final class ScannableClient implements ClientModInitializer {
     @Override

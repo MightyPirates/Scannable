@@ -5,6 +5,8 @@ import li.cil.scannable.common.container.BlockModuleContainerMenu;
 import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -13,8 +15,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 
 import java.util.List;
 

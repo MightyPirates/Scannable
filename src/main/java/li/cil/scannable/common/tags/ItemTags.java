@@ -2,10 +2,9 @@ package li.cil.scannable.common.tags;
 
 import li.cil.scannable.api.API;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.tags.Tag;
-import net.minecraft.resources.ResourceLocation;
 
 public final class ItemTags {
     public static final TagKey<Item> MODULES = tag("modules");

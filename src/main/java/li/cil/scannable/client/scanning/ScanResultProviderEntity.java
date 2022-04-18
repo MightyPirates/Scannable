@@ -7,6 +7,8 @@ import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.api.scanning.ScannerModuleProvider;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -18,8 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -43,7 +43,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         filters.clear();
         filterToModule.clear();
         for (final ItemStack stack : modules) {
-            if(stack.getItem() instanceof ScannerModuleProvider provider) {
+            if (stack.getItem() instanceof ScannerModuleProvider provider) {
                 ScannerModule module = provider.getScannerModule(stack);
                 if (module instanceof EntityScannerModule entityModule) {
                     final Predicate<Entity> filter = entityModule.getFilter(stack);

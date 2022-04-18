@@ -12,11 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
-    private void beforeRenderGui(float f, long l, boolean bl, CallbackInfo ci) {
-        ScanManager.onPreRenderGameOverlay(f);
+    private void beforeRenderGui(final float tickDelta, final long startTime, final boolean tick, final CallbackInfo ci) {
+        ScanManager.onPreRenderGameOverlay(tickDelta);
     }
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", shift = At.Shift.AFTER))
-    private void afterRenderGui(float f, long l, boolean bl, CallbackInfo ci) {
-        OverlayRenderer.onOverlayRender(new PoseStack(), f);
+    private void afterRenderGui(final float tickDelta, final long startTime, final boolean tick, final CallbackInfo ci) {
+        OverlayRenderer.onOverlayRender(new PoseStack(), tickDelta);
     }
 }

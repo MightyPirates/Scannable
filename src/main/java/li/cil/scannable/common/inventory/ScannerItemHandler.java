@@ -21,9 +21,9 @@ public final class ScannerItemHandler extends SimpleContainer {
     }
 
     public static ScannerItemHandler of(final ItemStack container) {
-        if(!(container.getItem() instanceof ScannerItem))
+        if (!(container.getItem() instanceof ScannerItem))
             return null;
-        ScannerItemHandler handler = new ScannerItemHandler(container);
+        final ScannerItemHandler handler = new ScannerItemHandler(container);
         handler.updateFromNBT();
         return handler;
     }
@@ -44,10 +44,10 @@ public final class ScannerItemHandler extends SimpleContainer {
         this.container.getOrCreateTag().put(TAG_ITEMS, this.createTag());
     }
 
-    private NonNullList<ItemStack> getItemsInRange(int start, int end) {
-        NonNullList<ItemStack> list = NonNullList.withSize(end-start, ItemStack.EMPTY);
-        for(int i = start; i < end; i++) {
-            list.set(i-start, this.getItem(i));
+    private NonNullList<ItemStack> getItemsInRange(final int start, final int end) {
+        final NonNullList<ItemStack> list = NonNullList.withSize(end - start, ItemStack.EMPTY);
+        for (int i = start; i < end; i++) {
+            list.set(i - start, this.getItem(i));
         }
         return list;
     }

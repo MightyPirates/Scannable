@@ -5,10 +5,10 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.FriendlyEntityScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 
 import java.util.function.Predicate;
 

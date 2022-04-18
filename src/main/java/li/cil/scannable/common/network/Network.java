@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -35,17 +34,17 @@ public final class Network {
     private static <T extends AbstractMessage> void registerMessageToServer(final ResourceLocation location, final Class<T> type, final Function<FriendlyByteBuf, T> decoder) {
         PACKET_MAP.put(type, location);
         ServerPlayNetworking.registerGlobalReceiver(location, (server, player, handler, buf, responseSender) -> {
-            T message = decoder.apply(buf);
+            final T message = decoder.apply(buf);
             AbstractMessage.handleMessage(message, server, player, handler, buf, responseSender);
         });
     }
 
     @Environment(EnvType.CLIENT)
-    public static void sendToServer(AbstractMessage message) {
-        ResourceLocation loc = PACKET_MAP.get(message.getClass());
-        if(loc == null)
+    public static void sendToServer(final AbstractMessage message) {
+        final ResourceLocation loc = PACKET_MAP.get(message.getClass());
+        if (loc == null)
             throw new IllegalArgumentException("Invalid message type");
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        final FriendlyByteBuf buf = PacketByteBufs.create();
         message.toBytes(buf);
         ClientPlayNetworking.send(loc, buf);
     }

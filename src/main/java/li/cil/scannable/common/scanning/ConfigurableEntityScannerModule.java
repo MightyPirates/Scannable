@@ -7,11 +7,11 @@ import li.cil.scannable.client.scanning.filter.EntityListScanFilter;
 import li.cil.scannable.client.scanning.filter.EntityTypeScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 
 import java.util.List;
 import java.util.function.Predicate;

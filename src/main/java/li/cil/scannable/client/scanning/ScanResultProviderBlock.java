@@ -17,6 +17,8 @@ import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.shader.Shaders;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -27,9 +29,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -47,8 +46,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,7 +83,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         final IntObjectMap<List<Predicate<BlockState>>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack stack : modules) {
-            if(stack.getItem() instanceof ScannerModuleProvider provider) {
+            if (stack.getItem() instanceof ScannerModuleProvider provider) {
                 ScannerModule module = provider.getScannerModule(stack);
                 if (module instanceof BlockScannerModule blockModule) {
                     final Predicate<BlockState> filter = blockModule.getFilter(stack);

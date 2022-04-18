@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 public interface ScannerModuleProvider {
     /**
      * Return the module implementation associated with this scanner module.
+     *
      * @param module the module itself
      * @return the module implementation
      */

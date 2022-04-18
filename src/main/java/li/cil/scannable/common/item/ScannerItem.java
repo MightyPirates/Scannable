@@ -53,8 +53,8 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
 
         if (allowdedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
-            ContainerItemContext context = ContainerItemContext.withInitial(stack);
-            try (Transaction transaction = Transaction.openOuter()) {
+            final ContainerItemContext context = ContainerItemContext.withInitial(stack);
+            try (final Transaction transaction = Transaction.openOuter()) {
                 context.find(EnergyStorage.ITEM).insert(this.getEnergyCapacity(), transaction);
                 transaction.commit();
             }
@@ -67,7 +67,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
         super.appendHoverText(stack, level, tooltip, flag);
 
         if (CommonConfig.useEnergy) {
-            EnergyStorage energyStorage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+            final EnergyStorage energyStorage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
             tooltip.add(Strings.energyStorage(energyStorage.getAmount(), energyStorage.getCapacity()));
         }
     }
@@ -133,7 +133,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
     }
 
     @Override
-    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, final ItemStack oldStack, final ItemStack newStack) {
+    public boolean allowNbtUpdateAnimation(final Player player, final InteractionHand hand, final ItemStack oldStack, final ItemStack newStack) {
         return oldStack.getItem() != newStack.getItem();
     }
 
@@ -193,7 +193,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             return 0;
         }
 
-        if(stack.getItem() instanceof ScannerModuleProvider provider) {
+        if (stack.getItem() instanceof ScannerModuleProvider provider) {
             return provider.getScannerModule(stack).getEnergyCost(stack);
         }
         return 0;
@@ -204,8 +204,8 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             return 0;
         }
 
-        EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
-        return storage.getAmount() / (float)storage.getCapacity();
+        final EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+        return storage.getAmount() / (float) storage.getCapacity();
     }
 
     private static boolean tryConsumeEnergy(final Player player, final InteractionHand hand, final List<ItemStack> modules, final boolean simulate) {
@@ -217,8 +217,8 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             return true;
         }
 
-        EnergyStorage storage = ContainerItemContext.ofPlayerHand(player, hand).find(EnergyStorage.ITEM);
-        if(storage == null)
+        final EnergyStorage storage = ContainerItemContext.ofPlayerHand(player, hand).find(EnergyStorage.ITEM);
+        if (storage == null)
             return false;
 
         int totalCostAccumulator = 0;
@@ -226,10 +226,10 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             totalCostAccumulator += getModuleEnergyCost(module);
         }
         final int totalCost = totalCostAccumulator;
-        long extracted;
-        try (Transaction transaction = Transaction.openOuter()) {
+        final long extracted;
+        try (final Transaction transaction = Transaction.openOuter()) {
             extracted = storage.extract(totalCost, transaction);
-            if(!simulate)
+            if (!simulate)
                 transaction.commit();
         }
         if (extracted < totalCost) {
@@ -240,8 +240,8 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
     }
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {
-        ScannerItemHandler scannerItemHandler = ScannerItemHandler.of(scanner);
-        if(scannerItemHandler == null)
+        final ScannerItemHandler scannerItemHandler = ScannerItemHandler.of(scanner);
+        if (scannerItemHandler == null)
             return false;
         boolean hasScannerModules = false;
         final NonNullList<ItemStack> activeModules = scannerItemHandler.getActiveModules();

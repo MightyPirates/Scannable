@@ -10,11 +10,11 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.shader.Shaders;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvType;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 

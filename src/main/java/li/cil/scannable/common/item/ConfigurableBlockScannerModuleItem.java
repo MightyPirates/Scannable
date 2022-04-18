@@ -1,7 +1,6 @@
 package li.cil.scannable.common.item;
 
 import dev.architectury.registry.menu.MenuRegistry;
-import dev.architectury.registry.registries.Registries;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.BlockModuleContainerMenu;
@@ -39,7 +38,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem {
     private static final Logger LOGGER = LogManager.getLogger();
