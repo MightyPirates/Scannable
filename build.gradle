@@ -149,6 +149,10 @@ curseforge {
         addGameVersion 'Fabric'
         addGameVersion minecraft_version
         addGameVersion 'Java 17'
+        relations {
+            requiredDependency 'architectury-fabric'
+            requiredDependency 'forge-config-api-port-fabric'
+        }
     }
 }
 
