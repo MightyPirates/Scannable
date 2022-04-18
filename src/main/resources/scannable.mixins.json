@@ -5,6 +5,7 @@
     "compatibilityLevel": "JAVA_17",
     "mixins": [],
     "client": [
+        "client.LevelRendererMixin",
         "client.GameRendererMixin",
         "client.ItemModelGeneratorAccessor"
     ],
