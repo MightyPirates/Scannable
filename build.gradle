@@ -67,7 +67,9 @@ dependencies {
 
 
     // Just for in-dev convenience. Mod doesn't use any JEI APIs.
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:8.1.449"
+    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:8.1.449") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 }
 
 processResources {
