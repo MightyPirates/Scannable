@@ -1,13 +1,13 @@
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public final class EntityModuleContainerMenu extends AbstractModuleContainerMenu {
     public static EntityModuleContainerMenu create(final int windowId, final Inventory inventory, final FriendlyByteBuf buffer) {
@@ -30,7 +30,7 @@ public final class EntityModuleContainerMenu extends AbstractModuleContainerMenu
     @Override
     public void setItemAt(final int index, final ResourceLocation name) {
         final ItemStack stack = getPlayer().getItemInHand(getHand());
-        final EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(name);
+        final EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(name).orElse(null);
         if (entityType != null) {
             ConfigurableEntityScannerModuleItem.setEntityTypeAt(stack, index, entityType);
         }

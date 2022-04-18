@@ -5,8 +5,8 @@ import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 
@@ -24,13 +24,13 @@ public enum RangeScannerModule implements ScannerModule {
     }
 
     @Nullable
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return null;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public float adjustGlobalRange(final float range) {
         return range + Mth.ceil(CommonConfig.baseScanRadius / 2f);

@@ -10,8 +10,8 @@ import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -25,13 +25,13 @@ public enum ConfigurableEntityScannerModule implements EntityScannerModule {
         return CommonConfig.energyCostModuleEntity;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.ENTITIES.get();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<Entity> getFilter(final ItemStack module) {
         final List<EntityType<?>> entityType = ConfigurableEntityScannerModuleItem.getEntityTypes(module);

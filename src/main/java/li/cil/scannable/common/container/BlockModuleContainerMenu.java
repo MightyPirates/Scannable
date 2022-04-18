@@ -2,6 +2,7 @@ package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
 import net.minecraft.ResourceLocationException;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -9,7 +10,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +37,7 @@ public class BlockModuleContainerMenu extends AbstractModuleContainerMenu {
     @Override
     public void setItemAt(final int index, final ResourceLocation name) {
         try {
-            final Block block = ForgeRegistries.BLOCKS.getValue(name);
+            final Block block = Registry.BLOCK.getOptional(name).orElse(null);
             if (block != null && block != Blocks.AIR) {
                 final ItemStack stack = getPlayer().getItemInHand(getHand());
                 ConfigurableBlockScannerModuleItem.setBlockAt(stack, index, block);

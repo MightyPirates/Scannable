@@ -1,24 +1,21 @@
 package li.cil.scannable.common.scanning.filter;
 
-import li.cil.scannable.api.API;
+import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITagManager;
+import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = API.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum IgnoredBlocks {
     INSTANCE;
 
@@ -36,24 +33,20 @@ public enum IgnoredBlocks {
 
         final Set<Block> ignoredBlocks = new HashSet<>();
         for (final ResourceLocation location : CommonConfig.ignoredBlocks) {
-            final Block block = ForgeRegistries.BLOCKS.getValue(location);
+            final Block block = Registry.BLOCK.getOptional(location).orElse(null);
             if (block != null) {
                 ignoredBlocks.add(block);
             }
         }
 
         final List<TagKey<Block>> ignoredTags = new ArrayList<>();
-        final ITagManager<Block> tags = ForgeRegistries.BLOCKS.tags();
-        if (tags != null) {
-            for (final ResourceLocation location : CommonConfig.ignoredBlockTags) {
-                final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, location);
-                if (tags.isKnownTagName(tag)) {
-                    ignoredTags.add(tag);
-                }
+        Registry.BLOCK.getTagNames().forEach(namedTag -> {
+            if (CommonConfig.ignoredBlockTags.contains(namedTag.location())) {
+                ignoredTags.add(namedTag);
             }
-        }
+        });
 
-        for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
+        for (final Block block : Registry.BLOCK) {
             final BlockState blockState = block.defaultBlockState();
             if (ignoredTags.stream().anyMatch(blockState::is)) {
                 ignoredBlocks.add(blockState.getBlock());
@@ -63,10 +56,8 @@ public enum IgnoredBlocks {
         this.ignoredBlocks = ignoredBlocks;
     }
 
-    @SubscribeEvent
-    public static void onModConfigEvent(final ModConfigEvent configEvent) {
-        // Reset on any config change so we also rebuild the filter when resource reload
-        // kicks in which can result in ids changing and thus our cache being invalid.
-        IgnoredBlocks.INSTANCE.ignoredBlocks = null;
+    static {
+        ModConfigEvent.LOADING.register((cfg) -> IgnoredBlocks.INSTANCE.ignoredBlocks = null);
+        ModConfigEvent.RELOADING.register((cfg) -> IgnoredBlocks.INSTANCE.ignoredBlocks = null);
     }
 }

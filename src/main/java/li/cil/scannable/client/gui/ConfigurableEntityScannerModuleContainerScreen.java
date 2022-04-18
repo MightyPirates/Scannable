@@ -11,6 +11,7 @@ import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -19,15 +20,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConfigurableScannerModuleContainerScreen<EntityModuleContainerMenu, EntityType<?>> {
     private static final Map<EntityType<?>, Entity> RENDER_ENTITIES = new HashMap<>();
 
@@ -56,9 +57,9 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         if (value.getItem() instanceof SpawnEggItem) {
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
-            final ResourceLocation registryName = entityType.getRegistryName();
+            final ResourceLocation registryName = Registry.ENTITY_TYPE.getKey(entityType);
             if (registryName != null) {
-                Network.INSTANCE.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
+                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
             }
         }
     }

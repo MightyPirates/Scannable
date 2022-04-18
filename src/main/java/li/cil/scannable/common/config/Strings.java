@@ -26,13 +26,13 @@ public final class Strings {
         return new TranslatableComponent(Strings.TOOLTIP_LIST_ITEM_FORMAT, value);
     }
 
-    public static Component energyStorage(final int stored, final int capacity) {
+    public static Component energyStorage(final long stored, final long capacity) {
         final MutableComponent storedText = new TextComponent(String.valueOf(stored)).withStyle(GREEN);
         final MutableComponent capacityText = new TextComponent(String.valueOf(capacity)).withStyle(GREEN);
         return new TranslatableComponent("item.scannable.scanner.energy", storedText, capacityText).withStyle(GRAY);
     }
 
-    public static Component energyUsage(final int value) {
+    public static Component energyUsage(final long value) {
         final MutableComponent energyText = new TextComponent(String.valueOf(value)).withStyle(GREEN);
         return new TranslatableComponent("tooltip.scannable.module.energy_cost", energyText).withStyle(GRAY);
     }

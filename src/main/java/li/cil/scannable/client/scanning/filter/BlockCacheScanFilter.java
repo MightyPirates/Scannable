@@ -1,10 +1,10 @@
 package li.cil.scannable.client.scanning.filter;
 
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class BlockCacheScanFilter implements Predicate<BlockState> {
     private final Collection<Block> blocks;
 
@@ -31,7 +31,7 @@ public final class BlockCacheScanFilter implements Predicate<BlockState> {
 
     private static Collection<Block> buildCache(final Collection<Predicate<BlockState>> filters) {
         final Set<Block> cache = new HashSet<>();
-        for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
+        for (final Block block : Registry.BLOCK) {
             final BlockState blockState = block.defaultBlockState();
             if (filters.stream().anyMatch(f -> f.test(blockState))) {
                 cache.add(blockState.getBlock());

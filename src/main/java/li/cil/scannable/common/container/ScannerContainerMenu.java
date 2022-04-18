@@ -1,20 +1,22 @@
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.inventory.ScannerItemHandler;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 public final class ScannerContainerMenu extends AbstractContainerMenu {
     public static ScannerContainerMenu create(final int windowId, final Inventory inventory, final FriendlyByteBuf buffer) {
         final InteractionHand hand = buffer.readEnum(InteractionHand.class);
-        return new ScannerContainerMenu(windowId, inventory, hand, new ScannerItemHandler(inventory.player.getItemInHand(hand)));
+        return new ScannerContainerMenu(windowId, inventory, hand, ScannerItemHandler.of(inventory.player.getItemInHand(hand)));
     }
 
     // --------------------------------------------------------------------- //
@@ -22,6 +24,7 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
     private final Player player;
     private final InteractionHand hand;
     private final ItemStack stack;
+    private final ScannerItemHandler handler;
 
     // --------------------------------------------------------------------- //
 
@@ -30,16 +33,11 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
 
         this.player = inventory.player;
         this.hand = hand;
+        this.handler = itemHandler;
         this.stack = player.getItemInHand(hand);
 
-        final IItemHandler activeModules = itemHandler.getActiveModules();
-        for (int slot = 0; slot < activeModules.getSlots(); ++slot) {
-            addSlot(new SlotItemHandler(activeModules, slot, 62 + slot * 18, 20));
-        }
-
-        final IItemHandler storedModules = itemHandler.getInactiveModules();
-        for (int slot = 0; slot < storedModules.getSlots(); ++slot) {
-            addSlot(new SlotItemHandler(storedModules, slot, 62 + slot * 18, 46));
+        for (int slot = 0; slot < ScannerItemHandler.ACTIVE_MODULE_COUNT; ++slot) {
+            addSlot(new Slot(itemHandler, slot, 62 + slot * 18, 20));
         }
 
         for (int row = 0; row < 3; ++row) {

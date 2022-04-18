@@ -7,8 +7,8 @@ import li.cil.scannable.client.scanning.filter.FriendlyEntityScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.function.Predicate;
 
@@ -20,13 +20,13 @@ public enum FriendlyEntityScannerModule implements EntityScannerModule {
         return CommonConfig.energyCostModuleAnimal;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.ENTITIES.get();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<Entity> getFilter(final ItemStack module) {
         return FriendlyEntityScanFilter.INSTANCE;

@@ -8,22 +8,22 @@ import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITagManager;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
+import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-@Mod.EventBusSubscriber(modid = API.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum FluidBlockScannerModule implements BlockScannerModule {
     INSTANCE;
 
@@ -34,48 +34,44 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
         return CommonConfig.energyCostModuleFluid;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.BLOCKS.get();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
         return range * Constants.BLOCK_MODULE_RADIUS_MULTIPLIER;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<BlockState> getFilter(final ItemStack module) {
         validateFilter();
         return filter;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void validateFilter() {
         if (filter != null) {
             return;
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        final ITagManager<Fluid> tags = ForgeRegistries.FLUIDS.tags();
-        if (tags != null) {
-            tags.getTagNames().forEach(tag -> {
-                if (!CommonConfig.ignoredFluidTags.contains(tag.location())) {
-                    filters.add(new FluidTagScanFilter(tag));
-                }
-            });
-        }
+        Registry.FLUID.getTagNames().forEach(namedTag -> {
+            if (!CommonConfig.ignoredFluidTags.contains(namedTag.location())) {
+                filters.add(new FluidTagScanFilter(namedTag));
+            }
+        });
         filter = new BlockCacheScanFilter(filters);
     }
 
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void onModConfigEvent(final ModConfigEvent configEvent) {
-        // Reset on any config change so we also rebuild the filter when resource reload
-        // kicks in which can result in ids changing and thus our cache being invalid.
-        FluidBlockScannerModule.INSTANCE.filter = null;
+    static {
+        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            ModConfigEvent.LOADING.register((cfg) -> FluidBlockScannerModule.INSTANCE.filter = null);
+            ModConfigEvent.RELOADING.register((cfg) -> FluidBlockScannerModule.INSTANCE.filter = null);
+        }
     }
 }

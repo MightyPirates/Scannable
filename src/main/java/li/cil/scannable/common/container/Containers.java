@@ -1,23 +1,27 @@
 package li.cil.scannable.common.container;
 
-import li.cil.scannable.util.RegistryUtils;
+import dev.architectury.registry.menu.MenuRegistry;
+import dev.architectury.registry.registries.DeferredRegister;
+import dev.architectury.registry.registries.RegistrySupplier;
+import li.cil.scannable.api.API;
+import li.cil.scannable.client.gui.ConfigurableBlockScannerModuleContainerScreen;
+import li.cil.scannable.client.gui.ConfigurableEntityScannerModuleContainerScreen;
+import li.cil.scannable.client.gui.ScannerContainerScreen;
+import net.minecraft.core.Registry;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public final class Containers {
-    public static final DeferredRegister<MenuType<?>> CONTAINERS = RegistryUtils.getInitializerFor(ForgeRegistries.CONTAINERS);
+    public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(API.MOD_ID, Registry.MENU_REGISTRY);
 
     // --------------------------------------------------------------------- //
 
-    public static final RegistryObject<MenuType<ScannerContainerMenu>> SCANNER_CONTAINER = CONTAINERS.register("scanner", () -> IForgeMenuType.create(ScannerContainerMenu::create));
-    public static final RegistryObject<MenuType<BlockModuleContainerMenu>> BLOCK_MODULE_CONTAINER = CONTAINERS.register("block_module", () -> IForgeMenuType.create(BlockModuleContainerMenu::create));
-    public static final RegistryObject<MenuType<EntityModuleContainerMenu>> ENTITY_MODULE_CONTAINER = CONTAINERS.register("entity_module", () -> IForgeMenuType.create(EntityModuleContainerMenu::create));
+    public static final RegistrySupplier<MenuType<ScannerContainerMenu>> SCANNER_CONTAINER = CONTAINERS.register("scanner", () -> MenuRegistry.ofExtended(ScannerContainerMenu::create));
+    public static final RegistrySupplier<MenuType<BlockModuleContainerMenu>> BLOCK_MODULE_CONTAINER = CONTAINERS.register("block_module", () -> MenuRegistry.ofExtended(BlockModuleContainerMenu::create));
+    public static final RegistrySupplier<MenuType<EntityModuleContainerMenu>> ENTITY_MODULE_CONTAINER = CONTAINERS.register("entity_module", () -> MenuRegistry.ofExtended(EntityModuleContainerMenu::create));
 
     // --------------------------------------------------------------------- //
 
     public static void initialize() {
+        CONTAINERS.register();
     }
 }

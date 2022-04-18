@@ -13,12 +13,12 @@ import li.cil.scannable.client.shader.Shaders;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public enum ScannerRenderer {
     INSTANCE;
 

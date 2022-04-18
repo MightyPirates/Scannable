@@ -1,12 +1,14 @@
 package li.cil.scannable.common.network.message;
 
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -21,25 +23,18 @@ public abstract class AbstractMessage {
 
     // --------------------------------------------------------------------- //
 
-    public static boolean handleMessage(final AbstractMessage message, final Supplier<NetworkEvent.Context> contextSupplied) {
-        final NetworkEvent.Context context = contextSupplied.get();
-        context.enqueueWork(() -> message.handleMessage(context));
+    public static boolean handleMessage(final AbstractMessage message, MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender) {
+        server.execute(() -> message.handleMessage(server, player, handler, buf, responseSender));
         return true;
     }
 
-    protected abstract void handleMessage(final NetworkEvent.Context context);
+    protected abstract void handleMessage(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender);
 
     public abstract void fromBytes(final FriendlyByteBuf buffer);
 
     public abstract void toBytes(final FriendlyByteBuf buffer);
 
-    @Nullable
-    protected Level getServerLevel(final NetworkEvent.Context context) {
-        final ServerPlayer sender = context.getSender();
-        return sender != null ? sender.getLevel() : null;
-    }
-
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Nullable
     protected Level getClientLevel() {
         return Minecraft.getInstance().level;

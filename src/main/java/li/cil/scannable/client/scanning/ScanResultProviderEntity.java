@@ -6,7 +6,7 @@ import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.common.capabilities.Capabilities;
+import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -18,15 +18,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.LazyOptional;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     private final List<Predicate<Entity>> filters = new ArrayList<>();
     private final Map<Predicate<Entity>, EntityScannerModule> filterToModule = new HashMap<>();
@@ -44,14 +43,14 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         filters.clear();
         filterToModule.clear();
         for (final ItemStack stack : modules) {
-            final LazyOptional<ScannerModule> capability = stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY);
-            capability.ifPresent(module -> {
+            if(stack.getItem() instanceof ScannerModuleProvider provider) {
+                ScannerModule module = provider.getScannerModule(stack);
                 if (module instanceof EntityScannerModule entityModule) {
                     final Predicate<Entity> filter = entityModule.getFilter(stack);
                     filters.add(filter);
                     filterToModule.put(filter, entityModule);
                 }
-            });
+            }
         }
 
         entities.clear();

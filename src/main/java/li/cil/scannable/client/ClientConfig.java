@@ -7,7 +7,6 @@ import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.fml.config.ModConfig;
 
 @Type(ModConfig.Type.CLIENT)
@@ -29,23 +28,23 @@ public final class ClientConfig {
             valueSerializer = @CustomSerializer(serializer = "toHexString", deserializer = "fromHexString"))
     public static Object2IntMap<ResourceLocation> blockTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
         // Minecraft
-        c.put(Tags.Blocks.ORES_COAL.location(), MaterialColor.COLOR_GRAY.col);
-        c.put(Tags.Blocks.ORES_IRON.location(), MaterialColor.COLOR_BROWN.col); // MaterialColor.IRON is also gray, so...
-        c.put(Tags.Blocks.ORES_GOLD.location(), MaterialColor.GOLD.col);
-        c.put(Tags.Blocks.ORES_LAPIS.location(), MaterialColor.LAPIS.col);
-        c.put(Tags.Blocks.ORES_DIAMOND.location(), MaterialColor.DIAMOND.col);
-        c.put(Tags.Blocks.ORES_REDSTONE.location(), MaterialColor.COLOR_RED.col);
-        c.put(Tags.Blocks.ORES_EMERALD.location(), MaterialColor.EMERALD.col);
-        c.put(Tags.Blocks.ORES_QUARTZ.location(), MaterialColor.QUARTZ.col);
+        c.put(new ResourceLocation("c", "coal_ores"), MaterialColor.COLOR_GRAY.col);
+        c.put(new ResourceLocation("c", "iron_ores"), MaterialColor.COLOR_BROWN.col); // MaterialColor.IRON is also gray, so...
+        c.put(new ResourceLocation("c", "gold_ores"), MaterialColor.GOLD.col);
+        c.put(new ResourceLocation("c", "lapis_ores"), MaterialColor.LAPIS.col);
+        c.put(new ResourceLocation("c", "diamond_ores"), MaterialColor.DIAMOND.col);
+        c.put(new ResourceLocation("c", "redstone_ores"), MaterialColor.COLOR_RED.col);
+        c.put(new ResourceLocation("c", "emerald_ores"), MaterialColor.EMERALD.col);
+        c.put(new ResourceLocation("c", "quartz_ores"), MaterialColor.QUARTZ.col);
 
         // Common modded ores
-        c.put(new ResourceLocation("forge", "ores/tin"), MaterialColor.COLOR_CYAN.col);
-        c.put(new ResourceLocation("forge", "ores/copper"), MaterialColor.TERRACOTTA_ORANGE.col);
-        c.put(new ResourceLocation("forge", "ores/lead"), MaterialColor.TERRACOTTA_BLUE.col);
-        c.put(new ResourceLocation("forge", "ores/silver"), MaterialColor.COLOR_LIGHT_GRAY.col);
-        c.put(new ResourceLocation("forge", "ores/nickel"), MaterialColor.COLOR_LIGHT_BLUE.col);
-        c.put(new ResourceLocation("forge", "ores/platinum"), MaterialColor.TERRACOTTA_WHITE.col);
-        c.put(new ResourceLocation("forge", "ores/mithril"), MaterialColor.COLOR_PURPLE.col);
+        c.put(new ResourceLocation("c", "tin_ores"), MaterialColor.COLOR_CYAN.col);
+        c.put(new ResourceLocation("c", "copper_ores"), MaterialColor.TERRACOTTA_ORANGE.col);
+        c.put(new ResourceLocation("c", "lead_ores"), MaterialColor.TERRACOTTA_BLUE.col);
+        c.put(new ResourceLocation("c", "silver_ores"), MaterialColor.COLOR_LIGHT_GRAY.col);
+        c.put(new ResourceLocation("c", "nickel_ores"), MaterialColor.COLOR_LIGHT_BLUE.col);
+        c.put(new ResourceLocation("c", "platinum_ores"), MaterialColor.TERRACOTTA_WHITE.col);
+        //c.put(new ResourceLocation("forge", "ores/mithril"), MaterialColor.COLOR_PURPLE.col);
     });
 
     @WorldRestart

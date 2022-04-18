@@ -1,20 +1,9 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
-}
-
 plugins {
-    id 'idea'
+    id 'fabric-loom' version '0.11-SNAPSHOT'
     id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
 apply from: 'minecraft.gradle'
 
 def getGitRef() {
@@ -33,9 +22,16 @@ def getGitRef() {
 version = "${semver}+${getGitRef()}"
 group = 'li.cil.scannable'
 
-java.toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
-    vendor = JvmVendorSpec.ADOPTOPENJDK
+tasks.withType(JavaCompile).configureEach {
+	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+	it.options.release = 17
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -43,90 +39,72 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 repositories {
+    mavenCentral()
     maven {
         url 'https://cursemaven.com'
         content { includeGroup "curse.maven" }
     }
+    maven { url "https://maven.architectury.dev/" }
+    maven { url "https://maven.shedaniel.me" }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation ("dev.architectury:architectury-fabric:${project.arch_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    include modApi('teamreborn:energy:2.2.0') {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    modImplementation "curse.maven:forgeconfigapi-547434:3671141"
+    implementation 'com.electronwill.night-config:core:3.6.3'
+    implementation 'com.electronwill.night-config:toml:3.6.3'
+
 
     // Just for in-dev convenience. Mod doesn't use any JEI APIs.
-    implementation fg.deobf("curse.maven:jei-238222:3735570")
+    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:8.1.449") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 }
 
-minecraft {
-    mappings channel: 'official', version: minecraft_version
+processResources {
+    filesMatching("fabric.mod.json") {
+        expand "semver": semver
+    }
+}
 
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
+loom {
+    accessWidenerPath = file('src/main/resources/scannable.accesswidener')
     runs {
-        client {
-            workingDirectory project.file('run')
+        datagen {
+            inherit client
+            name "Data Generation"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+            vmArg "-Dfabric-api.datagen.strict-validation"
 
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'info'
-
-            mods {
-                scannable {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'info'
-
-            mods {
-                scannable {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'info'
-
-            args '--mod', 'scannable', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
-
-            mods {
-                scannable {
-                    source sourceSets.main
-                }
-            }
+            ideConfigGenerated = true
         }
     }
+}
+
+runDatagen {
+    // Doesn't re-run the task when its up-to date
+    outputs.dir('src/main/generated')
 }
 
 task copyGeneratedResources(type: Copy) {
-    from 'src/generated'
-    into 'src/main'
-    exclude 'resources/.cache'
+    from 'src/main/generated'
+    into 'src/main/resources'
+    exclude '.cache'
 }
 
-jar {
-    finalizedBy 'reobfJar'
-
-    manifest {
-        attributes([
-            'FMLAT'                   : 'accesstransformer.cfg',
-            'Specification-Title'     : 'scannable',
-            'Specification-Vendor'    : 'Sangar',
-            'Specification-Version'   : '1',
-            'Implementation-Title'    : project.name,
-            'Implementation-Version'  : "${semver}",
-            'Implementation-Vendor'   : 'Sangar',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-}
+runDatagen.finalizedBy(copyGeneratedResources)
 
 task apiJar(type: Jar) {
     archiveClassifier.set('api')
@@ -168,9 +146,13 @@ curseforge {
         releaseType = curse_project_releaseType
         changelogType = 'markdown'
         changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
-        addGameVersion 'Forge'
+        addGameVersion 'Fabric'
         addGameVersion minecraft_version
         addGameVersion 'Java 17'
+        relations {
+            requiredDependency 'architectury-fabric'
+            requiredDependency 'forge-config-api-port-fabric'
+        }
     }
 }
 

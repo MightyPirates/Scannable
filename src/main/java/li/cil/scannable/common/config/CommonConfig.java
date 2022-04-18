@@ -2,9 +2,9 @@ package li.cil.scannable.common.config;
 
 import li.cil.scannable.util.ConfigManager.*;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +70,7 @@ public final class CommonConfig {
             tag and it will be impossible to tune the entity module to this block.""")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> ignoredBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.COMMAND_BLOCK.getRegistryName());
+        c.add(Registry.BLOCK.getKey(Blocks.COMMAND_BLOCK));
     });
 
     @Path("blocks") @WorldRestart
@@ -85,26 +85,26 @@ public final class CommonConfig {
     @Comment("Registry names of blocks considered 'common ores', requiring the common ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> commonOreBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.CLAY.getRegistryName());
+        c.add(Registry.BLOCK.getKey(Blocks.CLAY));
     });
 
     @Path("ores") @WorldRestart
     @Comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> commonOreBlockTags = Util.make(new HashSet<>(), c -> {
-        c.add(Tags.Blocks.ORES_COAL.location());
-        c.add(Tags.Blocks.ORES_IRON.location());
-        c.add(Tags.Blocks.ORES_REDSTONE.location());
-        c.add(Tags.Blocks.ORES_QUARTZ.location());
-        c.add(new ResourceLocation("forge", "ores/copper"));
-        c.add(new ResourceLocation("forge", "ores/tin"));
+        c.add(new ResourceLocation("c", "coal_ores"));
+        c.add(new ResourceLocation("c", "iron_ores"));
+        c.add(new ResourceLocation("c", "redstone_ores"));
+        c.add(new ResourceLocation("c", "quartz_ores"));
+        c.add(new ResourceLocation("c", "copper_ores"));
+        c.add(new ResourceLocation("c", "tin_ores"));
     });
 
     @Path("ores") @WorldRestart
     @Comment("Registry names of blocks considered 'rare ores', requiring the rare ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> rareOreBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.GLOWSTONE.getRegistryName());
+        c.add(Registry.BLOCK.getKey(Blocks.GLOWSTONE));
     });
 
     @Path("ores") @WorldRestart

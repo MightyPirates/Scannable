@@ -5,18 +5,20 @@ import li.cil.scannable.common.container.BlockModuleContainerMenu;
 import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfigurableScannerModuleContainerScreen<BlockModuleContainerMenu, Block> {
     public ConfigurableBlockScannerModuleContainerScreen(final BlockModuleContainerMenu container, final Inventory inventory, final Component title) {
         super(container, inventory, title, Strings.GUI_BLOCKS_LIST_CAPTION);
@@ -36,7 +38,7 @@ public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfi
 
     @Override
     protected void renderConfiguredItem(final Block block, final int x, final int y) {
-        getMinecraft().getItemRenderer().renderGuiItem(new ItemStack(block.asItem()), x, y);
+        Minecraft.getInstance().getItemRenderer().renderGuiItem(new ItemStack(block.asItem()), x, y);
     }
 
     @Override
@@ -44,9 +46,9 @@ public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfi
         final Block block = Block.byItem(value.getItem());
         //noinspection ConstantConditions Non-null for byItem is a lie because BlockItem.getBlock can return null.
         if (block != null && block != Blocks.AIR) {
-            final ResourceLocation registryName = block.getRegistryName();
+            final ResourceLocation registryName = Registry.BLOCK.getKey(block);
             if (registryName != null) {
-                Network.INSTANCE.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
+                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
             }
         }
     }

@@ -8,19 +8,19 @@
   ],
   "key": {
     "i": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "b": {
       "item": "minecraft:iron_bars"
     },
     "r": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:redstone_dusts"
     },
     "g": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:gold_ingots"
     },
     "q": {
-      "tag": "forge:gems/quartz"
+      "tag": "c:quartz"
     }
   },
   "result": {

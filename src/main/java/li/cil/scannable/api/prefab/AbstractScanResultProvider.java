@@ -19,9 +19,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -30,8 +29,8 @@ import java.util.Collection;
  * Helper base class for scan result providers, providing some common
  * functionality for drawing result information.
  */
-@OnlyIn(Dist.CLIENT)
-public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<ScanResultProvider> implements ScanResultProvider {
+@Environment(EnvType.CLIENT)
+public abstract class AbstractScanResultProvider implements ScanResultProvider {
     protected Player player;
     protected Vec3 center;
     protected float radius;

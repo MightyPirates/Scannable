@@ -4,46 +4,49 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.common.network.message.AbstractMessage;
 import li.cil.scannable.common.network.message.RemoveConfiguredModuleItemAtMessage;
 import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
 
+import java.util.HashMap;
 import java.util.function.Function;
 
 public final class Network {
     private static final String PROTOCOL_VERSION = "1";
+    private static final HashMap<Class<? extends AbstractMessage>, ResourceLocation> PACKET_MAP = new HashMap<>();
 
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(API.MOD_ID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
-
-    // --------------------------------------------------------------------- //
-
-    private static int nextPacketId = 1;
+    private static final ResourceLocation SET_CONFIGURED_MODULE_ITEM = new ResourceLocation(API.MOD_ID, "set_module_item");
+    private static final ResourceLocation REMOVE_CONFIGURED_MODULE_ITEM = new ResourceLocation(API.MOD_ID, "remove_module_item");
 
     // --------------------------------------------------------------------- //
 
     public static void initialize() {
-        registerMessage(RemoveConfiguredModuleItemAtMessage.class, RemoveConfiguredModuleItemAtMessage::new, NetworkDirection.PLAY_TO_SERVER);
-        registerMessage(SetConfiguredModuleItemAtMessage.class, SetConfiguredModuleItemAtMessage::new, NetworkDirection.PLAY_TO_SERVER);
+        registerMessageToServer(REMOVE_CONFIGURED_MODULE_ITEM, RemoveConfiguredModuleItemAtMessage.class, RemoveConfiguredModuleItemAtMessage::new);
+        registerMessageToServer(SET_CONFIGURED_MODULE_ITEM, SetConfiguredModuleItemAtMessage.class, SetConfiguredModuleItemAtMessage::new);
     }
 
     // --------------------------------------------------------------------- //
 
-    private static <T extends AbstractMessage> void registerMessage(final Class<T> type, final Function<FriendlyByteBuf, T> decoder, final NetworkDirection direction) {
-        INSTANCE.messageBuilder(type, getNextPacketId(), direction)
-                .encoder(AbstractMessage::toBytes)
-                .decoder(decoder)
-                .consumer(AbstractMessage::handleMessage)
-                .add();
+    private static <T extends AbstractMessage> void registerMessageToServer(final ResourceLocation location, final Class<T> type, final Function<FriendlyByteBuf, T> decoder) {
+        PACKET_MAP.put(type, location);
+        ServerPlayNetworking.registerGlobalReceiver(location, (server, player, handler, buf, responseSender) -> {
+            T message = decoder.apply(buf);
+            AbstractMessage.handleMessage(message, server, player, handler, buf, responseSender);
+        });
     }
 
-    private static int getNextPacketId() {
-        return nextPacketId++;
+    @Environment(EnvType.CLIENT)
+    public static void sendToServer(AbstractMessage message) {
+        ResourceLocation loc = PACKET_MAP.get(message.getClass());
+        if(loc == null)
+            throw new IllegalArgumentException("Invalid message type");
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        message.toBytes(buf);
+        ClientPlayNetworking.send(loc, buf);
     }
 }

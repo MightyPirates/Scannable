@@ -9,8 +9,8 @@ import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -23,19 +23,19 @@ public enum HostileEntityScannerModule implements EntityScannerModule {
         return CommonConfig.energyCostModuleMonster;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.ENTITIES.get();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public Optional<ResourceLocation> getIcon(final Entity entity) {
         return Optional.of(API.ICON_WARNING);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<Entity> getFilter(final ItemStack module) {
         return HostileEntityScanFilter.INSTANCE;

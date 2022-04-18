@@ -12,18 +12,16 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ScannerContainerScreen extends AbstractContainerScreen<ScannerContainerMenu> {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/scanner.png");
     private static final TranslatableComponent SCANNER_MODULES_TEXT = new TranslatableComponent("gui.scannable.scanner.active_modules");
     private static final TranslatableComponent SCANNER_MODULES_TOOLTIP = new TranslatableComponent("gui.scannable.scanner.active_modules.desc");
-    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TEXT = new TranslatableComponent("gui.scannable.scanner.inactive_modules");
-    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TOOLTIP = new TranslatableComponent("gui.scannable.scanner.inactive_modules.desc");
 
     // --------------------------------------------------------------------- //
 
@@ -45,9 +43,6 @@ public class ScannerContainerScreen extends AbstractContainerScreen<ScannerConta
         if (isHovering(8, 23, font.width(SCANNER_MODULES_TEXT), font.lineHeight, mouseX, mouseY)) {
             renderTooltip(poseStack, SCANNER_MODULES_TOOLTIP, mouseX, mouseY);
         }
-        if (isHovering(8, 49, font.width(SCANNER_MODULES_INACTIVE_TEXT), font.lineHeight, mouseX, mouseY)) {
-            renderTooltip(poseStack, SCANNER_MODULES_INACTIVE_TOOLTIP, mouseX, mouseY);
-        }
 
         renderTooltip(poseStack, mouseX, mouseY);
     }
@@ -57,7 +52,6 @@ public class ScannerContainerScreen extends AbstractContainerScreen<ScannerConta
         super.renderLabels(poseStack, mouseX, mouseY);
 
         font.draw(poseStack, SCANNER_MODULES_TEXT, (float) 8, (float) 23, 0x404040);
-        font.draw(poseStack, SCANNER_MODULES_INACTIVE_TEXT, (float) 8, (float) 49, 0x404040);
     }
 
     @Override

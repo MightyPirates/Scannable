@@ -1,9 +1,9 @@
 package li.cil.scannable.api.scanning;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Predicate;
 
@@ -24,7 +24,7 @@ public interface BlockScannerModule extends ScannerModule {
      * @param range the input range.
      * @return the adjusted range.
      */
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     default float adjustLocalRange(final float range) {
         return range;
     }
@@ -36,6 +36,6 @@ public interface BlockScannerModule extends ScannerModule {
      * @param module the module to get the filter for.
      * @return the filter to use.
      */
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     Predicate<BlockState> getFilter(final ItemStack module);
 }

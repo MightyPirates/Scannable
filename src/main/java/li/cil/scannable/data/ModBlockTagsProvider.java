@@ -1,37 +1,36 @@
 package li.cil.scannable.data;
 
-import li.cil.scannable.api.API;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraft.tags.TagKey;
 
-import javax.annotation.Nullable;
-
-public final class ModBlockTagsProvider extends BlockTagsProvider {
-    public ModBlockTagsProvider(final DataGenerator generator, @Nullable final ExistingFileHelper existingFileHelper) {
-        super(generator, API.MOD_ID, existingFileHelper);
+public final class ModBlockTagsProvider extends FabricTagProvider.BlockTagProvider {
+    public ModBlockTagsProvider(final FabricDataGenerator generator) {
+        super(generator);
     }
 
     @Override
-    protected void addTags() {
-        tag(Tags.Blocks.ORES)
-                .addTag(BlockTags.GOLD_ORES)
-                .addTag(BlockTags.IRON_ORES)
-                .addTag(BlockTags.DIAMOND_ORES)
-                .addTag(BlockTags.REDSTONE_ORES)
-                .addTag(BlockTags.LAPIS_ORES)
-                .addTag(BlockTags.COAL_ORES)
-                .addTag(BlockTags.EMERALD_ORES)
-                .addTag(BlockTags.COPPER_ORES);
+    protected void generateTags() {
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "ores")))
+                .forceAddTag(BlockTags.GOLD_ORES)
+                .forceAddTag(BlockTags.IRON_ORES)
+                .forceAddTag(BlockTags.DIAMOND_ORES)
+                .forceAddTag(BlockTags.REDSTONE_ORES)
+                .forceAddTag(BlockTags.LAPIS_ORES)
+                .forceAddTag(BlockTags.COAL_ORES)
+                .forceAddTag(BlockTags.EMERALD_ORES)
+                .forceAddTag(BlockTags.COPPER_ORES);
 
-        tag(Tags.Blocks.ORES_GOLD).addTag(BlockTags.GOLD_ORES);
-        tag(Tags.Blocks.ORES_IRON).addTag(BlockTags.IRON_ORES);
-        tag(Tags.Blocks.ORES_DIAMOND).addTag(BlockTags.DIAMOND_ORES);
-        tag(Tags.Blocks.ORES_REDSTONE).addTag(BlockTags.REDSTONE_ORES);
-        tag(Tags.Blocks.ORES_LAPIS).addTag(BlockTags.LAPIS_ORES);
-        tag(Tags.Blocks.ORES_COAL).addTag(BlockTags.COAL_ORES);
-        tag(Tags.Blocks.ORES_EMERALD).addTag(BlockTags.EMERALD_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "gold_ores"))).forceAddTag(BlockTags.GOLD_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "iron_ores"))).forceAddTag(BlockTags.IRON_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "diamond_ores"))).forceAddTag(BlockTags.DIAMOND_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "redstone_ores"))).forceAddTag(BlockTags.REDSTONE_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "lapis_ores"))).forceAddTag(BlockTags.LAPIS_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "coal_ores"))).forceAddTag(BlockTags.COAL_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "emerald_ores"))).forceAddTag(BlockTags.EMERALD_ORES);
+        getOrCreateTagBuilder(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation("c", "copper_ores"))).forceAddTag(BlockTags.COPPER_ORES);
     }
 }
