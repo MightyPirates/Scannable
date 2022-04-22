@@ -135,14 +135,14 @@ public final class ConfigManager {
     }
 
     public static void initialize() {
+        ModConfigEvent.LOADING.register(ConfigManager::handleModConfigEvent);
+        ModConfigEvent.RELOADING.register(ConfigManager::handleModConfigEvent);
+
         CONFIGS.forEach((spec, config) -> {
             final Type typeAnnotation = config.instance.getClass().getAnnotation(Type.class);
             final ModConfig.Type configType = typeAnnotation != null ? typeAnnotation.value() : ModConfig.Type.COMMON;
             ModLoadingContext.registerConfig(API.MOD_ID, configType, spec);
         });
-
-        ModConfigEvent.LOADING.register(ConfigManager::handleModConfigEvent);
-        ModConfigEvent.RELOADING.register(ConfigManager::handleModConfigEvent);
     }
 
     // --------------------------------------------------------------------- //
