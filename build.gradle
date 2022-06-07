@@ -12,6 +12,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.modrinth.minotaur' version '2.2.0'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -172,6 +173,17 @@ curseforge {
         addGameVersion minecraft_version
         addGameVersion 'Java 17'
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_API_KEY") ?: ""
+    projectId = modrinth_project_id
+    changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
+    versionNumber = semver
+    versionName = "${rootProject.name}-${version}"
+    versionType = 'release'
+    uploadFile = jar
+    gameVersions = [minecraft_version]
 }
 
 idea {

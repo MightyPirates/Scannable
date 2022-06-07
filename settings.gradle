@@ -1,2 +1,8 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
 apply from: 'minecraft.gradle'
 rootProject.name = "scannable-${minecraft_version}-${minecraft_sdk}"
