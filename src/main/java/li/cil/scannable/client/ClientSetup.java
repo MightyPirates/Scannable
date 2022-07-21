@@ -23,7 +23,7 @@ public final class ClientSetup {
 
         MinecraftForge.EVENT_BUS.addListener(OverlayRenderer::onOverlayRender);
         MinecraftForge.EVENT_BUS.addListener(ScanManager::onClientTick);
-        MinecraftForge.EVENT_BUS.addListener(ScanManager::onRenderLast);
+        MinecraftForge.EVENT_BUS.addListener(ScanManager::onPostRenderLevel);
         MinecraftForge.EVENT_BUS.addListener(ScanManager::onPreRenderGameOverlay);
 
         Shaders.initialize();

@@ -91,8 +91,34 @@ public interface ScanResultProvider extends IForgeRegistryEntry<ScanResultProvid
      * @param renderInfo   the active render info.
      * @param partialTicks partial ticks of the currently rendered frame.
      * @param results      the results to render.
+     * @deprecated Use the version taking the current render context instead.
      */
-    void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results);
+    @Deprecated
+    default void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+        render(ScanResultRenderContext.WORLD, bufferSource, poseStack, renderInfo, partialTicks, results);
+    }
+
+    /**
+     * Render the specified results.
+     * <p>
+     * This is delegated as a batch call to the provider to allow optimized
+     * rendering of large numbers of results. The provided results are
+     * guaranteed to have been produced by this provider via its
+     * {@link #collectScanResults(BlockGetter, Consumer)} method.
+     * <p>
+     * The specified list has been frustum culled using the results' bounds
+     * provided from {@link ScanResult#getRenderBounds()}.
+     *
+     * @param context      the current rendering context.
+     * @param bufferSource the buffer source to use for batched rendering.
+     * @param poseStack    the pose stack for rendering.
+     * @param renderInfo   the active render info.
+     * @param partialTicks partial ticks of the currently rendered frame.
+     * @param results      the results to render.
+     */
+    default void render(final ScanResultRenderContext context, final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+        render(bufferSource, poseStack, renderInfo, partialTicks, results);
+    }
 
     /**
      * Called when a scan is complete or is canceled.

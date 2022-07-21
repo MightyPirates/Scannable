@@ -12,6 +12,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
+import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.shader.Shaders;
@@ -233,7 +234,42 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     }
 
     @Override
-    public void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+    public void render(final ScanResultRenderContext context, final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+        switch (context) {
+            case WORLD -> renderBlocks(poseStack, renderInfo, partialTicks, results);
+            case GUI -> renderBlockIcons(bufferSource, poseStack, renderInfo, results);
+        }
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        scanFilterLayers.clear();
+        currentChunkSection = chunkSectionsPerTick = 0;
+        pendingChunkSections.clear();
+        resultClusters.clear();
+        results.clear();
+    }
+
+    // --------------------------------------------------------------------- //
+
+    public static RenderType getBlockScanResultRenderLayer() {
+        return RenderType.create("scan_result",
+            DefaultVertexFormat.POSITION_COLOR_TEX,
+            VertexFormat.Mode.QUADS,
+            65536,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
+                .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                .setCullState(RenderStateShard.NO_CULL)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .createCompositeState(false));
+    }
+
+    private void renderBlocks(final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
         final ShaderInstance shader = Shaders.getScanResultShader();
         if (shader == null) {
             return;
@@ -265,7 +301,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             VertexBuffer.unbind();
         }
         renderType.clearRenderState();
+    }
 
+    private void renderBlockIcons(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final List<ScanResult> results) {
         final Vec3 lookVec = new Vec3(renderInfo.getLookVector());
         final Vec3 viewerEyes = renderInfo.getPosition();
         final float yaw = renderInfo.getYRot();
@@ -295,33 +333,6 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 renderIconLabel(bufferSource, poseStack, yaw, pitch, lookVec, viewerEyes, distance, resultPos, API.ICON_INFO, label);
             }
         }
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
-        scanFilterLayers.clear();
-        currentChunkSection = chunkSectionsPerTick = 0;
-        pendingChunkSections.clear();
-        resultClusters.clear();
-        results.clear();
-    }
-
-    // --------------------------------------------------------------------- //
-
-    public static RenderType getBlockScanResultRenderLayer() {
-        return RenderType.create("scan_result",
-            DefaultVertexFormat.POSITION_COLOR_TEX,
-            VertexFormat.Mode.QUADS,
-            65536,
-            false,
-            false,
-            RenderType.CompositeState.builder()
-                .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
-                .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
-                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                .setCullState(RenderStateShard.NO_CULL)
-                .createCompositeState(false));
     }
 
     private boolean tryAddToCluster(final Map<BlockPos, BlockScanResult> clusters, final BlockPos pos) {

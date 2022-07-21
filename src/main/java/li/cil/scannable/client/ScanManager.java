@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
+import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.Capabilities;
@@ -23,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 
@@ -192,8 +193,7 @@ public final class ScanManager {
                         final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
                         final List<ScanResult> list = entry.getValue();
                         for (int i = Mth.ceil(list.size() * 0.5f); i > 0; i--) {
-                            list.get(list.size() - 1).close();
-                            list.remove(list.size() - 1);
+                            list.remove(list.size() - 1).close();
                         }
                         if (list.isEmpty()) {
                             iterator.remove();
@@ -222,10 +222,10 @@ public final class ScanManager {
             final List<ScanResult> results = entry.getValue();
 
             while (results.size() > 0) {
-                final ScanResult result = results.get(results.size() - 1);
-                final Vec3 position = result.getPosition();
+                final int index = results.size() - 1;
+                final Vec3 position = results.get(index).getPosition();
                 if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
-                    results.remove(results.size() - 1);
+                    final ScanResult result = results.remove(index);
                     synchronized (renderingResults) {
                         renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
                     }
@@ -240,16 +240,22 @@ public final class ScanManager {
         }
     }
 
-    public static void onRenderLast(final RenderLevelLastEvent event) {
+    public static void onPostRenderLevel(final RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
+            return;
+        }
+
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
             }
-
-            viewModelStack = new PoseStack();
-            viewModelStack.last().pose().load(event.getPoseStack().last().pose());
-            projectionMatrix = event.getProjectionMatrix();
         }
+
+        viewModelStack = new PoseStack();
+        viewModelStack.last().pose().load(event.getPoseStack().last().pose());
+        projectionMatrix = event.getProjectionMatrix();
+
+        render(ScanResultRenderContext.WORLD, event.getPartialTick(), viewModelStack, projectionMatrix);
     }
 
     public static void onPreRenderGameOverlay(final RenderGameOverlayEvent.Pre event) {
@@ -269,7 +275,7 @@ public final class ScanManager {
             RenderSystem.getModelViewStack().last().pose().setIdentity();
             RenderSystem.applyModelViewMatrix();
 
-            render(event.getPartialTicks(), viewModelStack, RenderSystem.getProjectionMatrix());
+            render(ScanResultRenderContext.GUI, event.getPartialTicks(), viewModelStack, projectionMatrix);
 
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();
@@ -277,7 +283,7 @@ public final class ScanManager {
         }
     }
 
-    private static void render(final float partialTicks, final PoseStack poseStack, final Matrix4f projectionMatrix) {
+    private static void render(final ScanResultRenderContext context, final float partialTicks, final PoseStack poseStack, final Matrix4f projectionMatrix) {
         final Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         final Vec3 pos = camera.getPosition();
 
@@ -306,7 +312,7 @@ public final class ScanManager {
                 }
 
                 if (!renderingList.isEmpty()) {
-                    entry.getKey().render(renderTypeBuffer, poseStack, camera, partialTicks, renderingList);
+                    entry.getKey().render(context, renderTypeBuffer, poseStack, camera, partialTicks, renderingList);
                     renderingList.clear();
                 }
             }

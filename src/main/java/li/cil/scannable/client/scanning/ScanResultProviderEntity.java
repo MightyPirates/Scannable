@@ -5,6 +5,7 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.api.prefab.AbstractScanResultProvider;
 import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
+import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.capabilities.Capabilities;
 import net.minecraft.client.Camera;
@@ -97,7 +98,11 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     }
 
     @Override
-    public void render(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+    public void render(final ScanResultRenderContext context, final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
+        if (context != ScanResultRenderContext.GUI) {
+            return;
+        }
+
         final float yaw = renderInfo.getYRot();
         final float pitch = renderInfo.getXRot();
 
