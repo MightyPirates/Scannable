@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
-import net.minecraft.advancements.critereon.LocationTrigger;
+import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -35,7 +35,7 @@ public final class ModRecipeProvider extends FabricRecipeProvider {
                 .define('g', ItemTags.GOLD_INGOTS)
                 .define('q', ItemTags.QUARTZ_GEMS)
                 .group("scanner")
-                .unlockedBy("is_delving", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.MINESHAFT)))
+                .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.MINESHAFT)))
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(BLANK_MODULE.get())

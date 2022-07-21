@@ -36,7 +36,7 @@
         "fabric": "*",
         "forgeconfigapiport": "*",
         "architectury": "*",
-        "minecraft": "1.18.x",
+        "minecraft": "1.19",
         "java": ">=17"
     }
 }

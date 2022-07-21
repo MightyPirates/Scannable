@@ -84,7 +84,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         final IntObjectMap<List<Predicate<BlockState>>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack stack : modules) {
             if (stack.getItem() instanceof ScannerModuleProvider provider) {
-                ScannerModule module = provider.getScannerModule(stack);
+                final ScannerModule module = provider.getScannerModule(stack);
                 if (module instanceof BlockScannerModule blockModule) {
                     final Predicate<BlockState> filter = blockModule.getFilter(stack);
                     final int localRadius = (int) Math.ceil(blockModule.adjustLocalRange(this.radius));
@@ -260,6 +260,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         for (final ScanResult result : results) {
             final BlockScanResult blockResult = (BlockScanResult) result;
             final VertexBuffer vbo = blockResult.vbo;
+            vbo.bind();
             vbo.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), shader);
             VertexBuffer.unbind();
         }
@@ -413,9 +414,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             render(buffer, new PoseStack());
-            buffer.end();
             vbo = new VertexBuffer();
-            vbo.upload(buffer);
+            vbo.bind();
+            vbo.upload(buffer.end());
+            VertexBuffer.unbind();
         }
 
         boolean isRoot() {

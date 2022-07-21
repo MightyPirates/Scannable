@@ -54,7 +54,7 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
     public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
 
-        if (allowdedIn(group) && CommonConfig.useEnergy) {
+        if (allowedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
             final ContainerItemContext context = ContainerItemContext.withInitial(stack);
             try (final Transaction transaction = Transaction.openOuter()) {
