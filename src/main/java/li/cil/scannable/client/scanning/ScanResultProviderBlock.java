@@ -383,7 +383,6 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
-
                 if (ClientConfig.fluidColors.containsKey(Registry.FLUID.getKey(fluidState.getType()))) {
                     color = ClientConfig.fluidColors.getInt(Registry.FLUID.getKey(fluidState.getType()));
                 } else {
