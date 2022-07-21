@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -31,7 +30,7 @@ import java.util.Collection;
  * functionality for drawing result information.
  */
 @OnlyIn(Dist.CLIENT)
-public abstract class AbstractScanResultProvider extends ForgeRegistryEntry<ScanResultProvider> implements ScanResultProvider {
+public abstract class AbstractScanResultProvider implements ScanResultProvider {
     protected Player player;
     protected Vec3 center;
     protected float radius;

@@ -23,7 +23,6 @@ public final class ScanResultProviders {
     // --------------------------------------------------------------------- //
 
     public static void initialize() {
-        DEFERRED_REGISTER.makeRegistry(ScanResultProvider.class, () ->
-            new RegistryBuilder<ScanResultProvider>().disableSync().disableSaving());
+        DEFERRED_REGISTER.makeRegistry(() -> new RegistryBuilder<ScanResultProvider>().disableSync().disableSaving());
     }
 }

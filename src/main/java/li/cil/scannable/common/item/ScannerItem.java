@@ -32,7 +32,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+import net.minecraftforge.event.PlayLevelSoundEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -65,7 +65,7 @@ public final class ScannerItem extends ModItem {
     public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
 
-        if (allowdedIn(group) && CommonConfig.useEnergy) {
+        if (allowedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
             ScannerEnergyStorage.of(stack).receiveEnergy(Integer.MAX_VALUE, false);
             items.add(stack);
@@ -104,7 +104,7 @@ public final class ScannerItem extends ModItem {
             if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
                 stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(itemHandler -> {
                     if (itemHandler instanceof ScannerItemHandler scannerItemHandler) {
-                        NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+                        NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
                             @Override
                             public Component getDisplayName() {
                                 return stack.getHoverName();
@@ -212,7 +212,7 @@ public final class ScannerItem extends ModItem {
         }
 
         return stack.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
-                .map(module -> module.getEnergyCost(stack)).orElse(0);
+            .map(module -> module.getEnergyCost(stack)).orElse(0);
     }
 
     private static float getRelativeEnergy(final ItemStack stack) {
@@ -221,8 +221,8 @@ public final class ScannerItem extends ModItem {
         }
 
         return stack.getCapability(CapabilityEnergy.ENERGY)
-                .map(storage -> storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
-                .orElse(0f);
+            .map(storage -> storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
+            .orElse(0f);
     }
 
     private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
@@ -267,7 +267,7 @@ public final class ScannerItem extends ModItem {
                     modules.add(module);
 
                     hasScannerModules |= module.getCapability(Capabilities.SCANNER_MODULE_CAPABILITY)
-                            .map(ScannerModule::hasResultProvider).orElse(false);
+                        .map(ScannerModule::hasResultProvider).orElse(false);
                 }
             }
             return hasScannerModules;
@@ -285,7 +285,7 @@ public final class ScannerItem extends ModItem {
         }
 
         @SubscribeEvent
-        public void onPlaySoundAtEntityEvent(final PlaySoundAtEntityEvent event) {
+        public void onPlaySoundAtEntityEvent(final PlayLevelSoundEvent event) {
             if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
                 event.setCanceled(true);
             }

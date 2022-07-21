@@ -39,7 +39,7 @@ public final class Network {
         INSTANCE.messageBuilder(type, getNextPacketId(), direction)
                 .encoder(AbstractMessage::toBytes)
                 .decoder(decoder)
-                .consumer(AbstractMessage::handleMessage)
+                .consumerMainThread((message, context) -> message.handleMessage(context.get()))
                 .add();
     }
 

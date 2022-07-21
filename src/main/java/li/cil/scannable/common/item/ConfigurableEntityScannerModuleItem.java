@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
     }
 
     private static boolean addEntityType(final ItemStack stack, final EntityType<?> entityType) {
-        final ResourceLocation registryName = entityType.getRegistryName();
+        final ResourceLocation registryName = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
         if (registryName == null) {
             return false;
         }
@@ -94,7 +95,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final ResourceLocation registryName = entityType.getRegistryName();
+        final ResourceLocation registryName = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
         if (registryName == null) {
             return;
         }
@@ -179,7 +180,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
         }
 
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+            NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
                     return stack.getHoverName();

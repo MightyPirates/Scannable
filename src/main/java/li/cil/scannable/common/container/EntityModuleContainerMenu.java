@@ -30,7 +30,7 @@ public final class EntityModuleContainerMenu extends AbstractModuleContainerMenu
     @Override
     public void setItemAt(final int index, final ResourceLocation name) {
         final ItemStack stack = getPlayer().getItemInHand(getHand());
-        final EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(name);
+        final EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(name);
         if (entityType != null) {
             ConfigurableEntityScannerModuleItem.setEntityTypeAt(stack, index, entityType);
         }

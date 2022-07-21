@@ -17,7 +17,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -91,13 +90,7 @@ public final class Shaders implements ResourceManagerReloadListener {
             }
 
             try {
-                shader = new ShaderInstance(location -> {
-                    try {
-                        return provider.getResource(new ResourceLocation(API.MOD_ID, location.getPath()));
-                    } catch (final IOException e) {
-                        return provider.getResource(location);
-                    }
-                }, name, format);
+                shader = new ShaderInstance(location -> provider.getResource(new ResourceLocation(API.MOD_ID, location.getPath())).or(() -> provider.getResource(location)), name, format);
             } catch (final Exception e) {
                 LOGGER.error(e);
             }

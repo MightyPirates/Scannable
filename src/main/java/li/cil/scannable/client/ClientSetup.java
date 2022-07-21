@@ -9,6 +9,7 @@ import li.cil.scannable.common.container.Containers;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -21,11 +22,15 @@ public final class ClientSetup {
         MenuScreens.register(Containers.BLOCK_MODULE_CONTAINER.get(), ConfigurableBlockScannerModuleContainerScreen::new);
         MenuScreens.register(Containers.ENTITY_MODULE_CONTAINER.get(), ConfigurableEntityScannerModuleContainerScreen::new);
 
-        MinecraftForge.EVENT_BUS.addListener(OverlayRenderer::onOverlayRender);
         MinecraftForge.EVENT_BUS.addListener(ScanManager::onClientTick);
-        MinecraftForge.EVENT_BUS.addListener(ScanManager::onPostRenderLevel);
-        MinecraftForge.EVENT_BUS.addListener(ScanManager::onPreRenderGameOverlay);
+        MinecraftForge.EVENT_BUS.addListener(ScanManager::renderLevel);
 
         Shaders.initialize();
+    }
+
+    @SubscribeEvent
+    public static void handleRegisterOverlaysEvent(final RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("scanner_results", (gui, poseStack, partialTick, width, height) -> ScanManager.renderGui(partialTick));
+        event.registerAboveAll("scanner_progress", (gui, poseStack, partialTick, width, height) -> OverlayRenderer.render(poseStack, partialTick));
     }
 }

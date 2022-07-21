@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         if (value.getItem() instanceof SpawnEggItem) {
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
-            final ResourceLocation registryName = entityType.getRegistryName();
+            final ResourceLocation registryName = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
             if (registryName != null) {
                 Network.INSTANCE.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
             }

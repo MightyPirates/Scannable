@@ -3,7 +3,7 @@ package li.cil.scannable.util;
 import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public final class TooltipUtils {
         final String translationKey = stack.getDescriptionId() + ".desc";
         final Language language = Language.getInstance();
         if (language.has(translationKey)) {
-            final TranslatableComponent description = new TranslatableComponent(translationKey);
+            final MutableComponent description = Component.translatable(translationKey);
             tooltip.add(description.withStyle(ChatFormatting.DARK_GRAY));
         }
     }

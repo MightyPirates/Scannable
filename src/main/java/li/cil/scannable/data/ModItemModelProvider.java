@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;
 
@@ -34,13 +35,13 @@ public final class ModItemModelProvider extends ItemModelProvider {
     }
 
     private ItemModelBuilder begin(final Item item) {
-        return withExistingParent(Objects.requireNonNull(item.getRegistryName()).getPath(), new ResourceLocation("item/generated"));
+        return withExistingParent(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item)).getPath(), new ResourceLocation("item/generated"));
     }
 
     private void registerModule(final Item item) {
         begin(item)
                 .texture("layer0", new ResourceLocation(API.MOD_ID, "items/blank_module"))
                 .texture("layer1", new ResourceLocation(API.MOD_ID, "items/module_slot"))
-                .texture("layer2", new ResourceLocation(API.MOD_ID, "items/" + Objects.requireNonNull(item.getRegistryName()).getPath()));
+                .texture("layer2", new ResourceLocation(API.MOD_ID, "items/" + Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item)).getPath()));
     }
 }

@@ -23,7 +23,7 @@ public final class RemoveConfiguredModuleItemAtMessage extends AbstractMessage {
     // --------------------------------------------------------------------- //
 
     @Override
-    protected void handleMessage(final NetworkEvent.Context context) {
+    public void handleMessage(final NetworkEvent.Context context) {
         final ServerPlayer player = context.getSender();
         if (player != null && player.containerMenu != null && player.containerMenu.containerId == windowId) {
             if (player.containerMenu instanceof AbstractModuleContainerMenu) {

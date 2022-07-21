@@ -6,7 +6,6 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
@@ -20,10 +19,10 @@ import javax.annotation.Nullable;
 @OnlyIn(Dist.CLIENT)
 public class ScannerContainerScreen extends AbstractContainerScreen<ScannerContainerMenu> {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/scanner.png");
-    private static final TranslatableComponent SCANNER_MODULES_TEXT = new TranslatableComponent("gui.scannable.scanner.active_modules");
-    private static final TranslatableComponent SCANNER_MODULES_TOOLTIP = new TranslatableComponent("gui.scannable.scanner.active_modules.desc");
-    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TEXT = new TranslatableComponent("gui.scannable.scanner.inactive_modules");
-    private static final TranslatableComponent SCANNER_MODULES_INACTIVE_TOOLTIP = new TranslatableComponent("gui.scannable.scanner.inactive_modules.desc");
+    private static final Component SCANNER_MODULES_TEXT = Component.translatable("gui.scannable.scanner.active_modules");
+    private static final Component SCANNER_MODULES_TOOLTIP = Component.translatable("gui.scannable.scanner.active_modules.desc");
+    private static final Component SCANNER_MODULES_INACTIVE_TEXT = Component.translatable("gui.scannable.scanner.inactive_modules");
+    private static final Component SCANNER_MODULES_INACTIVE_TOOLTIP = Component.translatable("gui.scannable.scanner.inactive_modules.desc");
 
     // --------------------------------------------------------------------- //
 

@@ -5,6 +5,7 @@ import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +71,7 @@ public final class CommonConfig {
             tag and it will be impossible to tune the entity module to this block.""")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> ignoredBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.COMMAND_BLOCK.getRegistryName());
+        c.add(ForgeRegistries.BLOCKS.getKey(Blocks.COMMAND_BLOCK));
     });
 
     @Path("blocks") @WorldRestart
@@ -85,7 +86,7 @@ public final class CommonConfig {
     @Comment("Registry names of blocks considered 'common ores', requiring the common ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> commonOreBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.CLAY.getRegistryName());
+        c.add(ForgeRegistries.BLOCKS.getKey(Blocks.CLAY));
     });
 
     @Path("ores") @WorldRestart
@@ -104,7 +105,7 @@ public final class CommonConfig {
     @Comment("Registry names of blocks considered 'rare ores', requiring the rare ore scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> rareOreBlocks = Util.make(new HashSet<>(), c -> {
-        c.add(Blocks.GLOWSTONE.getRegistryName());
+        c.add(ForgeRegistries.BLOCKS.getKey(Blocks.GLOWSTONE));
     });
 
     @Path("ores") @WorldRestart

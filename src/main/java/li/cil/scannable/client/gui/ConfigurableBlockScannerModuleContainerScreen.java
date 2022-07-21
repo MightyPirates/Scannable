@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfi
         final Block block = Block.byItem(value.getItem());
         //noinspection ConstantConditions Non-null for byItem is a lie because BlockItem.getBlock can return null.
         if (block != null && block != Blocks.AIR) {
-            final ResourceLocation registryName = block.getRegistryName();
+            final ResourceLocation registryName = ForgeRegistries.BLOCKS.getKey(block);
             if (registryName != null) {
                 Network.INSTANCE.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
             }

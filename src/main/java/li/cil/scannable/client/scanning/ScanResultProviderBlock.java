@@ -48,6 +48,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -297,6 +298,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         for (final ScanResult result : results) {
             final BlockScanResult blockResult = (BlockScanResult) result;
             final VertexBuffer vbo = blockResult.vbo;
+            vbo.bind();
             vbo.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), shader);
             VertexBuffer.unbind();
         }
@@ -394,8 +396,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
-                if (ClientConfig.fluidColors.containsKey(fluidState.getType().getRegistryName())) {
-                    color = ClientConfig.fluidColors.getInt(fluidState.getType().getRegistryName());
+                if (ClientConfig.fluidColors.containsKey(ForgeRegistries.FLUIDS.getKey(fluidState.getType()))) {
+                    color = ClientConfig.fluidColors.getInt(ForgeRegistries.FLUIDS.getKey(fluidState.getType()));
                 } else {
                     ClientConfig.fluidTagColors.forEach((k, v) -> {
                         final TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, k);
@@ -405,8 +407,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     });
                 }
             } else {
-                if (ClientConfig.blockColors.containsKey(blockState.getBlock().getRegistryName())) {
-                    color = ClientConfig.blockColors.getInt(blockState.getBlock().getRegistryName());
+                if (ClientConfig.blockColors.containsKey(ForgeRegistries.BLOCKS.getKey(blockState.getBlock()))) {
+                    color = ClientConfig.blockColors.getInt(ForgeRegistries.BLOCKS.getKey(blockState.getBlock()));
                 } else {
                     ClientConfig.blockTagColors.forEach((k, v) -> {
                         final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, k);
@@ -424,9 +426,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             render(buffer, new PoseStack());
-            buffer.end();
             vbo = new VertexBuffer();
-            vbo.upload(buffer);
+            vbo.bind();
+            vbo.upload(buffer.end());
+            VertexBuffer.unbind();
         }
 
         boolean isRoot() {

@@ -74,7 +74,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
     }
 
     public static boolean addBlock(final ItemStack stack, final Block block) {
-        final ResourceLocation registryName = block.getRegistryName();
+        final ResourceLocation registryName = ForgeRegistries.BLOCKS.getKey(block);
         if (registryName == null) {
             return false;
         }
@@ -106,7 +106,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final ResourceLocation registryName = block.getRegistryName();
+        final ResourceLocation registryName = ForgeRegistries.BLOCKS.getKey(block);
         if (registryName == null) {
             return;
         }
@@ -182,7 +182,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
         }
 
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openGui(serverPlayer, new MenuProvider() {
+            NetworkHooks.openScreen(serverPlayer, new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
                     return stack.getHoverName();

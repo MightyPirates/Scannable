@@ -23,7 +23,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
@@ -52,7 +51,7 @@ public final class ScanManager {
     }
 
     public static int computeScanGrowthDuration() {
-        return SCAN_GROWTH_DURATION * Minecraft.getInstance().options.renderDistance / REFERENCE_RENDER_DISTANCE;
+        return SCAN_GROWTH_DURATION * Minecraft.getInstance().options.renderDistance().get() / REFERENCE_RENDER_DISTANCE;
     }
 
     public static float computeRadius(final long start, final float duration) {
@@ -240,7 +239,7 @@ public final class ScanManager {
         }
     }
 
-    public static void onPostRenderLevel(final RenderLevelStageEvent event) {
+    public static void renderLevel(final RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
             return;
         }
@@ -258,11 +257,7 @@ public final class ScanManager {
         render(ScanResultRenderContext.WORLD, event.getPartialTick(), viewModelStack, projectionMatrix);
     }
 
-    public static void onPreRenderGameOverlay(final RenderGameOverlayEvent.Pre event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
-
+    public static void renderGui(final float partialTick) {
         synchronized (renderingResults) {
             if (renderingResults.isEmpty()) {
                 return;
@@ -275,7 +270,7 @@ public final class ScanManager {
             RenderSystem.getModelViewStack().last().pose().setIdentity();
             RenderSystem.applyModelViewMatrix();
 
-            render(ScanResultRenderContext.GUI, event.getPartialTicks(), viewModelStack, projectionMatrix);
+            render(ScanResultRenderContext.GUI, partialTick, viewModelStack, projectionMatrix);
 
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();
