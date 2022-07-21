@@ -2,6 +2,7 @@ plugins {
     id 'fabric-loom' version '0.11-SNAPSHOT'
     id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.modrinth.minotaur' version '2.2.0'
 }
 
 apply from: 'minecraft.gradle'
@@ -154,6 +155,17 @@ curseforge {
     options {
         forgeGradleIntegration = false
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_API_KEY") ?: ""
+    projectId = modrinth_project_id
+    changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
+    versionNumber = semver
+    versionName = "${rootProject.name}-${version}"
+    versionType = 'release'
+    uploadFile = remapJar
+    gameVersions = [minecraft_version]
 }
 
 idea {
