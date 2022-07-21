@@ -144,7 +144,7 @@ curseforge {
         addGameVersion minecraft_version
         addGameVersion 'Java 17'
         relations {
-            requiredDependency 'architectury-fabric'
+            requiredDependency 'architectury-api'
             requiredDependency 'forge-config-api-port-fabric'
         }
         mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
@@ -168,6 +168,7 @@ modrinth {
     gameVersions = [minecraft_version]
     dependencies {
         required.project 'P7dR8mSH' // Fabric API
+        required.project 'lhGA9TYQ' // Architectury API
     }
 }
 
