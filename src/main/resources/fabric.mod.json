@@ -32,11 +32,11 @@
     },
     "accessWidener": "scannable.accesswidener",
     "depends": {
-        "fabricloader": ">=0.12.12",
+        "fabricloader": ">=0.14.9",
         "fabric": "*",
         "forgeconfigapiport": "*",
         "architectury": "*",
-        "minecraft": "1.19",
+        "minecraft": "1.19.2",
         "java": ">=17"
     }
 }

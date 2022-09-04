@@ -61,7 +61,7 @@ dependencies {
 
 
     // Just for in-dev convenience. Mod doesn't use any REI APIs.
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:9.1.517") {
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:9.1.530") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 }
