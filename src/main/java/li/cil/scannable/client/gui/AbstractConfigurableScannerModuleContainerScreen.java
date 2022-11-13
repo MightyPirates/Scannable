@@ -141,6 +141,7 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
             }
         }
 
+        //noinspection ConstantConditions Missing nullable annotation, base method tests for null.
         super.slotClicked(slot, slotId, mouseButton, type);
     }
 }
