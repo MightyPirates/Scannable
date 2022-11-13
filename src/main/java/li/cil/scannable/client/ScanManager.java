@@ -217,19 +217,19 @@ public final class ScanManager {
             final List<ScanResult> results = entry.getValue();
 
             while (results.size() > 0) {
-                final int lastResultIndex = results.size() - 1;
-                final Vec3 position = results.get(lastResultIndex).getPosition();
+                final int index = results.size() - 1;
+                final Vec3 position = results.get(index).getPosition();
                 if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
+                    final ScanResult result = results.remove(index);
                     synchronized (renderingResults) {
-                        renderingResults.computeIfAbsent(provider, p -> new ArrayList<>())
-                            .add(results.remove(lastResultIndex));
+                        renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
                     }
                 } else {
                     break; // List is sorted, so nothing else is in range.
                 }
             }
 
-            if (results.size() == 0) {
+            if (results.isEmpty()) {
                 iterator.remove();
             }
         }
@@ -253,7 +253,7 @@ public final class ScanManager {
                 return;
             }
 
-            // Using shaders so we render as game overlay; restore matrices as used for level rendering.
+            // Using shaders, so we render as game overlay; restore matrices as used for level rendering.
             RenderSystem.backupProjectionMatrix();
             RenderSystem.setProjectionMatrix(projectionMatrix);
             RenderSystem.getModelViewStack().pushPose();

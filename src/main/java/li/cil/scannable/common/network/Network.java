@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.function.Function;
 
 public final class Network {
-    private static final String PROTOCOL_VERSION = "1";
     private static final HashMap<Class<? extends AbstractMessage>, ResourceLocation> PACKET_MAP = new HashMap<>();
 
     private static final ResourceLocation SET_CONFIGURED_MODULE_ITEM = new ResourceLocation(API.MOD_ID, "set_module_item");

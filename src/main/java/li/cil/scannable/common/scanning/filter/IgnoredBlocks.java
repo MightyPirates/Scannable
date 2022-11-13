@@ -30,10 +30,7 @@ public enum IgnoredBlocks {
 
         final Set<Block> ignoredBlocks = new HashSet<>();
         for (final ResourceLocation location : CommonConfig.ignoredBlocks) {
-            final Block block = Registry.BLOCK.getOptional(location).orElse(null);
-            if (block != null) {
-                ignoredBlocks.add(block);
-            }
+            Registry.BLOCK.getOptional(location).ifPresent(ignoredBlocks::add);
         }
 
         final List<TagKey<Block>> ignoredTags = new ArrayList<>();
