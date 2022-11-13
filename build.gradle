@@ -64,6 +64,8 @@ dependencies {
     modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:9.1.530") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+
+    modRuntimeOnly("curse.maven:tooltipfix-411557:4070924")
 }
 
 processResources {
