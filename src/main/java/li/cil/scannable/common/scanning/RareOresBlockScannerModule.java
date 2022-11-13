@@ -37,7 +37,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleOreCommon;
+        return CommonConfig.energyCostModuleOreRare;
     }
 
     @OnlyIn(Dist.CLIENT)
