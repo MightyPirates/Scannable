@@ -246,11 +246,8 @@ public final class ScannerItem extends ModItem {
         final int totalCost = totalCostAccumulator;
 
         final int extracted = energyStorage.map(storage -> storage.extractEnergy(totalCost, simulate)).orElse(0);
-        if (extracted < totalCost) {
-            return false;
-        }
 
-        return true;
+        return extracted >= totalCost;
     }
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {

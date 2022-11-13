@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "li.cil.scannable.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

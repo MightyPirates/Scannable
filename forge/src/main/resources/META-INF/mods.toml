@@ -5,7 +5,7 @@ license = "MIT"
 
 [[mods]]
 modId = "scannable"
-version = "${file.jarVersion}"
+version = "${version}"
 displayName = "Scannable"
 displayURL = "https://github.com/MightyPirates/Scannable"
 logoFile = "logo.png"
