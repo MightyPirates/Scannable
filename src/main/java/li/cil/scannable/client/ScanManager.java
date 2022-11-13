@@ -207,7 +207,7 @@ public final class ScanManager {
             return;
         }
 
-        if (pendingResults.size() <= 0) {
+        if (pendingResults.isEmpty()) {
             return;
         }
 
@@ -233,7 +233,7 @@ public final class ScanManager {
                 }
             }
 
-            if (results.size() == 0) {
+            if (results.isEmpty()) {
                 iterator.remove();
             }
         }
@@ -263,7 +263,7 @@ public final class ScanManager {
                 return;
             }
 
-            // Using shaders so we render as game overlay; restore matrices as used for level rendering.
+            // Using shaders, so we render as game overlay; restore matrices as used for level rendering.
             RenderSystem.backupProjectionMatrix();
             RenderSystem.setProjectionMatrix(projectionMatrix);
             RenderSystem.getModelViewStack().pushPose();
