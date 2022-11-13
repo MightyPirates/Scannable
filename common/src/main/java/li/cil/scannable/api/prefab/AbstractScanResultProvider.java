@@ -7,6 +7,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import li.cil.scannable.api.scanning.ScanResultProvider;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
@@ -19,8 +21,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -29,7 +29,7 @@ import java.util.Collection;
  * Helper base class for scan result providers, providing some common
  * functionality for drawing result information.
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public abstract class AbstractScanResultProvider implements ScanResultProvider {
     protected Player player;
     protected Vec3 center;
@@ -87,7 +87,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
         if (lookDirDot > 0.999f && label != null) {
             final Component text;
             if (displayDistance > 0) {
-                text = li.cil.scannable.common.config.Strings.withDistance(label, Mth.ceil(displayDistance));
+                text = withDistance(label, Mth.ceil(displayDistance));
             } else {
                 text = label;
             }
@@ -129,30 +129,36 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
 
     protected static RenderType getRenderLayer() {
         return RenderType.create("scan_result",
-                DefaultVertexFormat.POSITION_COLOR,
-                VertexFormat.Mode.QUADS, 65536,
-                false,
-                false,
-                RenderType.CompositeState.builder()
-                        .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
-                        .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                        .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                        .createCompositeState(false));
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.QUADS, 65536,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                .createCompositeState(false));
     }
 
     protected static RenderType getRenderLayer(final ResourceLocation textureLocation) {
         return RenderType.create("scan_result",
-                DefaultVertexFormat.POSITION_TEX,
-                VertexFormat.Mode.QUADS, 65536,
-                false,
-                false,
-                RenderType.CompositeState.builder()
-                        .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader))
-                        .setTextureState(new RenderStateShard.TextureStateShard(textureLocation, false, false))
-                        .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                        .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                        .createCompositeState(false));
+            DefaultVertexFormat.POSITION_TEX,
+            VertexFormat.Mode.QUADS, 65536,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader))
+                .setTextureState(new RenderStateShard.TextureStateShard(textureLocation, false, false))
+                .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                .createCompositeState(false));
+    }
+
+    // --------------------------------------------------------------------- //
+
+    private static Component withDistance(final Component caption, final float distance) {
+        return Component.translatable("gui.scannable.overlay.distance", caption, Mth.ceil(distance));
     }
 }

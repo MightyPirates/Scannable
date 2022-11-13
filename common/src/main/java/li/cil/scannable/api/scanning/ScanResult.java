@@ -1,9 +1,9 @@
 package li.cil.scannable.api.scanning;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -12,7 +12,7 @@ import java.io.Closeable;
  * Represents a single logical scan result, for which one single visualization
  * is rendered using the provider that produced this result.
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public interface ScanResult extends Closeable {
     /**
      * Get the in-world location of this scan result.

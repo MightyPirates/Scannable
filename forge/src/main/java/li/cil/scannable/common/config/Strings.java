@@ -38,8 +38,4 @@ public final class Strings {
     public static Component progress(final int value) {
         return Component.translatable("gui.scannable.scanner.progress", value);
     }
-
-    public static Component withDistance(final Component caption, final float distance) {
-        return Component.translatable("gui.scannable.overlay.distance", caption, Mth.ceil(distance));
-    }
 }
