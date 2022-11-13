@@ -22,7 +22,7 @@ public abstract class AbstractMessage {
 
     // --------------------------------------------------------------------- //
 
-    public static boolean handleMessage(final AbstractMessage message, MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender) {
+    public static boolean handleMessage(final AbstractMessage message, final MinecraftServer server, final ServerPlayer player, final ServerGamePacketListenerImpl handler, final FriendlyByteBuf buf, final PacketSender responseSender) {
         server.execute(() -> message.handleMessage(server, player, handler, buf, responseSender));
         return true;
     }

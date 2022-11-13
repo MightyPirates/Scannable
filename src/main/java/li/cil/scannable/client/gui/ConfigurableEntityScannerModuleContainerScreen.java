@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -57,10 +56,8 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         if (value.getItem() instanceof SpawnEggItem) {
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
-            final ResourceLocation registryName = Registry.ENTITY_TYPE.getKey(entityType);
-            if (registryName != null) {
-                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, registryName));
-            }
+            Registry.ENTITY_TYPE.getResourceKey(entityType).ifPresent(entityTypeResourceKey ->
+                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, entityTypeResourceKey.location())));
         }
     }
 

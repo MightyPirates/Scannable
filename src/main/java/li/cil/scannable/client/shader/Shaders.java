@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@SuppressWarnings("deprecation")
 @Environment(EnvType.CLIENT)
 public final class Shaders {
     private static final List<ShaderReference> SHADERS = new ArrayList<>();
@@ -55,7 +54,7 @@ public final class Shaders {
             }
 
             @Override
-            public void onResourceManagerReload(ResourceManager resourceManager) {
+            public void onResourceManagerReload(final ResourceManager resourceManager) {
                 reloadShaders(resourceManager);
             }
         });

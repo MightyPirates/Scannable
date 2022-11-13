@@ -71,9 +71,6 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
     @Override
     public ItemStack quickMoveStack(final Player player, final int index) {
         final Slot from = slots.get(index);
-        if (from == null) {
-            return ItemStack.EMPTY;
-        }
         final ItemStack stack = from.getItem().copy();
         if (stack.isEmpty()) {
             return ItemStack.EMPTY;

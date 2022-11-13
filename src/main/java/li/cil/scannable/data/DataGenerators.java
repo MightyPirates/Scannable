@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
 public final class DataGenerators implements DataGeneratorEntrypoint {
     @Override
-    public void onInitializeDataGenerator(FabricDataGenerator generator) {
+    public void onInitializeDataGenerator(final FabricDataGenerator generator) {
         final ModBlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(generator);
         generator.addProvider(blockTagsProvider);
         generator.addProvider(new ModItemTagsProvider(generator, blockTagsProvider));

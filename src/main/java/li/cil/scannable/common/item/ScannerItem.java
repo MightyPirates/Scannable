@@ -241,11 +241,8 @@ public final class ScannerItem extends ModItem implements SimpleBatteryItem, Fab
             if (!simulate)
                 transaction.commit();
         }
-        if (extracted < totalCost) {
-            return false;
-        }
 
-        return true;
+        return extracted >= totalCost;
     }
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {

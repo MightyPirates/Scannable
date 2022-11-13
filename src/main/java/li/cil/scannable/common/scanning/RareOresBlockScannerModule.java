@@ -61,10 +61,8 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
         for (final ResourceLocation location : CommonConfig.rareOreBlocks) {
-            final Block block = Registry.BLOCK.getOptional(location).orElse(null);
-            if (block != null) {
-                filters.add(new BlockScanFilter(block));
-            }
+            Registry.BLOCK.getOptional(location).ifPresent(block ->
+                filters.add(new BlockScanFilter(block)));
         }
         Registry.BLOCK.getTagNames().forEach(tag -> {
             if (CommonConfig.rareOreBlockTags.contains(tag.location())) {

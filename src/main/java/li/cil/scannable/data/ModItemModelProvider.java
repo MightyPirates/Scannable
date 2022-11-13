@@ -25,7 +25,6 @@ public final class ModItemModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(final BlockModelGenerators blockStateModelGenerator) {
-
     }
 
     @Override

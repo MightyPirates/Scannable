@@ -13,7 +13,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -63,8 +63,8 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
     }
 
     private static boolean addEntityType(final ItemStack stack, final EntityType<?> entityType) {
-        final ResourceLocation registryName = Registry.ENTITY_TYPE.getKey(entityType);
-        if (registryName == null) {
+        final Optional<ResourceKey<EntityType<?>>> registryName = Registry.ENTITY_TYPE.getResourceKey(entityType);
+        if (registryName.isEmpty()) {
             return false;
         }
 
@@ -73,7 +73,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return false;
         }
 
-        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.get().location().toString());
 
         final ListTag list = tag.getList(TAG_ENTITIES, Tag.TAG_STRING);
         if (list.contains(itemNbt)) {
@@ -95,8 +95,8 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final ResourceLocation registryName = Registry.ENTITY_TYPE.getKey(entityType);
-        if (registryName == null) {
+        final Optional<ResourceKey<EntityType<?>>> registryName = Registry.ENTITY_TYPE.getResourceKey(entityType);
+        if (registryName.isEmpty()) {
             return;
         }
 
@@ -105,7 +105,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.get().location().toString());
 
         final ListTag list = tag.getList(TAG_ENTITIES, Tag.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);

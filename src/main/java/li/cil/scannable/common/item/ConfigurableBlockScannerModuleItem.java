@@ -15,6 +15,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -38,6 +39,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -74,8 +76,8 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
     }
 
     public static boolean addBlock(final ItemStack stack, final Block block) {
-        final ResourceLocation registryName = Registry.BLOCK.getKey(block);
-        if (registryName == null) {
+        final Optional<ResourceKey<Block>> registryName = Registry.BLOCK.getResourceKey(block);
+        if (registryName.isEmpty()) {
             return false;
         }
 
@@ -84,7 +86,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return false;
         }
 
-        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.get().location().toString());
 
         final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
         if (list.contains(itemNbt)) {
@@ -106,8 +108,8 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final ResourceLocation registryName = Registry.BLOCK.getKey(block);
-        if (registryName == null) {
+        final Optional<ResourceKey<Block>> registryName = Registry.BLOCK.getResourceKey(block);
+        if (registryName.isEmpty()) {
             return;
         }
 
@@ -116,7 +118,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final StringTag itemNbt = StringTag.valueOf(registryName.toString());
+        final StringTag itemNbt = StringTag.valueOf(registryName.get().location().toString());
 
         final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
         final int oldIndex = list.indexOf(itemNbt);

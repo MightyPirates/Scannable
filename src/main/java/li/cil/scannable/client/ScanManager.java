@@ -156,7 +156,7 @@ public final class ScanManager {
 
         clear();
 
-        lastScanCenter = entity.position();
+        lastScanCenter = Objects.requireNonNull(entity.position());
         currentStart = System.currentTimeMillis();
 
         pendingResults.putAll(collectingResults);
@@ -173,7 +173,7 @@ public final class ScanManager {
         scanningTicks = 0;
     }
 
-    public static void onClientTick(final Minecraft minecraft) {
+    public static void onClientTick(final Minecraft ignored) {
         if (lastScanCenter == null || currentStart < 0) {
             return;
         }
@@ -188,8 +188,7 @@ public final class ScanManager {
                         final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
                         final List<ScanResult> list = entry.getValue();
                         for (int i = Mth.ceil(list.size() * 0.5f); i > 0; i--) {
-                            list.get(list.size() - 1).close();
-                            list.remove(list.size() - 1);
+                            list.remove(list.size() - 1).close();
                         }
                         if (list.isEmpty()) {
                             iterator.remove();
@@ -204,7 +203,7 @@ public final class ScanManager {
             return;
         }
 
-        if (pendingResults.size() <= 0) {
+        if (pendingResults.isEmpty()) {
             return;
         }
 
@@ -218,12 +217,12 @@ public final class ScanManager {
             final List<ScanResult> results = entry.getValue();
 
             while (results.size() > 0) {
-                final ScanResult result = results.get(results.size() - 1);
-                final Vec3 position = result.getPosition();
+                final int lastResultIndex = results.size() - 1;
+                final Vec3 position = results.get(lastResultIndex).getPosition();
                 if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
-                    results.remove(results.size() - 1);
                     synchronized (renderingResults) {
-                        renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
+                        renderingResults.computeIfAbsent(provider, p -> new ArrayList<>())
+                            .add(results.remove(lastResultIndex));
                     }
                 } else {
                     break; // List is sorted, so nothing else is in range.

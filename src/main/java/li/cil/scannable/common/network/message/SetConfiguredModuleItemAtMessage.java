@@ -27,9 +27,8 @@ public final class SetConfiguredModuleItemAtMessage extends AbstractMessage {
 
     // --------------------------------------------------------------------- //
 
-
     @Override
-    protected void handleMessage(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender) {
+    protected void handleMessage(final MinecraftServer server, final ServerPlayer player, final ServerGamePacketListenerImpl handler, final FriendlyByteBuf buf, final PacketSender responseSender) {
         if (player != null && player.containerMenu != null && player.containerMenu.containerId == windowId) {
             if (player.containerMenu instanceof AbstractModuleContainerMenu) {
                 ((AbstractModuleContainerMenu) player.containerMenu).setItemAt(index, value);

@@ -79,6 +79,7 @@ public class ScannerContainerScreen extends AbstractContainerScreen<ScannerConta
             }
         }
 
+        //noinspection ConstantConditions Missing nullable annotation, base method tests for null.
         super.slotClicked(slot, slotId, mouseButton, type);
     }
 }
