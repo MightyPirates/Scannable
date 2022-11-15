@@ -5,9 +5,8 @@ package li.cil.scannable.api.scanning;
  */
 public enum ScanResultRenderContext {
     /**
-     * World render context, currently rendering into the regular world render target, right after all block rendering
-     * has been performed (specifically in the context of {@link net.minecraftforge.client.event.RenderLevelStageEvent}
-     * with stage {@link net.minecraftforge.client.event.RenderLevelStageEvent.Stage#AFTER_TRIPWIRE_BLOCKS}).
+     * World render context, currently rendering into the regular world render target, right after all other rendering
+     * has been performed.
      */
     WORLD,
 
