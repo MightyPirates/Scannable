@@ -158,10 +158,6 @@ public final class ScannerItem extends ModItem {
             return stack;
         }
 
-        if (level.isClientSide()) {
-            SoundCanceler.cancelEquipSound();
-        }
-
         final List<ItemStack> modules = new ArrayList<>();
         if (!collectModules(stack, modules)) {
             return stack;
@@ -246,24 +242,5 @@ public final class ScannerItem extends ModItem {
                 .map(ScannerModule::hasResultProvider).orElse(false);
         }
         return hasScannerModules;
-    }
-
-    // --------------------------------------------------------------------- //
-
-    // Used to suppress the re-equip sound after finishing a scan (due to potential scanner item stack data change).
-    private enum SoundCanceler {
-        INSTANCE;
-
-        public static void cancelEquipSound() {
-//            MinecraftForge.EVENT_BUS.register(SoundCanceler.INSTANCE);
-        }
-
-//        @SubscribeEvent
-//        public void onPlaySoundAtEntityEvent(final PlayLevelSoundEvent event) {
-//            if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
-//                event.setCanceled(true);
-//            }
-//            MinecraftForge.EVENT_BUS.unregister(this);
-//        }
     }
 }

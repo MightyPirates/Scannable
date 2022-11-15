@@ -19,10 +19,6 @@ loom {
             vmArg "-Dfabric-api.datagen.modid=scannable"
             vmArg "-Dfabric-api.datagen.strict-validation"
 
-//            arg '--output', file('src/main/resources')
-//            arg '--existing', project(':common').file('src/main/resources').absolutePath
-//            arg '--existing', file('src/main/resources').absolutePath
-
             runDir "build/datagen"
         }
     }
