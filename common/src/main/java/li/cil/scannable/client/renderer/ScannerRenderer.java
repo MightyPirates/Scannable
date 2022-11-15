@@ -1,13 +1,14 @@
 package li.cil.scannable.client.renderer;
 
+import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlConst;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.shader.Shaders;
 import net.fabricmc.api.EnvType;
@@ -15,25 +16,21 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
+
+import static org.lwjgl.opengl.GL11.GL_NONE;
+import static org.lwjgl.opengl.GL11.glDrawBuffer;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 @Environment(EnvType.CLIENT)
 public enum ScannerRenderer {
     INSTANCE;
 
     // --------------------------------------------------------------------- //
-    // Settings
+
+    private DepthOnlyRenderTarget mainCameraDepth = new DepthOnlyRenderTarget(MainTarget.DEFAULT_WIDTH, MainTarget.DEFAULT_HEIGHT);
 
     // --------------------------------------------------------------------- //
-    // Frame buffer and depth texture IDs.
-
-    private int depthCopyFbo;
-    private int depthCopyColorBuffer;
-    private int depthCopyDepthBuffer;
-
-    // --------------------------------------------------------------------- //
-    // State of the scanner, set when triggering a ping.
 
     private long currentStart;
     private Vec3 currentCenter;
@@ -50,21 +47,25 @@ public enum ScannerRenderer {
     }
 
     public void doRender(final PoseStack poseStack) {
-        final int adjustedDuration = ScanManager.computeScanGrowthDuration();
-        final boolean shouldRender = currentStart > 0 && adjustedDuration > (int) (System.currentTimeMillis() - currentStart);
-        if (shouldRender) {
-            if (depthCopyFbo == 0) {
-                createDepthCopyBuffer();
-            }
-
+        if (shouldRender()) {
+            grabDepthBuffer();
             render(poseStack.last().pose());
-        } else {
-            if (depthCopyFbo != 0) {
-                deleteDepthCopyBuffer();
-            }
-
-            currentStart = 0;
         }
+    }
+
+    private boolean shouldRender() {
+        final int adjustedDuration = ScanManager.computeScanGrowthDuration();
+        return currentStart > 0 && adjustedDuration > (int) (System.currentTimeMillis() - currentStart);
+    }
+
+    private void grabDepthBuffer() {
+        final RenderTarget mainRenderTarget = Minecraft.getInstance().getMainRenderTarget();
+        if (mainRenderTarget.width != mainCameraDepth.width || mainRenderTarget.height != mainCameraDepth.height) {
+            mainCameraDepth.resize(mainRenderTarget.width, mainRenderTarget.height, Minecraft.ON_OSX);
+        }
+        mainCameraDepth = ScannerRenderer.copyBufferSettings(mainRenderTarget, mainCameraDepth);
+        mainCameraDepth.copyDepthFrom(mainRenderTarget);
+        mainRenderTarget.bindWrite(false);
     }
 
     private void render(final Matrix4f viewMatrix) {
@@ -75,21 +76,9 @@ public enum ScannerRenderer {
 
         final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 
-        updateDepthTexture(target);
-
         updateShaderUniforms(shader, viewMatrix);
 
         blit(target);
-    }
-
-    private void updateDepthTexture(final RenderTarget target) {
-        final int oldBuffer = GlStateManager.getBoundFramebuffer();
-        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, target.frameBufferId);
-        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, depthCopyFbo);
-        GL30.glBlitFramebuffer(0, 0, target.width, target.height,
-            0, 0, target.width, target.height,
-            GL30.GL_DEPTH_BUFFER_BIT, GL30.GL_NEAREST);
-        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, oldBuffer);
     }
 
     private void updateShaderUniforms(final ShaderInstance shader, final Matrix4f viewMatrix) {
@@ -104,7 +93,7 @@ public enum ScannerRenderer {
         final int adjustedDuration = ScanManager.computeScanGrowthDuration();
         final float radius = ScanManager.computeRadius(currentStart, (float) adjustedDuration);
 
-        shader.setSampler("depthTex", depthCopyDepthBuffer);
+        shader.setSampler("depthTex", mainCameraDepth.getDepthTextureId());
         shader.safeGetUniform("center").set(new Vector3f(currentCenter));
         shader.safeGetUniform("invViewMat").set(invertedViewMatrix);
         shader.safeGetUniform("invProjMat").set(invertedProjectionMatrix);
@@ -146,44 +135,28 @@ public enum ScannerRenderer {
 
     // --------------------------------------------------------------------- //
 
-    private void createDepthCopyBuffer() {
-        final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+    public static final class DepthOnlyRenderTarget extends TextureTarget {
+        public DepthOnlyRenderTarget(final int width, final int height) {
+            super(width, height, true, Minecraft.ON_OSX);
+        }
 
-        depthCopyFbo = GlStateManager.glGenFramebuffers();
-
-        // We don't use the color attachment on this FBO, but it's required for a complete FBO.
-        depthCopyColorBuffer = createTexture(target.width, target.height, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE);
-
-        // Main reason why we create this FBO: readable depth buffer into which we can copy the MC one.
-        depthCopyDepthBuffer = createTexture(target.width, target.height, GL30.GL_DEPTH_COMPONENT, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT);
-
-        final int oldBuffer = GlStateManager.getBoundFramebuffer();
-        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, depthCopyFbo);
-        GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, depthCopyColorBuffer, 0);
-        GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, depthCopyDepthBuffer, 0);
-        GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, oldBuffer);
+        @Override
+        public void createBuffers(final int width, final int height, final boolean isOnOSX) {
+            super.createBuffers(width, height, isOnOSX);
+            if (colorTextureId > -1) {
+                if (frameBufferId > -1) {
+                    glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId);
+                    glDrawBuffer(GL_NONE);
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                }
+                TextureUtil.releaseTextureId(this.colorTextureId);
+                this.colorTextureId = -1;
+            }
+        }
     }
 
-    private void deleteDepthCopyBuffer() {
-        GlStateManager._glDeleteFramebuffers(depthCopyFbo);
-        depthCopyFbo = 0;
-
-        TextureUtil.releaseTextureId(depthCopyColorBuffer);
-        depthCopyColorBuffer = 0;
-
-        TextureUtil.releaseTextureId(depthCopyDepthBuffer);
-        depthCopyDepthBuffer = 0;
-    }
-
-    private int createTexture(final int width, final int height, final int internalFormat, final int format, final int type) {
-        final int texture = TextureUtil.generateTextureId();
-        GlStateManager._bindTexture(texture);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GlStateManager._texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        GlStateManager._texImage2D(GL11.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null);
-        GlStateManager._bindTexture(0);
-        return texture;
+    @ExpectPlatform
+    private static DepthOnlyRenderTarget copyBufferSettings(final RenderTarget mainRenderTarget, final DepthOnlyRenderTarget depthRenderTarget) {
+        throw new AssertionError();
     }
 }

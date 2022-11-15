@@ -20,6 +20,7 @@ public final class RegistryUtils {
     private static Phase phase = Phase.PRE_INIT;
     private static String modId;
 
+    @SafeVarargs
     public static <T> RegistrarBuilder<T> builder(ResourceKey<Registry<T>> registryKey, T... typeGetter) {
         return Registries.get(modId).builder(registryKey.location(), typeGetter);
     }

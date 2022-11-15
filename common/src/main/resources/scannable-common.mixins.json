@@ -1,0 +1,13 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "li.cil.scannable.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "client": [
+        "client.LevelRendererMixin"
+    ],
+    "mixins": [],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

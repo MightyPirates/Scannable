@@ -13,6 +13,7 @@
         "sources": "https://github.com/MightyPirates/Scannable"
     },
     "mixins": [
+        "scannable-common.mixins.json",
         "scannable.mixins.json"
     ],
     "license": "MIT",
