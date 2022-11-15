@@ -1,6 +1,6 @@
 package li.cil.scannable.common.container;
 
-import li.cil.scannable.common.inventory.ScannerItemHandler;
+import li.cil.scannable.common.inventory.ScannerContainer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 public final class ScannerContainerMenu extends AbstractContainerMenu {
     public static ScannerContainerMenu create(final int windowId, final Inventory inventory, final FriendlyByteBuf buffer) {
         final InteractionHand hand = buffer.readEnum(InteractionHand.class);
-        return new ScannerContainerMenu(windowId, inventory, hand, new ScannerItemHandler(inventory.player.getItemInHand(hand)));
+        return new ScannerContainerMenu(windowId, inventory, hand, new ScannerContainer(inventory.player.getItemInHand(hand)));
     }
 
     // --------------------------------------------------------------------- //
@@ -24,7 +24,7 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
 
     // --------------------------------------------------------------------- //
 
-    public ScannerContainerMenu(final int windowId, final Inventory inventory, final InteractionHand hand, final ScannerItemHandler itemHandler) {
+    public ScannerContainerMenu(final int windowId, final Inventory inventory, final InteractionHand hand, final ScannerContainer itemHandler) {
         super(Containers.SCANNER_CONTAINER.get(), windowId);
 
         this.player = inventory.player;

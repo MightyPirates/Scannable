@@ -8,7 +8,7 @@ import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
-import li.cil.scannable.common.inventory.ScannerItemHandler;
+import li.cil.scannable.common.inventory.ScannerContainer;
 import li.cil.scannable.util.PlatformUtils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -98,7 +98,7 @@ public final class ScannerItem extends ModItem {
 
                     @Override
                     public AbstractContainerMenu createMenu(final int id, final Inventory inventory, final Player player) {
-                        return new ScannerContainerMenu(id, inventory, hand, ScannerItemHandler.of(stack));
+                        return new ScannerContainerMenu(id, inventory, hand, ScannerContainer.of(stack));
                     }
                 }, buffer -> buffer.writeEnum(hand));
             }
@@ -231,8 +231,8 @@ public final class ScannerItem extends ModItem {
     }
 
     private static boolean collectModules(final ItemStack scanner, final List<ItemStack> modules) {
-        final ScannerItemHandler scannerItemHandler = ScannerItemHandler.of(scanner);
-        final Container activeModules = scannerItemHandler.getActiveModules();
+        final ScannerContainer container = ScannerContainer.of(scanner);
+        final Container activeModules = container.getActiveModules();
         boolean hasScannerModules = false;
         for (int slot = 0; slot < activeModules.getContainerSize(); slot++) {
             final ItemStack module = activeModules.getItem(slot);

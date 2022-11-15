@@ -10,7 +10,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
-public final class ScannerItemHandler extends SimpleContainer {
+public final class ScannerContainer extends SimpleContainer {
     private static final int ACTIVE_MODULE_COUNT = 3;
     private static final int INACTIVE_MODULE_COUNT = 6;
     private static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT + INACTIVE_MODULE_COUNT;
@@ -21,7 +21,7 @@ public final class ScannerItemHandler extends SimpleContainer {
 
     private final ItemStack container;
 
-    public ScannerItemHandler(final ItemStack container) {
+    public ScannerContainer(final ItemStack container) {
         super(TOTAL_MODULE_COUNT);
         this.container = container;
 
@@ -31,11 +31,11 @@ public final class ScannerItemHandler extends SimpleContainer {
         }
     }
 
-    public static ScannerItemHandler of(final ItemStack container) {
+    public static ScannerContainer of(final ItemStack container) {
         if (container.getItem() instanceof ScannerItem) {
-            return new ScannerItemHandler(container);
+            return new ScannerContainer(container);
         } else {
-            return new ScannerItemHandler(new ItemStack(Items.SCANNER.get()));
+            return new ScannerContainer(new ItemStack(Items.SCANNER.get()));
         }
     }
 

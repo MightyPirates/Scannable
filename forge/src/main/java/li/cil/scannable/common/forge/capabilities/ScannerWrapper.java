@@ -3,7 +3,7 @@ package li.cil.scannable.common.forge.capabilities;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.energy.forge.ScannerEnergyStorage;
-import li.cil.scannable.common.inventory.ScannerItemHandler;
+import li.cil.scannable.common.inventory.ScannerContainer;
 import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +37,7 @@ public final class ScannerWrapper implements ICapabilityProvider {
     // --------------------------------------------------------------------- //
 
     public ScannerWrapper(final ItemStack container) {
-        itemHandler = new InvWrapper(ScannerItemHandler.of(container));
+        itemHandler = new InvWrapper(ScannerContainer.of(container));
         energyStorage = ScannerEnergyStorage.of(container);
 
         itemHandlerHolder = LazyOptional.of(() -> itemHandler);
