@@ -11,7 +11,7 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     runs {
-        datagen {
+        data {
             inherit client
             name "Data Generation"
             vmArg "-Dfabric-api.datagen"

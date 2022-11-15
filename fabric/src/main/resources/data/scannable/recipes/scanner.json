@@ -1,28 +1,28 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "scanner",
+  "key": {
+    "b": {
+      "item": "minecraft:iron_bars"
+    },
+    "g": {
+      "tag": "c:gold_ingots"
+    },
+    "i": {
+      "tag": "c:iron_ingots"
+    },
+    "q": {
+      "tag": "c:quartz"
+    },
+    "r": {
+      "tag": "c:redstone_dusts"
+    }
+  },
   "pattern": [
     "i i",
     "brb",
     "gqg"
   ],
-  "key": {
-    "i": {
-      "tag": "c:iron_ingots"
-    },
-    "b": {
-      "item": "minecraft:iron_bars"
-    },
-    "r": {
-      "tag": "c:redstone_dusts"
-    },
-    "g": {
-      "tag": "c:gold_ingots"
-    },
-    "q": {
-      "tag": "c:quartz"
-    }
-  },
   "result": {
     "item": "scannable:scanner"
   }

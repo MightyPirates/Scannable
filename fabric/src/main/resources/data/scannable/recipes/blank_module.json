@@ -1,25 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
   "group": "blank_module",
+  "key": {
+    "c": {
+      "item": "minecraft:clay_ball"
+    },
+    "g": {
+      "tag": "c:dye_green"
+    },
+    "n": {
+      "tag": "c:gold_nuggets"
+    },
+    "r": {
+      "tag": "c:glowstone_dusts"
+    }
+  },
   "pattern": [
     "ggg",
     "crc",
     "cnc"
   ],
-  "key": {
-    "g": {
-      "tag": "c:dye_green"
-    },
-    "c": {
-      "item": "minecraft:clay_ball"
-    },
-    "r": {
-      "tag": "c:glowstone_dusts"
-    },
-    "n": {
-      "tag": "c:gold_nuggets"
-    }
-  },
   "result": {
     "item": "scannable:blank_module"
   }
