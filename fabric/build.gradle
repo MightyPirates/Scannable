@@ -4,28 +4,26 @@ plugins {
 
 architectury {
     platformSetupLoomIde()
-    forge()
+    fabric()
 }
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
-    forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
-        mixinConfig "scannable.mixins.json"
-
-        dataGen {
-            mod "scannable"
-        }
-    }
-
     runs {
         datagen {
-            data()
-            programArgs '--existing', project(':common').file('src/main/resources').absolutePath
-            programArgs '--existing', file('src/main/resources').absolutePath
+            inherit client
+            name "Data Generation"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
+            vmArg "-Dfabric-api.datagen.modid=scannable"
+            vmArg "-Dfabric-api.datagen.strict-validation"
+
+//            arg '--output', file('src/main/resources')
+//            arg '--existing', project(':common').file('src/main/resources').absolutePath
+//            arg '--existing', file('src/main/resources').absolutePath
+
+            runDir "build/datagen"
         }
     }
 }
@@ -35,29 +33,46 @@ configurations {
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+repositories {
+    maven { url "https://maven.architectury.dev/" }
+    maven { url "https://maven.shedaniel.me" }
+    maven { url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
+    mavenCentral()
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
-    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    modRuntimeOnly "curse.maven:jei-238222:3884337"
+    include modApi('teamreborn:energy:2.2.0') {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    modImplementation "net.minecraftforge:forgeconfigapiport-fabric:4.2.6"
+
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:9.1.572") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    modRuntimeOnly "curse.maven:tooltipfix-411557:4070924"
 }
 
 processResources {
     inputs.property "version", project.version
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
 }
 
 shadowJar {
-    exclude "fabric.mod.json"
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
@@ -65,6 +80,7 @@ shadowJar {
 }
 
 remapJar {
+    injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier null
@@ -88,7 +104,7 @@ components.java {
 
 publishing {
     publications {
-        mavenForge(MavenPublication) {
+        mavenFabric(MavenPublication) {
             artifactId = "${rootProject.archives_base_name}-${rootProject.minecraft_version}-${project.name}"
             from components.java
         }
@@ -107,18 +123,26 @@ publishing {
 }
 
 curseforge {
-    apiKey = System.getenv("CURSEFORGE_API_KEY") ?: ""
+    apiKey = System.getenv('CURSEFORGE_API_KEY') ?: ""
     project {
         id = rootProject.curse_project_id
         releaseType = "release"
-        changelogType = "markdown"
+        changelogType = 'markdown'
         changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
         addGameVersion project.name
         addGameVersion rootProject.minecraft_version
-        addGameVersion "Java 17"
+        addGameVersion 'Java 17'
         relations {
-            requiredDependency "architectury-api"
+            requiredDependency 'architectury-api'
+            requiredDependency 'forge-config-api-port-fabric'
         }
+        mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
+        afterEvaluate {
+            uploadTask.dependsOn(remapJar)
+        }
+    }
+    options {
+        forgeGradleIntegration = false
     }
 }
 
@@ -128,10 +152,11 @@ modrinth {
     changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
     versionNumber = "MC${rootProject.minecraft_version}-${project.name}-${rootProject.semver}"
     versionName = "${rootProject.archives_base_name}-${project.version}"
-    versionType = "release"
+    versionType = 'release'
     uploadFile = jar
     gameVersions = [rootProject.minecraft_version]
     dependencies {
-        required.project "lhGA9TYQ" // Architectury API
+        required.project 'P7dR8mSH' // Fabric API
+        required.project 'lhGA9TYQ' // Architectury API
     }
 }

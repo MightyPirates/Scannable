@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "scanner_module",
+  "ingredients": [
+    {
+      "item": "scannable:blank_module"
+    },
+    {
+      "tag": "c:leather"
+    }
+  ],
+  "result": {
+    "item": "scannable:friendly_entity_module"
+  }
+}
