@@ -7,10 +7,10 @@ import org.jetbrains.annotations.Contract;
 import java.util.Optional;
 
 @SuppressWarnings("Contract")
-public interface EnergyStorage {
+public interface ItemEnergyStorage {
     @ExpectPlatform
     @Contract("_ -> !null")
-    static Optional<EnergyStorage> of(final ItemStack stack) {
+    static Optional<ItemEnergyStorage> of(final ItemStack stack) {
         throw new AssertionError();
     }
 

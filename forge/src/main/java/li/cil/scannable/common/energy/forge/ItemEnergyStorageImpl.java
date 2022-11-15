@@ -1,14 +1,14 @@
 package li.cil.scannable.common.energy.forge;
 
-import li.cil.scannable.common.energy.EnergyStorage;
+import li.cil.scannable.common.energy.ItemEnergyStorage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 import java.util.Optional;
 
-public class EnergyStorageImpl {
-    public static Optional<EnergyStorage> of(final ItemStack stack) {
-        return stack.getCapability(ForgeCapabilities.ENERGY).map(capability -> new EnergyStorage() {
+public final class ItemEnergyStorageImpl {
+    public static Optional<ItemEnergyStorage> of(final ItemStack container) {
+        return container.getCapability(ForgeCapabilities.ENERGY).map(capability -> new ItemEnergyStorage() {
             @Override
             public long receiveEnergy(final long amount, final boolean simulate) {
                 final int clampedAmount = (int) Math.min(amount, Integer.MAX_VALUE);

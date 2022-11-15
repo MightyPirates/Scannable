@@ -7,7 +7,7 @@ import li.cil.scannable.client.audio.SoundManager;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
-import li.cil.scannable.common.energy.EnergyStorage;
+import li.cil.scannable.common.energy.ItemEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerItemHandler;
 import li.cil.scannable.util.PlatformUtils;
 import net.minecraft.core.NonNullList;
@@ -52,9 +52,11 @@ public final class ScannerItem extends ModItem {
 
         if (allowedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
-            EnergyStorage.of(stack).ifPresent(energy ->
-                energy.receiveEnergy(Integer.MAX_VALUE, false));
-            items.add(stack);
+            ItemEnergyStorage.of(stack).ifPresent(energy ->
+            {
+                energy.receiveEnergy(Integer.MAX_VALUE, false);
+                items.add(stack);
+            });
         }
     }
 
@@ -63,7 +65,7 @@ public final class ScannerItem extends ModItem {
         super.appendHoverText(stack, level, tooltip, flag);
 
         if (CommonConfig.useEnergy) {
-            EnergyStorage.of(stack).ifPresent(energy ->
+            ItemEnergyStorage.of(stack).ifPresent(energy ->
                 tooltip.add(Strings.energyStorage(energy.getEnergyStored(), energy.getMaxEnergyStored())));
         }
     }
@@ -198,7 +200,7 @@ public final class ScannerItem extends ModItem {
             return 0;
         }
 
-        return EnergyStorage.of(stack)
+        return ItemEnergyStorage.of(stack)
             .map(storage -> storage.getEnergyStored() / (float) storage.getMaxEnergyStored())
             .orElse(0f);
     }
@@ -212,7 +214,7 @@ public final class ScannerItem extends ModItem {
             return true;
         }
 
-        final Optional<EnergyStorage> energyStorage = EnergyStorage.of(scanner);
+        final Optional<ItemEnergyStorage> energyStorage = ItemEnergyStorage.of(scanner);
         if (!energyStorage.isPresent()) {
             return false;
         }
