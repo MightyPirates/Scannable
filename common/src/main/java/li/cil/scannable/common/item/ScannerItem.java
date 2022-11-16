@@ -52,8 +52,7 @@ public final class ScannerItem extends ModItem {
 
         if (allowedIn(group) && CommonConfig.useEnergy) {
             final ItemStack stack = new ItemStack(this);
-            ItemEnergyStorage.of(stack).ifPresent(energy ->
-            {
+            ItemEnergyStorage.of(stack).ifPresent(energy -> {
                 energy.receiveEnergy(Integer.MAX_VALUE, false);
                 items.add(stack);
             });
