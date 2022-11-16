@@ -203,7 +203,7 @@ public abstract class ConfigManager {
         final int maxValue = (int) Math.min(getMax(field), Integer.MAX_VALUE);
 
         final var configValue = withCommonAttributes(field, builder)
-            .defineInRange(getPath(field), defaultValue, minValue, maxValue, int.class);
+            .defineInRange(getPath(field), defaultValue, minValue, maxValue, Integer.class);
 
         return new SetFieldConfigItem<>(field, configValue);
     }
@@ -214,7 +214,7 @@ public abstract class ConfigManager {
         final long maxValue = (long) Math.min(getMax(field), Long.MAX_VALUE);
 
         final var configValue = withCommonAttributes(field, builder)
-            .defineInRange(getPath(field), defaultValue, minValue, maxValue, long.class);
+            .defineInRange(getPath(field), defaultValue, minValue, maxValue, Long.class);
 
         return new SetFieldConfigItem<>(field, configValue);
     }
@@ -225,7 +225,7 @@ public abstract class ConfigManager {
         final double maxValue = getMax(field);
 
         final var configValue = withCommonAttributes(field, builder)
-            .defineInRange(getPath(field), defaultValue, minValue, maxValue, double.class);
+            .defineInRange(getPath(field), defaultValue, minValue, maxValue, Double.class);
 
         return new SetFieldConfigItem<>(field, configValue);
     }
