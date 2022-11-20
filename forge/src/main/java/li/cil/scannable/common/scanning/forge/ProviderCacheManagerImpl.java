@@ -1,25 +1,25 @@
-package li.cil.scannable.common.scanning.fabric;
+package li.cil.scannable.common.scanning.forge;
 
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.scanning.CommonOresBlockScannerModule;
 import li.cil.scannable.common.scanning.FluidBlockScannerModule;
 import li.cil.scannable.common.scanning.RareOresBlockScannerModule;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraftforge.api.fml.event.config.ModConfigEvents;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-public final class ProviderCacheConfigListenerImpl {
+@Mod.EventBusSubscriber(modid = API.MOD_ID, bus = Bus.MOD)
+public final class ProviderCacheManagerImpl {
     public static void initialize() {
-        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
-            return;
-        }
-
-        ModConfigEvents.loading(API.MOD_ID).register((cfg) -> clearCaches());
-        ModConfigEvents.reloading(API.MOD_ID).register((cfg) -> clearCaches());
     }
 
-    private static void clearCaches() {
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void onModConfigEvent(final ModConfigEvent configEvent) {
         // Reset on any config change, so we also rebuild the filter when resource reload
         // kicks in which can result in ids changing and thus our cache being invalid.
         CommonOresBlockScannerModule.clearCache();

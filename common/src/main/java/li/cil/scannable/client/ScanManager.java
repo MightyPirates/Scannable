@@ -10,7 +10,7 @@ import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.config.CommonConfig;
-import li.cil.scannable.util.PlatformUtils;
+import li.cil.scannable.common.item.ScannerModuleItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -102,7 +102,7 @@ public final class ScanManager {
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
-            final Optional<ScannerModule> module = PlatformUtils.getModule(stack);
+            final Optional<ScannerModule> module = ScannerModuleItem.getModule(stack);
             module.ifPresent(modules::add);
         }
         for (final ScannerModule module : modules) {

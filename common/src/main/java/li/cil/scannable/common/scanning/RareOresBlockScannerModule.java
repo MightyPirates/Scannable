@@ -1,5 +1,6 @@
 package li.cil.scannable.common.scanning;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
@@ -9,13 +10,15 @@ import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
-import li.cil.scannable.util.PlatformUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,10 +75,18 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
         });
 
         // Treat all blocks tagged as ores but not part of the common ore category as rare.
+        final TagKey<Block> topLevelOreTag = getTopLevelOreTag();
         filters.add(state -> !IgnoredBlocks.contains(state) &&
-            state.is(PlatformUtils.getTopLevelOreTag()) &&
+            state.is(topLevelOreTag) &&
             !CommonOresBlockScannerModule.INSTANCE.getFilter(ItemStack.EMPTY).test(state));
 
         filter = new BlockCacheScanFilter(filters);
+    }
+
+    @ExpectPlatform
+    @SuppressWarnings("Contract")
+    @Contract("_ -> !null")
+    private static TagKey<Block> getTopLevelOreTag() {
+        throw new AssertionError();
     }
 }

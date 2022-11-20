@@ -16,8 +16,8 @@ import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.shader.Shaders;
+import li.cil.scannable.common.item.ScannerModuleItem;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
-import li.cil.scannable.util.PlatformUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -84,7 +84,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         final IntObjectMap<List<Predicate<BlockState>>> filterByRadius = new IntObjectHashMap<>();
         for (final ItemStack stack : modules) {
-            final Optional<ScannerModule> capability = PlatformUtils.getModule(stack);
+            final Optional<ScannerModule> capability = ScannerModuleItem.getModule(stack);
             capability.ifPresent(module -> {
                 if (module instanceof BlockScannerModule blockModule) {
                     final Predicate<BlockState> filter = blockModule.getFilter(stack);

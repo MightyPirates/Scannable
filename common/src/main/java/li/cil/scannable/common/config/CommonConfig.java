@@ -1,6 +1,6 @@
 package li.cil.scannable.common.config;
 
-import li.cil.scannable.util.PlatformUtils;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import li.cil.scannable.util.config.*;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -92,7 +92,7 @@ public final class CommonConfig {
     @Path("ores") @WorldRestart
     @Comment("Block tags of blocks considered 'common ores', requiring the common ore scanner module.")
     @ItemType(ResourceLocation.class)
-    public static Set<ResourceLocation> commonOreBlockTags = PlatformUtils.getDefaultCommonOreTags();
+    public static Set<ResourceLocation> commonOreBlockTags = getDefaultCommonOreTags();
 
     @Path("ores") @WorldRestart
     @Comment("Registry names of blocks considered 'rare ores', requiring the rare ore scanner module.")
@@ -113,4 +113,9 @@ public final class CommonConfig {
     @Comment("Fluid tags of fluids that should be ignored.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> ignoredFluidTags = new HashSet<>();
+
+    @ExpectPlatform
+    private static Set<ResourceLocation> getDefaultCommonOreTags() {
+        throw new AssertionError();
+    }
 }

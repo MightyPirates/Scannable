@@ -9,7 +9,7 @@ import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.container.Containers;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.network.Network;
-import li.cil.scannable.common.scanning.ProviderCacheConfigListener;
+import li.cil.scannable.common.scanning.ProviderCacheManager;
 import li.cil.scannable.common.tags.ItemTags;
 import li.cil.scannable.util.ConfigManager;
 import li.cil.scannable.util.RegistryUtils;
@@ -28,7 +28,7 @@ public final class CommonSetup {
         Network.initialize();
 
         EnvExecutor.runInEnv(Env.CLIENT, () -> ScanResultProviders::initialize);
-        EnvExecutor.runInEnv(Env.CLIENT, () -> ProviderCacheConfigListener::initialize);
+        EnvExecutor.runInEnv(Env.CLIENT, () -> ProviderCacheManager::initialize);
 
         RegistryUtils.finish();
     }

@@ -1,8 +1,8 @@
 package li.cil.scannable.client;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import li.cil.scannable.util.PlatformUtils;
 import li.cil.scannable.util.config.*;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +26,7 @@ public final class ClientConfig {
         "by block tag. See `blockColors` for format entries have to be in.")
     @KeyValueTypes(keyType = ResourceLocation.class, valueType = int.class,
         valueSerializer = @CustomSerializer(serializer = "toHexString", deserializer = "fromHexString"))
-    public static Object2IntMap<ResourceLocation> blockTagColors = PlatformUtils.getDefaultBlockTagColors();
+    public static Object2IntMap<ResourceLocation> blockTagColors = getDefaultBlockTagColors();
 
     @WorldRestart
     @Comment("The colors for fluids used when rendering their result bounding box\n" +
@@ -53,5 +53,10 @@ public final class ClientConfig {
     @SuppressWarnings("unused") // Referenced in annotations.
     public static Object fromHexString(final String value) {
         return Integer.decode(value);
+    }
+
+    @ExpectPlatform
+    private static Object2IntMap<ResourceLocation> getDefaultBlockTagColors() {
+        throw new AssertionError();
     }
 }

@@ -9,7 +9,6 @@ import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerContainer;
-import li.cil.scannable.util.PlatformUtils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -181,15 +180,6 @@ public final class ScannerItem extends ModItem {
 
     // --------------------------------------------------------------------- //
 
-    static int getModuleEnergyCost(final ItemStack stack) {
-        if (!CommonConfig.useEnergy) {
-            return 0;
-        }
-
-        return PlatformUtils.getModule(stack)
-            .map(module -> module.getEnergyCost(stack)).orElse(0);
-    }
-
     private static float getRelativeEnergy(final ItemStack stack) {
         if (!CommonConfig.useEnergy) {
             return 0;
@@ -210,13 +200,13 @@ public final class ScannerItem extends ModItem {
         }
 
         final Optional<ItemEnergyStorage> energyStorage = ItemEnergyStorage.of(scanner);
-        if (!energyStorage.isPresent()) {
+        if (energyStorage.isEmpty()) {
             return false;
         }
 
         long totalCostAccumulator = 0;
         for (final ItemStack module : modules) {
-            totalCostAccumulator += getModuleEnergyCost(module);
+            totalCostAccumulator += ScannerModuleItem.getModuleEnergyCost(module);
         }
         final long totalCost = totalCostAccumulator;
 
@@ -237,7 +227,7 @@ public final class ScannerItem extends ModItem {
 
             modules.add(module);
 
-            hasScannerModules |= PlatformUtils.getModule(module)
+            hasScannerModules |= ScannerModuleItem.getModule(module)
                 .map(ScannerModule::hasResultProvider).orElse(false);
         }
         return hasScannerModules;

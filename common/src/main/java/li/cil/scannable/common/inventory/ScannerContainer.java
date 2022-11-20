@@ -3,7 +3,6 @@ package li.cil.scannable.common.inventory;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ScannerItem;
 import li.cil.scannable.common.item.ScannerModuleItem;
-import li.cil.scannable.util.PlatformUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -130,7 +129,7 @@ public final class ScannerContainer extends SimpleContainer {
         }
 
         // External modules declared via capability/interface.
-        if (PlatformUtils.getModule(stack).isPresent()) {
+        if (ScannerModuleItem.getModule(stack).isPresent()) {
             return true;
         }
 

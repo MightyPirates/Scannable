@@ -7,7 +7,7 @@ import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.util.PlatformUtils;
+import li.cil.scannable.common.item.ScannerModuleItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -44,7 +44,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         filters.clear();
         filterToModule.clear();
         for (final ItemStack stack : modules) {
-            final Optional<ScannerModule> capability = PlatformUtils.getModule(stack);
+            final Optional<ScannerModule> capability = ScannerModuleItem.getModule(stack);
             capability.ifPresent(module -> {
                 if (module instanceof EntityScannerModule entityModule) {
                     final Predicate<Entity> filter = entityModule.getFilter(stack);
