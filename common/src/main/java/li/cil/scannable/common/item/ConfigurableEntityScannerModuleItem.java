@@ -7,7 +7,7 @@ import li.cil.scannable.common.container.EntityModuleContainerMenu;
 import li.cil.scannable.common.scanning.ConfigurableEntityScannerModule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -63,7 +63,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
     }
 
     private static boolean addEntityType(final ItemStack stack, final EntityType<?> entityType) {
-        final Optional<ResourceKey<EntityType<?>>> registryName = Registry.ENTITY_TYPE.getResourceKey(entityType);
+        final Optional<ResourceKey<EntityType<?>>> registryName = BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType);
         if (registryName.isEmpty()) {
             return false;
         }
@@ -95,7 +95,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final Optional<ResourceKey<EntityType<?>>> registryName = Registry.ENTITY_TYPE.getResourceKey(entityType);
+        final Optional<ResourceKey<EntityType<?>>> registryName = BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType);
         if (registryName.isEmpty()) {
             return;
         }

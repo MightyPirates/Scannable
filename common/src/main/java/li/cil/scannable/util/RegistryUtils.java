@@ -2,7 +2,7 @@ package li.cil.scannable.util;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrarBuilder;
-import dev.architectury.registry.registries.Registries;
+import dev.architectury.registry.registries.RegistrarManager;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
@@ -22,7 +22,7 @@ public final class RegistryUtils {
 
     @SafeVarargs
     public static <T> RegistrarBuilder<T> builder(ResourceKey<Registry<T>> registryKey, T... typeGetter) {
-        return Registries.get(modId).builder(registryKey.location(), typeGetter);
+        return RegistrarManager.get(modId).builder(registryKey.location(), typeGetter);
     }
 
     public static <T> DeferredRegister<T> get(final ResourceKey<Registry<T>> registryKey) {

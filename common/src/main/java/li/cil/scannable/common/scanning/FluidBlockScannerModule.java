@@ -9,7 +9,7 @@ import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Constants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -57,7 +57,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        Registry.FLUID.getTagNames().forEach(tag -> {
+        BuiltInRegistries.FLUID.getTagNames().forEach(tag -> {
             if (!CommonConfig.ignoredFluidTags.contains(tag.location())) {
                 filters.add(new FluidTagScanFilter(tag));
             }

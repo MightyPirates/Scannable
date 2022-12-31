@@ -1,8 +1,6 @@
 package li.cil.scannable.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.EntityModuleContainerMenu;
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
@@ -13,7 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -21,11 +19,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
+import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static li.cil.scannable.util.UnitConversion.toRadians;
 
 @Environment(EnvType.CLIENT)
 public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConfigurableScannerModuleContainerScreen<EntityModuleContainerMenu, EntityType<?>> {
@@ -56,7 +57,7 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         if (value.getItem() instanceof SpawnEggItem) {
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
-            Registry.ENTITY_TYPE.getResourceKey(entityType).ifPresent(entityTypeResourceKey ->
+            BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType).ifPresent(entityTypeResourceKey ->
                 Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, entityTypeResourceKey.location())));
         }
     }
@@ -75,13 +76,13 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
         final PoseStack poseStack = new PoseStack();
         poseStack.translate(x, y, 0);
         poseStack.scale(scale, scale, scale);
-        final Quaternion quaternion = Vector3f.ZP.rotationDegrees(180);
-        quaternion.mul(Vector3f.XN.rotationDegrees(-20));
-        quaternion.mul(Vector3f.YP.rotationDegrees(30));
+        final var quaternion = new Quaternionf().rotationZ(toRadians(180));
+        quaternion.mul(new Quaternionf().rotationX(toRadians(20)));
+        quaternion.mul(new Quaternionf().rotationY(toRadians(30)));
         poseStack.mulPose(quaternion);
 
         final EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternion.conj();
+        quaternion.conjugate();
         renderManager.overrideCameraOrientation(quaternion);
         renderManager.setRenderShadow(false);
 

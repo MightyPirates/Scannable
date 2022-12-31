@@ -3,7 +3,6 @@ package li.cil.scannable.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
@@ -23,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -240,7 +240,7 @@ public final class ScanManager {
         }
 
         worldViewModelStack = new PoseStack();
-        worldViewModelStack.last().pose().load(poseStack.last().pose());
+        worldViewModelStack.last().pose().set(poseStack.last().pose());
         worldProjectionMatrix = projectionMatrix;
 
         render(ScanResultRenderContext.WORLD, partialTick, worldViewModelStack, worldProjectionMatrix);
@@ -256,7 +256,7 @@ public final class ScanManager {
             RenderSystem.backupProjectionMatrix();
             RenderSystem.setProjectionMatrix(worldProjectionMatrix);
             RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().last().pose().setIdentity();
+            RenderSystem.getModelViewStack().last().pose().identity();
             RenderSystem.applyModelViewMatrix();
 
             render(ScanResultRenderContext.GUI, partialTick, worldViewModelStack, worldProjectionMatrix);

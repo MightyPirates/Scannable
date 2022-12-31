@@ -1,6 +1,5 @@
 package li.cil.scannable.common.item;
 
-import li.cil.scannable.common.ModCreativeTabs;
 import li.cil.scannable.util.TooltipUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,7 +14,7 @@ import java.util.List;
 
 public class ModItem extends Item {
     protected ModItem(final Properties properties) {
-        super(properties.tab(ModCreativeTabs.COMMON));
+        super(properties);
     }
 
     protected ModItem() {

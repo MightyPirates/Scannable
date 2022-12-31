@@ -4,8 +4,6 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,9 +19,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+
+import static li.cil.scannable.util.UnitConversion.toRadians;
 
 /**
  * Helper base class for scan result providers, providing some common
@@ -80,8 +81,8 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
 
         poseStack.pushPose();
         poseStack.translate(resultPos.x, resultPos.y, resultPos.z);
-        poseStack.mulPose(Vector3f.YN.rotationDegrees(yaw));
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(pitch));
+        poseStack.mulPose(new Quaternionf().rotationY(toRadians(-yaw)));
+        poseStack.mulPose(new Quaternionf().rotationX(toRadians(pitch)));
         poseStack.scale(-scale, -scale, scale);
 
         if (lookDirDot > 0.999f && label != null) {
@@ -117,7 +118,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     }
 
     protected static void drawQuad(final VertexConsumer buffer, final PoseStack poseStack, final float width, final float height, final float r, final float g, final float b, final float a) {
-        final Matrix4f matrix = poseStack.last().pose();
+        final var matrix = poseStack.last().pose();
         buffer.vertex(matrix, -width * 0.5f, height * 0.5f, 0).color(r, g, b, a).uv(0, 1f).endVertex();
         buffer.vertex(matrix, width * 0.5f, height * 0.5f, 0).color(r, g, b, a).uv(1f, 1f).endVertex();
         buffer.vertex(matrix, width * 0.5f, -height * 0.5f, 0).color(r, g, b, a).uv(1f, 0).endVertex();

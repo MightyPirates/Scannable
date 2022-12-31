@@ -1,7 +1,7 @@
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -29,7 +29,7 @@ public final class EntityModuleContainerMenu extends AbstractModuleContainerMenu
     @Override
     public void setItemAt(final int index, final ResourceLocation name) {
         final ItemStack stack = getPlayer().getItemInHand(getHand());
-        Registry.ENTITY_TYPE.getOptional(name).ifPresent(type ->
+        BuiltInRegistries.ENTITY_TYPE.getOptional(name).ifPresent(type ->
             ConfigurableEntityScannerModuleItem.setEntityTypeAt(stack, index, type));
     }
 }

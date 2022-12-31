@@ -31,5 +31,7 @@ public final class CommonSetup {
         EnvExecutor.runInEnv(Env.CLIENT, () -> ProviderCacheManager::initialize);
 
         RegistryUtils.finish();
+
+        ModCreativeTabs.initialize();
     }
 }

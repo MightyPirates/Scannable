@@ -1,5 +1,6 @@
 package li.cil.scannable.common.scanning.fabric;
 
+import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.scanning.CommonOresBlockScannerModule;
 import li.cil.scannable.common.scanning.FluidBlockScannerModule;
@@ -7,7 +8,6 @@ import li.cil.scannable.common.scanning.RareOresBlockScannerModule;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraftforge.api.fml.event.config.ModConfigEvents;
 
 public final class ProviderCacheManagerImpl {
     public static void initialize() {

@@ -9,7 +9,7 @@ import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -62,7 +62,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
         list.forEach(item -> {
             try {
                 final ResourceLocation registryName = new ResourceLocation(item.getAsString());
-                Registry.BLOCK.getOptional(registryName).ifPresent(result::add);
+                BuiltInRegistries.BLOCK.getOptional(registryName).ifPresent(result::add);
             } catch (final ResourceLocationException e) {
                 LOGGER.error(e);
             }
@@ -72,7 +72,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
     }
 
     public static boolean addBlock(final ItemStack stack, final Block block) {
-        final Optional<ResourceKey<Block>> registryName = Registry.BLOCK.getResourceKey(block);
+        final Optional<ResourceKey<Block>> registryName = BuiltInRegistries.BLOCK.getResourceKey(block);
         if (registryName.isEmpty()) {
             return false;
         }
@@ -104,7 +104,7 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final Optional<ResourceKey<Block>> registryName = Registry.BLOCK.getResourceKey(block);
+        final Optional<ResourceKey<Block>> registryName = BuiltInRegistries.BLOCK.getResourceKey(block);
         if (registryName.isEmpty()) {
             return;
         }

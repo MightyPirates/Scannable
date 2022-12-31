@@ -12,7 +12,7 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
@@ -65,10 +65,10 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
         for (final ResourceLocation location : CommonConfig.rareOreBlocks) {
-            Registry.BLOCK.getOptional(location).ifPresent(block ->
+            BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
-        Registry.BLOCK.getTagNames().forEach(tag -> {
+        BuiltInRegistries.BLOCK.getTagNames().forEach(tag -> {
             if (CommonConfig.rareOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }

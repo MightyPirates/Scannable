@@ -4,11 +4,11 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import li.cil.scannable.common.scanning.*;
 import li.cil.scannable.util.RegistryUtils;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 
 public final class Items {
-    private static final DeferredRegister<Item> ITEMS = RegistryUtils.get(Registry.ITEM_REGISTRY);
+    private static final DeferredRegister<Item> ITEMS = RegistryUtils.get(Registries.ITEM);
 
     // --------------------------------------------------------------------- //
 

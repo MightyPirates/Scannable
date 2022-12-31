@@ -6,8 +6,6 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.shader.Shaders;
@@ -16,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.GL_NONE;
 import static org.lwjgl.opengl.GL11.glDrawBuffer;
@@ -94,10 +93,10 @@ public enum ScannerRenderer {
         final float radius = ScanManager.computeRadius(currentStart, (float) adjustedDuration);
 
         shader.setSampler("depthTex", mainCameraDepth.getDepthTextureId());
-        shader.safeGetUniform("center").set(new Vector3f(currentCenter));
+        shader.safeGetUniform("center").set(currentCenter.toVector3f());
         shader.safeGetUniform("invViewMat").set(invertedViewMatrix);
         shader.safeGetUniform("invProjMat").set(invertedProjectionMatrix);
-        shader.safeGetUniform("pos").set(new Vector3f(cameraPosition));
+        shader.safeGetUniform("pos").set(cameraPosition.toVector3f());
         shader.safeGetUniform("radius").set(radius);
     }
 
@@ -113,15 +112,15 @@ public enum ScannerRenderer {
         RenderSystem.setShader(Shaders::getScanEffectShader);
 
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(Matrix4f.orthographic(0, width, 0, height, 1, 100));
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, width, 0, height, 1, 100));
 
         final Tesselator tesselator = Tesselator.getInstance();
         final BufferBuilder buffer = tesselator.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(0, height, -50).uv(0, 0).endVertex();
-        buffer.vertex(width, height, -50).uv(1, 0).endVertex();
-        buffer.vertex(width, 0, -50).uv(1, 1).endVertex();
-        buffer.vertex(0, 0, -50).uv(0, 1).endVertex();
+        buffer.vertex(0, 0, -50).uv(0, 0).endVertex();
+        buffer.vertex(width, 0, -50).uv(1, 0).endVertex();
+        buffer.vertex(width, height, -50).uv(1, 1).endVertex();
+        buffer.vertex(0, height, -50).uv(0, 1).endVertex();
         tesselator.end();
 
         RenderSystem.restoreProjectionMatrix();

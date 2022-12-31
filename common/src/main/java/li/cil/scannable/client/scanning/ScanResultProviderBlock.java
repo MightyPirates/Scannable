@@ -3,7 +3,6 @@ package li.cil.scannable.client.scanning;
 import com.google.common.base.Strings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import io.netty.util.collection.IntObjectHashMap;
 import io.netty.util.collection.IntObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -27,8 +26,9 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -43,7 +43,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -276,7 +275,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         // Re-render hands into depth buffer to avoid rendering overlay on top of player hands.
         if (Minecraft.getInstance().gameRenderer.renderHand) {
-            final Matrix4f oldProjectionMatrix = RenderSystem.getProjectionMatrix();
+            final var oldProjectionMatrix = RenderSystem.getProjectionMatrix();
             RenderSystem.colorMask(false, false, false, false);
             poseStack.pushPose();
             try {
@@ -394,22 +393,22 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
-                if (ClientConfig.fluidColors.containsKey(Registry.FLUID.getKey(fluidState.getType()))) {
-                    color = ClientConfig.fluidColors.getInt(Registry.FLUID.getKey(fluidState.getType()));
+                if (ClientConfig.fluidColors.containsKey(BuiltInRegistries.FLUID.getKey(fluidState.getType()))) {
+                    color = ClientConfig.fluidColors.getInt(BuiltInRegistries.FLUID.getKey(fluidState.getType()));
                 } else {
                     ClientConfig.fluidTagColors.forEach((k, v) -> {
-                        final TagKey<Fluid> tag = TagKey.create(Registry.FLUID_REGISTRY, k);
+                        final var tag = TagKey.create(Registries.FLUID, k);
                         if (fluidState.is(tag)) {
                             color = v;
                         }
                     });
                 }
             } else {
-                if (ClientConfig.blockColors.containsKey(Registry.BLOCK.getKey(blockState.getBlock()))) {
-                    color = ClientConfig.blockColors.getInt(Registry.BLOCK.getKey(blockState.getBlock()));
+                if (ClientConfig.blockColors.containsKey(BuiltInRegistries.BLOCK.getKey(blockState.getBlock()))) {
+                    color = ClientConfig.blockColors.getInt(BuiltInRegistries.BLOCK.getKey(blockState.getBlock()));
                 } else {
                     ClientConfig.blockTagColors.forEach((k, v) -> {
-                        final TagKey<Block> tag = TagKey.create(Registry.BLOCK_REGISTRY, k);
+                        final var tag = TagKey.create(Registries.BLOCK, k);
                         if (blockState.is(tag)) {
                             color = v;
                         }
@@ -461,7 +460,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         }
 
         void render(final VertexConsumer buffer, final PoseStack poseStack) {
-            final Matrix4f matrix = poseStack.last().pose();
+            final var matrix = poseStack.last().pose();
 
             final float colorNormalizer = 1 / 255f;
             final float r = ((color >> 16) & 0xFF) * colorNormalizer;

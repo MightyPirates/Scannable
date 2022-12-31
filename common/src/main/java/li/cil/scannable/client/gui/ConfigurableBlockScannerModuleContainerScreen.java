@@ -8,7 +8,7 @@ import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +44,7 @@ public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfi
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         final Block block = Block.byItem(value.getItem());
         if (block != Blocks.AIR) {
-            Registry.BLOCK.getResourceKey(block).ifPresent(blockResourceKey ->
+            BuiltInRegistries.BLOCK.getResourceKey(block).ifPresent(blockResourceKey ->
                 Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, blockResourceKey.location())));
         }
     }

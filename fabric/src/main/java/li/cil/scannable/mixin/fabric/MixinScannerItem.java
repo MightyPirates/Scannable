@@ -7,10 +7,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import team.reborn.energy.api.base.SimpleBatteryItem;
+import team.reborn.energy.api.base.SimpleEnergyItem;
 
 @Mixin(ScannerItem.class)
-public abstract class MixinScannerItem implements FabricItem, SimpleBatteryItem {
+public abstract class MixinScannerItem implements FabricItem, SimpleEnergyItem {
     // --------------------------------------------------------------------- //
     // FabricItem
 
@@ -23,17 +23,17 @@ public abstract class MixinScannerItem implements FabricItem, SimpleBatteryItem 
     // SimpleBatteryItem
 
     @Override
-    public long getEnergyCapacity() {
+    public long getEnergyCapacity(final ItemStack stack) {
         return CommonConfig.energyCapacityScanner;
     }
 
     @Override
-    public long getEnergyMaxInput() {
+    public long getEnergyMaxInput(final ItemStack stack) {
         return Long.MAX_VALUE;
     }
 
     @Override
-    public long getEnergyMaxOutput() {
+    public long getEnergyMaxOutput(final ItemStack stack) {
         return Long.MAX_VALUE;
     }
 }

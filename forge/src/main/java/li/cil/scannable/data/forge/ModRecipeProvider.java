@@ -3,29 +3,29 @@ package li.cil.scannable.data.forge;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.*;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraftforge.common.Tags;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static li.cil.scannable.common.item.Items.*;
 
 public final class ModRecipeProvider extends RecipeProvider {
-    public ModRecipeProvider(final DataGenerator generator) {
-        super(generator);
+    public ModRecipeProvider(final PackOutput output) {
+        super(output);
     }
 
     @Override
-    protected void buildCraftingRecipes(final Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(SCANNER.get())
+    protected void buildRecipes(final Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, SCANNER.get())
             .pattern("i i")
             .pattern("brb")
             .pattern("gqg")
@@ -38,7 +38,7 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.MINESHAFT)))
             .save(consumer);
 
-        ShapedRecipeBuilder.shaped(BLANK_MODULE.get())
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BLANK_MODULE.get())
             .pattern("ggg")
             .pattern("crc")
             .pattern("cnc")
@@ -61,7 +61,7 @@ public final class ModRecipeProvider extends RecipeProvider {
     }
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final TagKey<Item> ingredient) {
-        return ShapelessRecipeBuilder.shapeless(item)
+        return ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, item)
             .requires(BLANK_MODULE.get())
             .requires(ingredient)
             .group("scanner_module")
@@ -69,7 +69,7 @@ public final class ModRecipeProvider extends RecipeProvider {
     }
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final Item ingredient) {
-        return ShapelessRecipeBuilder.shapeless(item)
+        return ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, item)
             .requires(BLANK_MODULE.get())
             .requires(ingredient)
             .group("scanner_module")

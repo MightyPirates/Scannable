@@ -2,7 +2,7 @@ package li.cil.scannable.client.scanning.filter;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -31,7 +31,7 @@ public final class BlockCacheScanFilter implements Predicate<BlockState> {
 
     private static Collection<Block> buildCache(final Collection<Predicate<BlockState>> filters) {
         final Set<Block> cache = new HashSet<>();
-        Registry.BLOCK.forEach(block -> {
+        BuiltInRegistries.BLOCK.forEach(block -> {
             final BlockState blockState = block.defaultBlockState();
             if (filters.stream().anyMatch(f -> f.test(blockState))) {
                 cache.add(blockState.getBlock());

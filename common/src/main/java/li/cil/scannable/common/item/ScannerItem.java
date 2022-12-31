@@ -9,7 +9,6 @@ import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerContainer;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -21,7 +20,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -44,19 +42,6 @@ public final class ScannerItem extends ModItem {
 
     // --------------------------------------------------------------------- //
     // Item
-
-    @Override
-    public void fillItemCategory(final CreativeModeTab group, final NonNullList<ItemStack> items) {
-        super.fillItemCategory(group, items);
-
-        if (allowedIn(group) && CommonConfig.useEnergy) {
-            final ItemStack stack = new ItemStack(this);
-            ItemEnergyStorage.of(stack).ifPresent(energy -> {
-                energy.receiveEnergy(Integer.MAX_VALUE, false);
-                items.add(stack);
-            });
-        }
-    }
 
     @Override
     public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {

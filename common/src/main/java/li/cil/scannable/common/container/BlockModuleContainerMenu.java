@@ -1,7 +1,7 @@
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -27,7 +27,7 @@ public class BlockModuleContainerMenu extends AbstractModuleContainerMenu {
 
     @Override
     public void setItemAt(final int index, final ResourceLocation name) {
-        Registry.BLOCK.getOptional(name).ifPresent(block -> {
+        BuiltInRegistries.BLOCK.getOptional(name).ifPresent(block -> {
             final ItemStack stack = getPlayer().getItemInHand(getHand());
             ConfigurableBlockScannerModuleItem.setBlockAt(stack, index, block);
         });

@@ -46,7 +46,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    modRuntimeOnly "curse.maven:jei-238222:3884337"
+//    modRuntimeOnly "curse.maven:jei-238222:3884337"
 }
 
 processResources {

@@ -9,11 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public final class SoundManager {
-    private static final SoundEvent SCANNER_CHARGE = new SoundEvent(new ResourceLocation(API.MOD_ID, "scanner_charge"));
-    private static final SoundEvent SCANNER_ACTIVATE = new SoundEvent(new ResourceLocation(API.MOD_ID, "scanner_activate"));
+    private static final SoundEvent SCANNER_CHARGE = SoundEvent.createVariableRangeEvent(new ResourceLocation(API.MOD_ID, "scanner_charge"));
+    private static final SoundEvent SCANNER_ACTIVATE = SoundEvent.createVariableRangeEvent(new ResourceLocation(API.MOD_ID, "scanner_activate"));
 
     @Nullable
     private static SimpleSoundInstance currentChargingSound;

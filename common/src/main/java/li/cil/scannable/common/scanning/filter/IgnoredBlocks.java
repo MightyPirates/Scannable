@@ -1,7 +1,7 @@
 package li.cil.scannable.common.scanning.filter;
 
 import li.cil.scannable.common.config.CommonConfig;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -33,17 +33,17 @@ public enum IgnoredBlocks {
 
         final Set<Block> ignoredBlocks = new HashSet<>();
         for (final ResourceLocation location : CommonConfig.ignoredBlocks) {
-            Registry.BLOCK.getOptional(location).ifPresent(ignoredBlocks::add);
+            BuiltInRegistries.BLOCK.getOptional(location).ifPresent(ignoredBlocks::add);
         }
 
         final List<TagKey<Block>> ignoredTags = new ArrayList<>();
-        Registry.BLOCK.getTagNames().forEach(namedTag -> {
+        BuiltInRegistries.BLOCK.getTagNames().forEach(namedTag -> {
             if (CommonConfig.ignoredBlockTags.contains(namedTag.location())) {
                 ignoredTags.add(namedTag);
             }
         });
 
-        for (final Block block : Registry.BLOCK) {
+        for (final Block block : BuiltInRegistries.BLOCK) {
             final BlockState blockState = block.defaultBlockState();
             if (ignoredTags.stream().anyMatch(blockState::is)) {
                 ignoredBlocks.add(blockState.getBlock());
