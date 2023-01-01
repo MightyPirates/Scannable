@@ -133,6 +133,6 @@ modrinth {
     uploadFile = jar
     gameVersions = [rootProject.minecraft_version]
     dependencies {
-        required.project "lhGA9TYQ" // Architectury API
+        required.project "architectury-api"
     }
 }
