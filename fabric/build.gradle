@@ -156,5 +156,6 @@ modrinth {
     dependencies {
         required.project "fabric-api"
         required.project "architectury-api"
+        required.project "forge-config-api-port"
     }
 }
