@@ -114,7 +114,7 @@ curseforge {
         releaseType = "release"
         changelogType = "markdown"
         changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
-        addGameVersion project.name
+        addGameVersion "Forge"
         addGameVersion rootProject.minecraft_version
         addGameVersion "Java 17"
         relations {
