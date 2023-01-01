@@ -48,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["./build/libs/*.jar"]'
+          asset_paths: '["./forge/build/libs/*.jar","./fabric/build/libs/*.jar"]'
 
       - name: Publish to Github Packages
         run: gradle -Psemver='${{ steps.split_tag.outputs._1 }}' publish
