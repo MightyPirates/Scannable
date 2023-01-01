@@ -120,6 +120,10 @@ curseforge {
         relations {
             requiredDependency "architectury-api"
         }
+        mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
+        afterEvaluate {
+            uploadTask.dependsOn(remapJar)
+        }
     }
 }
 
