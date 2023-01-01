@@ -152,7 +152,7 @@ modrinth {
     uploadFile = jar
     gameVersions = [rootProject.minecraft_version]
     dependencies {
-        required.project 'P7dR8mSH' // Fabric API
-        required.project 'lhGA9TYQ' // Architectury API
+        required.project "fabric-api"
+        required.project "architectury-api"
     }
 }
