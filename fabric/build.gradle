@@ -129,6 +129,7 @@ curseforge {
         addGameVersion rootProject.minecraft_version
         addGameVersion "Java 17"
         relations {
+            requiredDependency "fabric-api"
             requiredDependency "architectury-api"
             requiredDependency "forge-config-api-port-fabric"
         }
