@@ -149,7 +149,7 @@ modrinth {
     versionNumber = "MC${rootProject.minecraft_version}-${project.name}-${rootProject.semver}"
     versionName = "${rootProject.archives_base_name}-${project.version}"
     versionType = 'release'
-    uploadFile = jar
+    uploadFile = remapJar
     gameVersions = [rootProject.minecraft_version]
     dependencies {
         required.project "fabric-api"
