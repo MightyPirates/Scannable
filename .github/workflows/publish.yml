@@ -36,6 +36,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew -Psemver='${{ steps.split_tag.outputs._1 }}' build
 
+      - name: Remove extra JARs
+        run: |
+          rm fabric/build/libs/*-dev-shadow.jar
+          rm fabric/build/libs/*-sources.jar
+          rm forge/build/libs/*-dev-shadow.jar
+          rm forge/build/libs/*-sources.jar
+
       - name: Add Artifacts to Github Release
         uses: alexellis/upload-assets@0.3.0
         env:
