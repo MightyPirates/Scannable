@@ -136,6 +136,7 @@ modrinth {
     versionType = "release"
     uploadFile = remapJar
     gameVersions = [rootProject.minecraft_version]
+    loaders = ["forge"]
     dependencies {
         required.project "architectury-api"
     }
