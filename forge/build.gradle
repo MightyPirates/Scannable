@@ -14,11 +14,11 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig "scannable-common.mixins.json"
-        mixinConfig "scannable.mixins.json"
+        mixinConfig "${mod_id}-common.mixins.json"
+        mixinConfig "${mod_id}.mixins.json"
 
         dataGen {
-            mod "scannable"
+            mod "${mod_id}"
         }
     }
 
@@ -66,7 +66,7 @@ shadowJar {
 }
 
 remapJar {
-    input.set shadowJar.archiveFile
+    inputFile.set(shadowJar.archiveFile)
     dependsOn shadowJar
     classifier null
 }
@@ -90,7 +90,7 @@ components.java {
 publishing {
     publications {
         mavenForge(MavenPublication) {
-            artifactId = "${rootProject.archives_base_name}-${rootProject.minecraft_version}-${project.name}"
+            artifactId = "${mod_id}-${rootProject.minecraft_version}-${project.name}"
             from components.java
         }
     }
@@ -132,7 +132,7 @@ modrinth {
     projectId = rootProject.modrinth_project_id
     changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
     versionNumber = "MC${rootProject.minecraft_version}-${project.name}-${rootProject.semver}"
-    versionName = "${rootProject.archives_base_name}-${project.version}"
+    versionName = "${mod_id}-${project.version}"
     versionType = "release"
     uploadFile = remapJar
     gameVersions = [rootProject.minecraft_version]

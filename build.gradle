@@ -45,6 +45,9 @@ allprojects {
     archivesBaseName = "${rootProject.archives_base_name}-MC${rootProject.minecraft_version}-${project.name}"
     version = "${rootProject.semver}+${getGitRef()}"
     group = rootProject.maven_group
+    ext {
+        mod_id = rootProject.archives_base_name
+    }
 
     repositories {
         maven {

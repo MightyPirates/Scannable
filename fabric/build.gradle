@@ -16,7 +16,7 @@ loom {
             name "Data Generation"
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
-            vmArg "-Dfabric-api.datagen.modid=scannable"
+            vmArg "-Dfabric-api.datagen.modid=${mod_id}"
             vmArg "-Dfabric-api.datagen.strict-validation"
 
             runDir "build/datagen"
@@ -33,7 +33,6 @@ configurations {
 }
 
 repositories {
-    maven { url "https://maven.architectury.dev/" }
     maven { url "https://maven.shedaniel.me" }
     maven { url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
     mavenCentral()
@@ -77,7 +76,7 @@ shadowJar {
 
 remapJar {
     injectAccessWidener = true
-    input.set shadowJar.archiveFile
+    inputFile.set(shadowJar.archiveFile)
     dependsOn shadowJar
     classifier null
 }
@@ -101,7 +100,7 @@ components.java {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = "${rootProject.archives_base_name}-${rootProject.minecraft_version}-${project.name}"
+            artifactId = "${mod_id}-${rootProject.minecraft_version}-${project.name}"
             from components.java
         }
     }
@@ -148,7 +147,7 @@ modrinth {
     projectId = rootProject.modrinth_project_id
     changelog = System.getenv("CHANGELOG") ?: "Changelog not available."
     versionNumber = "MC${rootProject.minecraft_version}-${project.name}-${rootProject.semver}"
-    versionName = "${rootProject.archives_base_name}-${project.version}"
+    versionName = "${mod_id}-${project.version}"
     versionType = "release"
     uploadFile = remapJar
     gameVersions = [rootProject.minecraft_version]
