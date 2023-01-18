@@ -17,7 +17,7 @@ Scan the area for points of interest.
 [[dependencies.scannable]]
 modId = "forge"
 mandatory = true
-versionRange = "[44,)"
+versionRange = "[44.0.48,)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.scannable]]
@@ -30,6 +30,6 @@ side = "BOTH"
 [[dependencies.scannable]]
 modId = "architectury"
 mandatory = true
-versionRange = "[7,)"
+versionRange = "[7.0.66,)"
 ordering = "AFTER"
 side = "BOTH"
