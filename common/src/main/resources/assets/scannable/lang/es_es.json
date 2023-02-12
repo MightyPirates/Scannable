@@ -1,0 +1,43 @@
+{
+  "itemGroup.scannable.common": "Scannable",
+
+  "item.scannable.scanner": "Escáner",
+  "item.scannable.scanner.desc": "Use para buscar puntos de interés cercanos.",
+  "item.scannable.scanner.energy": "Energía: %s/%s",
+  "item.scannable.blank_module": "Módulo de escáner en blanco",
+  "item.scannable.range_module": "Módulo de escáner: Rango",
+  "item.scannable.range_module.desc": "Aumenta el rango de escaneos.",
+  "item.scannable.friendly_entity_module": "Módulo de escáner: Animales",
+  "item.scannable.friendly_entity_module.desc": "Detecta entidades pacificas.",
+  "item.scannable.hostile_entity_module": "Módulo de escáner: Monstruos",
+  "item.scannable.hostile_entity_module.desc": "Detecta entidades hostiles.",
+  "item.scannable.common_ores_module": "Módulo de escáner: Minerales comunes",
+  "item.scannable.common_ores_module.desc": "Detecta minerales comunes (ej. carbón, hierro).",
+  "item.scannable.rare_ores_module": "Módulo de escáner: Minerales raros",
+  "item.scannable.rare_ores_module.desc": "Detecta minerales raros (ej. diamantee, esmeralda).",
+  "item.scannable.block_module": "Módulo de escáner: Bloque",
+  "item.scannable.block_module.desc": "Detecta bloques configurados. Use en un bloque para agregarlo a la configuración. Use en el aire para administrar la configuración.",
+  "item.scannable.block_module.list": "Bloques configurados:",
+  "item.scannable.fluid_module": "Módulo de escáner: fluidos",
+  "item.scannable.fluid_module.desc": "Detecta fluidos (ej. agua, lava).",
+  "item.scannable.entity_module": "Módulo Escáner: Entidad",
+  "item.scannable.entity_module.desc": "Detecta entidades vivas configuradas. Use en una entidad para agregarla a la configuración. Use en el aire para administrar la configuración",
+  "item.scannable.entity_module.list": "Entidades configuradas:",
+
+  "tooltip.scannable.module.energy_cost": "Costo de energía: %s",
+  "tooltip.scannable.list_item": "§7- §f%s§r",
+
+  "gui.scannable.scanner.active_modules": "Módulos",
+  "gui.scannable.scanner.active_modules.desc": "Estos son los módulos activos que se utilizan al realizar un escaneo.",
+  "gui.scannable.scanner.inactive_modules": "Inactivo",
+  "gui.scannable.scanner.inactive_modules.desc": "Estas son ranuras para almacenar módulos adicionales. No se utilizan al realizar un escaneo.",
+  "gui.scannable.scanner.progress": "Cargando... %s%%",
+  "gui.scannable.block_module.list": "Blques",
+  "gui.scannable.entity_module.list": "Entidades",
+  "gui.scannable.overlay.distance": "%s (%sm)",
+
+  "message.scannable.no_scan_modules": "No hay ningún módulo de escaneo instalado.",
+  "message.scannable.not_enough_energy": "No hay suficiente energía.",
+  "message.scannable.block_ignored": "Bloque inválido.",
+  "message.scannable.no_free_slots": "No hay ranuras libres."
+}
