@@ -97,25 +97,25 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         scanFilterKeys.addAll(filterByRadius.keySet());
         scanFilterKeys.sort((a, b) -> -Integer.compare(a, b));
 
-        if (scanFilterKeys.size() > 0) {
+        if (!scanFilterKeys.isEmpty()) {
             this.radius = scanFilterKeys.getInt(0);
             for (final int r : scanFilterKeys) {
                 scanFilterLayers.add(new ScanFilterLayer(r, filterByRadius.get(r)));
             }
 
-            final BlockPos minBlockPos = new BlockPos(center).offset(-this.radius, -this.radius, -this.radius);
-            final BlockPos maxBlockPos = new BlockPos(center).offset(this.radius, this.radius, this.radius);
+            final BlockPos minBlockPos = BlockPos.containing(center).offset(-this.radius, -this.radius, -this.radius);
+            final BlockPos maxBlockPos = BlockPos.containing(center).offset(this.radius, this.radius, this.radius);
             final ChunkPos minChunkPos = new ChunkPos(minBlockPos);
             final ChunkPos maxChunkPos = new ChunkPos(maxBlockPos);
 
-            final int minChunkSectionIndex = Math.max(player.getLevel().getSectionIndex(minBlockPos.getY()), 0);
-            final int maxChunkSectionIndex = Math.min(player.getLevel().getSectionIndex(maxBlockPos.getY()), player.getLevel().getSectionsCount() - 1);
+            final int minChunkSectionIndex = Math.max(player.level().getSectionIndex(minBlockPos.getY()), 0);
+            final int maxChunkSectionIndex = Math.min(player.level().getSectionIndex(maxBlockPos.getY()), player.level().getSectionsCount() - 1);
 
             for (int chunkSectionIndex = minChunkSectionIndex; chunkSectionIndex <= maxChunkSectionIndex; chunkSectionIndex++) {
                 for (int chunkZ = minChunkPos.z; chunkZ <= maxChunkPos.z; chunkZ++) {
                     for (int chunkX = minChunkPos.x; chunkX <= maxChunkPos.x; chunkX++) {
                         final ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-                        final int chunkY = player.getLevel().getSectionYFromSectionIndex(chunkSectionIndex);
+                        final int chunkY = player.level().getSectionYFromSectionIndex(chunkSectionIndex);
 
                         final double dx = Math.min(
                             Math.abs(chunkPos.getMinBlockX() - center.x),
@@ -146,7 +146,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     @Override
     public void computeScanResults() {
-        final Level level = player.level;
+        final Level level = player.level();
         for (int i = 0; i < chunkSectionsPerTick; i++) {
             if (currentChunkSection >= pendingChunkSections.size()) {
                 return;
@@ -170,8 +170,9 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 continue;
             }
 
+            final int bottomBlockY = SectionPos.sectionToBlockCoord(chunk.getSectionYFromSectionIndex(chunkSectionIndex));
             final PalettedContainer<BlockState> palette = section.getStates();
-            final BlockPos origin = chunk.getPos().getWorldPosition().offset(0, section.bottomBlockY(), 0);
+            final BlockPos origin = chunk.getPos().getWorldPosition().offset(0, bottomBlockY, 0);
             final int originX = origin.getX();
             final int originY = origin.getY();
             final int originZ = origin.getZ();
@@ -275,7 +276,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         // Re-render hands into depth buffer to avoid rendering overlay on top of player hands.
         if (Minecraft.getInstance().gameRenderer.renderHand) {
-            final var oldProjectionMatrix = RenderSystem.getProjectionMatrix();
+            RenderSystem.backupProjectionMatrix();
             RenderSystem.colorMask(false, false, false, false);
             poseStack.pushPose();
             try {
@@ -285,7 +286,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             }
             poseStack.popPose();
             RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.setProjectionMatrix(oldProjectionMatrix);
+            RenderSystem.restoreProjectionMatrix();
         }
 
         shader.safeGetUniform("time").set((System.currentTimeMillis() - renderStartTime) / 1000.0f);
@@ -389,7 +390,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         void bake(final BlockGetter level) {
             final BlockState blockState = block.defaultBlockState();
 
-            color = blockState.getMapColor(level, new BlockPos(bounds.getCenter())).col;
+            color = blockState.getMapColor(level, BlockPos.containing(bounds.getCenter())).col;
 
             final FluidState fluidState = blockState.getFluidState();
             if (!fluidState.isEmpty()) {
@@ -423,7 +424,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             render(buffer, new PoseStack());
-            vbo = new VertexBuffer();
+            vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
             vbo.bind();
             vbo.upload(buffer.end());
             VertexBuffer.unbind();

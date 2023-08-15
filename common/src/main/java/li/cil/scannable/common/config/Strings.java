@@ -8,6 +8,8 @@ import static net.minecraft.ChatFormatting.*;
 public final class Strings {
     private static final String TOOLTIP_LIST_ITEM_FORMAT = "tooltip.scannable.list_item";
 
+    public static final Component CREATIVE_TAB_TITLE = Component.translatable("itemGroup.scannable.common");
+
     public static final Component TOOLTIP_BLOCKS_LIST_CAPTION = Component.translatable("item.scannable.block_module.list").withStyle(GRAY);
     public static final Component TOOLTIP_ENTITIES_LIST_CAPTION = Component.translatable("item.scannable.entity_module.list").withStyle(GRAY);
 

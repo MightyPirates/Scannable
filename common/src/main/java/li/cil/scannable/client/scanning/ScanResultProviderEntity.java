@@ -55,7 +55,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         }
 
         entities.clear();
-        for (final Entity entity : player.level.getEntities().getAll()) {
+        for (final Entity entity : player.level().getEntities().getAll()) {
             entities.add(entity);
         }
         currentEntityIndex = 0;

@@ -7,7 +7,7 @@ import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -36,8 +36,8 @@ public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfi
     }
 
     @Override
-    protected void renderConfiguredItem(final Block block, final int x, final int y) {
-        Minecraft.getInstance().getItemRenderer().renderGuiItem(new ItemStack(block.asItem()), x, y);
+    protected void renderConfiguredItem(final GuiGraphics graphics, final Block block, final int x, final int y) {
+        graphics.renderFakeItem(new ItemStack(block.asItem()), x, y);
     }
 
     @Override

@@ -6,13 +6,14 @@ import li.cil.scannable.common.tags.ItemTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraftforge.common.data.BlockTagsProvider;
+import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
 
 public final class ModItemTagsProvider extends ItemTagsProvider {
-    public ModItemTagsProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider, final BlockTagsProvider blockTagsProvider, final ExistingFileHelper existingFileHelper) {
+    public ModItemTagsProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider, final CompletableFuture<TagsProvider.TagLookup<Block>> blockTagsProvider, final ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, blockTagsProvider, API.MOD_ID, existingFileHelper);
     }
 

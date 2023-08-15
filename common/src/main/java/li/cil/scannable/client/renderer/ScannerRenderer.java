@@ -112,7 +112,7 @@ public enum ScannerRenderer {
         RenderSystem.setShader(Shaders::getScanEffectShader);
 
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, width, 0, height, 1, 100));
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, width, 0, height, 1, 100), VertexSorting.ORTHOGRAPHIC_Z);
 
         final Tesselator tesselator = Tesselator.getInstance();
         final BufferBuilder buffer = tesselator.getBuilder();

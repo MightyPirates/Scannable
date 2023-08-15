@@ -121,7 +121,7 @@ public final class ScannerItem extends ModItem {
     @Override
     public void onUseTick(final Level level, final LivingEntity entity, final ItemStack stack, final int count) {
         super.onUseTick(level, entity, stack, count);
-        if (entity.level.isClientSide()) {
+        if (entity.level().isClientSide()) {
             ScanManager.updateScan(entity, false);
         }
     }

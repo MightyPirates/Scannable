@@ -7,7 +7,7 @@ import li.cil.scannable.util.config.*;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 @Type(ConfigType.CLIENT)
 public final class ClientConfig {
@@ -41,8 +41,8 @@ public final class ClientConfig {
     @KeyValueTypes(keyType = ResourceLocation.class, valueType = int.class,
         valueSerializer = @CustomSerializer(serializer = "toHexString", deserializer = "fromHexString"))
     public static Object2IntMap<ResourceLocation> fluidTagColors = Util.make(new Object2IntOpenHashMap<>(), c -> {
-        c.put(FluidTags.WATER.location(), MaterialColor.WATER.col);
-        c.put(FluidTags.LAVA.location(), MaterialColor.TERRACOTTA_ORANGE.col);
+        c.put(FluidTags.WATER.location(), MapColor.WATER.col);
+        c.put(FluidTags.LAVA.location(), MapColor.TERRACOTTA_ORANGE.col);
     });
 
     @SuppressWarnings("unused") // Referenced in annotations.

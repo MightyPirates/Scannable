@@ -3,6 +3,7 @@ package li.cil.scannable.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
@@ -148,7 +149,7 @@ public final class ScanManager {
         }
 
         for (final ScanResultProvider provider : collectingProviders) {
-            provider.collectScanResults(entity.level, result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+            provider.collectScanResults(entity.level(), result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             provider.reset();
         }
 
@@ -213,7 +214,7 @@ public final class ScanManager {
             final ScanResultProvider provider = entry.getKey();
             final List<ScanResult> results = entry.getValue();
 
-            while (results.size() > 0) {
+            while (!results.isEmpty()) {
                 final int index = results.size() - 1;
                 final Vec3 position = results.get(index).getPosition();
                 if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
@@ -254,7 +255,7 @@ public final class ScanManager {
 
             // Using shaders, so we render as game overlay; restore matrices as used for level rendering.
             RenderSystem.backupProjectionMatrix();
-            RenderSystem.setProjectionMatrix(worldProjectionMatrix);
+            RenderSystem.setProjectionMatrix(worldProjectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
             RenderSystem.getModelViewStack().pushPose();
             RenderSystem.getModelViewStack().last().pose().identity();
             RenderSystem.applyModelViewMatrix();

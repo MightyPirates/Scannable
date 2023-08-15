@@ -1,13 +1,17 @@
 package li.cil.scannable.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.item.ScannerItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 public final class OverlayRenderer {
     private static final ResourceLocation PROGRESS = new ResourceLocation(API.MOD_ID, "textures/gui/overlay/scanner_progress.png");
 
-    public static void render(final PoseStack matrixStack, final float partialTick) {
+    public static void render(final GuiGraphics graphics, final float partialTick) {
         final Minecraft mc = Minecraft.getInstance();
         final Player player = mc.player;
         if (player == null) {
@@ -124,6 +128,6 @@ public final class OverlayRenderer {
         tesselator.end();
 
         final Component label = Strings.progress(Mth.floor(progress * 100));
-        mc.font.drawShadow(matrixStack, label, right + 12, midY - mc.font.lineHeight * 0.5f, 0xCCAACCEE);
+        graphics.drawString(mc.font, label, right + 12, midY - mc.font.lineHeight / 2, 0xCCAACCEE, true);
     }
 }

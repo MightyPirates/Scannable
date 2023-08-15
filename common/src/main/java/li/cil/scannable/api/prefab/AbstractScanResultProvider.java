@@ -34,7 +34,7 @@ import static li.cil.scannable.util.UnitConversion.toRadians;
 public abstract class AbstractScanResultProvider implements ScanResultProvider {
     protected Player player;
     protected Vec3 center;
-    protected float radius;
+    protected int radius;
 
     // --------------------------------------------------------------------- //
     // ScanResultProvider
@@ -43,14 +43,14 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     public void initialize(final Player player, final Collection<ItemStack> modules, final Vec3 center, final float radius, final int scanTicks) {
         this.player = player;
         this.center = center;
-        this.radius = radius;
+        this.radius = (int)radius;
     }
 
     @Override
     public void reset() {
         player = null;
         center = null;
-        radius = 0f;
+        radius = 0;
     }
 
     // --------------------------------------------------------------------- //
@@ -102,7 +102,9 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
             drawQuad(bufferSource.getBuffer(getRenderLayer()), poseStack, width, font.lineHeight + 5, 0, 0, 0, 0.6f);
 
             poseStack.popPose();
-            font.drawInBatch(text, 12, -4, 0xFFFFFFFF, true, poseStack.last().pose(), bufferSource, true, 0, 0xf000f0);
+            font.drawInBatch(text, 12, -4, 0xFFFFFFFF, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, 0xf000f0);
+            // HACK This is a workaround for text shadow rendering on top of main text in 1.20.  Can't figure out why.
+            font.drawInBatch(text, 12, -4, 0xFFFFFFFF, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, 0xf000f0);
         }
 
         drawQuad(bufferSource.getBuffer(getRenderLayer(icon)), poseStack, 16, 16);

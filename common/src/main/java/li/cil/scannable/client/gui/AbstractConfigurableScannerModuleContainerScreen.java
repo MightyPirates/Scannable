@@ -1,7 +1,5 @@
 package li.cil.scannable.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.container.AbstractModuleContainerMenu;
@@ -9,8 +7,8 @@ import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.RemoveConfiguredModuleItemAtMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,7 +37,6 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
         this.inventory = inventory;
 
         imageHeight = 133;
-        passEvents = false;
         inventoryLabelX = 8;
         inventoryLabelY = 39;
     }
@@ -52,7 +49,7 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
 
     protected abstract Component getItemName(final TItem item);
 
-    protected abstract void renderConfiguredItem(final TItem item, final int x, final int y);
+    protected abstract void renderConfiguredItem(final GuiGraphics graphics, final TItem item, final int x, final int y);
 
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
     }
@@ -60,10 +57,10 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
     // --------------------------------------------------------------------- //
 
     @Override
-    public void render(final PoseStack poseStack, final int mouseX, final int mouseY, final float partialTicks) {
-        renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
-        renderTooltip(poseStack, mouseX, mouseY);
+    public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTicks) {
+        renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        renderTooltip(graphics, mouseX, mouseY);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -73,15 +70,15 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
 
             if (isHovering(x, y, 16, 16, mouseX, mouseY)) {
                 final TItem item = items.get(slot);
-                renderTooltip(poseStack, getItemName(item), mouseX, mouseY);
+                graphics.renderTooltip(font, getItemName(item), mouseX, mouseY);
             }
         }
     }
 
     @Override
-    protected void renderLabels(final PoseStack poseStack, final int mouseX, final int mouseY) {
-        super.renderLabels(poseStack, mouseX, mouseY);
-        font.draw(poseStack, listCaption, 8, 23, 0x404040);
+    protected void renderLabels(final GuiGraphics graphics, final int mouseX, final int mouseY) {
+        super.renderLabels(graphics, mouseX, mouseY);
+        graphics.drawString(font, listCaption, 8, 23, 0x404040, false);
 
         final ItemStack stack = getHeldItem();
         final List<TItem> items = getConfiguredItems(stack);
@@ -90,23 +87,21 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
             final int y = SLOTS_ORIGIN_Y;
 
             if (isHovering(x, y, 16, 16, mouseX, mouseY)) {
-                renderSlotHighlight(poseStack, x, y, 400);
+                renderSlotHighlight(graphics, x, y, 400);
             }
 
             if (slot < items.size()) {
                 final TItem item = items.get(slot);
-                renderConfiguredItem(item, x, y);
+                renderConfiguredItem(graphics, item, x, y);
             }
         }
     }
 
     @Override
-    protected void renderBg(final PoseStack poseStack, final float partialTicks, final int mouseX, final int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, BACKGROUND);
+    protected void renderBg(final GuiGraphics graphics, final float partialTicks, final int mouseX, final int mouseY) {
         final int x = (width - imageWidth) / 2;
         final int y = (height - imageHeight) / 2;
-        blit(poseStack, x, y, 0, 0, imageWidth, imageHeight);
+        graphics.blit(BACKGROUND, x, y, 0, 0, imageWidth, imageHeight);
     }
 
     @Override

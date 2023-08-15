@@ -9,7 +9,7 @@ import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -49,8 +49,8 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
     }
 
     @Override
-    protected void renderConfiguredItem(final EntityType<?> entityType, final int x, final int y) {
-        renderEntity(x + 8, y + 13, entityType);
+    protected void renderConfiguredItem(final GuiGraphics graphics, final EntityType<?> entityType, final int x, final int y) {
+        renderEntity(graphics, x + 8, y + 13, entityType);
     }
 
     @Override
@@ -58,23 +58,25 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
         if (value.getItem() instanceof SpawnEggItem) {
             final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
             BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType).ifPresent(entityTypeResourceKey ->
-                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, entityTypeResourceKey.location())));
+                    Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, entityTypeResourceKey.location())));
         }
     }
 
-    private void renderEntity(final int x, final int y, final EntityType<?> entityType) {
+    private void renderEntity(final GuiGraphics graphics, final int x, final int y, final EntityType<?> entityType) {
         final Entity entity = getRenderEntity(entityType);
         if (entity == null) {
             return;
         }
 
-        entity.level = menu.getPlayer().level;
+        entity.setLevel(menu.getPlayer().level());
         final EntityDimensions bounds = entityType.getDimensions();
         final float size = Math.max(bounds.width, bounds.height);
         final float scale = 11.0f / size;
 
-        final PoseStack poseStack = new PoseStack();
-        poseStack.translate(x, y, 0);
+        final PoseStack poseStack = graphics.pose();
+        poseStack.pushPose();
+
+        poseStack.translate(x, y, 100);
         poseStack.scale(scale, scale, scale);
         final var quaternion = new Quaternionf().rotationZ(toRadians(180));
         quaternion.mul(new Quaternionf().rotationX(toRadians(20)));
@@ -86,15 +88,14 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
         renderManager.overrideCameraOrientation(quaternion);
         renderManager.setRenderShadow(false);
 
-        final MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        renderManager.render(entity, 0, 0, 0, 0, 1, poseStack, buffer, 0xf000f0);
-        buffer.endBatch();
+        renderManager.render(entity, 0, 0, 0, 0, 1, poseStack, graphics.bufferSource(), 0xf000f0);
 
         renderManager.setRenderShadow(true);
+        poseStack.popPose();
     }
 
     @Nullable
     private Entity getRenderEntity(final EntityType<?> entityType) {
-        return RENDER_ENTITIES.computeIfAbsent(entityType, t -> t.create(menu.getPlayer().level));
+        return RENDER_ENTITIES.computeIfAbsent(entityType, t -> t.create(menu.getPlayer().level()));
     }
 }

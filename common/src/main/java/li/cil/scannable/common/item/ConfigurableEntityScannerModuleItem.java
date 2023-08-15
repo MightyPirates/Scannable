@@ -203,12 +203,12 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             player.swing(hand);
             player.getInventory().setChanged();
         } else {
-            if (!player.level.isClientSide() && !ConfigurableEntityScannerModuleItem.isLocked(stack)) {
+            if (!player.level().isClientSide() && !ConfigurableEntityScannerModuleItem.isLocked(stack)) {
                 player.displayClientMessage(Strings.MESSAGE_NO_FREE_SLOTS, true);
             }
         }
 
         // Always succeed to prevent opening item UI.
-        return InteractionResult.sidedSuccess(player.level.isClientSide());
+        return InteractionResult.sidedSuccess(player.level().isClientSide());
     }
 }
