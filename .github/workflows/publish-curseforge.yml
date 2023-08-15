@@ -7,11 +7,27 @@ on:
         description: 'Mod Version'
         required: true
         default: '0.0.0'
+      changelog:
+        description: 'Changelog'
+        required: true
+        type: string
+      forge:
+        description: 'Publish Forge Version'
+        required: true
+        default: true
+        type: boolean
+      fabric:
+        description: 'Publish Fabric Version'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
@@ -27,15 +43,19 @@ jobs:
             ~/.gradle/wrapper
           key: ubuntu-latest-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: ubuntu-latest-gradle-
+      - name: Build with Gradle
+        run: ./gradlew -Psemver='${{ inputs.version }}' build
 
       - name: Publish to Curseforge (Forge)
-        run: ./gradlew -Psemver='${{ github.event.inputs.version }}' forge:curseforge
+        if: ${{ inputs.forge }}
+        run: ./gradlew -Psemver='${{ inputs.version }}' forge:curseforge
         env:
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          CHANGELOG: ${{ github.event.release.body }}
+          CHANGELOG: ${{ inputs.changelog }}
 
       - name: Publish to Curseforge (Fabric)
-        run: ./gradlew -Psemver='${{ github.event.inputs.version }}' fabric:curseforge
+        if: ${{ inputs.fabric }}
+        run: ./gradlew -Psemver='${{ inputs.version }}' fabric:curseforge
         env:
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          CHANGELOG: ${{ github.event.release.body }}
+          CHANGELOG: ${{ inputs.changelog }}

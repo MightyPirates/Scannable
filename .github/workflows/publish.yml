@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Extract Version from Tag
-        uses: rishabhgupta/split-by@v1
+        uses: rishabhgupta/split-by@v2
         id: split_tag
         with:
           string: ${{ github.event.release.tag_name }}
@@ -44,7 +44,7 @@ jobs:
           rm forge/build/libs/*-sources.jar
 
       - name: Add Artifacts to Github Release
-        uses: alexellis/upload-assets@0.3.0
+        uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
