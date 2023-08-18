@@ -33,3 +33,10 @@ mandatory = true
 versionRange = "[9.1.12,)"
 ordering = "AFTER"
 side = "BOTH"
+[[dependencies.scannable.mc-publish]]
+modrinth = "lhGA9TYQ"
+curseforge = 419699
+
+[mc-publish]
+modrinth = "YqFnwJHf"
+curseforge = 266784

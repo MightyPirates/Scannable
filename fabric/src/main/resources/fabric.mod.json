@@ -40,5 +40,16 @@
     },
     "recommends": {
         "tooltipfix": "*"
+    },
+    "custom": {
+        "mc-publish": {
+            "modrinth": "YqFnwJHf",
+            "curseforge": 266784,
+            "dependencies": [
+                "fabric-api@>=0.83.0+1.20(required){modrinth:P7dR8mSH}{curseforge:306612}",
+                "forgeconfigapiport@>=7.0.0(required){modrinth:ohNO6lps}{curseforge:547434}",
+                "architectury@>=9.1.12(required){modrinth:lhGA9TYQ}{curseforge:419699}"
+            ]
+        }
     }
 }
