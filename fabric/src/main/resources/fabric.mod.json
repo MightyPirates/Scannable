@@ -2,7 +2,6 @@
     "schemaVersion": 1,
     "id": "scannable",
     "version": "${version}",
-
     "name": "Scannable",
     "description": "Scan the area for points of interest.",
     "authors": [
@@ -18,7 +17,6 @@
     ],
     "license": "MIT",
     "icon": "logo.png",
-
     "environment": "*",
     "entrypoints": {
         "main": [
@@ -28,14 +26,14 @@
             "li.cil.scannable.client.fabric.ClientSetupFabric"
         ],
         "fabric-datagen": [
-          "li.cil.scannable.data.fabric.DataGenerators"
+            "li.cil.scannable.data.fabric.DataGenerators"
         ]
     },
     "depends": {
-        "fabric-api": "0.83.0+1.20",
-        "forgeconfigapiport": "7.0.0",
+        "fabric-api": "0.87.0+1.20.1",
+        "forgeconfigapiport": "8.0.0",
         "architectury": "9.1.12",
-        "minecraft": "1.20",
+        "minecraft": "1.20.1",
         "java": ">=17"
     },
     "recommends": {
@@ -46,8 +44,8 @@
             "modrinth": "YqFnwJHf",
             "curseforge": 266784,
             "dependencies": [
-                "fabric-api@>=0.83.0+1.20(required){modrinth:P7dR8mSH}{curseforge:306612}",
-                "forgeconfigapiport@>=7.0.0(required){modrinth:ohNO6lps}{curseforge:547434}",
+                "fabric-api@>=0.87.0+1.20.1(required){modrinth:P7dR8mSH}{curseforge:306612}",
+                "forgeconfigapiport@>=8.0.0(required){modrinth:ohNO6lps}{curseforge:547434}",
                 "architectury@>=9.1.12(required){modrinth:lhGA9TYQ}{curseforge:419699}"
             ]
         }

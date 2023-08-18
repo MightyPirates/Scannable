@@ -46,17 +46,17 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    include modApi("teamreborn:energy:2.3.0") {
+    include modApi("teamreborn:energy:3.0.0") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:7.0.0"
+    modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.0"
 
+    // Not used by mod, just for dev convenience.
+    modRuntimeOnly "curse.maven:tooltipfix-411557:4577194"
     modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:12.0.645") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-
-    modRuntimeOnly "curse.maven:tooltipfix-411557:4577194"
 }
 
 processResources {
