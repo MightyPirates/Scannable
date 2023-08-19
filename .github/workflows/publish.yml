@@ -16,8 +16,8 @@ jobs:
         run: |
           tag=${{ github.event.release.tag_name }}
           parts=(${tag//\// })
-          echo "mc_version=${arrIN[0]}" >> $GITHUB_OUTPUT
-          echo "mod_version=${arrIN[1]}" >> $GITHUB_OUTPUT
+          echo "mc_version=${parts[0]}" >> $GITHUB_OUTPUT
+          echo "mod_version=${parts[1]}" >> $GITHUB_OUTPUT
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -36,14 +36,12 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ubuntu-latest-gradle-
       - name: Build with Gradle
-        run: ./gradlew -Psemver='${{ steps.split_tag.outputs.mod_version }}' build
+        run: ./gradlew -PmodVersion='${{ steps.split_tag.outputs.mod_version }}' build
 
       - name: Remove extra JARs
         run: |
           rm fabric/build/libs/*-dev-shadow.jar
-          rm fabric/build/libs/*-sources.jar
           rm forge/build/libs/*-dev-shadow.jar
-          rm forge/build/libs/*-sources.jar
 
       - name: Add Artifacts to Github Release
         uses: alexellis/upload-assets@0.4.0
