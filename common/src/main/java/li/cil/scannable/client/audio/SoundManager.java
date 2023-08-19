@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public final class SoundManager {

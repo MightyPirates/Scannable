@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.architectury)
     alias(libs.plugins.loom) apply false
     alias(libs.plugins.shadow) apply false
+    alias(libs.plugins.spotless)
 }
 
 val modId: String by project
@@ -70,5 +71,16 @@ subprojects {
                 excludeDirs.add(file(exclude))
             }
         }
+    }
+}
+
+spotless {
+    java {
+        target("*/src/*/java/li/cil/**/*.java")
+
+        endWithNewline()
+        trimTrailingWhitespace()
+        removeUnusedImports()
+        indentWithSpaces()
     }
 }
