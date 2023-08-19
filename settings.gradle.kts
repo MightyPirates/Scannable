@@ -1,8 +1,23 @@
 pluginManagement {
     repositories {
-        maven { url = uri("https://maven.fabricmc.net/") }
-        maven { url = uri("https://maven.architectury.dev/") }
-        maven { url = uri("https://maven.minecraftforge.net/") }
+        maven("https://maven.architectury.dev") {
+            content {
+                includeGroup("architectury-plugin")
+                includeGroupByRegex("dev\\.architectury.*")
+            }
+        }
+        maven("https://maven.fabricmc.net") {
+            content {
+                includeGroup("net.fabricmc")
+                includeGroup("fabric-loom")
+            }
+        }
+        maven("https://maven.minecraftforge.net") {
+            content {
+                includeGroupByRegex("net\\.minecraftforge.*")
+                includeGroup("de.oceanlabs.mcp")
+            }
+        }
         gradlePluginPortal()
     }
 }

@@ -44,6 +44,9 @@ subprojects {
     }
 
     repositories {
+        maven("https://maven.parchmentmc.org") {
+            content { includeGroupByRegex("org\\.parchmentmc.*") }
+        }
         maven {
             url = uri("https://cursemaven.com")
             content { includeGroup("curse.maven") }
@@ -52,7 +55,11 @@ subprojects {
 
     dependencies {
         "minecraft"(rootProject.libs.minecraft)
-        "mappings"(project.extensions.getByName<LoomGradleExtensionAPI>("loom").officialMojangMappings())
+        val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
+        "mappings"(loom.layered {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-$minecraftVersion:${rootProject.libs.versions.parchment.get()}@zip")
+        })
         "compileOnly"("com.google.code.findbugs:jsr305:3.0.2")
     }
 
