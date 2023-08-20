@@ -28,7 +28,7 @@ dependencies {
     modApi(libs.architecturyForge)
 
     // Not used by mod, just for dev convenience.
-    modRuntimeOnly("curse.maven:jei-238222:4690097")
+    modRuntimeOnly(libs.justEnoughItems)
 }
 
 tasks {

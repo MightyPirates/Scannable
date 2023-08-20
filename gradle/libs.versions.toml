@@ -15,11 +15,21 @@ spotless = { id = "com.diffplug.spotless", version = "6.20.0" }
 
 [libraries]
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }
+architecturyApi = { group = "dev.architectury", name = "architectury", version.ref = "architectury" }
+
+# Fabric specific libraries
 fabricLoader = { group = "net.fabricmc", name = "fabric-loader", version = "0.14.22" }
 fabricApi = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabricApi" }
-forge = { group = "net.minecraftforge", name = "forge", version = "1.20.1-47.1.0" }
-architecturyApi = { group = "dev.architectury", name = "architectury", version.ref = "architectury" }
 architecturyFabric = { group = "dev.architectury", name = "architectury-fabric", version.ref = "architectury" }
-architecturyForge = { group = "dev.architectury", name = "architectury-forge", version.ref = "architectury" }
 
 forgeConfigPort = { group = "fuzs.forgeconfigapiport", name = "forgeconfigapiport-fabric", version.ref = "forgeConfigPort" }
+fabricEnergy = { group = "teamreborn", name = "energy", version = "3.0.0" }
+
+tooltipFix = { group = "curse.maven", name = "tooltipfix-411557", version = "4577194" }
+roughlyEnoughItems = { group = "me.shedaniel", name = "RoughlyEnoughItems-fabric", version = "12.0.645" }
+
+# Forge specific libraries
+forge = { group = "net.minecraftforge", name = "forge", version = "1.20.1-47.1.0" }
+architecturyForge = { group = "dev.architectury", name = "architectury-forge", version.ref = "architectury" }
+
+justEnoughItems = { group = "curse.maven", name = "jei-238222", version = "4690097"}

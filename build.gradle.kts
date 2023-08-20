@@ -47,8 +47,7 @@ subprojects {
         maven("https://maven.parchmentmc.org") {
             content { includeGroupByRegex("org\\.parchmentmc.*") }
         }
-        maven {
-            url = uri("https://cursemaven.com")
+        maven("https://cursemaven.com") {
             content { includeGroup("curse.maven") }
         }
     }

@@ -22,9 +22,12 @@ loom {
 }
 
 repositories {
-    maven { url = uri("https://maven.shedaniel.me") }
-    maven { url = uri("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/") }
-    mavenCentral()
+    maven("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/") {
+        content { includeGroup("fuzs.forgeconfigapiport") }
+    }
+    maven("https://maven.shedaniel.me") {
+        content { includeGroup("me.shedaniel") }
+    }
 }
 
 dependencies {
@@ -32,15 +35,14 @@ dependencies {
     modApi(libs.fabricApi)
     modApi(libs.architecturyFabric)
 
-    include(modApi("teamreborn:energy:3.0.0") {
+    modImplementation(libs.forgeConfigPort)
+    include(modApi(libs.fabricEnergy.get().toString()) {
         exclude(group = "net.fabricmc.fabric-api")
     })
 
-    modImplementation(libs.forgeConfigPort)
-
     // Not used by mod, just for dev convenience.
-    modRuntimeOnly("curse.maven:tooltipfix-411557:4577194")
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:12.0.645") {
+    modRuntimeOnly(libs.tooltipFix)
+    modRuntimeOnly(libs.roughlyEnoughItems) {
         exclude(group = "net.fabricmc.fabric-api")
     }
 }
