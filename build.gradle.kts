@@ -37,8 +37,6 @@ subprojects {
         minecraft = minecraftVersion
     }
 
-    project.extra.set("mod_id", modId)
-
     configure<LoomGradleExtensionAPI> {
         silentMojangMappingsLicense()
     }

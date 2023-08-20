@@ -30,10 +30,10 @@
         ]
     },
     "depends": {
-        "fabric-api": "${fabricApiVersion}",
-        "forgeconfigapiport": "${forgeConfigPortVersion}",
-        "architectury": "${architecturyVersion}",
-        "minecraft": "${minecraftVersion}",
+        "fabric-api": ">=${fabricApiVersion}",
+        "forgeconfigapiport": ">=${forgeConfigPortVersion}",
+        "architectury": ">=${architecturyVersion}",
+        "minecraft": ">=${minecraftVersion}",
         "java": ">=17"
     },
     "recommends": {
