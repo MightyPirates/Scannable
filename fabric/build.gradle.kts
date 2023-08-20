@@ -22,11 +22,13 @@ loom {
 }
 
 repositories {
-    maven("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/") {
-        content { includeGroup("fuzs.forgeconfigapiport") }
+    exclusiveContent {
+        forRepository { maven("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/") }
+        filter { includeGroup("fuzs.forgeconfigapiport") }
     }
-    maven("https://maven.shedaniel.me") {
-        content { includeGroup("me.shedaniel") }
+    exclusiveContent {
+        forRepository { maven("https://maven.shedaniel.me") }
+        filter { includeGroup("me.shedaniel") }
     }
 }
 

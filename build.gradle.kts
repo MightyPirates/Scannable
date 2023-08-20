@@ -44,11 +44,13 @@ subprojects {
     }
 
     repositories {
-        maven("https://maven.parchmentmc.org") {
-            content { includeGroupByRegex("org\\.parchmentmc.*") }
+        exclusiveContent {
+            forRepository { maven("https://maven.parchmentmc.org") }
+            filter { includeGroupByRegex("org\\.parchmentmc.*") }
         }
-        maven("https://cursemaven.com") {
-            content { includeGroup("curse.maven") }
+        exclusiveContent {
+            forRepository { maven("https://cursemaven.com") }
+            filter { includeGroup("curse.maven") }
         }
     }
 

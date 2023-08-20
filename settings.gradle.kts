@@ -1,19 +1,22 @@
 pluginManagement {
     repositories {
-        maven("https://maven.architectury.dev") {
-            content {
+        exclusiveContent {
+            forRepository { maven("https://maven.architectury.dev") }
+            filter {
                 includeGroup("architectury-plugin")
                 includeGroupByRegex("dev\\.architectury.*")
             }
         }
-        maven("https://maven.fabricmc.net") {
-            content {
+        exclusiveContent {
+            forRepository { maven("https://maven.fabricmc.net") }
+            filter {
                 includeGroup("net.fabricmc")
                 includeGroup("fabric-loom")
             }
         }
-        maven("https://maven.minecraftforge.net") {
-            content {
+        exclusiveContent {
+            forRepository { maven("https://maven.minecraftforge.net") }
+            filter {
                 includeGroupByRegex("net\\.minecraftforge.*")
                 includeGroup("de.oceanlabs.mcp")
             }
