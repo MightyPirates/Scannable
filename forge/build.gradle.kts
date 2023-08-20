@@ -1,4 +1,7 @@
 val modId: String by project
+val minecraftVersion: String = libs.versions.minecraft.get()
+val forgeVersion: String = libs.versions.forge.get()
+val architecturyVersion: String = libs.versions.architectury.get()
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
@@ -22,7 +25,7 @@ loom {
 
 dependencies {
     forge(libs.forge)
-    modApi(libs.architectury.forge)
+    modApi(libs.architecturyForge)
 
     // Not used by mod, just for dev convenience.
     modRuntimeOnly("curse.maven:jei-238222:4690097")
@@ -30,10 +33,16 @@ dependencies {
 
 tasks {
     processResources {
-        inputs.property("version", project.version)
-
+        val properties = mapOf(
+            "version" to project.version,
+            "minecraftVersion" to minecraftVersion,
+            "loaderVersion" to forgeVersion.split(".").first(),
+            "forgeVersion" to forgeVersion,
+            "architecturyVersion" to architecturyVersion
+        )
+        inputs.properties(properties)
         filesMatching("META-INF/mods.toml") {
-            expand(mapOf("version" to project.version))
+            expand(properties)
         }
     }
 }

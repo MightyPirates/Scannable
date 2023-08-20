@@ -30,10 +30,10 @@
         ]
     },
     "depends": {
-        "fabric-api": "0.87.0+1.20.1",
-        "forgeconfigapiport": "8.0.0",
-        "architectury": "9.1.12",
-        "minecraft": "1.20.1",
+        "fabric-api": "${fabricApiVersion}",
+        "forgeconfigapiport": "${forgeConfigPortVersion}",
+        "architectury": "${architecturyVersion}",
+        "minecraft": "${minecraftVersion}",
         "java": ">=17"
     },
     "recommends": {
@@ -44,9 +44,9 @@
             "modrinth": "YqFnwJHf",
             "curseforge": 266784,
             "dependencies": [
-                "fabric-api@>=0.87.0+1.20.1(required){modrinth:P7dR8mSH}{curseforge:306612}",
-                "forgeconfigapiport@>=8.0.0(required){modrinth:ohNO6lps}{curseforge:547434}",
-                "architectury@>=9.1.12(required){modrinth:lhGA9TYQ}{curseforge:419699}"
+                "fabric-api@>=${fabricApiVersion}(required){modrinth:P7dR8mSH}{curseforge:306612}",
+                "forgeconfigapiport@>=${forgeConfigPortVersion}(required){modrinth:ohNO6lps}{curseforge:547434}",
+                "architectury@>=${architecturyVersion}(required){modrinth:lhGA9TYQ}{curseforge:419699}"
             ]
         }
     }

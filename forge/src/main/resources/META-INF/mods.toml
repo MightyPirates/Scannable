@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[${loaderVersion},)"
 issueTrackerURL = "https://github.com/MightyPirates/Scannable/issues"
 license = "MIT"
 
@@ -17,20 +17,20 @@ Scan the area for points of interest.
 [[dependencies.scannable]]
 modId = "forge"
 mandatory = true
-versionRange = "[47.1.0,)"
+versionRange = "[${forgeVersion},)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.scannable]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.1,)"
+versionRange = "[${minecraftVersion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.scannable]]
 modId = "architectury"
 mandatory = true
-versionRange = "[9.1.12,)"
+versionRange = "[${architecturyVersion},)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -38,5 +38,5 @@ side = "BOTH"
 modrinth = "YqFnwJHf"
 curseforge = 266784
 dependencies = [
-    "architectury@>=9.1.12(required){modrinth:lhGA9TYQ}{curseforge:419699}"
+    "architectury@>=${architecturyVersion}(required){modrinth:lhGA9TYQ}{curseforge:419699}"
 ]

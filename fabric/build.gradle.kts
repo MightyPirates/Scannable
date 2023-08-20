@@ -1,4 +1,8 @@
 val modId: String by project
+val minecraftVersion: String = libs.versions.minecraft.get()
+val fabricApiVersion: String = libs.versions.fabricApi.get()
+val architecturyVersion: String = libs.versions.architectury.get()
+val forgeConfigPortVersion: String = libs.versions.forgeConfigPort.get()
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
@@ -24,15 +28,15 @@ repositories {
 }
 
 dependencies {
-    modImplementation(libs.fabric.loader)
-    modApi(libs.fabric.api)
-    modApi(libs.architectury.fabric)
+    modImplementation(libs.fabricLoader)
+    modApi(libs.fabricApi)
+    modApi(libs.architecturyFabric)
 
     include(modApi("teamreborn:energy:3.0.0") {
         exclude(group = "net.fabricmc.fabric-api")
     })
 
-    modImplementation("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.0")
+    modImplementation(libs.forgeConfigPort)
 
     // Not used by mod, just for dev convenience.
     modRuntimeOnly("curse.maven:tooltipfix-411557:4577194")
@@ -43,10 +47,16 @@ dependencies {
 
 tasks {
     processResources {
-        inputs.property("version", project.version)
-
+        val properties = mapOf(
+            "version" to project.version,
+            "minecraftVersion" to minecraftVersion,
+            "fabricApiVersion" to fabricApiVersion,
+            "architecturyVersion" to architecturyVersion,
+            "forgeConfigPortVersion" to forgeConfigPortVersion
+        )
+        inputs.properties(properties)
         filesMatching("fabric.mod.json") {
-            expand(mapOf("version" to project.version))
+            expand(properties)
         }
     }
 
