@@ -12,12 +12,15 @@ To add a dependency to Scannable for use in your mod, add the following to your 
 
 ```groovy
 repositories {
-    maven {
-        url 'https://cursemaven.com'
-        content { includeGroup "curse.maven" }
+    exclusiveContent {
+        forRepository { maven("https://cursemaven.com") }
+        filter { includeGroup("curse.maven") }
     }
 }
 dependencies {
-    implementation fg.deobf("curse.maven:scannable-266784:3738448")
+    // Forge via ForgeGradle
+    implementation(fg.deobf("curse.maven:scannable-266784:4712704"))
+    // Fabric via Loom
+    modImplementation("curse.maven:scannable-266784:4712705")
 }
 ```
