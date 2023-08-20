@@ -1,6 +1,6 @@
 val modId: String by project
 val minecraftVersion: String = libs.versions.minecraft.get()
-val forgeVersion: String = libs.versions.forge.get()
+val forgeVersion: String = libs.versions.forge.platform.get().split("-")[1]
 val architecturyVersion: String = libs.versions.architectury.get()
 
 loom {
@@ -24,11 +24,11 @@ loom {
 }
 
 dependencies {
-    forge(libs.forge)
-    modApi(libs.architecturyForge)
+    forge(libs.forge.platform)
+    modApi(libs.forge.architectury)
 
     // Not used by mod, just for dev convenience.
-    modRuntimeOnly(libs.justEnoughItems)
+    modRuntimeOnly(libs.forge.justEnoughItems)
 }
 
 tasks {

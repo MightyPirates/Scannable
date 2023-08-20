@@ -10,6 +10,6 @@ loom {
 }
 
 dependencies {
-    modImplementation(libs.fabricLoader)
-    modApi(libs.architecturyApi)
+    modImplementation(libs.fabric.loader)
+    modApi(libs.architectury.api)
 }
