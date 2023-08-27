@@ -9,6 +9,7 @@
     "scannable:block_module",
     "scannable:common_ores_module",
     "scannable:rare_ores_module",
-    "scannable:fluid_module"
+    "scannable:fluid_module",
+    "scannable:chest_module"
   ]
 }

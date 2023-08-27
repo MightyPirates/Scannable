@@ -27,7 +27,8 @@ public final class ModItemTagsProvider extends FabricTagProvider.ItemTagProvider
             key(Items.BLOCK_MODULE.get()),
             key(Items.COMMON_ORES_MODULE.get()),
             key(Items.RARE_ORES_MODULE.get()),
-            key(Items.FLUID_MODULE.get())
+            key(Items.FLUID_MODULE.get()),
+            key(Items.CHEST_MODULE.get())
         );
 
         tag(CommonItemTags.IRON_INGOTS).add(key(net.minecraft.world.item.Items.IRON_INGOT));

@@ -42,6 +42,7 @@ public final class ModItemModelProvider extends FabricModelProvider {
         registerModule(itemModelGenerator, Items.COMMON_ORES_MODULE.get());
         registerModule(itemModelGenerator, Items.RARE_ORES_MODULE.get());
         registerModule(itemModelGenerator, Items.FLUID_MODULE.get());
+        registerModule(itemModelGenerator, Items.CHEST_MODULE.get());
     }
 
     private void registerSimpleItem(final ItemModelGenerators itemModelGenerator, final Item item) {

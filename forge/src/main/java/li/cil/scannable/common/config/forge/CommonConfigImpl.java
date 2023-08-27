@@ -18,4 +18,12 @@ public final class CommonConfigImpl {
             c.add(new ResourceLocation("forge", "ores/tin"));
         });
     }
+
+    public static Set<ResourceLocation> getDefaultChestsTags() {
+        return Util.make(new HashSet<>(), c -> {
+            c.add(Tags.Blocks.CHESTS.location());
+            c.add(Tags.Blocks.BARRELS.location());
+            c.add(new ResourceLocation("minecraft", "shulker_boxes"));
+        });
+    }
 }

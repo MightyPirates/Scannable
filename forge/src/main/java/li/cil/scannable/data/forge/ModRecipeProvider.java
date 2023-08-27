@@ -55,6 +55,7 @@ public final class ModRecipeProvider extends RecipeProvider {
         registerModule(COMMON_ORES_MODULE.get(), Items.COAL).save(consumer);
         registerModule(RARE_ORES_MODULE.get(), Tags.Items.GEMS_DIAMOND).save(consumer);
         registerModule(FLUID_MODULE.get(), Items.WATER_BUCKET).save(consumer);
+        registerModule(CHEST_MODULE.get(), Items.CHEST).save(consumer);
     }
 
     private static ShapelessRecipeBuilder registerModule(final Item item, final TagKey<Item> ingredient) {
