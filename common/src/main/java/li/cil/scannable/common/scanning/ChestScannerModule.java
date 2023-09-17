@@ -29,10 +29,6 @@ public enum ChestScannerModule implements BlockScannerModule {
 
     private Predicate<BlockState> filter;
 
-    public static void clearCache() {
-        INSTANCE.filter = null;
-    }
-
     @Override
     public int getEnergyCost(final ItemStack module) {
         return CommonConfig.energyCostModuleChest;

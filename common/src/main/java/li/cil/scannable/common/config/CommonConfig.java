@@ -50,6 +50,7 @@ public final class CommonConfig {
     @Path("energy") @WorldRestart @Min(0)
     @Comment("Amount of energy used by the entity module per scan.")
     public static int energyCostModuleEntity = 75;
+
     @Path("energy") @WorldRestart @Min(0)
     @Comment("Amount of energy used by the chest module per scan.")
     public static int energyCostModuleChest = 100;
@@ -118,23 +119,24 @@ public final class CommonConfig {
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> ignoredFluidTags = new HashSet<>();
 
-    @ExpectPlatform
-    private static Set<ResourceLocation> getDefaultCommonOreTags() {
-        throw new AssertionError();
-    }
-
     @Path("chests") @WorldRestart
     @Comment("Registry names of blocks considered 'chests', requiring the chest scanner module.")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> commonChestBlocks = new HashSet<>();
+
+    @Path("chests") @WorldRestart
+    @Comment("Registry names of blocks considered 'chests', requiring the chest scanner module.")
+    @ItemType(ResourceLocation.class)
+    public static Set<ResourceLocation> commonChestTags = getDefaultChestsTags();
+
+    @ExpectPlatform
+    private static Set<ResourceLocation> getDefaultCommonOreTags() {
+        throw new AssertionError();
+    }
 
     @ExpectPlatform
     private static Set<ResourceLocation> getDefaultChestsTags() {
         throw new AssertionError();
     }
 
-    @Path("chests") @WorldRestart
-    @Comment("Registry names of blocks considered 'chests', requiring the chest scanner module.")
-    @ItemType(ResourceLocation.class)
-    public static Set<ResourceLocation> commonChestTags = getDefaultChestsTags();
 }
