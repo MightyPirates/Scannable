@@ -2,11 +2,7 @@ package li.cil.scannable.common.scanning.fabric;
 
 import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.scanning.ChestScannerModule;
-import li.cil.scannable.common.scanning.CommonOresBlockScannerModule;
-import li.cil.scannable.common.scanning.FluidBlockScannerModule;
-import li.cil.scannable.common.scanning.RareOresBlockScannerModule;
-import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
+import li.cil.scannable.common.scanning.ProviderCacheManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -21,12 +17,6 @@ public final class ProviderCacheManagerImpl {
     }
 
     private static void clearCaches() {
-        // Reset on any config change, so we also rebuild the filter when resource reload
-        // kicks in which can result in ids changing and thus our cache being invalid.
-        CommonOresBlockScannerModule.clearCache();
-        FluidBlockScannerModule.clearCache();
-        RareOresBlockScannerModule.clearCache();
-        ChestScannerModule.clearCache();
-        IgnoredBlocks.clearCache();
+        ProviderCacheManager.clearCache();
     }
 }
