@@ -1,6 +1,7 @@
 package li.cil.scannable.common.scanning.forge;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.common.scanning.ChestScannerModule;
 import li.cil.scannable.common.scanning.CommonOresBlockScannerModule;
 import li.cil.scannable.common.scanning.FluidBlockScannerModule;
 import li.cil.scannable.common.scanning.RareOresBlockScannerModule;
@@ -25,6 +26,7 @@ public final class ProviderCacheManagerImpl {
         CommonOresBlockScannerModule.clearCache();
         FluidBlockScannerModule.clearCache();
         RareOresBlockScannerModule.clearCache();
+        ChestScannerModule.clearCache();
         IgnoredBlocks.clearCache();
     }
 }

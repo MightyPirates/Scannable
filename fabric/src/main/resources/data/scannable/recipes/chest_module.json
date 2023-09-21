@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "scanner_module",
+  "ingredients": [
+    {
+      "item": "scannable:blank_module"
+    },
+    {
+      "item": "minecraft:chest"
+    }
+  ],
+  "result": {
+    "item": "scannable:chest_module"
+  }
+}
