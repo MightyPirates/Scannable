@@ -6,7 +6,6 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
-import li.cil.scannable.common.config.Constants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -40,7 +39,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
-        return range * Constants.BLOCK_MODULE_RADIUS_MULTIPLIER;
+        return range * CommonConfig.rangeModifierModuleFluid;
     }
 
     @Environment(EnvType.CLIENT)

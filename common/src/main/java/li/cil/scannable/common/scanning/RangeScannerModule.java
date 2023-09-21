@@ -33,6 +33,6 @@ public enum RangeScannerModule implements ScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public float adjustGlobalRange(final float range) {
-        return range + Mth.ceil(CommonConfig.baseScanRadius / 2f);
+        return range + Mth.ceil(CommonConfig.baseScanRadius * CommonConfig.rangeModifierModuleRange);
     }
 }

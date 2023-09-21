@@ -55,14 +55,34 @@ public final class CommonConfig {
     @Comment("Amount of energy used by the chest module per scan.")
     public static int energyCostModuleChest = 100;
 
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative amount of base scan radius added by each installed range module.")
+    public static float rangeModifierModuleRange = 0.5f;
 
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the common ore module.")
+    public static float rangeModifierModuleOreCommon = 0.25f;
+
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the rare ore module.")
+    public static float rangeModifierModuleOreRare = 0.25f;
+
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the block module.")
+    public static float rangeModifierModuleBlock = 0.5f;
+
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the fluid module.")
+    public static float rangeModifierModuleFluid = 0.5f;
+
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the chest module.")
+    public static float rangeModifierModuleChest = 0.25f;
+
+    // TODO Migrate to range category in next major version.
     @Path("general") @WorldRestart @Min(16) @Max(128)
     @Comment("The basic scan radius without range modules. Higher values mean more computational\n" +
-        "overhead and thus potentially worse performance while scanning.\n" +
-        "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
-        "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
-        "value by " + Constants.ORE_MODULE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.BLOCK_MODULE_RADIUS_MULTIPLIER + ".\n" +
-        "Range modules will boost the range by half this value.")
+        "overhead and thus potentially worse performance while scanning.")
     public static int baseScanRadius = 64;
 
     @Path("general") @WorldRestart @Min(1000) @Max(60000 * 5)
@@ -138,5 +158,4 @@ public final class CommonConfig {
     private static Set<ResourceLocation> getDefaultChestsTags() {
         throw new AssertionError();
     }
-
 }

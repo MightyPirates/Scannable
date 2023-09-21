@@ -32,11 +32,13 @@ public abstract class ConfigManager {
         PARSERS.put(boolean.class, ConfigManager::parseBooleanField);
         PARSERS.put(int.class, ConfigManager::parseIntField);
         PARSERS.put(long.class, ConfigManager::parseLongField);
+        PARSERS.put(float.class, ConfigManager::parseFloatField);
         PARSERS.put(double.class, ConfigManager::parseDoubleField);
 
         STRING_CONVERTERS.put(boolean.class, Pair.of(o -> String.valueOf((boolean) o), Boolean::parseBoolean));
         STRING_CONVERTERS.put(int.class, Pair.of(o -> String.valueOf((int) o), Integer::decode));
         STRING_CONVERTERS.put(long.class, Pair.of(o -> String.valueOf((long) o), Long::decode));
+        STRING_CONVERTERS.put(float.class, Pair.of(o -> String.valueOf((float) o), Float::parseFloat));
         STRING_CONVERTERS.put(double.class, Pair.of(o -> String.valueOf((double) o), Double::parseDouble));
         STRING_CONVERTERS.put(String.class, Pair.of(s -> (String) s, s -> s));
         STRING_CONVERTERS.put(UUID.class, Pair.of(Object::toString, UUID::fromString));
@@ -215,6 +217,17 @@ public abstract class ConfigManager {
 
         final var configValue = withCommonAttributes(field, builder)
             .defineInRange(getPath(field), defaultValue, minValue, maxValue, Long.class);
+
+        return new SetFieldConfigItem<>(field, configValue);
+    }
+
+    private static ConfigFieldPair<?> parseFloatField(final Object instance, final Field field, final Builder builder) throws IllegalAccessException {
+        final float defaultValue = field.getFloat(instance);
+        final float minValue = (float) getMin(field);
+        final float maxValue = (float) getMax(field);
+
+        final var configValue = withCommonAttributes(field, builder)
+            .defineInRange(getPath(field), defaultValue, minValue, maxValue, Float.class);
 
         return new SetFieldConfigItem<>(field, configValue);
     }

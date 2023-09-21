@@ -7,7 +7,6 @@ import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
-import li.cil.scannable.common.config.Constants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -42,7 +41,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
-        return range * Constants.ORE_MODULE_RADIUS_MULTIPLIER;
+        return range * CommonConfig.rangeModifierModuleOreCommon;
     }
 
     @Environment(EnvType.CLIENT)
