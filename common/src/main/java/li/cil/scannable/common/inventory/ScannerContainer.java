@@ -43,7 +43,7 @@ public final class ScannerContainer extends SimpleContainer {
     }
 
     public ContainerSlice getInactiveModules() {
-        return new ContainerSlice(this, ACTIVE_MODULE_COUNT, TOTAL_MODULE_COUNT);
+        return new ContainerSlice(this, ACTIVE_MODULE_COUNT, INACTIVE_MODULE_COUNT);
     }
 
     // --------------------------------------------------------------------- //
