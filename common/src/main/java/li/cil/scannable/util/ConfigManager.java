@@ -222,14 +222,15 @@ public abstract class ConfigManager {
     }
 
     private static ConfigFieldPair<?> parseFloatField(final Object instance, final Field field, final Builder builder) throws IllegalAccessException {
-        final float defaultValue = field.getFloat(instance);
-        final float minValue = (float) getMin(field);
-        final float maxValue = (float) getMax(field);
+        // Forge config does not natively support floats, so we map float fields to double config values.
+        final double defaultValue = field.getFloat(instance);
+        final double minValue = getMin(field);
+        final double maxValue = getMax(field);
 
         final var configValue = withCommonAttributes(field, builder)
-            .defineInRange(getPath(field), defaultValue, minValue, maxValue, Float.class);
+            .defineInRange(getPath(field), defaultValue, minValue, maxValue, Double.class);
 
-        return new SetFieldConfigItem<>(field, configValue);
+        return new SetFieldConfigItem<>(field, configValue, value -> (float) (double) value);
     }
 
     private static ConfigFieldPair<?> parseDoubleField(final Object instance, final Field field, final Builder builder) throws IllegalAccessException {
