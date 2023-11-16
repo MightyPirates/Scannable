@@ -6,8 +6,8 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.tags.TagKey;
@@ -16,7 +16,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 import static li.cil.scannable.common.item.Items.*;
 
@@ -26,7 +25,7 @@ public final class ModRecipeProvider extends FabricRecipeProvider {
     }
 
     @Override
-    public void buildRecipes(final Consumer<FinishedRecipe> consumer) {
+    public void buildRecipes(final RecipeOutput consumer) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, SCANNER.get())
             .pattern("i i")
             .pattern("brb")
@@ -37,7 +36,7 @@ public final class ModRecipeProvider extends FabricRecipeProvider {
             .define('g', CommonItemTags.GOLD_INGOTS)
             .define('q', CommonItemTags.QUARTZ_GEMS)
             .group("scanner")
-            .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.MINESHAFT)))
+            .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.MINESHAFT)))
             .save(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BLANK_MODULE.get())

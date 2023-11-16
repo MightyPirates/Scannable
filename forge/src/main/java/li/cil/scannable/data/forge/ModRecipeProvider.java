@@ -11,8 +11,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraftforge.common.Tags;
 
-import java.util.function.Consumer;
-
 import static li.cil.scannable.common.item.Items.*;
 
 public final class ModRecipeProvider extends RecipeProvider {
@@ -21,7 +19,7 @@ public final class ModRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void buildRecipes(final Consumer<FinishedRecipe> consumer) {
+    protected void buildRecipes(final RecipeOutput consumer) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, SCANNER.get())
             .pattern("i i")
             .pattern("brb")
@@ -32,7 +30,7 @@ public final class ModRecipeProvider extends RecipeProvider {
             .define('g', Tags.Items.INGOTS_GOLD)
             .define('q', Tags.Items.GEMS_QUARTZ)
             .group("scanner")
-            .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.MINESHAFT)))
+            .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.MINESHAFT)))
             .save(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BLANK_MODULE.get())

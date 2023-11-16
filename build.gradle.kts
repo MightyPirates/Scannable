@@ -57,7 +57,7 @@ subprojects {
         val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
         "mappings"(loom.layered {
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$minecraftVersion:${rootProject.libs.versions.parchment.get()}@zip")
+            parchment("org.parchmentmc.data:parchment-${rootProject.libs.versions.parchment.minecraft.get()}:${rootProject.libs.versions.parchment.mappings.get()}@zip")
         })
         "compileOnly"("com.google.code.findbugs:jsr305:3.0.2")
     }
