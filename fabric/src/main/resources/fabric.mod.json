@@ -33,7 +33,7 @@
         "fabric-api": ">=${fabricApiVersion}",
         "forgeconfigapiport": ">=${forgeConfigPortVersion}",
         "architectury": ">=${architecturyVersion}",
-        "minecraft": ">=${minecraftVersion}",
+        "minecraft": "${minecraftVersion}",
         "java": ">=17"
     },
     "recommends": {

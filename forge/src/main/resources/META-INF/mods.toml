@@ -23,7 +23,7 @@ side = "BOTH"
 [[dependencies.scannable]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[${minecraftVersion},)"
+versionRange = "${minecraftVersion}"
 ordering = "NONE"
 side = "BOTH"
 
