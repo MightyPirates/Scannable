@@ -52,6 +52,7 @@ public final class Constants {
     public static final String CONFIG_FLUID_BLACKLIST = "config.scannable.fluidBlacklist";
     public static final String CONFIG_FLUID_COLORS = "config.scannable.fluidColors";
     public static final String CONFIG_LOG_BLOCK_DROP_LOOKUP_FAILURES = "config.scannable.logBlockDropLookupFailures";
+    public static final String CONFIG_SCAN_STAY_DURATION = "config.scannable.scanStayDuration";
 
     // --------------------------------------------------------------------- //
     // GUI labels

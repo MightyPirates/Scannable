@@ -63,7 +63,7 @@ minecraft {
 
 repositories {
     maven { url "http://dvs1.progwml6.com/files/maven" }
-    maven { url = "http://maven.ic2.player.to/" }
+    maven { url = "https://modmaven.dev/" }
     maven { url = "http://maven.covers1624.net" }
 }
 

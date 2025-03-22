@@ -80,6 +80,12 @@ public final class Settings {
     @Config.RequiresWorldRestart
     public static int energyCostModuleEntity = 75;
 
+    @Config.LangKey(Constants.CONFIG_SCAN_STAY_DURATION)
+    @Config.Comment("How long the results from a scan should remain visible (in milliseconds).\n" +
+                    "Set to -1 to disable the scan stay duration.")
+    @Config.RangeInt(min = -1)
+    public static int scanStayDuration = 10000;
+
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
     @Config.Comment("The basic scan radius without range modules.\n" +
                     "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
@@ -328,6 +334,10 @@ public final class Settings {
 
     public static int getEnergyCostModuleEntity() {
         return serverSettings != null ? serverSettings.energyCostModuleEntity : energyCostModuleEntity;
+    }
+
+    public static int getScanStayDuration() {
+        return serverSettings != null ? serverSettings.scanStayDuration : scanStayDuration;
     }
 
     public static int getBaseScanRadius() {

@@ -16,6 +16,7 @@ public final class ServerSettings {
     final int energyCostModuleStructure;
     final int energyCostModuleFluid;
     final int energyCostModuleEntity;
+    final int scanStayDuration;
     final int baseScanRadius;
     final String[] blockBlacklist;
     final String[] oresBlacklist;
@@ -38,6 +39,7 @@ public final class ServerSettings {
         energyCostModuleStructure = packet.readInt();
         energyCostModuleFluid = packet.readInt();
         energyCostModuleEntity = packet.readInt();
+        scanStayDuration = packet.readInt();
         baseScanRadius = packet.readInt();
         blockBlacklist = readStringArray(packet);
         oresBlacklist = readStringArray(packet);
@@ -61,6 +63,7 @@ public final class ServerSettings {
         energyCostModuleStructure = Settings.energyCostModuleStructure;
         energyCostModuleFluid = Settings.energyCostModuleFluid;
         energyCostModuleEntity = Settings.energyCostModuleEntity;
+        scanStayDuration = Settings.scanStayDuration;
         baseScanRadius = Settings.baseScanRadius;
         blockBlacklist = Settings.blockBlacklist;
         oresBlacklist = Settings.oreBlacklist;
@@ -84,6 +87,7 @@ public final class ServerSettings {
         packet.writeInt(energyCostModuleStructure);
         packet.writeInt(energyCostModuleFluid);
         packet.writeInt(energyCostModuleEntity);
+        packet.writeInt(scanStayDuration);
         packet.writeInt(baseScanRadius);
         writeStringArray(packet, blockBlacklist);
         writeStringArray(packet, oresBlacklist);

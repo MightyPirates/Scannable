@@ -167,7 +167,7 @@ public enum ScanManager {
             return;
         }
 
-        if (Constants.SCAN_STAY_DURATION < (int) (System.currentTimeMillis() - currentStart)) {
+        if (Settings.getScanStayDuration() < (int) (System.currentTimeMillis() - currentStart) && Settings.getScanStayDuration() != -1) {
             pendingResults.clear();
             synchronized (renderingResults) {
                 if (!renderingResults.isEmpty()) {
