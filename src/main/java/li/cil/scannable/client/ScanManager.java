@@ -6,6 +6,7 @@ import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.capabilities.CapabilityScanResultProvider;
 import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.config.Settings;
+import li.cil.scannable.common.config.ClientSettings;
 import li.cil.scannable.common.init.Items;
 import li.cil.scannable.integration.optifine.ProxyOptiFine;
 import net.minecraft.client.Minecraft;
@@ -36,21 +37,23 @@ public enum ScanManager {
     // --------------------------------------------------------------------- //
 
     private static int computeTargetRadius() {
-        return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE - Constants.SCAN_INITIAL_RADIUS;
+        return Minecraft.getMinecraft().gameSettings.renderDistanceChunks * Constants.CHUNK_SIZE
+                - Constants.SCAN_INITIAL_RADIUS;
     }
 
     public static int computeScanGrowthDuration() {
-        return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks / Constants.REFERENCE_RENDER_DISTANCE;
+        return Constants.SCAN_GROWTH_DURATION * Minecraft.getMinecraft().gameSettings.renderDistanceChunks
+                / Constants.REFERENCE_RENDER_DISTANCE;
     }
 
     public static float computeRadius(final long start, final float duration) {
         // Scan wave speeds up exponentially. To avoid the initial speed being
         // near zero due to that we offset the time and adjust the remaining
         // parameters accordingly. Base equation is:
-        //   r = a + (t + b)^2 * c
+        // r = a + (t + b)^2 * c
         // with r := 0 and target radius and t := 0 and target time this yields:
-        //   c = r1/((t1 + b)^2 - b*b)
-        //   a = -r1*b*b/((t1 + b)^2 - b*b)
+        // c = r1/((t1 + b)^2 - b*b)
+        // a = -r1*b*b/((t1 + b)^2 - b*b)
 
         final float r1 = (float) computeTargetRadius();
         final float t1 = duration;
@@ -91,7 +94,8 @@ public enum ScanManager {
         float scanRadius = Settings.getBaseScanRadius();
 
         for (final ItemStack module : modules) {
-            final ScanResultProvider provider = module.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
+            final ScanResultProvider provider = module
+                    .getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
             if (provider != null) {
                 collectingProviders.add(provider);
             }
@@ -120,7 +124,8 @@ public enum ScanManager {
             }
 
             for (final ScanResultProvider provider : collectingProviders) {
-                provider.computeScanResults(result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+                provider.computeScanResults(
+                        result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             }
 
             ++scanningTicks;
@@ -130,7 +135,8 @@ public enum ScanManager {
 
         for (int i = 0; i < remaining; i++) {
             for (final ScanResultProvider provider : collectingProviders) {
-                provider.computeScanResults(result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
+                provider.computeScanResults(
+                        result -> collectingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result));
             }
         }
 
@@ -144,7 +150,8 @@ public enum ScanManager {
         currentStart = System.currentTimeMillis();
 
         pendingResults.putAll(collectingResults);
-        pendingResults.values().forEach(list -> list.sort(Comparator.comparing(result -> -lastScanCenter.distanceTo(result.getPosition()))));
+        pendingResults.values().forEach(
+                list -> list.sort(Comparator.comparing(result -> -lastScanCenter.distanceTo(result.getPosition()))));
 
         ScannerRenderer.INSTANCE.ping(lastScanCenter);
 
@@ -166,12 +173,13 @@ public enum ScanManager {
         if (lastScanCenter == null || currentStart < 0) {
             return;
         }
-
-        if (Settings.getScanStayDuration() < (int) (System.currentTimeMillis() - currentStart) && Settings.getScanStayDuration() != -1) {
+        final int duration = ClientSettings.scanStayDuration;
+        if (duration < (int) (System.currentTimeMillis() - currentStart) && duration != -1) {
             pendingResults.clear();
             synchronized (renderingResults) {
                 if (!renderingResults.isEmpty()) {
-                    for (Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = renderingResults.entrySet().iterator(); iterator.hasNext(); ) {
+                    for (Iterator<Map.Entry<ScanResultProvider, List<ScanResult>>> iterator = renderingResults
+                            .entrySet().iterator(); iterator.hasNext();) {
                         final Map.Entry<ScanResultProvider, List<ScanResult>> entry = iterator.next();
                         final List<ScanResult> list = entry.getValue();
                         for (int i = MathHelper.ceil(list.size() / 2f); i > 0; i--) {
@@ -257,7 +265,8 @@ public enum ScanManager {
                 return;
             }
 
-            // Using shaders so we render as game overlay; restore matrices as used for world rendering.
+            // Using shaders so we render as game overlay; restore matrices as used for
+            // world rendering.
             GlStateManager.matrixMode(GL11.GL_PROJECTION);
             GlStateManager.pushMatrix();
             GlStateManager.matrixMode(GL11.GL_MODELVIEW);
