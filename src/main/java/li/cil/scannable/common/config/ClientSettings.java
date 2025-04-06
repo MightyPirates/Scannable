@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-@Config(modid = API.MOD_ID, category = "client", name = "Client")
+@Config(modid = API.MOD_ID, category = "client", name = "scannable-Client")
 public final class ClientSettings {
     @Config.LangKey(Constants.CONFIG_SCAN_STAY_DURATION)
     @Config.Comment("How long the results from a scan should remain visible (in milliseconds).")

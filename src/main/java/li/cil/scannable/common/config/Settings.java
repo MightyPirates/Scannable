@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-@Config(modid = API.MOD_ID, name = "Common")
+@Config(modid = API.MOD_ID, name = "scannable-Common")
 public final class Settings {
     @Config.LangKey(Constants.CONFIG_USE_ENERGY)
     @Config.Comment("Whether to consume energy when performing a scan.\n" +
