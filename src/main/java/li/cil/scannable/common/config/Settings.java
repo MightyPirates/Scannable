@@ -331,10 +331,6 @@ public final class Settings {
         return serverSettings != null ? serverSettings.energyCostModuleEntity : energyCostModuleEntity;
     }
 
-    public static int getScanStayDuration() {
-        return serverSettings != null ? serverSettings.scanStayDuration : scanStayDuration;
-    }
-
     public static int getBaseScanRadius() {
         return serverSettings != null ? serverSettings.baseScanRadius : baseScanRadius;
     }
