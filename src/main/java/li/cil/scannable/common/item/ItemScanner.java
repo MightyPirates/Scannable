@@ -38,11 +38,12 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Optional.Interface(iface = "cofh.redstoneflux.api.IEnergyContainerItem", modid = ModIDs.RedstoneFlux)
 public final class ItemScanner extends Item implements IEnergyContainerItem {
@@ -77,7 +78,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
     }
 
     @Override
-    public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip, final ITooltipFlag flag) {
+    public void addInformation(final ItemStack stack, @Nullable final World world, final List<String> tooltip,
+            final ITooltipFlag flag) {
         super.addInformation(stack, world, tooltip, flag);
 
         tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER));
@@ -91,7 +93,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
             return;
         }
 
-        tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER_ENERGY, energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored()));
+        tooltip.add(I18n.format(Constants.TOOLTIP_SCANNER_ENERGY, energyStorage.getEnergyStored(),
+                energyStorage.getMaxEnergyStored()));
     }
 
     @Override
@@ -122,7 +125,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
             final List<ItemStack> modules = new ArrayList<>();
             if (!collectModules(stack, modules)) {
                 if (world.isRemote) {
-                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentTranslation(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(
+                            new TextComponentTranslation(Constants.MESSAGE_NO_SCAN_MODULES), Constants.CHAT_LINE_ID);
                 }
                 player.getCooldownTracker().setCooldown(this, 10);
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
@@ -130,7 +134,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
 
             if (!tryConsumeEnergy(player, stack, modules, true)) {
                 if (world.isRemote) {
-                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentTranslation(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
+                    Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(
+                            new TextComponentTranslation(Constants.MESSAGE_NOT_ENOUGH_ENERGY), Constants.CHAT_LINE_ID);
                 }
                 player.getCooldownTracker().setCooldown(this, 10);
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
@@ -146,7 +151,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(final ItemStack oldStack, final ItemStack newStack, final boolean slotChanged) {
+    public boolean shouldCauseReequipAnimation(final ItemStack oldStack, final ItemStack newStack,
+            final boolean slotChanged) {
         return oldStack.getItem() != newStack.getItem() || slotChanged;
     }
 
@@ -163,7 +169,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
     }
 
     @Override
-    public void onPlayerStoppedUsing(final ItemStack stack, final World world, final EntityLivingBase entity, final int timeLeft) {
+    public void onPlayerStoppedUsing(final ItemStack stack, final World world, final EntityLivingBase entity,
+            final int timeLeft) {
         if (world.isRemote) {
             ScanManager.INSTANCE.cancelScan();
             SoundManager.INSTANCE.stopChargingSound();
@@ -207,19 +214,21 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
     // --------------------------------------------------------------------- //
 
     static int getModuleEnergyCost(final EntityPlayer player, final ItemStack module) {
-        final ScanResultProvider provider = module.getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
+        final ScanResultProvider provider = module
+                .getCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null);
         if (provider != null) {
             return provider.getEnergyCost(player, module);
         }
 
         if (Items.isModuleRange(module)) {
-            return Settings.getEnergyCostModuleRange();
+            return Settings.getEnergyCostModuleRange() * module.getCount();
         }
 
         return 0;
     }
 
-    private static boolean tryConsumeEnergy(final EntityPlayer player, final ItemStack stack, final List<ItemStack> modules, final boolean simulate) {
+    private static boolean tryConsumeEnergy(final EntityPlayer player, final ItemStack stack,
+            final List<ItemStack> modules, final boolean simulate) {
         if (!Settings.useEnergy()) {
             return true;
         }
@@ -251,8 +260,12 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
         final IItemHandler itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         assert itemHandler instanceof ItemHandlerScanner;
         final IItemHandler activeModules = ((ItemHandlerScanner) itemHandler).getActiveModules();
-        for (int slot = 0; slot < activeModules.getSlots(); slot++) {
-            final ItemStack module = activeModules.getStackInSlot(slot);
+        final IItemHandler rangeModules = ((ItemHandlerScanner) itemHandler).getRangeModules();
+        final IItemHandler availableModules = new CombinedInvWrapper(
+                (IItemHandlerModifiable) activeModules,
+                (IItemHandlerModifiable) rangeModules);
+        for (int slot = 0; slot < availableModules.getSlots(); slot++) {
+            final ItemStack module = availableModules.getStackInSlot(slot);
             if (module.isEmpty()) {
                 continue;
             }
@@ -267,7 +280,8 @@ public final class ItemScanner extends Item implements IEnergyContainerItem {
 
     // --------------------------------------------------------------------- //
 
-    // Used to suppress the re-equip sound after finishing a scan (due to potential scanner item stack data change).
+    // Used to suppress the re-equip sound after finishing a scan (due to potential
+    // scanner item stack data change).
     private enum SoundCanceler {
         INSTANCE;
 

@@ -30,10 +30,11 @@ tooltip.scannable.module_entity=§7檢測附近指定的實體，右鍵單擊實
 tooltip.scannable.module_entity.name=§7綁定的實體：§f%s
 
 gui.scannable.scanner.title=掃描器
-gui.scannable.scanner.modules=模組
+gui.scannable.scanner.modules=啟用欄 
 gui.scannable.scanner.modules.tooltip=此欄為掃描時使用的模組
-gui.scannable.scanner.modules_inactive=備用的模組
+gui.scannable.scanner.modules_inactive=備用欄
 gui.scannable.scanner.modules_inactive.tooltip=此欄存放備用模組
+gui.scannable.scanner.modules_range.tooltip=此欄為範圍增加插件
 gui.scannable.scanner.progress=充能中……%s%%
 gui.scannable.overlay.entity_details=%s（%sm）
 

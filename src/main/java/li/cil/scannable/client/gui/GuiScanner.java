@@ -13,7 +13,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 
 public class GuiScanner extends GuiContainer {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/scanner.png");
+    private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID,
+            "textures/gui/container/scanner.png");
 
     // --------------------------------------------------------------------- //
 
@@ -34,13 +35,17 @@ public class GuiScanner extends GuiContainer {
     public void drawScreen(final int mouseX, final int mouseY, final float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        if (isPointInRegion(8, 23, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES)), fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
+        if (isPointInRegion(8, 23, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES)),
+                fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
             drawHoveringText(I18n.format(Constants.GUI_SCANNER_MODULES_TOOLTIP), mouseX, mouseY);
         }
-        if (isPointInRegion(8, 49, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE)), fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
+        if (isPointInRegion(8, 49, fontRenderer.getStringWidth(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE)),
+                fontRenderer.FONT_HEIGHT, mouseX, mouseY)) {
             drawHoveringText(I18n.format(Constants.GUI_SCANNER_MODULES_INACTIVE_TOOLTIP), mouseX, mouseY);
         }
-
+        if (isPointInRegion(44 + 6 * 18, 20, 18, 18, mouseX, mouseY)) {
+            drawHoveringText(I18n.format(Constants.GUI_SCANNER_MODULES_RANGE_TOOLTIP), mouseX, mouseY);
+        }
         this.renderHoveredToolTip(mouseX, mouseY);
     }
 

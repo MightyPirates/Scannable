@@ -44,7 +44,11 @@ public final class ItemHandlerScanner extends ItemStackHandler {
     }
 
     public IItemHandler getInactiveModules() {
-        return new RangedWrapper(this, Constants.SCANNER_ACTIVE_MODULE_COUNT, Constants.SCANNER_TOTAL_MODULE_COUNT);
+        return new RangedWrapper(this, Constants.SCANNER_ACTIVE_MODULE_COUNT, Constants.SCANNER_ACTIVE_MODULE_COUNT + Constants.SCANNER_INACTIVE_MODULE_COUNT);
+    }
+
+    public IItemHandler getRangeModules() {
+        return new RangedWrapper(this, Constants.SCANNER_ACTIVE_MODULE_COUNT + Constants.SCANNER_INACTIVE_MODULE_COUNT, Constants.SCANNER_TOTAL_MODULE_COUNT);
     }
 
     // --------------------------------------------------------------------- //
@@ -56,7 +60,17 @@ public final class ItemHandlerScanner extends ItemStackHandler {
             return 0;
         }
         if (stack.getItem() instanceof AbstractItemScannerModule) {
-            return 64;
+            // Check if this is a range module and if it's in the range module slot
+            if (stack.getItem().getRegistryName().toString().endsWith(Constants.NAME_MODULE_RANGE) && 
+                slot >= Constants.SCANNER_ACTIVE_MODULE_COUNT + Constants.SCANNER_INACTIVE_MODULE_COUNT) {
+                return 64;
+            }
+            // For non-range modules, only allow them in non-range slots
+            if (!stack.getItem().getRegistryName().toString().endsWith(Constants.NAME_MODULE_RANGE) && 
+                slot < Constants.SCANNER_ACTIVE_MODULE_COUNT + Constants.SCANNER_INACTIVE_MODULE_COUNT) {
+                return 64;
+            }
+            return 0;
         }
         if (stack.hasCapability(CapabilityScanResultProvider.SCAN_RESULT_PROVIDER_CAPABILITY, null)) {
             return 64;

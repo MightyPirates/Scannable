@@ -12,11 +12,11 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-@Config(modid = API.MOD_ID)
+@Config(modid = API.MOD_ID, name = "Common")
 public final class Settings {
     @Config.LangKey(Constants.CONFIG_USE_ENERGY)
     @Config.Comment("Whether to consume energy when performing a scan.\n" +
-                    "Will make the scanner a chargeable item.")
+            "Will make the scanner a chargeable item.")
     @Config.RequiresWorldRestart
     public static boolean useEnergy = true;
 
@@ -80,18 +80,13 @@ public final class Settings {
     @Config.RequiresWorldRestart
     public static int energyCostModuleEntity = 75;
 
-    @Config.LangKey(Constants.CONFIG_SCAN_STAY_DURATION)
-    @Config.Comment("How long the results from a scan should remain visible (in milliseconds).\n" +
-                    "Set to -1 to disable the scan stay duration.")
-    @Config.RangeInt(min = -1)
-    public static int scanStayDuration = 10000;
-
     @Config.LangKey(Constants.CONFIG_BASE_SCAN_RADIUS)
     @Config.Comment("The basic scan radius without range modules.\n" +
-                    "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
-                    "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
-                    "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by " + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
-                    "Range modules will boost the range by half this value.")
+            "IMPORTANT: some modules such as the block and ore scanner modules will already use\n" +
+            "a reduced radius based on this value. Specifically, the ore scanners multiply this\n" +
+            "value by " + Constants.MODULE_ORE_RADIUS_MULTIPLIER + ", and the block scanner multiplies it by "
+            + Constants.MODULE_BLOCK_RADIUS_MULTIPLIER + ".\n" +
+            "Range modules will boost the range by half this value.")
     @Config.RangeInt(min = 16, max = 128)
     @Config.RequiresWorldRestart
     public static int baseScanRadius = 64;
@@ -111,7 +106,7 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_ORES_COMMON)
     @Config.Comment("Ore dictionary entries considered common ores, requiring the common ore scanner module.\n" +
-                    "Use this to mark ores as common, as opposed to rare (see oresRare).")
+            "Use this to mark ores as common, as opposed to rare (see oresRare).")
     @Config.RequiresWorldRestart
     public static String[] oresCommon = {
             // Minecraft
@@ -135,43 +130,43 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_ORES_RARE)
     @Config.Comment("Ore dictionary names of ores considered 'rare', requiring the rare ore scanner module.\n" +
-                    "Anything matching /ore[A-Z].*/ that isn't in the common ore list is\n" +
-                    "automatically considered a rare ore (as opposed to the other way around,\n" +
-                    "to make missing entries less likely be a problem). Use this to add rare\n" +
-                    "ores that do follow this pattern.")
+            "Anything matching /ore[A-Z].*/ that isn't in the common ore list is\n" +
+            "automatically considered a rare ore (as opposed to the other way around,\n" +
+            "to make missing entries less likely be a problem). Use this to add rare\n" +
+            "ores that do follow this pattern.")
     @Config.RequiresWorldRestart
     public static String[] oresRare = {
     };
 
     @Config.LangKey(Constants.CONFIG_STATES_COMMON)
     @Config.Comment("Block states considered common ores, requiring the common ore scanner module.\n" +
-                    "Use this to mark arbitrary block states as common ores. Format is as follows:\n" +
-                    "  mod_id:block_name\n" +
-                    "or with block properties:\n" +
-                    "  mod_id:block_name[property1=value1,property2=value2]\n" +
-                    "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
-                    "in the bottom right.")
+            "Use this to mark arbitrary block states as common ores. Format is as follows:\n" +
+            "  mod_id:block_name\n" +
+            "or with block properties:\n" +
+            "  mod_id:block_name[property1=value1,property2=value2]\n" +
+            "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
+            "in the bottom right.")
     @Config.RequiresWorldRestart
     public static String[] statesCommon = {
     };
 
     @Config.LangKey(Constants.CONFIG_STATES_RARE)
     @Config.Comment("Block states considered rare ores, requiring the rare ore scanner module.\n" +
-                    "Use this to mark arbitrary block states as rare ores. Format is as follows:\n" +
-                    "  mod_id:block_name\n" +
-                    "or with block properties:\n" +
-                    "  mod_id:block_name[property1=value1,property2=value2]\n" +
-                    "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
-                    "in the bottom right.")
+            "Use this to mark arbitrary block states as rare ores. Format is as follows:\n" +
+            "  mod_id:block_name\n" +
+            "or with block properties:\n" +
+            "  mod_id:block_name[property1=value1,property2=value2]\n" +
+            "You can look up the properties (as well as name and mod id) in the F3 debug overlay\n" +
+            "in the bottom right.")
     @Config.RequiresWorldRestart
     public static String[] statesRare = {
     };
 
     @Config.LangKey(Constants.CONFIG_ORE_COLORS)
     @Config.Comment("The colors for ores used when rendering their result bounding box.\n" +
-                    "Each entry must be a key-value pair separated by a `=`, with the.\n" +
-                    "key being the ore dictionary name and the value being the hexadecimal\n" +
-                    "RGB value of the color.")
+            "Each entry must be a key-value pair separated by a `=`, with the.\n" +
+            "key being the ore dictionary name and the value being the hexadecimal\n" +
+            "RGB value of the color.")
     @Config.RequiresWorldRestart
     public static String[] oreColors = {
             // Minecraft
@@ -237,7 +232,7 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_FLUID_COLORS)
     @Config.Comment("The colors for fluids used when rendering their result bounding box.\n" +
-                    "See `oreColors` for format entries have to be in.")
+            "See `oreColors` for format entries have to be in.")
     @Config.RequiresWorldRestart
     public static String[] fluidColors = {
             "water=0x4275DC",
@@ -246,25 +241,25 @@ public final class Settings {
 
     @Config.LangKey(Constants.CONFIG_INJECT_DEPTH_TEXTURE)
     @Config.Comment("Whether to try to inject a depth texture into Minecraft's FBO when rendering the\n" +
-                    "scan wave effect. This is much faster as it will not have to re-render the world\n" +
-                    "geometry to retrieve the depth information required for the effect. However, it\n" +
-                    "appears that on some systems this doesn't work. The mod tries to detect that and\n" +
-                    "will fall back to re-rendering automatically, but you can force re-rendering by\n" +
-                    "setting this to false, e.g. for debugging or just to avoid the one logged warning.")
+            "scan wave effect. This is much faster as it will not have to re-render the world\n" +
+            "geometry to retrieve the depth information required for the effect. However, it\n" +
+            "appears that on some systems this doesn't work. The mod tries to detect that and\n" +
+            "will fall back to re-rendering automatically, but you can force re-rendering by\n" +
+            "setting this to false, e.g. for debugging or just to avoid the one logged warning.")
     public static boolean injectDepthTexture = true;
 
     @Config.LangKey(Constants.CONFIG_LOG_BLOCK_DROP_LOOKUP_FAILURES)
     @Config.Comment("Whether to log out failure to determine the item stack dropped by a block.\n" +
-                    "Scannable needs to find the item stack representation of a block to get the\n" +
-                    "ore dictionary name(s) of blocks, as well as to show a more accurate tooltip\n" +
-                    "of the currently bound block in the block module. Scannable attempts to find\n" +
-                    "the item stack representation by calling Block.getPickBlock (which is allowed\n" +
-                    "to fail, as some blocks require a valid world state) and alternatively by using\n " +
-                    "Item.getItemFromBlock+Block.damageDropped, the latter being verified using the\n" +
-                    "roundtrip through Block.damageDropped/Item.getMetadata/Block.getStateFromMeta.\n" +
-                    "Sadly this fails for a lot of modded blocks because people rarely implement\n" +
-                    "Block.damageDropped. As a workaround you can add blocks for which this fails to\n" +
-                    "the `statesCommon` and `statesRare` lists.")
+            "Scannable needs to find the item stack representation of a block to get the\n" +
+            "ore dictionary name(s) of blocks, as well as to show a more accurate tooltip\n" +
+            "of the currently bound block in the block module. Scannable attempts to find\n" +
+            "the item stack representation by calling Block.getPickBlock (which is allowed\n" +
+            "to fail, as some blocks require a valid world state) and alternatively by using\n " +
+            "Item.getItemFromBlock+Block.damageDropped, the latter being verified using the\n" +
+            "roundtrip through Block.damageDropped/Item.getMetadata/Block.getStateFromMeta.\n" +
+            "Sadly this fails for a lot of modded blocks because people rarely implement\n" +
+            "Block.damageDropped. As a workaround you can add blocks for which this fails to\n" +
+            "the `statesCommon` and `statesRare` lists.")
     public static boolean logBlockDropLookupFailures = false;
 
     // --------------------------------------------------------------------- //
@@ -334,10 +329,6 @@ public final class Settings {
 
     public static int getEnergyCostModuleEntity() {
         return serverSettings != null ? serverSettings.energyCostModuleEntity : energyCostModuleEntity;
-    }
-
-    public static int getScanStayDuration() {
-        return serverSettings != null ? serverSettings.scanStayDuration : scanStayDuration;
     }
 
     public static int getBaseScanRadius() {

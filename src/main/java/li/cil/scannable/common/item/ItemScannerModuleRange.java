@@ -18,4 +18,7 @@ public final class ItemScannerModuleRange extends AbstractItemScannerModule {
         tooltip.add(I18n.format(Constants.TOOLTIP_MODULE_RANGE));
         super.addInformation(stack, world, tooltip, flag);
     }
+    public ItemScannerModuleRange() {
+        setMaxStackSize(8);
+    }
 }

@@ -35,6 +35,11 @@ public final class ContainerScanner extends Container {
             addSlotToContainer(new SlotItemHandler(storedModules, slot, 62 + slot * 18, 46));
         }
 
+        final IItemHandler rangeModules = ((ItemHandlerScanner) itemHandler).getRangeModules();
+        for (int slot = 0; slot < rangeModules.getSlots(); ++slot) {
+            addSlotToContainer(new SlotItemHandler(rangeModules, slot, 44 + 6 * 18, 20));
+        }
+
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
                 addSlotToContainer(new Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, row * 18 + 77));
