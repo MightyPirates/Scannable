@@ -41,14 +41,14 @@ public enum ScannerRenderer {
         currentCenter = pos;
     }
 
-    public static void render(final PoseStack poseStack) {
-        INSTANCE.doRender(poseStack);
+    public static void render(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
+        INSTANCE.doRender(viewMatrix, projectionMatrix);
     }
 
-    private void doRender(final PoseStack poseStack) {
+    private void doRender(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
         if (shouldRender()) {
             grabDepthBuffer();
-            render(poseStack.last().pose());
+            renderEffect(viewMatrix, projectionMatrix);
         }
     }
 
@@ -67,7 +67,7 @@ public enum ScannerRenderer {
         mainRenderTarget.bindWrite(false);
     }
 
-    private void render(final Matrix4f viewMatrix) {
+    private void renderEffect(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
         final ShaderInstance shader = Shaders.getScanEffectShader();
         if (shader == null) {
             return;
@@ -75,16 +75,18 @@ public enum ScannerRenderer {
 
         final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 
-        updateShaderUniforms(shader, viewMatrix);
+        updateShaderUniforms(shader, viewMatrix, projectionMatrix);
 
         blit(target);
     }
 
-    private void updateShaderUniforms(final ShaderInstance shader, final Matrix4f viewMatrix) {
+    private void updateShaderUniforms(final ShaderInstance shader, final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
         final Matrix4f invertedViewMatrix = new Matrix4f(viewMatrix);
         invertedViewMatrix.invert();
 
-        final Matrix4f invertedProjectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
+        // Must be the projection used for level rendering; RenderSystem's current
+        // projection is not guaranteed to be that at the point we render from.
+        final Matrix4f invertedProjectionMatrix = new Matrix4f(projectionMatrix);
         invertedProjectionMatrix.invert();
 
         final Vec3 cameraPosition = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
@@ -114,14 +116,23 @@ public enum ScannerRenderer {
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, width, 0, height, 1, 100), VertexSorting.ORTHOGRAPHIC_Z);
 
-        final Tesselator tesselator = Tesselator.getInstance();
-        final BufferBuilder buffer = tesselator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(0, 0, -50).uv(0, 0).endVertex();
-        buffer.vertex(width, 0, -50).uv(1, 0).endVertex();
-        buffer.vertex(width, height, -50).uv(1, 1).endVertex();
-        buffer.vertex(0, height, -50).uv(0, 1).endVertex();
-        tesselator.end();
+        // This is a screen space quad, so it must not inherit the camera transform.
+        // Depending on which hook we render from, the model view matrix may still hold
+        // it: as of MC 1.21 LevelRenderer.renderLevel pushes the camera transform onto
+        // the model view stack and only pops it at the very end. Fabric's
+        // WorldRenderEvents.LAST fires before that pop, NeoForge's AFTER_LEVEL after it.
+        RenderSystem.getModelViewStack().pushMatrix().identity();
+        RenderSystem.applyModelViewMatrix();
+
+        final BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.addVertex(0, 0, -50).setUv(0, 0);
+        buffer.addVertex(width, 0, -50).setUv(1, 0);
+        buffer.addVertex(width, height, -50).setUv(1, 1);
+        buffer.addVertex(0, height, -50).setUv(0, 1);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
+
+        RenderSystem.getModelViewStack().popMatrix();
+        RenderSystem.applyModelViewMatrix();
 
         RenderSystem.restoreProjectionMatrix();
 

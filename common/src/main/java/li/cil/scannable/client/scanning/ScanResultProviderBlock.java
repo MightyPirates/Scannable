@@ -40,7 +40,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.material.FluidState;
@@ -253,12 +253,12 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     // --------------------------------------------------------------------- //
 
     public static RenderType getBlockScanResultRenderLayer() {
+        // Must match the format used for the VBO in BlockScanResult, and the
+        // vertex format declared by the scan_result shader.
         return RenderType.create("scan_result",
-            DefaultVertexFormat.POSITION_COLOR_TEX,
+            DefaultVertexFormat.POSITION_TEX_COLOR,
             VertexFormat.Mode.QUADS,
             65536,
-            false,
-            false,
             RenderType.CompositeState.builder()
                 .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
                 .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
@@ -280,7 +280,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             RenderSystem.colorMask(false, false, false, false);
             poseStack.pushPose();
             try {
-                Minecraft.getInstance().gameRenderer.renderItemInHand(poseStack, renderInfo, partialTicks);
+                Minecraft.getInstance().gameRenderer.renderItemInHand(renderInfo, partialTicks, poseStack.last().pose());
             } catch (final Throwable e) {
                 LOGGER.catching(e);
             }
@@ -421,12 +421,11 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                 color = DEFAULT_COLOR;
             }
 
-            final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            final BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             render(buffer, new PoseStack());
             vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
             vbo.bind();
-            vbo.upload(buffer.end());
+            vbo.upload(buffer.buildOrThrow());
             VertexBuffer.unbind();
         }
 
@@ -482,10 +481,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvY;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, x, minY, minZ).uv(u0, v0).color(r, g, b, 0.8f).endVertex();
-                    buffer.vertex(matrix, x, minY, maxZ).uv(u0, v1).color(r, g, b, 0.8f).endVertex();
-                    buffer.vertex(matrix, x, maxY, maxZ).uv(u1, v1).color(r, g, b, 0.8f).endVertex();
-                    buffer.vertex(matrix, x, maxY, minZ).uv(u1, v0).color(r, g, b, 0.8f).endVertex();
+                    buffer.addVertex(matrix, x, minY, minZ).setUv(u0, v0).setColor(r, g, b, 0.8f);
+                    buffer.addVertex(matrix, x, minY, maxZ).setUv(u0, v1).setColor(r, g, b, 0.8f);
+                    buffer.addVertex(matrix, x, maxY, maxZ).setUv(u1, v1).setColor(r, g, b, 0.8f);
+                    buffer.addVertex(matrix, x, maxY, minZ).setUv(u1, v0).setColor(r, g, b, 0.8f);
                 }
                 if (!blocks.contains(cell.offset(1, 0, 0))) {
                     final float x = cell.getX() + 1;
@@ -497,10 +496,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvY;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, x, minY, minZ).uv(u0, v0).color(r, g, b, 0.8f).endVertex();
-                    buffer.vertex(matrix, x, maxY, minZ).uv(u1, v0).color(r, g, b, 0.8f).endVertex();
-                    buffer.vertex(matrix, x, maxY, maxZ).uv(u1, v1).color(r, g, b, 0.8f).endVertex();
-                    buffer.vertex(matrix, x, minY, maxZ).uv(u0, v1).color(r, g, b, 0.8f).endVertex();
+                    buffer.addVertex(matrix, x, minY, minZ).setUv(u0, v0).setColor(r, g, b, 0.8f);
+                    buffer.addVertex(matrix, x, maxY, minZ).setUv(u1, v0).setColor(r, g, b, 0.8f);
+                    buffer.addVertex(matrix, x, maxY, maxZ).setUv(u1, v1).setColor(r, g, b, 0.8f);
+                    buffer.addVertex(matrix, x, minY, maxZ).setUv(u0, v1).setColor(r, g, b, 0.8f);
                 }
                 if (!blocks.contains(cell.offset(0, -1, 0))) {
                     final float y = cell.getY();
@@ -512,10 +511,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, minX, y, minZ).uv(u0, v0).color(r, g, b, 0.7f).endVertex();
-                    buffer.vertex(matrix, maxX, y, minZ).uv(u1, v0).color(r, g, b, 0.7f).endVertex();
-                    buffer.vertex(matrix, maxX, y, maxZ).uv(u1, v1).color(r, g, b, 0.7f).endVertex();
-                    buffer.vertex(matrix, minX, y, maxZ).uv(u0, v1).color(r, g, b, 0.7f).endVertex();
+                    buffer.addVertex(matrix, minX, y, minZ).setUv(u0, v0).setColor(r, g, b, 0.7f);
+                    buffer.addVertex(matrix, maxX, y, minZ).setUv(u1, v0).setColor(r, g, b, 0.7f);
+                    buffer.addVertex(matrix, maxX, y, maxZ).setUv(u1, v1).setColor(r, g, b, 0.7f);
+                    buffer.addVertex(matrix, minX, y, maxZ).setUv(u0, v1).setColor(r, g, b, 0.7f);
                 }
                 if (!blocks.contains(cell.offset(0, 1, 0))) {
                     final float y = cell.getY() + 1;
@@ -527,10 +526,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minZ - (float) bounds.minZ) * sizeUvZ;
                     final float v1 = v0 + sizeUvZ;
-                    buffer.vertex(matrix, minX, y, minZ).uv(u0, v0).color(r, g, b, 1.0f).endVertex();
-                    buffer.vertex(matrix, minX, y, maxZ).uv(u0, v1).color(r, g, b, 1.0f).endVertex();
-                    buffer.vertex(matrix, maxX, y, maxZ).uv(u1, v1).color(r, g, b, 1.0f).endVertex();
-                    buffer.vertex(matrix, maxX, y, minZ).uv(u1, v0).color(r, g, b, 1.0f).endVertex();
+                    buffer.addVertex(matrix, minX, y, minZ).setUv(u0, v0).setColor(r, g, b, 1.0f);
+                    buffer.addVertex(matrix, minX, y, maxZ).setUv(u0, v1).setColor(r, g, b, 1.0f);
+                    buffer.addVertex(matrix, maxX, y, maxZ).setUv(u1, v1).setColor(r, g, b, 1.0f);
+                    buffer.addVertex(matrix, maxX, y, minZ).setUv(u1, v0).setColor(r, g, b, 1.0f);
                 }
                 if (!blocks.contains(cell.offset(0, 0, -1))) {
                     final float z = cell.getZ();
@@ -542,10 +541,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minY - (float) bounds.minY) * sizeUvY;
                     final float v1 = v0 + sizeUvY;
-                    buffer.vertex(matrix, minX, minY, z).uv(u0, v0).color(r, g, b, 0.9f).endVertex();
-                    buffer.vertex(matrix, minX, maxY, z).uv(u0, v1).color(r, g, b, 0.9f).endVertex();
-                    buffer.vertex(matrix, maxX, maxY, z).uv(u1, v1).color(r, g, b, 0.9f).endVertex();
-                    buffer.vertex(matrix, maxX, minY, z).uv(u1, v0).color(r, g, b, 0.9f).endVertex();
+                    buffer.addVertex(matrix, minX, minY, z).setUv(u0, v0).setColor(r, g, b, 0.9f);
+                    buffer.addVertex(matrix, minX, maxY, z).setUv(u0, v1).setColor(r, g, b, 0.9f);
+                    buffer.addVertex(matrix, maxX, maxY, z).setUv(u1, v1).setColor(r, g, b, 0.9f);
+                    buffer.addVertex(matrix, maxX, minY, z).setUv(u1, v0).setColor(r, g, b, 0.9f);
                 }
                 if (!blocks.contains(cell.offset(0, 0, 1))) {
                     final float z = cell.getZ() + 1;
@@ -557,10 +556,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
                     final float u1 = u0 + sizeUvX;
                     final float v0 = (minY - (float) bounds.minY) * sizeUvY;
                     final float v1 = v0 + sizeUvY;
-                    buffer.vertex(matrix, minX, minY, z).uv(u0, v0).color(r, g, b, 0.9f).endVertex();
-                    buffer.vertex(matrix, maxX, minY, z).uv(u1, v0).color(r, g, b, 0.9f).endVertex();
-                    buffer.vertex(matrix, maxX, maxY, z).uv(u1, v1).color(r, g, b, 0.9f).endVertex();
-                    buffer.vertex(matrix, minX, maxY, z).uv(u0, v1).color(r, g, b, 0.9f).endVertex();
+                    buffer.addVertex(matrix, minX, minY, z).setUv(u0, v0).setColor(r, g, b, 0.9f);
+                    buffer.addVertex(matrix, maxX, minY, z).setUv(u1, v0).setColor(r, g, b, 0.9f);
+                    buffer.addVertex(matrix, maxX, maxY, z).setUv(u1, v1).setColor(r, g, b, 0.9f);
+                    buffer.addVertex(matrix, minX, maxY, z).setUv(u0, v1).setColor(r, g, b, 0.9f);
                 }
             }
         }

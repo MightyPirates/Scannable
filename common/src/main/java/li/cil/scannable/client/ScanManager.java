@@ -2,7 +2,7 @@ package li.cil.scannable.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
@@ -86,6 +86,8 @@ public final class ScanManager {
     private static final Map<ScanResultProvider, List<ScanResult>> renderingResults = new HashMap<>();
     // Temporary, re-used list to collect visible results each frame.
     private static final List<ScanResult> renderingList = new ArrayList<>();
+    // Backing buffer for the immediate buffer source used while rendering results.
+    private static final ByteBufferBuilder BYTE_BUFFER_BUILDER = new ByteBufferBuilder(1536);
 
     private static int scanningTicks = -1;
     private static long currentStart = -1;
@@ -233,9 +235,15 @@ public final class ScanManager {
         }
     }
 
-    public static void setMatrices(final PoseStack poseStack, final Matrix4f projectionMatrix) {
+    /**
+     * @param viewMatrix       the camera/view matrix. Note that as of MC 1.21 the
+     *                         {@link PoseStack} used during level rendering is identity;
+     *                         the camera transform lives in this matrix instead.
+     * @param projectionMatrix the projection matrix used for level rendering.
+     */
+    public static void setMatrices(final Matrix4f viewMatrix, final Matrix4f projectionMatrix) {
         worldViewModelStack = new PoseStack();
-        worldViewModelStack.last().pose().set(poseStack.last().pose());
+        worldViewModelStack.last().pose().set(viewMatrix);
         worldProjectionMatrix = projectionMatrix;
     }
 
@@ -258,13 +266,12 @@ public final class ScanManager {
             // Using shaders, so we render as game overlay; restore matrices as used for level rendering.
             RenderSystem.backupProjectionMatrix();
             RenderSystem.setProjectionMatrix(worldProjectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
-            RenderSystem.getModelViewStack().pushPose();
-            RenderSystem.getModelViewStack().last().pose().identity();
+            RenderSystem.getModelViewStack().pushMatrix().identity();
             RenderSystem.applyModelViewMatrix();
 
             render(ScanResultRenderContext.GUI, partialTick, worldViewModelStack, worldProjectionMatrix);
 
-            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.getModelViewStack().popMatrix();
             RenderSystem.applyModelViewMatrix();
             RenderSystem.restoreProjectionMatrix();
         }
@@ -287,7 +294,7 @@ public final class ScanManager {
         // This allows providers to do more optimized rendering, in e.g.
         // setting up the render state once before rendering all visuals,
         // or even set up display lists or VBOs.
-        final MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        final MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(BYTE_BUFFER_BUILDER);
         try {
             for (final Map.Entry<ScanResultProvider, List<ScanResult>> entry : renderingResults.entrySet()) {
                 // Quick and dirty frustum culling.

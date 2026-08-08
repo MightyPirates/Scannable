@@ -1,6 +1,6 @@
 package li.cil.scannable.common.config;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import li.cil.scannable.common.tags.CommonTags;
 import li.cil.scannable.util.config.*;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -92,7 +92,7 @@ public final class CommonConfig {
     @Path("blocks") @WorldRestart
     @Comment("""
         Registry names of blocks that should be ignored.
-        Blocks in this list will be excluded from the default ore list based on the forge:ores
+        Blocks in this list will be excluded from the default ore list based on the c:ores
         tag and it will be impossible to tune the entity module to this block.""")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> ignoredBlocks = Util.make(new HashSet<>(), c -> {
@@ -103,7 +103,7 @@ public final class CommonConfig {
     @Comment("""
         Tag names of block tags that should be ignored.
         Blocks matching a tag in this list will be excluded from the default ore list based on the
-        forge:ores tag and it will be impossible to tune the entity module to this block.""")
+        c:ores tag and it will be impossible to tune the entity module to this block.""")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> ignoredBlockTags = new HashSet<>();
 
@@ -129,7 +129,7 @@ public final class CommonConfig {
     @Path("ores") @WorldRestart
     @Comment("""
         Block tags of blocks considered 'rare ores', requiring the common ore scanner module.
-        Any block with the forge:ores tag is implicitly in this list, unless the block also
+        Any block with the c:ores tag is implicitly in this list, unless the block also
         matches an ignored or common ore block tag, or is an ignored or common block.""")
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> rareOreBlockTags = new HashSet<>();
@@ -149,13 +149,22 @@ public final class CommonConfig {
     @ItemType(ResourceLocation.class)
     public static Set<ResourceLocation> commonChestTags = getDefaultChestsTags();
 
-    @ExpectPlatform
     private static Set<ResourceLocation> getDefaultCommonOreTags() {
-        throw new AssertionError();
+        return Util.make(new HashSet<>(), c -> {
+            c.add(CommonTags.ORES_COAL.location());
+            c.add(CommonTags.ORES_IRON.location());
+            c.add(CommonTags.ORES_REDSTONE.location());
+            c.add(CommonTags.ORES_QUARTZ.location());
+            c.add(CommonTags.ORES_COPPER.location());
+            c.add(CommonTags.ORES_TIN.location());
+        });
     }
 
-    @ExpectPlatform
     private static Set<ResourceLocation> getDefaultChestsTags() {
-        throw new AssertionError();
+        return Util.make(new HashSet<>(), c -> {
+            c.add(CommonTags.CHESTS.location());
+            c.add(CommonTags.BARRELS_WOODEN.location());
+            c.add(CommonTags.SHULKER_BOXES.location());
+        });
     }
 }

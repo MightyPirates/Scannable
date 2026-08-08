@@ -4,7 +4,6 @@ import li.cil.scannable.common.neoforge.ModEventBus;
 import li.cil.scannable.util.ConfigManager;
 import li.cil.scannable.util.config.ConfigType;
 import li.cil.scannable.util.config.Type;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public final class ConfigManagerImpl extends ConfigManager {
-    private static final Map<IConfigSpec<ModConfigSpec>, ConfigDefinition> CONFIGS = new HashMap<>();
+    private static final Map<IConfigSpec, ConfigDefinition> CONFIGS = new HashMap<>();
 
     // --------------------------------------------------------------------- //
 
@@ -40,7 +39,7 @@ public final class ConfigManagerImpl extends ConfigManager {
                 case CLIENT -> ModConfig.Type.CLIENT;
                 case SERVER -> ModConfig.Type.SERVER;
             };
-            ModLoadingContext.get().registerConfig(platformType, spec);
+            ModEventBus.MOD_CONTAINER.registerConfig(platformType, spec);
         });
 
         ModEventBus.INSTANCE.addListener(ConfigManagerImpl::handleModConfigEvent);

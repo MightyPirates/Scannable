@@ -1,25 +1,23 @@
 [versions]
-minecraft = "1.20.4"
-parchment-minecraft = "1.20.4"
-parchment-mappings = "2024.02.25"
+minecraft = "1.21.1"
+parchment-minecraft = "1.21.1"
+parchment-mappings = "2024.11.17"
 
-architectury = "11.1.17"
+architectury = "13.0.11"
 
-fabric-loader = "0.15.10"
-fabric-api = "0.97.0+1.20.4"
+fabric-loader = "0.19.3"
+fabric-api = "0.116.15+1.21.1"
 
-fabric-forgeConfigPort = "20.4.3"
+fabric-forgeConfigPort = "21.1.6"
 fabric-tooltipfix = "1.1.1-1.20"
 
-forge-platform = "1.20.4-49.0.41"
-
-neoforge-platform = "20.4.227"
-neoforge-loader = "2"
+neoforge-platform = "21.1.248"
+neoforge-loader = "4"
 
 [plugins]
-loom = { id = "dev.architectury.loom", version = "1.6-SNAPSHOT" }
+loom = { id = "dev.architectury.loom", version = "1.11-SNAPSHOT" }
 architectury = { id = "architectury-plugin", version = "3.4-SNAPSHOT" }
-shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
+shadow = { id = "com.gradleup.shadow", version = "9.4.1" }
 spotless = { id = "com.diffplug.spotless", version = "6.22.0" }
 
 [libraries]
@@ -32,13 +30,10 @@ fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.r
 fabric-architectury = { group = "dev.architectury", name = "architectury-fabric", version.ref = "architectury" }
 
 fabric-forgeConfigPort = { group = "fuzs.forgeconfigapiport", name = "forgeconfigapiport-fabric", version.ref = "fabric-forgeConfigPort" }
-fabric-energy = { group = "teamreborn", name = "energy", version = "3.0.0" }
+fabric-energy = { group = "teamreborn", name = "energy", version = "4.1.0" }
 
 fabric-tooltipFix = { group = "maven.modrinth", name = "tooltipfix", version.ref = "fabric-tooltipfix" }
-fabric-roughlyEnoughItems = { group = "me.shedaniel", name = "RoughlyEnoughItems-fabric", version = "14.0.692" }
-
-forge-platform = { group = "net.minecraftforge", name = "forge", version.ref = "forge-platform" }
-forge-architectury = { group = "dev.architectury", name = "architectury-forge", version.ref = "architectury" }
+fabric-roughlyEnoughItems = { group = "me.shedaniel", name = "RoughlyEnoughItems-fabric", version = "16.0.799" }
 
 neoforge-platform = { group = "net.neoforged", name = "neoforge", version.ref = "neoforge-platform" }
 neoforge-architectury = { group = "dev.architectury", name = "architectury-neoforge", version.ref = "architectury" }

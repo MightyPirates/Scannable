@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "scanner_module",
+  "ingredients": [
+    {
+      "item": "scannable:blank_module"
+    },
+    {
+      "tag": "c:gems/diamond"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "scannable:rare_ores_module"
+  }
+}

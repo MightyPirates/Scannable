@@ -26,7 +26,7 @@ public final class ItemEnergyStorageImpl {
 
             @Override
             protected void onFinalCommit() {
-                container.setTag(current.getTag());
+                container.applyComponents(current.getComponentsPatch());
             }
         });
 

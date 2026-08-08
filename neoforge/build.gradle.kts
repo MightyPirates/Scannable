@@ -38,7 +38,7 @@ tasks {
             "architecturyVersion" to architecturyVersion
         )
         inputs.properties(properties)
-        filesMatching("META-INF/mods.toml") {
+        filesMatching("META-INF/neoforge.mods.toml") {
             expand(properties)
         }
     }

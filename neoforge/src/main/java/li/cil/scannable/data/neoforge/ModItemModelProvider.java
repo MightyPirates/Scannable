@@ -20,9 +20,9 @@ public final class ModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         begin(Items.SCANNER.get())
-            .texture("layer0", new ResourceLocation(API.MOD_ID, "item/scanner"));
+            .texture("layer0", ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/scanner"));
         begin(Items.BLANK_MODULE.get())
-            .texture("layer0", new ResourceLocation(API.MOD_ID, "item/blank_module"));
+            .texture("layer0", ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/blank_module"));
 
         registerModule(Items.RANGE_MODULE.get());
         registerModule(Items.ENTITY_MODULE.get());
@@ -36,13 +36,13 @@ public final class ModItemModelProvider extends ItemModelProvider {
     }
 
     private ItemModelBuilder begin(final Item item) {
-        return withExistingParent(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).getPath(), new ResourceLocation("item/generated"));
+        return withExistingParent(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).getPath(), ResourceLocation.withDefaultNamespace("item/generated"));
     }
 
     private void registerModule(final Item item) {
         begin(item)
-            .texture("layer0", new ResourceLocation(API.MOD_ID, "item/blank_module"))
-            .texture("layer1", new ResourceLocation(API.MOD_ID, "item/module_slot"))
-            .texture("layer2", new ResourceLocation(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).getPath()));
+            .texture("layer0", ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/blank_module"))
+            .texture("layer1", ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/module_slot"))
+            .texture("layer2", ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).getPath()));
     }
 }

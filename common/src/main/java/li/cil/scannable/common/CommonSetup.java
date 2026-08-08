@@ -8,6 +8,7 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.container.Containers;
 import li.cil.scannable.common.item.Items;
+import li.cil.scannable.common.item.ModDataComponents;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.scanning.ProviderCacheManager;
 import li.cil.scannable.common.tags.ItemTags;
@@ -23,6 +24,7 @@ public final class CommonSetup {
         RegistryUtils.begin(API.MOD_ID);
 
         ItemTags.initialize();
+        ModDataComponents.initialize();
         Items.initialize();
         Containers.initialize();
         Network.initialize();

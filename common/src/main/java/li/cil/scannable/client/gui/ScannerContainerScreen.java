@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class ScannerContainerScreen extends AbstractContainerScreen<ScannerContainerMenu> {
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(API.MOD_ID, "textures/gui/container/scanner.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "textures/gui/container/scanner.png");
     private static final Component SCANNER_MODULES_TEXT = Component.translatable("gui.scannable.scanner.active_modules");
     private static final Component SCANNER_MODULES_TOOLTIP = Component.translatable("gui.scannable.scanner.active_modules.desc");
     private static final Component SCANNER_MODULES_INACTIVE_TEXT = Component.translatable("gui.scannable.scanner.inactive_modules");

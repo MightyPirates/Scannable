@@ -12,7 +12,6 @@
         "sources": "https://github.com/MightyPirates/Scannable"
     },
     "mixins": [
-        "scannable-common.mixins.json",
         "scannable.mixins.json"
     ],
     "license": "MIT",
@@ -34,7 +33,7 @@
         "forgeconfigapiport": ">=${forgeConfigPortVersion}",
         "architectury": ">=${architecturyVersion}",
         "minecraft": "${minecraftVersion}",
-        "java": ">=17"
+        "java": ">=21"
     },
     "recommends": {
         "tooltipfix": "*"

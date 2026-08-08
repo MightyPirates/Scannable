@@ -56,7 +56,7 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
     @Override
     protected void configureItemAt(final ItemStack stack, final int slot, final ItemStack value) {
         if (value.getItem() instanceof SpawnEggItem) {
-            final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value.getTag());
+            final EntityType<?> entityType = ((SpawnEggItem) value.getItem()).getType(value);
             BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType).ifPresent(entityTypeResourceKey ->
                     Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, entityTypeResourceKey.location())));
         }
@@ -70,7 +70,7 @@ public class ConfigurableEntityScannerModuleContainerScreen extends AbstractConf
 
         entity.setLevel(menu.getPlayer().level());
         final EntityDimensions bounds = entityType.getDimensions();
-        final float size = Math.max(bounds.width, bounds.height);
+        final float size = Math.max(bounds.width(), bounds.height());
         final float scale = 11.0f / size;
 
         final PoseStack poseStack = graphics.pose();

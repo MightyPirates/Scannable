@@ -15,7 +15,7 @@ public abstract class MixinScannerItem implements FabricItem, SimpleEnergyItem {
     // FabricItem
 
     @Override
-    public boolean allowNbtUpdateAnimation(final Player player, final InteractionHand hand, final ItemStack oldStack, final ItemStack newStack) {
+    public boolean allowComponentsUpdateAnimation(final Player player, final InteractionHand hand, final ItemStack oldStack, final ItemStack newStack) {
         return oldStack.getItem() != newStack.getItem();
     }
 

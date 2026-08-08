@@ -20,11 +20,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,8 +44,8 @@ public final class ScannerItem extends ModItem {
     // Item
 
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
+    public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final List<Component> tooltip, final TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
 
         if (CommonConfig.useEnergy) {
             ItemEnergyStorage.of(stack).ifPresent(energy ->
@@ -114,7 +114,7 @@ public final class ScannerItem extends ModItem {
     }
 
     @Override
-    public int getUseDuration(final ItemStack stack) {
+    public int getUseDuration(final ItemStack stack, final LivingEntity entity) {
         return ScanManager.SCAN_COMPUTE_DURATION;
     }
 

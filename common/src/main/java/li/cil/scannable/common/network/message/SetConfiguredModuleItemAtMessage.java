@@ -1,51 +1,43 @@
 package li.cil.scannable.common.network.message;
 
 import dev.architectury.networking.NetworkManager;
+import li.cil.scannable.api.API;
 import li.cil.scannable.common.container.AbstractModuleContainerMenu;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-public final class SetConfiguredModuleItemAtMessage extends AbstractMessage {
-    private int windowId;
-    private int index;
-    private ResourceLocation value;
+public record SetConfiguredModuleItemAtMessage(int windowId, int index,
+                                               ResourceLocation value) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<SetConfiguredModuleItemAtMessage> TYPE =
+        new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "set_module_item"));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetConfiguredModuleItemAtMessage> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, SetConfiguredModuleItemAtMessage::windowId,
+            ByteBufCodecs.VAR_INT, SetConfiguredModuleItemAtMessage::index,
+            ResourceLocation.STREAM_CODEC, SetConfiguredModuleItemAtMessage::value,
+            SetConfiguredModuleItemAtMessage::new);
 
     // --------------------------------------------------------------------- //
 
-    public SetConfiguredModuleItemAtMessage(final int windowId, final int index, final ResourceLocation value) {
-        this.windowId = windowId;
-        this.index = index;
-        this.value = value;
-    }
-
-    public SetConfiguredModuleItemAtMessage(final FriendlyByteBuf buffer) {
-        super(buffer);
-    }
-
-    // --------------------------------------------------------------------- //
-
-    @Override
     public void handleMessage(final NetworkManager.PacketContext context) {
         if (context.getPlayer() instanceof ServerPlayer player &&
             player.containerMenu != null &&
             player.containerMenu.containerId == windowId &&
-            player.containerMenu instanceof AbstractModuleContainerMenu) {
-            ((AbstractModuleContainerMenu) player.containerMenu).setItemAt(index, value);
+            player.containerMenu instanceof AbstractModuleContainerMenu menu) {
+            menu.setItemAt(index, value);
         }
     }
 
-    @Override
-    public void fromBytes(final FriendlyByteBuf buffer) {
-        windowId = buffer.readByte();
-        index = buffer.readByte();
-        value = buffer.readResourceLocation();
-    }
+    // --------------------------------------------------------------------- //
+    // CustomPacketPayload
 
     @Override
-    public void toBytes(final FriendlyByteBuf buffer) {
-        buffer.writeByte(windowId);
-        buffer.writeByte(index);
-        buffer.writeResourceLocation(value);
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

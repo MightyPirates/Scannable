@@ -40,7 +40,7 @@ public interface ScanResultProvider {
     /**
      * The registry name of the registry holding scan result providers.
      */
-    ResourceKey<Registry<ScanResultProvider>> REGISTRY = ResourceKey.createRegistryKey(new ResourceLocation(API.MOD_ID, "scan_result_provider"));
+    ResourceKey<Registry<ScanResultProvider>> REGISTRY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "scan_result_provider"));
 
     /**
      * Called each time a scan is started by the player.

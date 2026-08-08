@@ -1,10 +1,10 @@
 package li.cil.scannable.data.neoforge;
 
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public final class DataGenerators {
     @SubscribeEvent
     public static void gatherData(final GatherDataEvent event) {
@@ -16,7 +16,7 @@ public final class DataGenerators {
         final var blockTagsProvider = new ModBlockTagsProvider(output, lookupProvider, existingFileHelper);
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new ModItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
-        generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
+        generator.addProvider(event.includeServer(), new ModRecipeProvider(output, lookupProvider));
 
         generator.addProvider(event.includeClient(), new ModItemModelProvider(output, existingFileHelper));
     }

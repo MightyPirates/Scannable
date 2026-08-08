@@ -1,11 +1,13 @@
 package li.cil.scannable.data.fabric;
 
+import li.cil.scannable.common.tags.CommonTags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -20,44 +22,50 @@ import java.util.concurrent.CompletableFuture;
 import static li.cil.scannable.common.item.Items.*;
 
 public final class ModRecipeProvider extends FabricRecipeProvider {
-    public ModRecipeProvider(final FabricDataOutput output, final CompletableFuture<HolderLookup.Provider> ignoredRegistries) {
-        super(output);
+    private final CompletableFuture<HolderLookup.Provider> registries;
+
+    public ModRecipeProvider(final FabricDataOutput output, final CompletableFuture<HolderLookup.Provider> registries) {
+        super(output, registries);
+        this.registries = registries;
     }
 
     @Override
     public void buildRecipes(final RecipeOutput consumer) {
+        final HolderLookup.Provider lookup = registries.join();
+
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, SCANNER.get())
             .pattern("i i")
             .pattern("brb")
             .pattern("gqg")
-            .define('i', CommonItemTags.IRON_INGOTS)
+            .define('i', CommonTags.INGOTS_IRON)
             .define('b', Items.IRON_BARS)
-            .define('r', CommonItemTags.REDSTONE_DUSTS)
-            .define('g', CommonItemTags.GOLD_INGOTS)
-            .define('q', CommonItemTags.QUARTZ_GEMS)
+            .define('r', CommonTags.DUSTS_REDSTONE)
+            .define('g', CommonTags.INGOTS_GOLD)
+            .define('q', CommonTags.GEMS_QUARTZ)
             .group("scanner")
-            .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.MINESHAFT)))
+            .unlockedBy("is_delving", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(
+                lookup.lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.MINESHAFT))))
             .save(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BLANK_MODULE.get())
             .pattern("ggg")
             .pattern("crc")
             .pattern("cnc")
-            .define('g', CommonItemTags.GREEN_DYES)
+            .define('g', CommonTags.DYES_GREEN)
             .define('c', Items.CLAY_BALL)
-            .define('r', CommonItemTags.GLOWSTONE_DUSTS)
-            .define('n', CommonItemTags.GOLD_NUGGETS)
+            .define('r', CommonTags.DUSTS_GLOWSTONE)
+            .define('n', CommonTags.NUGGETS_GOLD)
             .group("blank_module")
             .unlockedBy("has_scanner", InventoryChangeTrigger.TriggerInstance.hasItems(SCANNER.get()))
             .save(consumer);
 
-        registerModule(RANGE_MODULE.get(), CommonItemTags.ENDER_PEARLS).save(consumer);
+        registerModule(RANGE_MODULE.get(), CommonTags.ENDER_PEARLS).save(consumer);
         registerModule(ENTITY_MODULE.get(), Items.LEAD).save(consumer);
-        registerModule(FRIENDLY_ENTITY_MODULE.get(), CommonItemTags.LEATHER).save(consumer);
-        registerModule(HOSTILE_ENTITY_MODULE.get(), CommonItemTags.BONES).save(consumer);
-        registerModule(BLOCK_MODULE.get(), CommonItemTags.STONE).save(consumer);
+        registerModule(FRIENDLY_ENTITY_MODULE.get(), CommonTags.LEATHERS).save(consumer);
+        registerModule(HOSTILE_ENTITY_MODULE.get(), CommonTags.BONES).save(consumer);
+        registerModule(BLOCK_MODULE.get(), CommonTags.STONES).save(consumer);
         registerModule(COMMON_ORES_MODULE.get(), Items.COAL).save(consumer);
-        registerModule(RARE_ORES_MODULE.get(), CommonItemTags.DIAMOND_GEMS).save(consumer);
+        registerModule(RARE_ORES_MODULE.get(), CommonTags.GEMS_DIAMOND).save(consumer);
         registerModule(FLUID_MODULE.get(), Items.WATER_BUCKET).save(consumer);
         registerModule(CHEST_MODULE.get(), Items.CHEST).save(consumer);
     }

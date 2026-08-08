@@ -1,22 +1,21 @@
 package li.cil.scannable.common.inventory;
 
 import li.cil.scannable.common.item.Items;
+import li.cil.scannable.common.item.ModDataComponents;
 import li.cil.scannable.common.item.ScannerItem;
 import li.cil.scannable.common.item.ScannerModuleItem;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ScannerContainer extends SimpleContainer {
     private static final int ACTIVE_MODULE_COUNT = 3;
     private static final int INACTIVE_MODULE_COUNT = 6;
     private static final int TOTAL_MODULE_COUNT = ACTIVE_MODULE_COUNT + INACTIVE_MODULE_COUNT;
-
-    private static final String TAG_ITEMS = "items";
-    private static final String TAG_SLOT = "slot";
-    private static final String TAG_ITEM = "item";
 
     private final ItemStack container;
 
@@ -24,9 +23,13 @@ public final class ScannerContainer extends SimpleContainer {
         super(TOTAL_MODULE_COUNT);
         this.container = container;
 
-        final CompoundTag tag = container.getTag();
-        if (tag != null && tag.contains(TAG_ITEMS, Tag.TAG_LIST)) {
-            fromTag(tag.getList(TAG_ITEMS, Tag.TAG_COMPOUND));
+        final ItemContainerContents contents = container.get(ModDataComponents.MODULES.get());
+        if (contents != null) {
+            final NonNullList<ItemStack> items = NonNullList.withSize(TOTAL_MODULE_COUNT, ItemStack.EMPTY);
+            contents.copyInto(items);
+            for (int slot = 0; slot < TOTAL_MODULE_COUNT; slot++) {
+                setItem(slot, items.get(slot));
+            }
         }
     }
 
@@ -64,7 +67,12 @@ public final class ScannerContainer extends SimpleContainer {
     @Override
     public void setChanged() {
         super.setChanged();
-        this.container.addTagElement(TAG_ITEMS, this.createTag());
+
+        final List<ItemStack> items = new ArrayList<>(getContainerSize());
+        for (int slot = 0; slot < getContainerSize(); slot++) {
+            items.add(getItem(slot));
+        }
+        container.set(ModDataComponents.MODULES.get(), ItemContainerContents.fromItems(items));
     }
 
     // --------------------------------------------------------------------- //
@@ -82,42 +90,6 @@ public final class ScannerContainer extends SimpleContainer {
     @Override
     public boolean canAddItem(final ItemStack stack) {
         return isModule(stack) && super.canAddItem(stack);
-    }
-
-    @Override
-    public void fromTag(final ListTag tag) {
-        for (int i = 0; i < this.getContainerSize(); ++i) {
-            this.setItem(i, ItemStack.EMPTY);
-        }
-
-        for (int i = 0; i < tag.size(); ++i) {
-            final CompoundTag slotTag = tag.getCompound(i);
-            final int slot = slotTag.getByte(TAG_SLOT) & 0xFF;
-            if (slot < this.getContainerSize()) {
-                this.setItem(slot, ItemStack.of(slotTag.getCompound(TAG_ITEM)));
-            }
-        }
-    }
-
-    @Override
-    public ListTag createTag() {
-        final ListTag tag = new ListTag();
-
-        for (int i = 0; i < this.getContainerSize(); ++i) {
-            final ItemStack stack = this.getItem(i);
-            if (!stack.isEmpty()) {
-                final CompoundTag slotTag = new CompoundTag();
-                slotTag.putByte(TAG_SLOT, (byte) i);
-
-                final CompoundTag itemTag = new CompoundTag();
-                stack.save(itemTag);
-                slotTag.put(TAG_ITEM, itemTag);
-
-                tag.add(slotTag);
-            }
-        }
-
-        return tag;
     }
 
     // --------------------------------------------------------------------- //

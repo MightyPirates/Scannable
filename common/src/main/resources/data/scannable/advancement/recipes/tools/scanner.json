@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "scannable:scanner"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "is_delving": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "structures": "minecraft:mineshaft"
+              }
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:location"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "is_delving"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "scannable:scanner"
+    ]
+  }
+}

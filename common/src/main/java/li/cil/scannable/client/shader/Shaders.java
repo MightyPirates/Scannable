@@ -91,7 +91,7 @@ public final class Shaders implements ResourceManagerReloadListener {
             }
 
             try {
-                shader = new ShaderInstance(location -> provider.getResource(new ResourceLocation(API.MOD_ID, location.getPath())).or(() -> provider.getResource(location)), name, format);
+                shader = new ShaderInstance(location -> provider.getResource(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, location.getPath())).or(() -> provider.getResource(location)), name, format);
             } catch (final Exception e) {
                 LOGGER.error(e);
             }

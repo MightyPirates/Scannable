@@ -47,16 +47,16 @@ public final class ModItemModelProvider extends FabricModelProvider {
 
     private void registerSimpleItem(final ItemModelGenerators itemModelGenerator, final Item item) {
         ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item),
-            TextureMapping.layer0(new ResourceLocation(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),
+            TextureMapping.layer0(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),
             ((ItemModelGeneratorAccessor) itemModelGenerator).getOutput());
     }
 
     private void registerModule(final ItemModelGenerators itemModelGenerator, final Item item) {
-        final ModelTemplate model = new ModelTemplate(Optional.of(new ResourceLocation("minecraft", "item/generated")), Optional.empty(), TextureSlot.LAYER0, LAYER1, LAYER2);
+        final ModelTemplate model = new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0, LAYER1, LAYER2);
         model.create(ModelLocationUtils.getModelLocation(item), (new TextureMapping())
-                .put(TextureSlot.LAYER0, new ResourceLocation(API.MOD_ID, "item/blank_module"))
-                .put(LAYER1, new ResourceLocation(API.MOD_ID, "item/module_slot"))
-                .put(LAYER2, new ResourceLocation(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),
+                .put(TextureSlot.LAYER0, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/blank_module"))
+                .put(LAYER1, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/module_slot"))
+                .put(LAYER2, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),
             ((ItemModelGeneratorAccessor) itemModelGenerator).getOutput());
     }
 }

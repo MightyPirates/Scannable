@@ -8,12 +8,7 @@ import li.cil.scannable.common.scanning.ConfigurableBlockScannerModule;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -25,48 +20,34 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem {
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    private static final String TAG_BLOCKS = "blocks";
-    private static final String TAG_IS_LOCKED = "isLocked";
-
     public static boolean isLocked(final ItemStack stack) {
-        final CompoundTag tag = stack.getTag();
-        return tag != null && tag.getBoolean(TAG_IS_LOCKED);
+        return stack.getOrDefault(ModDataComponents.LOCKED.get(), false);
     }
 
     public static List<Block> getBlocks(final ItemStack stack) {
-        final CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains(TAG_BLOCKS, Tag.TAG_LIST)) {
+        final List<ResourceLocation> ids = getBlockIds(stack);
+        if (ids.isEmpty()) {
             return Collections.emptyList();
         }
 
-        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
-        final List<Block> result = new ArrayList<>();
-        list.forEach(item -> {
-            try {
-                final ResourceLocation registryName = new ResourceLocation(item.getAsString());
-                BuiltInRegistries.BLOCK.getOptional(registryName).ifPresent(result::add);
-            } catch (final ResourceLocationException e) {
-                LOGGER.error(e);
-            }
-        });
+        final List<Block> result = new ArrayList<>(ids.size());
+        for (final ResourceLocation id : ids) {
+            BuiltInRegistries.BLOCK.getOptional(id).ifPresent(result::add);
+        }
 
         return result;
     }
@@ -77,25 +58,21 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return false;
         }
 
-        final CompoundTag tag = stack.getOrCreateTag();
-        if (tag.getBoolean(TAG_IS_LOCKED)) {
+        if (isLocked(stack)) {
             return false;
         }
 
-        final StringTag itemNbt = StringTag.valueOf(registryName.get().location().toString());
-
-        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
-        if (list.contains(itemNbt)) {
+        final ResourceLocation id = registryName.get().location();
+        final List<ResourceLocation> ids = new ArrayList<>(getBlockIds(stack));
+        if (ids.contains(id)) {
             return true;
         }
-        if (list.size() >= Constants.CONFIGURABLE_MODULE_SLOTS) {
+        if (ids.size() >= Constants.CONFIGURABLE_MODULE_SLOTS) {
             return false;
         }
 
-        // getList may have just created a new empty list.
-        tag.put(TAG_BLOCKS, list);
-
-        list.add(itemNbt);
+        ids.add(id);
+        setBlockIds(stack, ids);
         return true;
     }
 
@@ -109,30 +86,28 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final CompoundTag tag = stack.getOrCreateTag();
-        if (tag.getBoolean(TAG_IS_LOCKED)) {
+        if (isLocked(stack)) {
             return;
         }
 
-        final StringTag itemNbt = StringTag.valueOf(registryName.get().location().toString());
-
-        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
-        final int oldIndex = list.indexOf(itemNbt);
+        final ResourceLocation id = registryName.get().location();
+        final List<ResourceLocation> ids = new ArrayList<>(getBlockIds(stack));
+        final int oldIndex = ids.indexOf(id);
         if (oldIndex == index) {
             return;
         }
 
-        if (index >= list.size()) {
-            list.add(itemNbt);
+        if (index >= ids.size()) {
+            ids.add(id);
         } else {
-            list.set(index, itemNbt);
+            ids.set(index, id);
         }
 
         if (oldIndex >= 0) {
-            list.remove(oldIndex);
+            ids.remove(oldIndex);
         }
 
-        tag.put(TAG_BLOCKS, list);
+        setBlockIds(stack, ids);
     }
 
     public static void removeBlockAt(final ItemStack stack, final int index) {
@@ -140,15 +115,25 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
             return;
         }
 
-        final CompoundTag tag = stack.getOrCreateTag();
-        if (tag.getBoolean(TAG_IS_LOCKED)) {
+        if (isLocked(stack)) {
             return;
         }
 
-        final ListTag list = tag.getList(TAG_BLOCKS, Tag.TAG_STRING);
-        if (index < list.size()) {
-            list.remove(index);
+        final List<ResourceLocation> ids = new ArrayList<>(getBlockIds(stack));
+        if (index < ids.size()) {
+            ids.remove(index);
+            setBlockIds(stack, ids);
         }
+    }
+
+    // --------------------------------------------------------------------- //
+
+    private static List<ResourceLocation> getBlockIds(final ItemStack stack) {
+        return stack.getOrDefault(ModDataComponents.BLOCKS.get(), Collections.emptyList());
+    }
+
+    private static void setBlockIds(final ItemStack stack, final List<ResourceLocation> ids) {
+        stack.set(ModDataComponents.BLOCKS.get(), List.copyOf(ids));
     }
 
     // --------------------------------------------------------------------- //
@@ -162,8 +147,8 @@ public final class ConfigurableBlockScannerModuleItem extends ScannerModuleItem 
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void appendHoverText(final ItemStack stack, @Nullable final Level level, final List<Component> tooltip, final TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
+    public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final List<Component> tooltip, final TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
 
         final List<Block> blocks = getBlocks(stack);
         if (!blocks.isEmpty()) {

@@ -1,8 +1,8 @@
 package li.cil.scannable.client;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import li.cil.scannable.common.tags.CommonTags;
 import li.cil.scannable.util.config.*;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
@@ -55,8 +55,26 @@ public final class ClientConfig {
         return Integer.decode(value);
     }
 
-    @ExpectPlatform
     private static Object2IntMap<ResourceLocation> getDefaultBlockTagColors() {
-        throw new AssertionError();
+        return Util.make(new Object2IntOpenHashMap<>(), c -> {
+            // Minecraft
+            c.put(CommonTags.ORES_COAL.location(), MapColor.COLOR_GRAY.col);
+            c.put(CommonTags.ORES_IRON.location(), MapColor.COLOR_BROWN.col); // MaterialColor.IRON is also gray, so...
+            c.put(CommonTags.ORES_GOLD.location(), MapColor.GOLD.col);
+            c.put(CommonTags.ORES_LAPIS.location(), MapColor.LAPIS.col);
+            c.put(CommonTags.ORES_DIAMOND.location(), MapColor.DIAMOND.col);
+            c.put(CommonTags.ORES_REDSTONE.location(), MapColor.COLOR_RED.col);
+            c.put(CommonTags.ORES_EMERALD.location(), MapColor.EMERALD.col);
+            c.put(CommonTags.ORES_QUARTZ.location(), MapColor.QUARTZ.col);
+
+            // Common modded ores
+            c.put(CommonTags.ORES_TIN.location(), MapColor.COLOR_CYAN.col);
+            c.put(CommonTags.ORES_COPPER.location(), MapColor.TERRACOTTA_ORANGE.col);
+            c.put(CommonTags.ORES_LEAD.location(), MapColor.TERRACOTTA_BLUE.col);
+            c.put(CommonTags.ORES_SILVER.location(), MapColor.COLOR_LIGHT_GRAY.col);
+            c.put(CommonTags.ORES_NICKEL.location(), MapColor.COLOR_LIGHT_BLUE.col);
+            c.put(CommonTags.ORES_PLATINUM.location(), MapColor.TERRACOTTA_WHITE.col);
+            c.put(CommonTags.ORES_MITHRIL.location(), MapColor.COLOR_PURPLE.col);
+        });
     }
 }

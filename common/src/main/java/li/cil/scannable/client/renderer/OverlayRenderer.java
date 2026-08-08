@@ -2,6 +2,7 @@ package li.cil.scannable.client.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -21,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public final class OverlayRenderer {
-    private static final ResourceLocation PROGRESS = new ResourceLocation(API.MOD_ID, "textures/gui/overlay/scanner_progress.png");
+    private static final ResourceLocation PROGRESS = ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "textures/gui/overlay/scanner_progress.png");
 
     public static void render(final GuiGraphics graphics, final float partialTick) {
         final Minecraft mc = Minecraft.getInstance();
@@ -39,7 +40,7 @@ public final class OverlayRenderer {
             return;
         }
 
-        final int total = stack.getUseDuration();
+        final int total = stack.getUseDuration(player);
         final int remaining = player.getUseItemRemainingTicks();
 
         final float progress = Mth.clamp(1 - (remaining - partialTick) / (float) total, 0, 1);
@@ -52,10 +53,7 @@ public final class OverlayRenderer {
         RenderSystem.setShaderColor(0.66f, 0.8f, 0.93f, 0.66f);
         RenderSystem.setShaderTexture(0, PROGRESS);
 
-        final Tesselator tesselator = Tesselator.getInstance();
-        final BufferBuilder buffer = tesselator.getBuilder();
-
-        buffer.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_TEX);
+        final BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_TEX);
 
         final int width = 64;
         final int height = 64;
@@ -70,62 +68,62 @@ public final class OverlayRenderer {
         final float tx = Mth.sin(angle);
         final float ty = Mth.cos(angle);
 
-        buffer.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
+        buffer.addVertex(midX, top, 0).setUv(0.5f, 1);
         if (progress < 0.125) { // Top right.
-            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+            buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
 
             final float x = tx / ty * 0.5f;
-            buffer.vertex(midX + x * width, top, 0).uv(0.5f + x, 1).endVertex();
+            buffer.addVertex(midX + x * width, top, 0).setUv(0.5f + x, 1);
         } else {
-            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-            buffer.vertex(right, top, 0).uv(1, 1).endVertex();
+            buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
+            buffer.addVertex(right, top, 0).setUv(1, 1);
 
-            buffer.vertex(right, top, 0).uv(1, 1).endVertex();
+            buffer.addVertex(right, top, 0).setUv(1, 1);
             if (progress < 0.375) { // Right.
-                buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
 
                 final float y = Math.abs(ty / tx - 1) * 0.5f;
-                buffer.vertex(right, top + y * height, 0).uv(1, 1 - y).endVertex();
+                buffer.addVertex(right, top + y * height, 0).setUv(1, 1 - y);
             } else {
-                buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                buffer.vertex(right, bottom, 0).uv(1, 0).endVertex();
+                buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
+                buffer.addVertex(right, bottom, 0).setUv(1, 0);
 
-                buffer.vertex(right, bottom, 0).uv(1, 0).endVertex();
+                buffer.addVertex(right, bottom, 0).setUv(1, 0);
                 if (progress < 0.625) { // Bottom.
-                    buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                    buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
 
                     final float x = Math.abs(tx / ty - 1) * 0.5f;
-                    buffer.vertex(left + x * width, bottom, 0).uv(x, 0).endVertex();
+                    buffer.addVertex(left + x * width, bottom, 0).setUv(x, 0);
                 } else {
-                    buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                    buffer.vertex(left, bottom, 0).uv(0, 0).endVertex();
+                    buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
+                    buffer.addVertex(left, bottom, 0).setUv(0, 0);
 
-                    buffer.vertex(left, bottom, 0).uv(0, 0).endVertex();
+                    buffer.addVertex(left, bottom, 0).setUv(0, 0);
                     if (progress < 0.875) { // Left.
-                        buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                        buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
 
                         final float y = (ty / tx + 1) * 0.5f;
-                        buffer.vertex(left, top + y * height, 0).uv(0, 1 - y).endVertex();
+                        buffer.addVertex(left, top + y * height, 0).setUv(0, 1 - y);
                     } else {
-                        buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                        buffer.vertex(left, top, 0).uv(0, 1).endVertex();
+                        buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
+                        buffer.addVertex(left, top, 0).setUv(0, 1);
 
-                        buffer.vertex(left, top, 0).uv(0, 1).endVertex();
+                        buffer.addVertex(left, top, 0).setUv(0, 1);
                         if (progress < 1) { // Top left.
-                            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
+                            buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
 
                             final float x = Math.abs(tx / ty) * 0.5f;
-                            buffer.vertex(midX - x * width, top, 0).uv(0.5f - x, 1).endVertex();
+                            buffer.addVertex(midX - x * width, top, 0).setUv(0.5f - x, 1);
                         } else {
-                            buffer.vertex(midX, midY, 0).uv(0.5f, 0.5f).endVertex();
-                            buffer.vertex(midX, top, 0).uv(0.5f, 1).endVertex();
+                            buffer.addVertex(midX, midY, 0).setUv(0.5f, 0.5f);
+                            buffer.addVertex(midX, top, 0).setUv(0.5f, 1);
                         }
                     }
                 }
             }
         }
 
-        tesselator.end();
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         final Component label = Strings.progress(Mth.floor(progress * 100));
         graphics.drawString(mc.font, label, right + 12, midY - mc.font.lineHeight / 2, 0xCCAACCEE, true);

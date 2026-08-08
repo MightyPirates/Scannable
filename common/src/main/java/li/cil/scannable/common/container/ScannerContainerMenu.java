@@ -100,7 +100,7 @@ public final class ScannerContainerMenu extends AbstractContainerMenu {
                     continue;
                 }
 
-                final boolean itemsAreEqual = ItemStack.isSameItemSameTags(fromStack, intoStack);
+                final boolean itemsAreEqual = ItemStack.isSameItemSameComponents(fromStack, intoStack);
                 if (!itemsAreEqual) {
                     continue;
                 }
