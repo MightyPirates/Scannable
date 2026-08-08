@@ -49,11 +49,13 @@ jobs:
           rm neoforge/build/libs/*-dev-shadow.jar
 
       - name: Add Artifacts to Github Release
-        uses: alexellis/upload-assets@0.4.1
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          asset_paths: '["./fabric/build/libs/*.jar","./neoforge/build/libs/*.jar"]'
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload '${{ github.event.release.tag_name }}' \
+            ./fabric/build/libs/*.jar \
+            ./neoforge/build/libs/*.jar \
+            --clobber
 
       - uses: actions/upload-artifact@v4
         name: Upload Artifacts
@@ -67,6 +69,7 @@ jobs:
 
   publish:
     strategy:
+      fail-fast: false
       matrix:
         loader: [ fabric, neoforge ]
     runs-on: ubuntu-latest
@@ -86,6 +89,8 @@ jobs:
           java: Java 21
 
           files: ${{ matrix.loader }}/build/libs/*.jar
+
+          fail-mode: skip
 
           modrinth-token: ${{ secrets.MODRINTH_API_KEY }}
           curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
