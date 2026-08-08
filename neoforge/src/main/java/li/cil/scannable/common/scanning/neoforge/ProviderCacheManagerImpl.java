@@ -8,7 +8,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 
-@EventBusSubscriber(modid = API.MOD_ID)
+@EventBusSubscriber(modid = API.MOD_ID, value = Dist.CLIENT)
 public final class ProviderCacheManagerImpl {
     public static void initialize() {
     }
