@@ -43,7 +43,7 @@ public final class OverlayRenderer {
         final int total = stack.getUseDuration(player);
         final int remaining = player.getUseItemRemainingTicks();
 
-        final float progress = Mth.clamp(1 - (remaining - partialTick) / (float) total, 0, 1);
+        final float progress = Mth.clamp(1 - (remaining - partialTick) / total, 0, 1);
 
         final int screenWidth = mc.getWindow().getGuiScaledWidth();
         final int screenHeight = mc.getWindow().getGuiScaledHeight();

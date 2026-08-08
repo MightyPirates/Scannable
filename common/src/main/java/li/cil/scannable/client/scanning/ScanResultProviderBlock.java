@@ -40,9 +40,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -440,6 +440,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
             return this;
         }
 
+        @SuppressWarnings("PMD.CompareObjectsWithEquals")
         void setRoot(final BlockScanResult root) {
             if (root == this) {
                 return;

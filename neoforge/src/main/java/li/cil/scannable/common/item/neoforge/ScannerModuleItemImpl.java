@@ -1,8 +1,8 @@
 package li.cil.scannable.common.item.neoforge;
 
 import li.cil.scannable.api.scanning.ScannerModule;
-import net.minecraft.world.item.ItemStack;
 import li.cil.scannable.common.neoforge.capabilities.Capabilities;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 

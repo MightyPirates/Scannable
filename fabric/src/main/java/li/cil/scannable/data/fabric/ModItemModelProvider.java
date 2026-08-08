@@ -53,7 +53,7 @@ public final class ModItemModelProvider extends FabricModelProvider {
 
     private void registerModule(final ItemModelGenerators itemModelGenerator, final Item item) {
         final ModelTemplate model = new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0, LAYER1, LAYER2);
-        model.create(ModelLocationUtils.getModelLocation(item), (new TextureMapping())
+        model.create(ModelLocationUtils.getModelLocation(item), new TextureMapping()
                 .put(TextureSlot.LAYER0, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/blank_module"))
                 .put(LAYER1, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/module_slot"))
                 .put(LAYER2, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),

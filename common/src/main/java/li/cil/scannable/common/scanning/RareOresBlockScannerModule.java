@@ -1,6 +1,5 @@
 package li.cil.scannable.common.scanning;
 
-import li.cil.scannable.common.tags.CommonTags;
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
@@ -9,6 +8,7 @@ import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
+import li.cil.scannable.common.tags.CommonTags;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;

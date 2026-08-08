@@ -21,6 +21,7 @@ public final class RegistryUtils {
     private static String modId;
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> RegistrarBuilder<T> builder(ResourceKey<Registry<T>> registryKey, T... typeGetter) {
         return RegistrarManager.get(modId).builder(registryKey.location(), typeGetter);
     }

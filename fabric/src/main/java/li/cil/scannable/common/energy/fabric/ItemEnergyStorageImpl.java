@@ -35,7 +35,7 @@ public final class ItemEnergyStorageImpl {
                 @Override
                 public long receiveEnergy(final long amount, final boolean simulate) {
                     final long inserted;
-                    try (final Transaction transaction = Transaction.openOuter()) {
+                    try (Transaction transaction = Transaction.openOuter()) {
                         inserted = storage.insert(amount, transaction);
                         if (!simulate)
                             transaction.commit();
@@ -46,7 +46,7 @@ public final class ItemEnergyStorageImpl {
                 @Override
                 public long extractEnergy(final long amount, final boolean simulate) {
                     final long extracted;
-                    try (final Transaction transaction = Transaction.openOuter()) {
+                    try (Transaction transaction = Transaction.openOuter()) {
                         extracted = storage.extract(amount, transaction);
                         if (!simulate)
                             transaction.commit();

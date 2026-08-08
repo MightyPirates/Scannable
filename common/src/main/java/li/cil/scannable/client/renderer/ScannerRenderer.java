@@ -165,6 +165,7 @@ public enum ScannerRenderer {
         }
     }
 
+    @SuppressWarnings("PMD.UnusedFormalParameter")
     @ExpectPlatform
     private static DepthOnlyRenderTarget copyBufferSettings(final RenderTarget mainRenderTarget, final DepthOnlyRenderTarget depthRenderTarget) {
         throw new AssertionError();

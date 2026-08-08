@@ -19,18 +19,17 @@ public final class ModItemTagsProvider extends FabricTagProvider.ItemTagProvider
 
     @Override
     protected void addTags(final HolderLookup.Provider provider) {
-        tag(ItemTags.MODULES).add(
-            key(Items.BLANK_MODULE.get()),
-            key(Items.RANGE_MODULE.get()),
-            key(Items.ENTITY_MODULE.get()),
-            key(Items.FRIENDLY_ENTITY_MODULE.get()),
-            key(Items.HOSTILE_ENTITY_MODULE.get()),
-            key(Items.BLOCK_MODULE.get()),
-            key(Items.COMMON_ORES_MODULE.get()),
-            key(Items.RARE_ORES_MODULE.get()),
-            key(Items.FLUID_MODULE.get()),
-            key(Items.CHEST_MODULE.get())
-        );
+        tag(ItemTags.MODULES)
+            .add(key(Items.BLANK_MODULE.get()))
+            .add(key(Items.RANGE_MODULE.get()))
+            .add(key(Items.ENTITY_MODULE.get()))
+            .add(key(Items.FRIENDLY_ENTITY_MODULE.get()))
+            .add(key(Items.HOSTILE_ENTITY_MODULE.get()))
+            .add(key(Items.BLOCK_MODULE.get()))
+            .add(key(Items.COMMON_ORES_MODULE.get()))
+            .add(key(Items.RARE_ORES_MODULE.get()))
+            .add(key(Items.FLUID_MODULE.get()))
+            .add(key(Items.CHEST_MODULE.get()));
 
         tag(CommonTags.INGOTS_IRON).add(key(net.minecraft.world.item.Items.IRON_INGOT));
         tag(CommonTags.ENDER_PEARLS).add(key(net.minecraft.world.item.Items.ENDER_PEARL));
@@ -38,7 +37,6 @@ public final class ModItemTagsProvider extends FabricTagProvider.ItemTagProvider
         tag(CommonTags.INGOTS_GOLD).add(key(net.minecraft.world.item.Items.GOLD_INGOT));
         tag(CommonTags.LEATHERS).add(key(net.minecraft.world.item.Items.LEATHER));
         tag(CommonTags.DUSTS_REDSTONE).add(key(net.minecraft.world.item.Items.REDSTONE));
-        tag(CommonTags.INGOTS_IRON).add(key(net.minecraft.world.item.Items.IRON_INGOT));
         tag(CommonTags.GEMS_QUARTZ).add(key(net.minecraft.world.item.Items.QUARTZ));
         tag(CommonTags.DYES_GREEN).add(key(net.minecraft.world.item.Items.GREEN_DYE));
         tag(CommonTags.DUSTS_GLOWSTONE).add(key(net.minecraft.world.item.Items.GLOWSTONE_DUST));

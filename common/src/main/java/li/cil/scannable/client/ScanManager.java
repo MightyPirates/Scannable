@@ -1,8 +1,8 @@
 package li.cil.scannable.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
@@ -68,7 +68,7 @@ public final class ScanManager {
         final float a = -r1 * b * b * n;
         final float c = r1 * n;
 
-        final float t = (float) (System.currentTimeMillis() - start);
+        final float t = System.currentTimeMillis() - start;
 
         return SCAN_INITIAL_RADIUS + a + (t + b) * (t + b) * c;
     }

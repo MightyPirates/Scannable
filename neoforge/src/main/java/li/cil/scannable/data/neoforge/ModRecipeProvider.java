@@ -1,9 +1,9 @@
 package li.cil.scannable.data.neoforge;
 
+import li.cil.scannable.common.tags.CommonTags;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
-import li.cil.scannable.common.tags.CommonTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
