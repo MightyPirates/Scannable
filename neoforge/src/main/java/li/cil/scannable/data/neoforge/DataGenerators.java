@@ -1,8 +1,11 @@
 package li.cil.scannable.data.neoforge;
 
+import net.minecraft.data.tags.TagsProvider;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+
+import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber
 public final class DataGenerators {
@@ -13,9 +16,8 @@ public final class DataGenerators {
         final var lookupProvider = event.getLookupProvider();
         final var existingFileHelper = event.getExistingFileHelper();
 
-        final var blockTagsProvider = new ModBlockTagsProvider(output, lookupProvider, existingFileHelper);
-        generator.addProvider(event.includeServer(), blockTagsProvider);
-        generator.addProvider(event.includeServer(), new ModItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
+        generator.addProvider(event.includeServer(), new ModItemTagsProvider(output, lookupProvider,
+            CompletableFuture.completedFuture(TagsProvider.TagLookup.empty()), existingFileHelper));
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output, lookupProvider));
 
         generator.addProvider(event.includeClient(), new ModItemModelProvider(output, existingFileHelper));
