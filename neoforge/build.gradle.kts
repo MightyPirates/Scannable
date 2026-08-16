@@ -1,4 +1,5 @@
 val modId: String by project
+val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
 val minecraftVersion: String = libs.versions.minecraft.get()
 val neoforgeVersion: String = libs.versions.neoforge.platform.get()
 val neoforgeLoaderVersion: String = libs.versions.neoforge.loader.get()
