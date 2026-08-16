@@ -26,3 +26,5 @@ jobs:
           validate-wrappers: true
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Run game tests
+        run: ./gradlew gameTest

@@ -4,6 +4,7 @@ val minecraftVersion: String = libs.versions.minecraft.get()
 val fabricApiVersion: String = libs.versions.fabric.api.get()
 val architecturyVersion: String = libs.versions.architectury.get()
 val forgeConfigPortVersion: String = libs.versions.fabric.forgeConfigPort.get()
+val gameTestRuntime: Configuration by configurations.creating
 
 fabricApi {
     configureTests {
@@ -63,7 +64,7 @@ dependencies {
         exclude(group = "net.fabricmc.fabric-api")
     }
 
-    runtimeOnly(project(path = ":gametest-fabric", configuration = "namedElements"))
+    gameTestRuntime(project(path = ":gametest-fabric", configuration = "namedElements"))
 }
 
 tasks {
@@ -91,6 +92,11 @@ val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
     delete(gameTestResultsDir)
 }
 
-tasks.named("runGameTest") {
+tasks.named<JavaExec>("runGameTest") {
     dependsOn(cleanGameTestResults)
+    classpath += gameTestRuntime
+}
+
+tasks.named("test") {
+    setDependsOn(dependsOn.filterNot { "runGameTest" in it.toString() })
 }

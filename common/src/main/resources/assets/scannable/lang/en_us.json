@@ -40,5 +40,7 @@
   "message.scannable.no_scan_modules": "No scanning module installed.",
   "message.scannable.not_enough_energy": "Not enough energy.",
   "message.scannable.block_ignored": "Invalid block.",
-  "message.scannable.no_free_slots": "No free slots."
+  "message.scannable.no_free_slots": "No free slots.",
+
+  "tag.item.scannable.modules": "Scanner Modules"
 }

@@ -18,6 +18,7 @@ public class ModItem extends Item {
 
     // --------------------------------------------------------------------- //
 
+    @SuppressWarnings("deprecation")
     @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final TooltipDisplay display, final Consumer<Component> tooltip, final TooltipFlag flag) {

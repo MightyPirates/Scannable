@@ -4,6 +4,7 @@ val minecraftVersion: String = libs.versions.minecraft.get()
 val neoforgeVersion: String = libs.versions.neoforge.platform.get()
 val neoforgeLoaderVersion: String = libs.versions.neoforge.loader.get()
 val architecturyVersion: String = libs.versions.architectury.get()
+val gameTestRuntime: Configuration by configurations.creating
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
@@ -43,7 +44,7 @@ dependencies {
     neoForge(libs.neoforge.platform)
     modImplementation(libs.neoforge.architectury)
 
-    runtimeOnly(project(":gametest-neoforge"))
+    gameTestRuntime(project(":gametest-neoforge"))
 }
 
 tasks {
@@ -71,6 +72,7 @@ val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
     delete(gameTestResultsDir)
 }
 
-tasks.named("runGameTestServer") {
+tasks.named<JavaExec>("runGameTestServer") {
     dependsOn(cleanGameTestResults)
+    classpath += gameTestRuntime
 }
