@@ -1,0 +1,18 @@
+{
+    "schemaVersion": 1,
+    "id": "scannable_gametest",
+    "version": "0.0.0",
+    "name": "Scannable Game Tests",
+    "description": "Game test suite. Run with ./gradlew :fabric:runGametest",
+    "license": "MIT",
+    "environment": "*",
+    "entrypoints": {
+        "fabric-gametest": [
+            "li.cil.scannable.gametest.fabric.EnergyTestsFabric"
+        ]
+    },
+    "depends": {
+        "scannable": "*",
+        "fabric-gametest-api-v1": "*"
+    }
+}

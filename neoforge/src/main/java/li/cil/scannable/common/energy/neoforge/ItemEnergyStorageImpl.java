@@ -1,5 +1,6 @@
 package li.cil.scannable.common.energy.neoforge;
 
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
 import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.world.item.ItemStack;
@@ -12,7 +13,7 @@ import java.util.function.ToIntBiFunction;
 
 public final class ItemEnergyStorageImpl {
     public static Optional<ItemEnergyStorage> of(final ItemStack container) {
-        if (!(container.getItem() instanceof ScannerItem)) {
+        if (!CommonConfig.useEnergy || !(container.getItem() instanceof ScannerItem)) {
             return Optional.empty();
         }
 

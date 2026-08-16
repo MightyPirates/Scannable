@@ -18,6 +18,13 @@ loom {
 
             runDir("build/datagen")
         }
+        create("gametest") {
+            server()
+            name("Game Test")
+            vmArg("-Dfabric-api.gametest")
+            vmArg("-Dfabric-api.gametest.report-file=${layout.buildDirectory.get()}/junit.xml")
+            runDir("build/gametest")
+        }
     }
 }
 
@@ -43,10 +50,11 @@ dependencies {
     })
 
     // Not used by mod, just for dev convenience.
-    modRuntimeOnly(libs.fabric.tooltipFix)
     modRuntimeOnly(libs.fabric.roughlyEnoughItems) {
         exclude(group = "net.fabricmc.fabric-api")
     }
+
+    runtimeOnly(project(path = ":gametest-fabric", configuration = "namedElements"))
 }
 
 tasks {

@@ -177,6 +177,49 @@ for (platform in enabledPlatforms.split(',')) {
     }
 }
 
+for (platform in enabledPlatforms.split(',')) {
+    project(":gametest-$platform") {
+        architectury {
+            platformSetupLoomIde()
+            loader(platform)
+        }
+
+        val common: Configuration by configurations.creating
+        val bundle: Configuration by configurations.creating
+
+        configurations {
+            common.isCanBeResolved = true
+            common.isCanBeConsumed = false
+
+            compileClasspath.get().extendsFrom(common)
+            runtimeClasspath.get().extendsFrom(common)
+            getByName("development${projectConfigurations[platform]}").extendsFrom(common)
+
+            bundle.isCanBeResolved = true
+            bundle.isCanBeConsumed = false
+        }
+
+        dependencies {
+            common(project(path = ":gametest-common", configuration = "namedElements")) { isTransitive = false }
+            bundle(
+                project(
+                    path = ":gametest-common",
+                    configuration = "transformProduction${projectConfigurations[platform]}"
+                )
+            ) { isTransitive = false }
+        }
+
+        tasks.jar {
+            val bundleFiles = configurations["bundle"]
+            dependsOn(bundleFiles)
+            from(bundleFiles.elements.map { files -> files.map { zipTree(it) } }) {
+                exclude("architectury.common.json", "META-INF/MANIFEST.MF")
+            }
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
+
 tasks.register("lint") {
     group = "verification"
     description = "Runs Spotless and PMD across all modules."

@@ -7,7 +7,6 @@ import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
-import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public final class ScannerEnergyStorage extends SimpleEnergyHandler {
     private final ItemStack container;
@@ -30,24 +29,6 @@ public final class ScannerEnergyStorage extends SimpleEnergyHandler {
 
     // --------------------------------------------------------------------- //
     // SimpleEnergyHandler
-
-    @Override
-    public int insert(final int amount, final TransactionContext transaction) {
-        if (!CommonConfig.useEnergy) {
-            return 0;
-        }
-
-        return super.insert(amount, transaction);
-    }
-
-    @Override
-    public int extract(final int amount, final TransactionContext transaction) {
-        if (!CommonConfig.useEnergy) {
-            return 0;
-        }
-
-        return super.extract(amount, transaction);
-    }
 
     @Override
     protected void onEnergyChanged(final int previousAmount) {

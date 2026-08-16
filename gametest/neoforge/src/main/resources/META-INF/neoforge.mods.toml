@@ -1,0 +1,18 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+
+[[mods]]
+modId = "scannable_gametest"
+version = "0.0.0"
+displayName = "Scannable Game Tests"
+description = '''
+Game test suite. Run with ./gradlew :neoforge:runGameTestServer
+'''
+
+[[dependencies.scannable_gametest]]
+modId = "scannable"
+type = "required"
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "BOTH"

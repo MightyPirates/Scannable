@@ -15,6 +15,15 @@ loom {
             programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
             programArgs("--existing", file("src/main/resources").absolutePath)
         }
+        create("gameTestServer") {
+            server()
+            name("Game Test Server")
+            mainClass.set("net.neoforged.fml.startup.GameTestServer")
+            runDir = "run/gametest"
+            programArgs("--tests", "scannable_gametest:*")
+            programArgs("--report", file("build/gametest-report.xml").absolutePath)
+            vmArg("-ea")
+        }
         create("serverData") {
             serverData()
             programArgs("--mod", modId)
@@ -32,6 +41,8 @@ repositories {
 dependencies {
     neoForge(libs.neoforge.platform)
     modImplementation(libs.neoforge.architectury)
+
+    runtimeOnly(project(":gametest-neoforge"))
 }
 
 tasks {
