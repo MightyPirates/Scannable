@@ -67,7 +67,7 @@ public final class RecipeTests {
         final ItemStack expected = display.result().resolveForFirstStack(displayContext);
         assertTrue(helper, id + " should produce a result", !expected.isEmpty());
 
-        final ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        @SuppressWarnings("removal") final ServerPlayer player = helper.makeMockServerPlayerInLevel();
         final CraftingMenu menu = new CraftingMenu(0, player.getInventory(),
             ContainerLevelAccess.create(level, helper.absolutePos(TABLE)));
         final List<Slot> grid = menu.getInputGridSlots();
