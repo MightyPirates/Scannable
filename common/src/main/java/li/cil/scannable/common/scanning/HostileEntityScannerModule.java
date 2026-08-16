@@ -8,7 +8,7 @@ import li.cil.scannable.client.scanning.filter.HostileEntityScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
@@ -26,12 +26,12 @@ public enum HostileEntityScannerModule implements EntityScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return ScanResultProviders.ENTITIES.get();
+        return ScanResultProviders.entities();
     }
 
     @Environment(EnvType.CLIENT)
     @Override
-    public Optional<ResourceLocation> getIcon(final Entity entity) {
+    public Optional<Identifier> getIcon(final Entity entity) {
         return Optional.of(API.ICON_WARNING);
     }
 

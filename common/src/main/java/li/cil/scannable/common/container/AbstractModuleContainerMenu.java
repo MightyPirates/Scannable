@@ -1,6 +1,6 @@
 package li.cil.scannable.common.container;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -44,7 +44,7 @@ public abstract class AbstractModuleContainerMenu extends AbstractContainerMenu 
 
     public abstract void removeItemAt(final int index);
 
-    public abstract void setItemAt(final int index, final ResourceLocation value);
+    public abstract void setItemAt(final int index, final Identifier value);
 
     // --------------------------------------------------------------------- //
     // Container

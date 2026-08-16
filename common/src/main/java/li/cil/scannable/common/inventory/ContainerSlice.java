@@ -1,6 +1,7 @@
 package li.cil.scannable.common.inventory;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -73,13 +74,13 @@ public final class ContainerSlice implements Container, Iterable<ItemStack> {
     }
 
     @Override
-    public void startOpen(final Player player) {
-        container.startOpen(player);
+    public void startOpen(final ContainerUser user) {
+        container.startOpen(user);
     }
 
     @Override
-    public void stopOpen(final Player player) {
-        container.stopOpen(player);
+    public void stopOpen(final ContainerUser user) {
+        container.stopOpen(user);
     }
 
     @Override

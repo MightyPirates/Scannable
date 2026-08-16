@@ -10,8 +10,10 @@ import li.cil.scannable.common.config.CommonConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return ScanResultProviders.BLOCKS.get();
+        return ScanResultProviders.blocks();
     }
 
     @Environment(EnvType.CLIENT)
@@ -58,11 +60,12 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final ResourceLocation location : CommonConfig.commonOreBlocks) {
+        for (final Identifier location : CommonConfig.commonOreBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
-        BuiltInRegistries.BLOCK.getTagNames().forEach(tag -> {
+        BuiltInRegistries.BLOCK.getTags().forEach(namedTag -> {
+            final TagKey<Block> tag = namedTag.key();
             if (CommonConfig.commonOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }

@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "scannable:item/common_ores_module"
+  }
+}

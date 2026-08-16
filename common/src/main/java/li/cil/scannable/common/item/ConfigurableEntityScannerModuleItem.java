@@ -9,12 +9,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,12 +23,14 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem {
     public static boolean isLocked(final ItemStack stack) {
@@ -37,13 +38,13 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
     }
 
     public static List<EntityType<?>> getEntityTypes(final ItemStack stack) {
-        final List<ResourceLocation> ids = getEntityTypeIds(stack);
+        final List<Identifier> ids = getEntityTypeIds(stack);
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }
 
         final List<EntityType<?>> result = new ArrayList<>(ids.size());
-        for (final ResourceLocation id : ids) {
+        for (final Identifier id : ids) {
             EntityType.byString(id.toString()).ifPresent(result::add);
         }
 
@@ -60,8 +61,8 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return false;
         }
 
-        final ResourceLocation id = registryName.get().location();
-        final List<ResourceLocation> ids = new ArrayList<>(getEntityTypeIds(stack));
+        final Identifier id = registryName.get().identifier();
+        final List<Identifier> ids = new ArrayList<>(getEntityTypeIds(stack));
         if (ids.contains(id)) {
             return true;
         }
@@ -88,8 +89,8 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final ResourceLocation id = registryName.get().location();
-        final List<ResourceLocation> ids = new ArrayList<>(getEntityTypeIds(stack));
+        final Identifier id = registryName.get().identifier();
+        final List<Identifier> ids = new ArrayList<>(getEntityTypeIds(stack));
         final int oldIndex = ids.indexOf(id);
         if (oldIndex == index) {
             return;
@@ -117,7 +118,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             return;
         }
 
-        final List<ResourceLocation> ids = new ArrayList<>(getEntityTypeIds(stack));
+        final List<Identifier> ids = new ArrayList<>(getEntityTypeIds(stack));
         if (index < ids.size()) {
             ids.remove(index);
             setEntityTypeIds(stack, ids);
@@ -126,18 +127,18 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
 
     // --------------------------------------------------------------------- //
 
-    private static List<ResourceLocation> getEntityTypeIds(final ItemStack stack) {
+    private static List<Identifier> getEntityTypeIds(final ItemStack stack) {
         return stack.getOrDefault(ModDataComponents.ENTITY_TYPES.get(), Collections.emptyList());
     }
 
-    private static void setEntityTypeIds(final ItemStack stack, final List<ResourceLocation> ids) {
+    private static void setEntityTypeIds(final ItemStack stack, final List<Identifier> ids) {
         stack.set(ModDataComponents.ENTITY_TYPES.get(), List.copyOf(ids));
     }
 
     // --------------------------------------------------------------------- //
 
-    public ConfigurableEntityScannerModuleItem() {
-        super(ConfigurableEntityScannerModule.INSTANCE);
+    public ConfigurableEntityScannerModuleItem(final Properties properties) {
+        super(properties, ConfigurableEntityScannerModule.INSTANCE);
     }
 
     // --------------------------------------------------------------------- //
@@ -145,21 +146,21 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final List<Component> tooltip, final TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+    public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final TooltipDisplay display, final Consumer<Component> tooltip, final TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, tooltip, flag);
 
         final List<EntityType<?>> entities = getEntityTypes(stack);
         if (!entities.isEmpty()) {
-            tooltip.add(Strings.TOOLTIP_ENTITIES_LIST_CAPTION);
-            entities.forEach(e -> tooltip.add(Strings.listItem(e.getDescription())));
+            tooltip.accept(Strings.TOOLTIP_ENTITIES_LIST_CAPTION);
+            entities.forEach(e -> tooltip.accept(Strings.listItem(e.getDescription())));
         }
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(final Level level, final Player player, final InteractionHand hand) {
+    public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
         final ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
@@ -176,7 +177,7 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
             }, buffer -> buffer.writeEnum(hand));
         }
 
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -192,6 +193,6 @@ public final class ConfigurableEntityScannerModuleItem extends ScannerModuleItem
         }
 
         // Always succeed to prevent opening item UI.
-        return InteractionResult.sidedSuccess(player.level().isClientSide());
+        return InteractionResult.SUCCESS;
     }
 }

@@ -5,28 +5,29 @@ import li.cil.scannable.common.energy.neoforge.ScannerEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerContainer;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ScannerModuleItem;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage;
-import net.neoforged.neoforge.capabilities.Capabilities.ItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 
 @EventBusSubscriber(modid = API.MOD_ID)
-public final class Capabilities {
+public final class ModCapabilities {
     public static final class ScannerModule {
-        public static final ItemCapability<li.cil.scannable.api.scanning.ScannerModule, Void> ITEM = ItemCapability.createVoid(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "scanner_module"), li.cil.scannable.api.scanning.ScannerModule.class);
+        public static final ItemCapability<li.cil.scannable.api.scanning.ScannerModule, Void> ITEM = ItemCapability.createVoid(Identifier.fromNamespaceAndPath(API.MOD_ID, "scanner_module"), li.cil.scannable.api.scanning.ScannerModule.class);
     }
 
     // --------------------------------------------------------------------- //
 
     @SubscribeEvent
     public static void initialize(final RegisterCapabilitiesEvent event) {
-        event.registerItem(ItemHandler.ITEM, (stack, context) -> new InvWrapper(ScannerContainer.of(stack)),
+        event.registerItem(Capabilities.Item.ITEM,
+            (stack, context) -> VanillaContainerWrapper.of(ScannerContainer.of(stack)),
             Items.SCANNER.get());
-        event.registerItem(EnergyStorage.ITEM, (stack, context) -> ScannerEnergyStorage.of(stack),
+        event.registerItem(Capabilities.Energy.ITEM,
+            (stack, context) -> ScannerEnergyStorage.of(stack),
             Items.SCANNER.get());
         event.registerItem(ScannerModule.ITEM, (stack, context) -> ((ScannerModuleItem) stack.getItem()).getModule(),
             Items.RANGE_MODULE.get(),
@@ -38,5 +39,10 @@ public final class Capabilities {
             Items.RARE_ORES_MODULE.get(),
             Items.FLUID_MODULE.get(),
             Items.CHEST_MODULE.get());
+    }
+
+    // --------------------------------------------------------------------- //
+
+    private ModCapabilities() {
     }
 }

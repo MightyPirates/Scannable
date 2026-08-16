@@ -3,7 +3,7 @@ package li.cil.scannable.api.scanning;
 import li.cil.scannable.api.API;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,7 +29,7 @@ public interface EntityScannerModule extends ScannerModule {
      * @return the icon to use; if an {@link Optional#empty()} is returned {@link API#ICON_INFO} is used.
      */
     @Environment(EnvType.CLIENT)
-    default Optional<ResourceLocation> getIcon(final Entity entity) {
+    default Optional<Identifier> getIcon(final Entity entity) {
         return Optional.empty();
     }
 

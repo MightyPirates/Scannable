@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -23,11 +23,13 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class ScannerItem extends ModItem {
     public static boolean isScanner(final ItemStack stack) {
@@ -36,20 +38,20 @@ public final class ScannerItem extends ModItem {
 
     // --------------------------------------------------------------------- //
 
-    public ScannerItem() {
-        super(new Properties().stacksTo(1));
+    public ScannerItem(final Properties properties) {
+        super(properties.stacksTo(1));
     }
 
     // --------------------------------------------------------------------- //
     // Item
 
     @Override
-    public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final List<Component> tooltip, final TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+    public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final TooltipDisplay display, final Consumer<Component> tooltip, final TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, tooltip, flag);
 
         if (CommonConfig.useEnergy) {
             ItemEnergyStorage.of(stack).ifPresent(energy ->
-                tooltip.add(Strings.energyStorage(energy.getEnergyStored(), energy.getMaxEnergyStored())));
+                tooltip.accept(Strings.energyStorage(energy.getEnergyStored(), energy.getMaxEnergyStored())));
         }
     }
 
@@ -69,7 +71,7 @@ public final class ScannerItem extends ModItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(final Level level, final Player player, final InteractionHand hand) {
+    public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
         final ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
@@ -91,16 +93,16 @@ public final class ScannerItem extends ModItem {
                 if (!level.isClientSide()) {
                     player.displayClientMessage(Strings.MESSAGE_NO_SCAN_MODULES, true);
                 }
-                player.getCooldowns().addCooldown(this, 10);
-                return InteractionResultHolder.fail(stack);
+                player.getCooldowns().addCooldown(stack, 10);
+                return InteractionResult.FAIL;
             }
 
             if (!tryConsumeEnergy(player, stack, modules, true)) {
                 if (!level.isClientSide()) {
                     player.displayClientMessage(Strings.MESSAGE_NOT_ENOUGH_ENERGY, true);
                 }
-                player.getCooldowns().addCooldown(this, 10);
-                return InteractionResultHolder.fail(stack);
+                player.getCooldowns().addCooldown(stack, 10);
+                return InteractionResult.FAIL;
             }
 
             player.startUsingItem(hand);
@@ -110,7 +112,7 @@ public final class ScannerItem extends ModItem {
             }
         }
 
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -127,12 +129,12 @@ public final class ScannerItem extends ModItem {
     }
 
     @Override
-    public void releaseUsing(final ItemStack stack, final Level level, final LivingEntity entity, final int timeLeft) {
+    public boolean releaseUsing(final ItemStack stack, final Level level, final LivingEntity entity, final int timeLeft) {
         if (level.isClientSide()) {
             ScanManager.cancelScan();
             SoundManager.stopChargingSound();
         }
-        super.releaseUsing(stack, level, entity, timeLeft);
+        return super.releaseUsing(stack, level, entity, timeLeft);
     }
 
     @Override
@@ -158,7 +160,7 @@ public final class ScannerItem extends ModItem {
             }
         }
 
-        player.getCooldowns().addCooldown(this, 40);
+        player.getCooldowns().addCooldown(stack, 40);
 
         return stack;
     }

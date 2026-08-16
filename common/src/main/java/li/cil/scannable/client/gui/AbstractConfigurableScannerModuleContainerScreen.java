@@ -9,8 +9,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -21,7 +23,8 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractConfigurableScannerModuleContainerScreen<TContainer extends AbstractModuleContainerMenu, TItem> extends AbstractContainerScreen<TContainer> {
-    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "textures/gui/container/configurable_module.png");
+    private static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(API.MOD_ID, "textures/gui/container/configurable_module.png");
+    private static final Identifier SLOT_HIGHLIGHT = Identifier.withDefaultNamespace("container/slot_highlight_front");
     public static final int SLOTS_ORIGIN_X = 62;
     public static final int SLOTS_ORIGIN_Y = 20;
     public static final int SLOT_SIZE = 18;
@@ -58,7 +61,6 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
 
     @Override
     public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTicks) {
-        renderBackground(graphics, mouseX, mouseY, partialTicks);
         super.render(graphics, mouseX, mouseY, partialTicks);
         renderTooltip(graphics, mouseX, mouseY);
 
@@ -70,7 +72,7 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
 
             if (isHovering(x, y, 16, 16, mouseX, mouseY)) {
                 final TItem item = items.get(slot);
-                graphics.renderTooltip(font, getItemName(item), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, getItemName(item), mouseX, mouseY);
             }
         }
     }
@@ -87,7 +89,7 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
             final int y = SLOTS_ORIGIN_Y;
 
             if (isHovering(x, y, 16, 16, mouseX, mouseY)) {
-                renderSlotHighlight(graphics, x, y, 400);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT, x - 4, y - 4, 24, 24);
             }
 
             if (slot < items.size()) {
@@ -101,16 +103,16 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
     protected void renderBg(final GuiGraphics graphics, final float partialTicks, final int mouseX, final int mouseY) {
         final int x = (width - imageWidth) / 2;
         final int y = (height - imageHeight) / 2;
-        graphics.blit(BACKGROUND, x, y, 0, 0, imageWidth, imageHeight);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
+    public boolean mouseClicked(final MouseButtonEvent event, final boolean isDoubleClick) {
         for (int slot = 0; slot < Constants.CONFIGURABLE_MODULE_SLOTS; slot++) {
             final int x = SLOTS_ORIGIN_X + slot * SLOT_SIZE;
             final int y = SLOTS_ORIGIN_Y;
 
-            if (isHovering(x, y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
+            if (isHovering(x, y, SLOT_SIZE, SLOT_SIZE, event.x(), event.y())) {
                 final ItemStack heldItemStack = menu.getCarried();
                 if (!heldItemStack.isEmpty()) {
                     configureItemAt(getHeldItem(), slot, heldItemStack);
@@ -121,7 +123,7 @@ public abstract class AbstractConfigurableScannerModuleContainerScreen<TContaine
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, isDoubleClick);
     }
 
     @Override

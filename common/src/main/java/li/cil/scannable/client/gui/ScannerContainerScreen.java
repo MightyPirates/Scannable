@@ -6,8 +6,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -17,7 +18,7 @@ import javax.annotation.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class ScannerContainerScreen extends AbstractContainerScreen<ScannerContainerMenu> {
-    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "textures/gui/container/scanner.png");
+    private static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(API.MOD_ID, "textures/gui/container/scanner.png");
     private static final Component SCANNER_MODULES_TEXT = Component.translatable("gui.scannable.scanner.active_modules");
     private static final Component SCANNER_MODULES_TOOLTIP = Component.translatable("gui.scannable.scanner.active_modules.desc");
     private static final Component SCANNER_MODULES_INACTIVE_TEXT = Component.translatable("gui.scannable.scanner.inactive_modules");
@@ -36,14 +37,13 @@ public class ScannerContainerScreen extends AbstractContainerScreen<ScannerConta
 
     @Override
     public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTicks) {
-        renderBackground(graphics, mouseX, mouseY, partialTicks);
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         if (isHovering(8, 23, font.width(SCANNER_MODULES_TEXT), font.lineHeight, mouseX, mouseY)) {
-            graphics.renderTooltip(font, SCANNER_MODULES_TOOLTIP, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, SCANNER_MODULES_TOOLTIP, mouseX, mouseY);
         }
         if (isHovering(8, 49, font.width(SCANNER_MODULES_INACTIVE_TEXT), font.lineHeight, mouseX, mouseY)) {
-            graphics.renderTooltip(font, SCANNER_MODULES_INACTIVE_TOOLTIP, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, SCANNER_MODULES_INACTIVE_TOOLTIP, mouseX, mouseY);
         }
 
         renderTooltip(graphics, mouseX, mouseY);
@@ -61,7 +61,7 @@ public class ScannerContainerScreen extends AbstractContainerScreen<ScannerConta
     protected void renderBg(final GuiGraphics graphics, final float partialTicks, final int mouseX, final int mouseY) {
         final int x = (width - imageWidth) / 2;
         final int y = (height - imageHeight) / 2;
-        graphics.blit(BACKGROUND, x, y, 0, 0, imageWidth, imageHeight);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
     }
 
     @Override

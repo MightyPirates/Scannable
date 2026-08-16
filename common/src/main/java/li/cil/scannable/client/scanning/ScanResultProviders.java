@@ -21,6 +21,16 @@ public final class ScanResultProviders {
 
     // --------------------------------------------------------------------- //
 
+    public static ScanResultProvider blocks() {
+        return BLOCKS.get();
+    }
+
+    public static ScanResultProvider entities() {
+        return ENTITIES.get();
+    }
+
+    // --------------------------------------------------------------------- //
+
     public static void initialize() {
         RegistryUtils.builder(ScanResultProvider.REGISTRY).build();
     }

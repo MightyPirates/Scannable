@@ -1,20 +1,18 @@
 package li.cil.scannable.api.prefab;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.scanning.ScanResultProvider;
+import li.cil.scannable.client.shader.ScanPipelines;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +21,8 @@ import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static li.cil.scannable.util.UnitConversion.toRadians;
 
@@ -32,6 +32,10 @@ import static li.cil.scannable.util.UnitConversion.toRadians;
  */
 @Environment(EnvType.CLIENT)
 public abstract class AbstractScanResultProvider implements ScanResultProvider {
+    private static final RenderType OVERLAY_LAYER = RenderType.create("scan_result_overlay",
+        RenderSetup.builder(ScanPipelines.SCAN_RESULT_OVERLAY).createRenderSetup());
+    private static final Map<Identifier, RenderType> TEXTURED_OVERLAY_LAYERS = new ConcurrentHashMap<>();
+
     protected Player player;
     protected Vec3 center;
     protected int radius;
@@ -70,7 +74,7 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
      * @param icon            the icon to display.
      * @param label           the label text. May be null.
      */
-    protected static void renderIconLabel(final MultiBufferSource bufferSource, final PoseStack poseStack, final float yaw, final float pitch, final Vec3 lookVec, final Vec3 viewerEyes, final float displayDistance, final Vec3 resultPos, final ResourceLocation icon, @Nullable final Component label) {
+    protected static void renderIconLabel(final MultiBufferSource bufferSource, final PoseStack poseStack, final float yaw, final float pitch, final Vec3 lookVec, final Vec3 viewerEyes, final float displayDistance, final Vec3 resultPos, final Identifier icon, @Nullable final Component label) {
         final Vec3 toResult = resultPos.subtract(viewerEyes);
         final float distance = (float) toResult.length();
         final float lookDirDot = (float) lookVec.dot(toResult.normalize());
@@ -131,28 +135,15 @@ public abstract class AbstractScanResultProvider implements ScanResultProvider {
     // Simple render layers for result rendering.
 
     protected static RenderType getRenderLayer() {
-        return RenderType.create("scan_result",
-            DefaultVertexFormat.POSITION_COLOR,
-            VertexFormat.Mode.QUADS, 65536,
-            RenderType.CompositeState.builder()
-                .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
-                .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                .createCompositeState(false));
+        return OVERLAY_LAYER;
     }
 
-    protected static RenderType getRenderLayer(final ResourceLocation textureLocation) {
-        return RenderType.create("scan_result",
-            DefaultVertexFormat.POSITION_TEX,
-            VertexFormat.Mode.QUADS, 65536,
-            RenderType.CompositeState.builder()
-                .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader))
-                .setTextureState(new RenderStateShard.TextureStateShard(textureLocation, false, false))
-                .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                .createCompositeState(false));
+    protected static RenderType getRenderLayer(final Identifier textureLocation) {
+        return TEXTURED_OVERLAY_LAYERS.computeIfAbsent(textureLocation, location ->
+            RenderType.create("scan_result_overlay_textured",
+                RenderSetup.builder(ScanPipelines.SCAN_RESULT_OVERLAY_TEXTURED)
+                    .withTexture("Sampler0", location)
+                    .createRenderSetup()));
     }
 
     // --------------------------------------------------------------------- //

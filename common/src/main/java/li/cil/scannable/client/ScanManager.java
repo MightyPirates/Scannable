@@ -1,9 +1,9 @@
 package li.cil.scannable.client;
 
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
@@ -16,6 +16,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -88,13 +89,16 @@ public final class ScanManager {
     private static final List<ScanResult> renderingList = new ArrayList<>();
     // Backing buffer for the immediate buffer source used while rendering results.
     private static final ByteBufferBuilder BYTE_BUFFER_BUILDER = new ByteBufferBuilder(1536);
+    // Holds the level projection so it can be re-bound while drawing as an overlay.
+    private static final PerspectiveProjectionMatrixBuffer PROJECTION_MATRIX_BUFFER =
+        new PerspectiveProjectionMatrixBuffer("scannable scan results");
 
     private static int scanningTicks = -1;
     private static long currentStart = -1;
     @Nullable private static Vec3 lastScanCenter;
 
-    private static PoseStack worldViewModelStack;
-    private static Matrix4f worldProjectionMatrix;
+    private static PoseStack worldViewModelStack = new PoseStack();
+    @Nullable private static Matrix4f worldProjectionMatrix;
 
     // --------------------------------------------------------------------- //
 
@@ -249,43 +253,48 @@ public final class ScanManager {
 
     public static void renderLevel(final float partialTick) {
         synchronized (renderingResults) {
-            if (renderingResults.isEmpty()) {
+            if (renderingResults.isEmpty() || worldProjectionMatrix == null) {
                 return;
             }
 
-            render(ScanResultRenderContext.WORLD, partialTick, worldViewModelStack, worldProjectionMatrix);
+            RenderSystem.backupProjectionMatrix();
+            RenderSystem.setProjectionMatrix(PROJECTION_MATRIX_BUFFER.getBuffer(worldProjectionMatrix), ProjectionType.PERSPECTIVE);
+
+            try {
+                render(ScanResultRenderContext.WORLD, partialTick, worldViewModelStack, worldProjectionMatrix);
+            } finally {
+                RenderSystem.restoreProjectionMatrix();
+            }
         }
     }
 
     public static void renderGui(final float partialTick) {
         synchronized (renderingResults) {
-            if (renderingResults.isEmpty()) {
+            if (renderingResults.isEmpty() || worldProjectionMatrix == null) {
                 return;
             }
 
-            // Using shaders, so we render as game overlay; restore matrices as used for level rendering.
+            // Results are drawn as a game overlay, so restore the matrices that were
+            // used for level rendering.
             RenderSystem.backupProjectionMatrix();
-            RenderSystem.setProjectionMatrix(worldProjectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
+            RenderSystem.setProjectionMatrix(PROJECTION_MATRIX_BUFFER.getBuffer(worldProjectionMatrix), ProjectionType.PERSPECTIVE);
             RenderSystem.getModelViewStack().pushMatrix().identity();
-            RenderSystem.applyModelViewMatrix();
 
-            render(ScanResultRenderContext.GUI, partialTick, worldViewModelStack, worldProjectionMatrix);
-
-            RenderSystem.getModelViewStack().popMatrix();
-            RenderSystem.applyModelViewMatrix();
-            RenderSystem.restoreProjectionMatrix();
+            try {
+                render(ScanResultRenderContext.GUI, partialTick, worldViewModelStack, worldProjectionMatrix);
+            } finally {
+                RenderSystem.getModelViewStack().popMatrix();
+                RenderSystem.restoreProjectionMatrix();
+            }
         }
     }
 
     private static void render(final ScanResultRenderContext context, final float partialTicks, final PoseStack poseStack, final Matrix4f projectionMatrix) {
         final Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        final Vec3 pos = camera.getPosition();
+        final Vec3 pos = camera.position();
 
         final Frustum frustum = new Frustum(poseStack.last().pose(), projectionMatrix);
         frustum.prepare(pos.x(), pos.y(), pos.z());
-
-        RenderSystem.disableDepthTest();
-        RenderSystem.setShaderColor(1, 1, 1, 1);
 
         poseStack.pushPose();
         poseStack.translate(-pos.x, -pos.y, -pos.z);
@@ -317,8 +326,6 @@ public final class ScanManager {
         renderTypeBuffer.endBatch();
 
         poseStack.popPose();
-
-        RenderSystem.enableDepthTest();
     }
 
     // --------------------------------------------------------------------- //

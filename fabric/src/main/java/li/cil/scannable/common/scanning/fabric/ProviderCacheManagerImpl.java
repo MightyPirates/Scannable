@@ -1,6 +1,6 @@
 package li.cil.scannable.common.scanning.fabric;
 
-import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
+import fuzs.forgeconfigapiport.fabric.api.v5.ModConfigEvents;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.scanning.ProviderCacheManager;
 import net.fabricmc.api.EnvType;
@@ -12,8 +12,8 @@ public final class ProviderCacheManagerImpl {
             return;
         }
 
-        NeoForgeModConfigEvents.loading(API.MOD_ID).register((cfg) -> clearCaches());
-        NeoForgeModConfigEvents.reloading(API.MOD_ID).register((cfg) -> clearCaches());
+        ModConfigEvents.loading(API.MOD_ID).register((cfg) -> clearCaches());
+        ModConfigEvents.reloading(API.MOD_ID).register((cfg) -> clearCaches());
     }
 
     private static void clearCaches() {

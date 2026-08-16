@@ -12,7 +12,7 @@ import li.cil.scannable.common.tags.CommonTags;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -39,7 +39,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return ScanResultProviders.BLOCKS.get();
+        return ScanResultProviders.blocks();
     }
 
     @Environment(EnvType.CLIENT)
@@ -62,11 +62,12 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final ResourceLocation location : CommonConfig.rareOreBlocks) {
+        for (final Identifier location : CommonConfig.rareOreBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
-        BuiltInRegistries.BLOCK.getTagNames().forEach(tag -> {
+        BuiltInRegistries.BLOCK.getTags().forEach(namedTag -> {
+            final TagKey<Block> tag = namedTag.key();
             if (CommonConfig.rareOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }

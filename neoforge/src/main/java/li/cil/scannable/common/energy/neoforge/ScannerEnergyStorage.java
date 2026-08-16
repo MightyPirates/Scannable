@@ -6,16 +6,18 @@ import li.cil.scannable.common.item.ModDataComponents;
 import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.energy.EnergyStorage;
+import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public final class ScannerEnergyStorage extends EnergyStorage {
+public final class ScannerEnergyStorage extends SimpleEnergyHandler {
     private final ItemStack container;
 
     public ScannerEnergyStorage(final ItemStack container) {
-        super(CommonConfig.energyCapacityScanner);
+        super(CommonConfig.energyCapacityScanner,
+            CommonConfig.energyCapacityScanner,
+            CommonConfig.energyCapacityScanner,
+            Mth.clamp(container.getOrDefault(ModDataComponents.ENERGY.get(), 0), 0, CommonConfig.energyCapacityScanner));
         this.container = container;
-
-        this.energy = Mth.clamp(container.getOrDefault(ModDataComponents.ENERGY.get(), 0), 0, this.capacity);
     }
 
     public static ScannerEnergyStorage of(final ItemStack container) {
@@ -27,33 +29,28 @@ public final class ScannerEnergyStorage extends EnergyStorage {
     }
 
     // --------------------------------------------------------------------- //
-    // IEnergyStorage
+    // SimpleEnergyHandler
 
     @Override
-    public int receiveEnergy(final int maxReceive, final boolean simulate) {
+    public int insert(final int amount, final TransactionContext transaction) {
         if (!CommonConfig.useEnergy) {
             return 0;
         }
 
-        final int energyReceived = super.receiveEnergy(maxReceive, simulate);
-        if (!simulate && energyReceived != 0) {
-            container.set(ModDataComponents.ENERGY.get(), energy);
-        }
-
-        return energyReceived;
+        return super.insert(amount, transaction);
     }
 
     @Override
-    public int extractEnergy(final int maxExtract, final boolean simulate) {
+    public int extract(final int amount, final TransactionContext transaction) {
         if (!CommonConfig.useEnergy) {
             return 0;
         }
 
-        final int energyExtracted = super.extractEnergy(maxExtract, simulate);
-        if (!simulate && energyExtracted != 0) {
-            container.set(ModDataComponents.ENERGY.get(), energy);
-        }
+        return super.extract(amount, transaction);
+    }
 
-        return energyExtracted;
+    @Override
+    protected void onEnergyChanged(final int previousAmount) {
+        container.set(ModDataComponents.ENERGY.get(), energy);
     }
 }

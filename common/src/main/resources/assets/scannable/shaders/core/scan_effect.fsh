@@ -1,11 +1,14 @@
-#version 150
+#version 330
 
-uniform mat4 invViewMat;
-uniform mat4 invProjMat;
-uniform vec3 pos;
-uniform vec3 center;
-uniform float radius;
-uniform sampler2D depthTex;
+// vec4 for alignment.
+layout(std140) uniform ScanEffect {
+    mat4 invViewMat;
+    mat4 invProjMat;
+    vec4 cameraPos;
+    vec4 centerAndRadius;
+};
+
+uniform sampler2D depthTexSampler;
 
 in vec2 texCoord0;
 
@@ -29,13 +32,16 @@ vec3 worldpos(float depth) {
     viewSpacePosition /= viewSpacePosition.w;
     vec4 worldSpacePosition = invViewMat * viewSpacePosition;
 
-    return pos + worldSpacePosition.xyz;
+    return cameraPos.xyz + worldSpacePosition.xyz;
 }
 
 void main() {
     vec4 color = vec4(0, 0, 0, 0);
 
-    float depth = texture2D(depthTex, texCoord0).r;
+    vec3 center = centerAndRadius.xyz;
+    float radius = centerAndRadius.w;
+
+    float depth = texture(depthTexSampler, texCoord0).r;
     vec3 pos = worldpos(depth);
     float dist = distance(pos, center);
 

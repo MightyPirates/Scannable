@@ -3,18 +3,10 @@
   "category": "misc",
   "group": "blank_module",
   "key": {
-    "c": {
-      "item": "minecraft:clay_ball"
-    },
-    "g": {
-      "tag": "c:dyes/green"
-    },
-    "n": {
-      "tag": "c:nuggets/gold"
-    },
-    "r": {
-      "tag": "c:dusts/glowstone"
-    }
+    "c": "minecraft:clay_ball",
+    "g": "#c:dyes/green",
+    "n": "#c:nuggets/gold",
+    "r": "#c:dusts/glowstone"
   },
   "pattern": [
     "ggg",

@@ -28,7 +28,7 @@ public enum ConfigurableEntityScannerModule implements EntityScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return ScanResultProviders.ENTITIES.get();
+        return ScanResultProviders.entities();
     }
 
     @Environment(EnvType.CLIENT)

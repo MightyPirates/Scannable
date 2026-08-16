@@ -3,14 +3,19 @@ package li.cil.scannable.data.fabric;
 import li.cil.scannable.api.API;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.mixin.fabric.client.ItemModelGeneratorAccessor;
+import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelLocationUtils;
+import net.minecraft.client.data.models.model.ModelTemplate;
+import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.data.models.model.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 
 import java.util.Objects;
@@ -46,17 +51,32 @@ public final class ModItemModelProvider extends FabricModelProvider {
     }
 
     private void registerSimpleItem(final ItemModelGenerators itemModelGenerator, final Item item) {
-        ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item),
-            TextureMapping.layer0(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),
-            ((ItemModelGeneratorAccessor) itemModelGenerator).getOutput());
+        final Identifier model = ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(item),
+            TextureMapping.layer0(itemTexture(item)),
+            ((ItemModelGeneratorAccessor) itemModelGenerator).getModelOutput());
+        emitItemModelDefinition(itemModelGenerator, item, model);
     }
 
     private void registerModule(final ItemModelGenerators itemModelGenerator, final Item item) {
-        final ModelTemplate model = new ModelTemplate(Optional.of(ResourceLocation.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0, LAYER1, LAYER2);
-        model.create(ModelLocationUtils.getModelLocation(item), new TextureMapping()
-                .put(TextureSlot.LAYER0, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/blank_module"))
-                .put(LAYER1, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/module_slot"))
-                .put(LAYER2, ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()))),
-            ((ItemModelGeneratorAccessor) itemModelGenerator).getOutput());
+        final ModelTemplate template = new ModelTemplate(Optional.of(Identifier.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0, LAYER1, LAYER2);
+        final Identifier model = template.create(ModelLocationUtils.getModelLocation(item), new TextureMapping()
+                .put(TextureSlot.LAYER0, modTexture("item/blank_module"))
+                .put(LAYER1, modTexture("item/module_slot"))
+                .put(LAYER2, itemTexture(item)),
+            ((ItemModelGeneratorAccessor) itemModelGenerator).getModelOutput());
+        emitItemModelDefinition(itemModelGenerator, item, model);
+    }
+
+    private static void emitItemModelDefinition(final ItemModelGenerators itemModelGenerator, final Item item, final Identifier model) {
+        ((ItemModelGeneratorAccessor) itemModelGenerator).getItemModelOutput()
+            .accept(item, ItemModelUtils.plainModel(model));
+    }
+
+    private static Identifier itemTexture(final Item item) {
+        return modTexture("item/" + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item).getPath()));
+    }
+
+    private static Identifier modTexture(final String path) {
+        return Identifier.fromNamespaceAndPath(API.MOD_ID, path);
     }
 }

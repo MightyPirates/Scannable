@@ -8,9 +8,15 @@ loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
     runs {
-        create("data") {
-            data()
-            programArgs("--all")
+        create("clientData") {
+            clientData()
+            programArgs("--mod", modId)
+            programArgs("--output", file("src/generated/resources/").absolutePath)
+            programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
+            programArgs("--existing", file("src/main/resources").absolutePath)
+        }
+        create("serverData") {
+            serverData()
             programArgs("--mod", modId)
             programArgs("--output", file("src/generated/resources/").absolutePath)
             programArgs("--existing", project(":common").file("src/main/resources").absolutePath)

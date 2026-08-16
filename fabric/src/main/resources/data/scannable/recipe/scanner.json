@@ -3,21 +3,11 @@
   "category": "equipment",
   "group": "scanner",
   "key": {
-    "b": {
-      "item": "minecraft:iron_bars"
-    },
-    "g": {
-      "tag": "c:ingots/gold"
-    },
-    "i": {
-      "tag": "c:ingots/iron"
-    },
-    "q": {
-      "tag": "c:gems/quartz"
-    },
-    "r": {
-      "tag": "c:dusts/redstone"
-    }
+    "b": "minecraft:iron_bars",
+    "g": "#c:ingots/gold",
+    "i": "#c:ingots/iron",
+    "q": "#c:gems/quartz",
+    "r": "#c:dusts/redstone"
   },
   "pattern": [
     "i i",

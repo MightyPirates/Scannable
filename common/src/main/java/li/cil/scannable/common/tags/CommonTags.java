@@ -1,7 +1,7 @@
 package li.cil.scannable.common.tags;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -60,8 +60,8 @@ public final class CommonTags {
 
     // --------------------------------------------------------------------- //
 
-    public static ResourceLocation id(final String name) {
-        return ResourceLocation.fromNamespaceAndPath(NAMESPACE, name);
+    public static Identifier id(final String name) {
+        return Identifier.fromNamespaceAndPath(NAMESPACE, name);
     }
 
     private static TagKey<Block> blockTag(final String name) {

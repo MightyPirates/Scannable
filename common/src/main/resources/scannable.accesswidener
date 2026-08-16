@@ -1,16 +1,26 @@
 accessWidener  v2  named
-accessible  class  net/minecraft/client/renderer/RenderType$CompositeState
-accessible method  net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
-accessible method  net/minecraft/client/renderer/RenderStateShard$ShaderStateShard <init> (Ljava/util/function/Supplier;)V
-accessible  field  net/minecraft/client/renderer/RenderStateShard TRANSLUCENT_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
-accessible  field  net/minecraft/client/renderer/RenderStateShard LIGHTNING_TRANSPARENCY Lnet/minecraft/client/renderer/RenderStateShard$TransparencyStateShard;
-accessible  field  net/minecraft/client/renderer/RenderStateShard NO_DEPTH_TEST Lnet/minecraft/client/renderer/RenderStateShard$DepthTestStateShard;
-accessible  field  net/minecraft/client/renderer/RenderStateShard NO_CULL Lnet/minecraft/client/renderer/RenderStateShard$CullStateShard;
-accessible  field  net/minecraft/client/renderer/RenderStateShard COLOR_WRITE Lnet/minecraft/client/renderer/RenderStateShard$WriteMaskStateShard;
-accessible  class  net/minecraft/client/renderer/RenderStateShard$TextureStateShard
-accessible method  net/minecraft/world/level/chunk/PalettedContainer get (I)Ljava/lang/Object;
-accessible  field  net/minecraft/client/renderer/GameRenderer renderHand Z
-accessible method  net/minecraft/client/renderer/GameRenderer renderItemInHand (Lnet/minecraft/client/Camera;FLorg/joml/Matrix4f;)V
-accessible method  net/minecraft/world/level/Level getEntities ()Lnet/minecraft/world/level/entity/LevelEntityGetter;
-accessible method  net/minecraft/util/thread/BlockableEventLoop submitAsync (Ljava/lang/Runnable;)Ljava/util/concurrent/CompletableFuture;
-accessible method  net/minecraft/world/entity/Entity setLevel (Lnet/minecraft/world/level/Level;)V
+
+# Custom render types. NeoForge does this for us, Fabric do not.
+accessible  method  net/minecraft/client/renderer/rendertype/RenderType create (Ljava/lang/String;Lnet/minecraft/client/renderer/rendertype/RenderSetup;)Lnet/minecraft/client/renderer/rendertype/RenderType;
+
+# Screen registration.
+accessible  class  net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
+accessible  method  net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
+
+# The scanner progress ring is a triangle fan, which needs a custom
+# GuiElementRenderState; GuiGraphics keeps its render state package-private.
+accessible  field  net/minecraft/client/gui/GuiGraphics guiRenderState Lnet/minecraft/client/gui/render/state/GuiRenderState;
+
+# Scan effect needs the exact projection used for level rendering.
+accessible  method  net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)F
+# Re-render the held item into the depth buffer so results don't draw over hands.
+accessible  method  net/minecraft/client/renderer/GameRenderer renderItemInHand (FZLorg/joml/Matrix4f;)V
+
+# Block scanning accesses chunk section palettes directly.
+accessible  method  net/minecraft/world/level/chunk/PalettedContainer get (I)Ljava/lang/Object;
+
+# Entity scanning iterates all loaded entities.
+accessible  method  net/minecraft/world/level/Level getEntities ()Lnet/minecraft/world/level/entity/LevelEntityGetter;
+
+# Dummy entities rendered in the entity module screen need a level.
+accessible  method  net/minecraft/world/entity/Entity setLevel (Lnet/minecraft/world/level/Level;)V

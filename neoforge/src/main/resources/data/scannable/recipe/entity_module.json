@@ -3,12 +3,8 @@
   "category": "misc",
   "group": "scanner_module",
   "ingredients": [
-    {
-      "item": "scannable:blank_module"
-    },
-    {
-      "item": "minecraft:lead"
-    }
+    "scannable:blank_module",
+    "minecraft:lead"
   ],
   "result": {
     "count": 1,

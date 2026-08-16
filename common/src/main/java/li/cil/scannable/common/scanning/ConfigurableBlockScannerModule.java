@@ -26,7 +26,7 @@ public enum ConfigurableBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
-        return ScanResultProviders.BLOCKS.get();
+        return ScanResultProviders.blocks();
     }
 
     @Environment(EnvType.CLIENT)

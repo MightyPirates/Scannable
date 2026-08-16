@@ -1,16 +1,19 @@
 package li.cil.scannable.mixin.fabric.client;
 
-import com.google.gson.JsonElement;
-import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.ItemModelOutput;
+import net.minecraft.client.data.models.model.ModelInstance;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 @Mixin(ItemModelGenerators.class)
 public interface ItemModelGeneratorAccessor {
-    @Accessor("output")
-    BiConsumer<ResourceLocation, Supplier<JsonElement>> getOutput();
+    @Accessor("modelOutput")
+    BiConsumer<Identifier, ModelInstance> getModelOutput();
+
+    @Accessor("itemModelOutput")
+    ItemModelOutput getItemModelOutput();
 }

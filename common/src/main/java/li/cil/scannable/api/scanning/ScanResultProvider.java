@@ -7,8 +7,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -40,7 +40,7 @@ public interface ScanResultProvider {
     /**
      * The registry name of the registry holding scan result providers.
      */
-    ResourceKey<Registry<ScanResultProvider>> REGISTRY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(API.MOD_ID, "scan_result_provider"));
+    ResourceKey<Registry<ScanResultProvider>> REGISTRY = ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(API.MOD_ID, "scan_result_provider"));
 
     /**
      * Called each time a scan is started by the player.

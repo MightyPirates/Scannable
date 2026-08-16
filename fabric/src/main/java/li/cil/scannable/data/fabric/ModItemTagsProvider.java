@@ -6,9 +6,6 @@ import li.cil.scannable.common.tags.ItemTags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.Item;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,33 +16,29 @@ public final class ModItemTagsProvider extends FabricTagProvider.ItemTagProvider
 
     @Override
     protected void addTags(final HolderLookup.Provider provider) {
-        tag(ItemTags.MODULES)
-            .add(key(Items.BLANK_MODULE.get()))
-            .add(key(Items.RANGE_MODULE.get()))
-            .add(key(Items.ENTITY_MODULE.get()))
-            .add(key(Items.FRIENDLY_ENTITY_MODULE.get()))
-            .add(key(Items.HOSTILE_ENTITY_MODULE.get()))
-            .add(key(Items.BLOCK_MODULE.get()))
-            .add(key(Items.COMMON_ORES_MODULE.get()))
-            .add(key(Items.RARE_ORES_MODULE.get()))
-            .add(key(Items.FLUID_MODULE.get()))
-            .add(key(Items.CHEST_MODULE.get()));
+        valueLookupBuilder(ItemTags.MODULES)
+            .add(Items.BLANK_MODULE.get())
+            .add(Items.RANGE_MODULE.get())
+            .add(Items.ENTITY_MODULE.get())
+            .add(Items.FRIENDLY_ENTITY_MODULE.get())
+            .add(Items.HOSTILE_ENTITY_MODULE.get())
+            .add(Items.BLOCK_MODULE.get())
+            .add(Items.COMMON_ORES_MODULE.get())
+            .add(Items.RARE_ORES_MODULE.get())
+            .add(Items.FLUID_MODULE.get())
+            .add(Items.CHEST_MODULE.get());
 
-        tag(CommonTags.INGOTS_IRON).add(key(net.minecraft.world.item.Items.IRON_INGOT));
-        tag(CommonTags.ENDER_PEARLS).add(key(net.minecraft.world.item.Items.ENDER_PEARL));
-        tag(CommonTags.NUGGETS_GOLD).add(key(net.minecraft.world.item.Items.GOLD_NUGGET));
-        tag(CommonTags.INGOTS_GOLD).add(key(net.minecraft.world.item.Items.GOLD_INGOT));
-        tag(CommonTags.LEATHERS).add(key(net.minecraft.world.item.Items.LEATHER));
-        tag(CommonTags.DUSTS_REDSTONE).add(key(net.minecraft.world.item.Items.REDSTONE));
-        tag(CommonTags.GEMS_QUARTZ).add(key(net.minecraft.world.item.Items.QUARTZ));
-        tag(CommonTags.DYES_GREEN).add(key(net.minecraft.world.item.Items.GREEN_DYE));
-        tag(CommonTags.DUSTS_GLOWSTONE).add(key(net.minecraft.world.item.Items.GLOWSTONE_DUST));
-        tag(CommonTags.BONES).add(key(net.minecraft.world.item.Items.BONE));
-        tag(CommonTags.STONES).add(key(net.minecraft.world.item.Items.STONE));
-        tag(CommonTags.GEMS_DIAMOND).add(key(net.minecraft.world.item.Items.DIAMOND));
-    }
-
-    private static ResourceKey<Item> key(final Item item) {
-        return BuiltInRegistries.ITEM.getResourceKey(item).orElseThrow();
+        valueLookupBuilder(CommonTags.INGOTS_IRON).add(net.minecraft.world.item.Items.IRON_INGOT);
+        valueLookupBuilder(CommonTags.ENDER_PEARLS).add(net.minecraft.world.item.Items.ENDER_PEARL);
+        valueLookupBuilder(CommonTags.NUGGETS_GOLD).add(net.minecraft.world.item.Items.GOLD_NUGGET);
+        valueLookupBuilder(CommonTags.INGOTS_GOLD).add(net.minecraft.world.item.Items.GOLD_INGOT);
+        valueLookupBuilder(CommonTags.LEATHERS).add(net.minecraft.world.item.Items.LEATHER);
+        valueLookupBuilder(CommonTags.DUSTS_REDSTONE).add(net.minecraft.world.item.Items.REDSTONE);
+        valueLookupBuilder(CommonTags.GEMS_QUARTZ).add(net.minecraft.world.item.Items.QUARTZ);
+        valueLookupBuilder(CommonTags.DYES_GREEN).add(net.minecraft.world.item.Items.GREEN_DYE);
+        valueLookupBuilder(CommonTags.DUSTS_GLOWSTONE).add(net.minecraft.world.item.Items.GLOWSTONE_DUST);
+        valueLookupBuilder(CommonTags.BONES).add(net.minecraft.world.item.Items.BONE);
+        valueLookupBuilder(CommonTags.STONES).add(net.minecraft.world.item.Items.STONE);
+        valueLookupBuilder(CommonTags.GEMS_DIAMOND).add(net.minecraft.world.item.Items.DIAMOND);
     }
 }

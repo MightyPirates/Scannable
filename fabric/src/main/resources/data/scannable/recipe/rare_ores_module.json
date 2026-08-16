@@ -3,12 +3,8 @@
   "category": "misc",
   "group": "scanner_module",
   "ingredients": [
-    {
-      "item": "scannable:blank_module"
-    },
-    {
-      "tag": "c:gems/diamond"
-    }
+    "scannable:blank_module",
+    "#c:gems/diamond"
   ],
   "result": {
     "count": 1,

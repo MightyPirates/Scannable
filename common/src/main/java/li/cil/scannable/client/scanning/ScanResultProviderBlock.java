@@ -1,6 +1,12 @@
 package li.cil.scannable.client.scanning;
 
 import com.google.common.base.Strings;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import io.netty.util.collection.IntObjectHashMap;
@@ -14,7 +20,7 @@ import li.cil.scannable.api.scanning.ScanResult;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.ClientConfig;
-import li.cil.scannable.client.shader.Shaders;
+import li.cil.scannable.client.shader.ScanPipelines;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import net.fabricmc.api.EnvType;
@@ -22,9 +28,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -46,17 +49,22 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import org.lwjgl.system.MemoryStack;
 
 import javax.annotation.Nullable;
+import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Environment(EnvType.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final int TIME_UNIFORM_SIZE = new Std140SizeCalculator().putVec4().get();
 
     // Sanity performance check. Maybe some day I'll do some research on how to
     // do the clustering more efficiently, but for now this is good enough. We
@@ -71,6 +79,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private final List<BlockScanResult> results = new ArrayList<>();
 
     private long renderStartTime;
+    @Nullable private GpuBuffer timeUniformBuffer;
 
     // --------------------------------------------------------------------- //
     // ScanResultProvider
@@ -235,7 +244,7 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     @Override
     public void render(final ScanResultRenderContext context, final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
         switch (context) {
-            case WORLD -> renderBlocks(poseStack, renderInfo, partialTicks, results);
+            case WORLD -> renderBlocks(poseStack, results);
             case GUI -> renderBlockIcons(bufferSource, poseStack, renderInfo, results);
         }
     }
@@ -252,63 +261,61 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
     // --------------------------------------------------------------------- //
 
-    public static RenderType getBlockScanResultRenderLayer() {
-        // Must match the format used for the VBO in BlockScanResult, and the
-        // vertex format declared by the scan_result shader.
-        return RenderType.create("scan_result",
-            DefaultVertexFormat.POSITION_TEX_COLOR,
-            VertexFormat.Mode.QUADS,
-            65536,
-            RenderType.CompositeState.builder()
-                .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::getScanResultShader))
-                .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
-                .setWriteMaskState(RenderStateShard.COLOR_WRITE)
-                .setCullState(RenderStateShard.NO_CULL)
-                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-                .createCompositeState(false));
+    private void renderBlocks(final PoseStack poseStack, final List<ScanResult> results) {
+        final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+        final GpuBufferSlice transform = RenderSystem.getDynamicUniforms().writeTransform(
+            poseStack.last().pose(), new Vector4f(1, 1, 1, 1), new Vector3f(), new Matrix4f());
+
+        final float time = (System.currentTimeMillis() - renderStartTime) / 1000.0f;
+        final GpuBuffer timeUniform = updateTimeUniform(time);
+
+        final RenderSystem.AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+
+        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+            () -> "Scannable block scan results",
+            target.getColorTextureView(),
+            OptionalInt.empty(),
+            target.useDepth ? target.getDepthTextureView() : null,
+            OptionalDouble.empty())) {
+            renderPass.setPipeline(ScanPipelines.SCAN_RESULT);
+            RenderSystem.bindDefaultUniforms(renderPass);
+            renderPass.setUniform("DynamicTransforms", transform);
+            renderPass.setUniform(ScanPipelines.SCAN_RESULT_UNIFORM, timeUniform);
+
+            for (final ScanResult result : results) {
+                final BlockScanResult blockResult = (BlockScanResult) result;
+                if (blockResult.vertexBuffer == null || blockResult.indexCount <= 0) {
+                    continue;
+                }
+
+                renderPass.setVertexBuffer(0, blockResult.vertexBuffer);
+                renderPass.setIndexBuffer(indices.getBuffer(blockResult.indexCount), indices.type());
+                renderPass.drawIndexed(0, 0, blockResult.indexCount, 1);
+            }
+        }
     }
 
-    private void renderBlocks(final PoseStack poseStack, final Camera renderInfo, final float partialTicks, final List<ScanResult> results) {
-        final ShaderInstance shader = Shaders.getScanResultShader();
-        if (shader == null) {
-            return;
-        }
-
-        // Re-render hands into depth buffer to avoid rendering overlay on top of player hands.
-        if (Minecraft.getInstance().gameRenderer.renderHand) {
-            RenderSystem.backupProjectionMatrix();
-            RenderSystem.colorMask(false, false, false, false);
-            poseStack.pushPose();
-            try {
-                Minecraft.getInstance().gameRenderer.renderItemInHand(renderInfo, partialTicks, poseStack.last().pose());
-            } catch (final Throwable e) {
-                LOGGER.catching(e);
+    private GpuBuffer updateTimeUniform(final float time) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            final ByteBuffer data = Std140Builder.onStack(stack, TIME_UNIFORM_SIZE).putVec4(time, 0, 0, 0).get();
+            if (timeUniformBuffer == null) {
+                timeUniformBuffer = RenderSystem.getDevice().createBuffer(
+                    () -> "Scannable scan result uniforms",
+                    GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_COPY_DST,
+                    data);
+            } else {
+                RenderSystem.getDevice().createCommandEncoder().writeToBuffer(timeUniformBuffer.slice(), data);
             }
-            poseStack.popPose();
-            RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.restoreProjectionMatrix();
+            return timeUniformBuffer;
         }
-
-        shader.safeGetUniform("time").set((System.currentTimeMillis() - renderStartTime) / 1000.0f);
-
-        final RenderType renderType = getBlockScanResultRenderLayer();
-        renderType.setupRenderState();
-        for (final ScanResult result : results) {
-            final BlockScanResult blockResult = (BlockScanResult) result;
-            final VertexBuffer vbo = blockResult.vbo;
-            vbo.bind();
-            vbo.drawWithShader(poseStack.last().pose(), RenderSystem.getProjectionMatrix(), shader);
-            VertexBuffer.unbind();
-        }
-        renderType.clearRenderState();
     }
 
     private void renderBlockIcons(final MultiBufferSource bufferSource, final PoseStack poseStack, final Camera renderInfo, final List<ScanResult> results) {
-        final Vec3 lookVec = new Vec3(renderInfo.getLookVector());
-        final Vec3 viewerEyes = renderInfo.getPosition();
-        final float yaw = renderInfo.getYRot();
-        final float pitch = renderInfo.getXRot();
-        final boolean showDistance = renderInfo.getEntity().isShiftKeyDown();
+        final Vec3 lookVec = new Vec3(renderInfo.forwardVector());
+        final Vec3 viewerEyes = renderInfo.position();
+        final float yaw = renderInfo.yRot();
+        final float pitch = renderInfo.xRot();
+        final boolean showDistance = renderInfo.entity().isShiftKeyDown();
 
         // Order results by distance to center of screen (deviation from look
         // vector) so that labels we're looking at are in front of others.
@@ -378,7 +385,8 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
         @Nullable private BlockScanResult parent;
         private final Set<BlockPos> blocks;
         private int color;
-        private VertexBuffer vbo;
+        @Nullable private GpuBuffer vertexBuffer;
+        private int indexCount;
 
         BlockScanResult(final Block block, final BlockPos pos) {
             this.block = block;
@@ -423,10 +431,17 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
             final BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             render(buffer, new PoseStack());
-            vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
-            vbo.bind();
-            vbo.upload(buffer.buildOrThrow());
-            VertexBuffer.unbind();
+            try (MeshData mesh = buffer.build()) {
+                if (mesh == null) {
+                    return;
+                }
+
+                indexCount = mesh.drawState().indexCount();
+                vertexBuffer = RenderSystem.getDevice().createBuffer(
+                    () -> "Scannable scan result geometry",
+                    GpuBuffer.USAGE_VERTEX,
+                    mesh.vertexBuffer());
+            }
         }
 
         boolean isRoot() {
@@ -581,9 +596,10 @@ public final class ScanResultProviderBlock extends AbstractScanResultProvider {
 
         @Override
         public void close() {
-            if (vbo != null) {
-                vbo.close();
-                vbo = null;
+            if (vertexBuffer != null) {
+                vertexBuffer.close();
+                vertexBuffer = null;
+                indexCount = 0;
             }
         }
     }

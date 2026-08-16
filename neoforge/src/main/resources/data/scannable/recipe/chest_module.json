@@ -3,12 +3,8 @@
   "category": "misc",
   "group": "scanner_module",
   "ingredients": [
-    {
-      "item": "scannable:blank_module"
-    },
-    {
-      "item": "minecraft:chest"
-    }
+    "scannable:blank_module",
+    "minecraft:chest"
   ],
   "result": {
     "count": 1,

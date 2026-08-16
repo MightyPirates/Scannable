@@ -45,7 +45,7 @@ public class ConfigurableBlockScannerModuleContainerScreen extends AbstractConfi
         final Block block = Block.byItem(value.getItem());
         if (block != Blocks.AIR) {
             BuiltInRegistries.BLOCK.getResourceKey(block).ifPresent(blockResourceKey ->
-                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, blockResourceKey.location())));
+                Network.sendToServer(new SetConfiguredModuleItemAtMessage(menu.containerId, slot, blockResourceKey.identifier())));
         }
     }
 }

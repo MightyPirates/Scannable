@@ -3,12 +3,8 @@
   "category": "misc",
   "group": "scanner_module",
   "ingredients": [
-    {
-      "item": "scannable:blank_module"
-    },
-    {
-      "item": "minecraft:coal"
-    }
+    "scannable:blank_module",
+    "minecraft:coal"
   ],
   "result": {
     "count": 1,

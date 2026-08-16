@@ -35,9 +35,6 @@
         "minecraft": "${minecraftVersion}",
         "java": ">=21"
     },
-    "recommends": {
-        "tooltipfix": "*"
-    },
     "custom": {
         "mc-publish": {
             "modrinth": "YqFnwJHf",
