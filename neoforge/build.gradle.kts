@@ -21,7 +21,7 @@ loom {
             mainClass.set("net.neoforged.fml.startup.GameTestServer")
             runDir = "run/gametest"
             programArgs("--tests", "scannable_gametest:*")
-            programArgs("--report", file("build/gametest-report.xml").absolutePath)
+            property("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
             vmArg("-ea")
         }
         create("serverData") {
@@ -63,4 +63,13 @@ tasks {
     remapJar {
         atAccessWideners.add("${modId}.accesswidener")
     }
+}
+
+val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
+    description = "Deletes game test results from previous runs."
+    delete(gameTestResultsDir)
+}
+
+tasks.named("runGameTestServer") {
+    dependsOn(cleanGameTestResults)
 }

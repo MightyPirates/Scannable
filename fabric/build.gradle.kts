@@ -1,8 +1,20 @@
 val modId: String by project
+val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
 val minecraftVersion: String = libs.versions.minecraft.get()
 val fabricApiVersion: String = libs.versions.fabric.api.get()
 val architecturyVersion: String = libs.versions.architectury.get()
 val forgeConfigPortVersion: String = libs.versions.fabric.forgeConfigPort.get()
+
+fabricApi {
+    configureTests {
+        createSourceSet = false
+        modId = "scannable_gametest"
+        enableGameTests = true
+        enableClientGameTests = false
+        eula = true
+        clearRunDirectory = true
+    }
+}
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
@@ -18,12 +30,9 @@ loom {
 
             runDir("build/datagen")
         }
-        create("gametest") {
-            server()
-            name("Game Test")
-            vmArg("-Dfabric-api.gametest")
-            vmArg("-Dfabric-api.gametest.report-file=${layout.buildDirectory.get()}/junit.xml")
-            runDir("build/gametest")
+        named("gameTest") {
+            property("fabric-api.gametest.report-file",
+                gameTestResultsDir.get().file("fabric-game-tests.xml").asFile.absolutePath)
         }
     }
 }
@@ -75,4 +84,13 @@ tasks {
     remapJar {
         injectAccessWidener.set(true)
     }
+}
+
+val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
+    description = "Deletes game test results from previous runs."
+    delete(gameTestResultsDir)
+}
+
+tasks.named("runGameTest") {
+    dependsOn(cleanGameTestResults)
 }
