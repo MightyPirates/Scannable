@@ -7,8 +7,6 @@ import li.cil.scannable.client.scanning.filter.EntityListScanFilter;
 import li.cil.scannable.client.scanning.filter.EntityTypeScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -25,13 +23,11 @@ public enum ConfigurableEntityScannerModule implements EntityScannerModule {
         return CommonConfig.energyCostModuleEntity;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.entities();
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<Entity> getFilter(final ItemStack module) {
         final List<EntityType<?>> entityType = ConfigurableEntityScannerModuleItem.getEntityTypes(module);

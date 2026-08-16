@@ -3,8 +3,6 @@ package li.cil.scannable.common.network;
 import dev.architectury.networking.NetworkManager;
 import li.cil.scannable.common.network.message.RemoveConfiguredModuleItemAtMessage;
 import li.cil.scannable.common.network.message.SetConfiguredModuleItemAtMessage;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public final class Network {
@@ -19,7 +17,6 @@ public final class Network {
             (message, context) -> context.queue(() -> message.handleMessage(context)));
     }
 
-    @Environment(EnvType.CLIENT)
     public static void sendToServer(final CustomPacketPayload message) {
         NetworkManager.sendToServer(message);
     }

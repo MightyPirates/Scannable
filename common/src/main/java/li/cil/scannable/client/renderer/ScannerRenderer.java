@@ -11,8 +11,6 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.shader.ScanPipelines;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -22,7 +20,6 @@ import javax.annotation.Nullable;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
-@Environment(EnvType.CLIENT)
 public enum ScannerRenderer {
     INSTANCE;
 

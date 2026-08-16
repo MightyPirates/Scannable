@@ -9,8 +9,6 @@ import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import li.cil.scannable.common.tags.CommonTags;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -36,26 +34,22 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
         return CommonConfig.energyCostModuleOreRare;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.blocks();
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
         return range * CommonConfig.rangeModifierModuleOreRare;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<BlockState> getFilter(final ItemStack module) {
         validateFilter();
         return filter;
     }
 
-    @Environment(EnvType.CLIENT)
     private void validateFilter() {
         if (filter != null) {
             return;

@@ -23,8 +23,6 @@ import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.shader.ScanPipelines;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -62,7 +60,6 @@ import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@Environment(EnvType.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
     private static final int TIME_UNIFORM_SIZE = new Std140SizeCalculator().putVec4().get();
 

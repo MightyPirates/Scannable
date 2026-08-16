@@ -1,8 +1,6 @@
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.util.TooltipUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +17,6 @@ public class ModItem extends Item {
     // --------------------------------------------------------------------- //
 
     @SuppressWarnings("deprecation")
-    @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final TooltipDisplay display, final Consumer<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, context, display, tooltip, flag);

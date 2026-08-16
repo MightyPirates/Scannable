@@ -5,8 +5,6 @@ import li.cil.scannable.common.config.Constants;
 import li.cil.scannable.common.container.AbstractModuleContainerMenu;
 import li.cil.scannable.common.network.Network;
 import li.cil.scannable.common.network.message.RemoveConfiguredModuleItemAtMessage;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -21,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
 public abstract class AbstractConfigurableScannerModuleContainerScreen<TContainer extends AbstractModuleContainerMenu, TItem> extends AbstractContainerScreen<TContainer> {
     private static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(API.MOD_ID, "textures/gui/container/configurable_module.png");
     private static final Identifier SLOT_HIGHLIGHT = Identifier.withDefaultNamespace("container/slot_highlight_front");

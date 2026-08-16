@@ -7,8 +7,6 @@ import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
 import li.cil.scannable.common.config.CommonConfig;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -34,26 +32,22 @@ public enum ChestScannerModule implements BlockScannerModule {
         return CommonConfig.energyCostModuleChest;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public ScanResultProvider getResultProvider() {
         return ScanResultProviders.blocks();
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
         return range * CommonConfig.rangeModifierModuleChest;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public Predicate<BlockState> getFilter(final ItemStack module) {
         validateFilter();
         return filter;
     }
 
-    @Environment(EnvType.CLIENT)
     private void validateFilter() {
         if (filter != null) {
             return;

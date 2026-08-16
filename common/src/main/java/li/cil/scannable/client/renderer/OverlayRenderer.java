@@ -6,8 +6,6 @@ import li.cil.scannable.api.API;
 import li.cil.scannable.client.shader.ScanPipelines;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.item.ScannerItem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.render.TextureSetup;
@@ -19,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3x2f;
 
-@Environment(EnvType.CLIENT)
 public final class OverlayRenderer {
     private static final Identifier PROGRESS = Identifier.fromNamespaceAndPath(API.MOD_ID, "textures/gui/overlay/scanner_progress.png");
     private static final int PROGRESS_SIZE = 64;

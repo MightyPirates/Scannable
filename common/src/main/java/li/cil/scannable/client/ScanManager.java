@@ -11,8 +11,6 @@ import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.item.ScannerModuleItem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -29,7 +27,6 @@ import org.joml.Matrix4f;
 import javax.annotation.Nullable;
 import java.util.*;
 
-@Environment(EnvType.CLIENT)
 public final class ScanManager {
     // The number of ticks over which to compute scan results. Which is at the
     // same time the use time of the scanner item.

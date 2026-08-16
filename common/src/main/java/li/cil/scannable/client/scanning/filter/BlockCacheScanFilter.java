@@ -1,7 +1,5 @@
 package li.cil.scannable.client.scanning.filter;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-@Environment(EnvType.CLIENT)
 public final class BlockCacheScanFilter implements Predicate<BlockState> {
     private final Collection<Block> blocks;
 

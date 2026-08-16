@@ -4,8 +4,6 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.config.Strings;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +47,6 @@ public class ScannerModuleItem extends ModItem {
     // --------------------------------------------------------------------- //
     // Item
 
-    @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final TooltipDisplay display, final Consumer<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, context, display, tooltip, flag);

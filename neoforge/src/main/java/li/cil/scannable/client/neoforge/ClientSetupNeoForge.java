@@ -11,7 +11,6 @@ import li.cil.scannable.common.container.Containers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -22,7 +21,6 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Matrix4f;
 
-@OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = API.MOD_ID, value = Dist.CLIENT)
 public final class ClientSetupNeoForge {
     @SubscribeEvent

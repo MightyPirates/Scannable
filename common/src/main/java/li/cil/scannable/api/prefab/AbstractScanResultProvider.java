@@ -4,8 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.shader.ScanPipelines;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -30,7 +28,6 @@ import static li.cil.scannable.util.UnitConversion.toRadians;
  * Helper base class for scan result providers, providing some common
  * functionality for drawing result information.
  */
-@Environment(EnvType.CLIENT)
 public abstract class AbstractScanResultProvider implements ScanResultProvider {
     private static final RenderType OVERLAY_LAYER = RenderType.create("scan_result_overlay",
         RenderSetup.builder(ScanPipelines.SCAN_RESULT_OVERLAY).createRenderSetup());

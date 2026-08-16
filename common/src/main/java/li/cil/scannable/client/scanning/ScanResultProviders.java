@@ -5,10 +5,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import li.cil.scannable.api.API;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.util.RegistryUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
-@Environment(EnvType.CLIENT)
 public final class ScanResultProviders {
     private static final DeferredRegister<ScanResultProvider> DEFERRED_REGISTER = RegistryUtils.get(ScanResultProvider.REGISTRY);
 

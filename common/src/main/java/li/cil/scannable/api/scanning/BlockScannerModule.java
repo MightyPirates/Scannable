@@ -1,7 +1,5 @@
 package li.cil.scannable.api.scanning;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -24,7 +22,6 @@ public interface BlockScannerModule extends ScannerModule {
      * @param range the input range.
      * @return the adjusted range.
      */
-    @Environment(EnvType.CLIENT)
     default float adjustLocalRange(final float range) {
         return range;
     }
@@ -36,6 +33,5 @@ public interface BlockScannerModule extends ScannerModule {
      * @param module the module to get the filter for.
      * @return the filter to use.
      */
-    @Environment(EnvType.CLIENT)
     Predicate<BlockState> getFilter(final ItemStack module);
 }

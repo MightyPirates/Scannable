@@ -1,8 +1,6 @@
 package li.cil.scannable.api.scanning;
 
 import li.cil.scannable.api.API;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +26,6 @@ public interface EntityScannerModule extends ScannerModule {
      * @param entity the entity to get the icon for.
      * @return the icon to use; if an {@link Optional#empty()} is returned {@link API#ICON_INFO} is used.
      */
-    @Environment(EnvType.CLIENT)
     default Optional<Identifier> getIcon(final Entity entity) {
         return Optional.empty();
     }
@@ -40,6 +37,5 @@ public interface EntityScannerModule extends ScannerModule {
      * @param module the module to get the filter for.
      * @return the filter to use.
      */
-    @Environment(EnvType.CLIENT)
     Predicate<Entity> getFilter(final ItemStack module);
 }

@@ -7,12 +7,9 @@ import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import li.cil.scannable.api.API;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
-@Environment(EnvType.CLIENT)
 public final class ScanPipelines {
     // See scan_effect.fsh.
     public static final String SCAN_EFFECT_UNIFORM = "ScanEffect";
