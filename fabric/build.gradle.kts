@@ -92,9 +92,33 @@ val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
     delete(gameTestResultsDir)
 }
 
+// Fabric seems to have a typo in their test result root node, missing the last s...
+val fixGameTestReport = tasks.register("fixGameTestReport") {
+    val reportFile = gameTestResultsDir.map { it.file("fabric-game-tests.xml") }
+    outputs.upToDateWhen { false }
+    onlyIf { reportFile.get().asFile.exists() }
+    doLast {
+        val file = reportFile.get().asFile
+        val document = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder().parse(file)
+        val root = document.documentElement
+
+        if (root.tagName == "testsuite" && root.getElementsByTagName("testsuite").length > 0) {
+            document.renameNode(root, null, "testsuites")
+
+            javax.xml.transform.TransformerFactory.newInstance().newTransformer()
+                .transform(
+                    javax.xml.transform.dom.DOMSource(document),
+                    javax.xml.transform.stream.StreamResult(file)
+                )
+        }
+    }
+}
+
 tasks.named<JavaExec>("runGameTest") {
     dependsOn(cleanGameTestResults)
     classpath += gameTestRuntime
+    finalizedBy(fixGameTestReport)
 }
 
 tasks.named("test") {
