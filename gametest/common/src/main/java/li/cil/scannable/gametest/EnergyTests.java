@@ -1,6 +1,5 @@
 package li.cil.scannable.gametest;
 
-import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
 import li.cil.scannable.common.item.Items;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -137,13 +136,7 @@ public final class EnergyTests {
     }
 
     private static void withEnergy(final boolean enabled, final Runnable body) {
-        final boolean wasEnabled = CommonConfig.useEnergy;
-        CommonConfig.useEnergy = enabled;
-        try {
-            body.run();
-        } finally {
-            CommonConfig.useEnergy = wasEnabled;
-        }
+        TestSupport.withEnergy(enabled, body);
     }
 
     private static ItemStack scanner() {

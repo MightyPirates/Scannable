@@ -9,6 +9,7 @@
     "entrypoints": {
         "fabric-gametest": [
             "li.cil.scannable.gametest.fabric.EnergyTestsFabric",
+            "li.cil.scannable.gametest.fabric.EnergyCapabilityTestsFabric",
             "li.cil.scannable.gametest.fabric.RecipeTestsFabric"
         ]
     },

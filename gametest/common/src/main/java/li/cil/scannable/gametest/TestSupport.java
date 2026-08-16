@@ -1,5 +1,6 @@
 package li.cil.scannable.gametest;
 
+import li.cil.scannable.common.config.CommonConfig;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
@@ -20,6 +21,16 @@ public final class TestSupport {
     public static void assertTrue(final GameTestHelper helper, final String what, final boolean condition) {
         if (!condition) {
             throw failure(helper, what);
+        }
+    }
+
+    public static void withEnergy(final boolean enabled, final Runnable body) {
+        final boolean wasEnabled = CommonConfig.useEnergy;
+        CommonConfig.useEnergy = enabled;
+        try {
+            body.run();
+        } finally {
+            CommonConfig.useEnergy = wasEnabled;
         }
     }
 
