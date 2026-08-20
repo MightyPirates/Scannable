@@ -6,23 +6,15 @@ import li.cil.scannable.common.inventory.ScannerContainer;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ModDataComponents;
 import li.cil.scannable.common.item.ScannerModuleItem;
-import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.transfer.energy.ItemAccessEnergyHandler;
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 
 @EventBusSubscriber(modid = API.MOD_ID)
 public final class ModCapabilities {
-    public static final class ScannerModule {
-        public static final ItemCapability<li.cil.scannable.api.scanning.ScannerModule, Void> ITEM = ItemCapability.createVoid(Identifier.fromNamespaceAndPath(API.MOD_ID, "scanner_module"), li.cil.scannable.api.scanning.ScannerModule.class);
-    }
-
-    // --------------------------------------------------------------------- //
-
     @SubscribeEvent
     public static void initialize(final RegisterCapabilitiesEvent event) {
         event.registerItem(Capabilities.Item.ITEM,
@@ -33,7 +25,8 @@ public final class ModCapabilities {
                 ? new ItemAccessEnergyHandler(access, ModDataComponents.ENERGY.get(), CommonConfig.energyCapacityScanner)
                 : null,
             Items.SCANNER.get());
-        event.registerItem(ScannerModule.ITEM, (stack, context) -> ((ScannerModuleItem) stack.getItem()).getModule(),
+        event.registerItem(li.cil.scannable.api.neoforge.Capabilities.SCANNER_MODULE,
+            (stack, context) -> ((ScannerModuleItem) stack.getItem()).getModule(),
             Items.RANGE_MODULE.get(),
             Items.ENTITY_MODULE.get(),
             Items.FRIENDLY_ENTITY_MODULE.get(),
