@@ -1,5 +1,6 @@
-package li.cil.scannable.api.scanning;
+package li.cil.scannable.api.fabric;
 
+import li.cil.scannable.api.scanning.ScannerModule;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;

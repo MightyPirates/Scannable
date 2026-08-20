@@ -1,7 +1,7 @@
 package li.cil.scannable.common.item.fabric;
 
+import li.cil.scannable.api.fabric.ScannerModuleProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;

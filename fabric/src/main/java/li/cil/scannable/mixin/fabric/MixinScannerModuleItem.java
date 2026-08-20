@@ -1,7 +1,7 @@
 package li.cil.scannable.mixin.fabric;
 
+import li.cil.scannable.api.fabric.ScannerModuleProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.api.scanning.ScannerModuleProvider;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
