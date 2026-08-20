@@ -1,9 +1,12 @@
 package li.cil.scannable.util.neoforge;
 
-import li.cil.scannable.common.neoforge.ModEventBus;
+import li.cil.scannable.api.API;
+import li.cil.scannable.common.neoforge.CommonSetupNeoForge;
 import li.cil.scannable.util.ConfigManager;
 import li.cil.scannable.util.config.ConfigType;
 import li.cil.scannable.util.config.Type;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+@EventBusSubscriber(modid = API.MOD_ID)
 public final class ConfigManagerImpl extends ConfigManager {
     private static final Map<IConfigSpec, ConfigDefinition> CONFIGS = new HashMap<>();
 
@@ -39,17 +43,22 @@ public final class ConfigManagerImpl extends ConfigManager {
                 case CLIENT -> ModConfig.Type.CLIENT;
                 case SERVER -> ModConfig.Type.SERVER;
             };
-            ModEventBus.MOD_CONTAINER.registerConfig(platformType, spec);
+            CommonSetupNeoForge.MOD_CONTAINER.registerConfig(platformType, spec);
         });
-
-        ModEventBus.INSTANCE.addListener(ConfigManagerImpl::handleModConfigEvent);
     }
 
     // --------------------------------------------------------------------- //
 
-    private static void handleModConfigEvent(final ModConfigEvent event) {
+    @SubscribeEvent
+    public static void handleModConfigEvent(final ModConfigEvent event) {
         final ConfigDefinition config = CONFIGS.get(event.getConfig().getSpec());
-        if (config != null) {
+        if (config == null) {
+            return;
+        }
+
+        if (event instanceof ModConfigEvent.Unloading) {
+            config.applyDefaults();
+        } else {
             config.apply();
         }
     }
@@ -92,6 +101,11 @@ public final class ConfigManagerImpl extends ConfigManager {
         @Override
         public T get() {
             return value().get();
+        }
+
+        @Override
+        public T getDefault() {
+            return value().getDefault();
         }
     }
 }
