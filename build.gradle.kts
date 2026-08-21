@@ -187,6 +187,11 @@ spotless {
     }
 }
 
+tasks.named("build") {
+    dependsOn("apiJar", "apiSourcesJar")
+}
+
 registerGameTestTask()
 registerLintTask()
 registerApiJarTask(minecraftVersion)
+configureMavenPublishing(minecraftVersion, "https://github.com/fnuecke/Scannable")
