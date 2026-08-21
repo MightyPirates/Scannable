@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.mixin.fabric.client;
 
 import com.google.gson.JsonElement;

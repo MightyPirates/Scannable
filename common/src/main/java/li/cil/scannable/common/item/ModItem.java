@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.item;
 
 import li.cil.scannable.util.TooltipUtils;

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.tags;
 
 import net.minecraft.core.registries.Registries;

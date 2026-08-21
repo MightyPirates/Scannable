@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;

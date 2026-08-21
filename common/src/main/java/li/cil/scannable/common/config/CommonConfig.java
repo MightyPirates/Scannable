@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.config;
 
 import li.cil.scannable.common.tags.CommonTags;

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;

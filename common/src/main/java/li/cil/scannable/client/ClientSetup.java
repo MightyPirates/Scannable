@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client;
 
 import li.cil.scannable.client.shader.Shaders;

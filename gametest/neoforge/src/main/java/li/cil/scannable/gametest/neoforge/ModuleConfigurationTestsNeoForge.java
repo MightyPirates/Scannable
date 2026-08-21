@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.gametest.neoforge;
 
 import li.cil.scannable.gametest.ModuleConfigurationTests;

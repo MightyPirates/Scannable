@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client.renderer.neoforge;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;

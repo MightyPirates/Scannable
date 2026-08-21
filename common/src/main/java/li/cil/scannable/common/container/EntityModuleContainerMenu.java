@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.container;
 
 import li.cil.scannable.common.item.ConfigurableEntityScannerModuleItem;

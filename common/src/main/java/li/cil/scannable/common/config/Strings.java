@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.config;
 
 import net.minecraft.network.chat.Component;

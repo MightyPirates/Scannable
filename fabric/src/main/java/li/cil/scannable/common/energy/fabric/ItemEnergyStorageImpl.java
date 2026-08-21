@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.energy.fabric;
 
 import li.cil.scannable.common.config.CommonConfig;
