@@ -6,6 +6,8 @@ val forgeConfigPortVersion: String = libs.versions.fabric.forgeConfigPort.get()
 
 val gameTestRuntime: Configuration by configurations.creating
 val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
+val devOnlyMods: Configuration by configurations.creating
+val devOnlyModNames = provider { devOnlyMods.resolvedConfiguration.resolvedArtifacts.map { it.moduleVersion.id.name } }
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
@@ -27,11 +29,9 @@ repositories {
         forRepository { maven("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/") }
         filter { includeGroup("fuzs.forgeconfigapiport") }
     }
-    exclusiveContent {
-        forRepository { maven("https://maven.shedaniel.me") }
-        filter { includeGroup("me.shedaniel") }
-    }
 }
+
+configurations.named("modRuntimeOnly") { extendsFrom(devOnlyMods) }
 
 dependencies {
     modImplementation(libs.fabric.loader)
@@ -44,10 +44,8 @@ dependencies {
     })
 
     // Not used by mod, just for dev convenience.
-    modRuntimeOnly(libs.fabric.tooltipFix)
-    modRuntimeOnly(libs.fabric.roughlyEnoughItems) {
-        exclude(group = "net.fabricmc.fabric-api")
-    }
+    devOnlyMods(libs.fabric.tooltipFix)
+    devOnlyMods(libs.jei.fabric)
 
     gameTestRuntime(project(path = ":gametest-fabric", configuration = "namedElements")) { isTransitive = false }
 }
@@ -69,6 +67,7 @@ val fixGameTestReport = tasks.register("fixGameTestReport") {
 tasks.named<JavaExec>("runGameTest") {
     dependsOn(cleanGameTestResults)
     classpath += gameTestRuntime
+    classpath = classpath.filter { file -> devOnlyModNames.get().none { file.name.startsWith("${it}-") } }
     finalizedBy(fixGameTestReport)
 }
 

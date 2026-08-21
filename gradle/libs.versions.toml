@@ -14,6 +14,8 @@ fabric-tooltipfix = "1.1.1-1.20"
 neoforge-platform = "21.1.248"
 neoforge-loader = "4"
 
+jei = "19.43.0.395"
+
 [plugins]
 loom = { id = "dev.architectury.loom", version = "1.17-SNAPSHOT" }
 architectury = { id = "architectury-plugin", version = "3.5-SNAPSHOT" }
@@ -33,7 +35,8 @@ fabric-forgeConfigPort = { group = "fuzs.forgeconfigapiport", name = "forgeconfi
 fabric-energy = { group = "teamreborn", name = "energy", version = "4.1.0" }
 
 fabric-tooltipFix = { group = "maven.modrinth", name = "tooltipfix", version.ref = "fabric-tooltipfix" }
-fabric-roughlyEnoughItems = { group = "me.shedaniel", name = "RoughlyEnoughItems-fabric", version = "16.0.799" }
+jei-fabric = { group = "mezz.jei", name = "jei-1.21.1-fabric", version.ref = "jei" }
+jei-neoforge = { group = "mezz.jei", name = "jei-1.21.1-neoforge", version.ref = "jei" }
 
 neoforge-platform = { group = "net.neoforged", name = "neoforge", version.ref = "neoforge-platform" }
 neoforge-architectury = { group = "dev.architectury", name = "architectury-neoforge", version.ref = "architectury" }
