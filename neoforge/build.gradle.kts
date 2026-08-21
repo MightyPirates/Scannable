@@ -10,6 +10,9 @@ loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
     runs {
+        named("client") { runDir = "run/client" }
+        named("server") { runDir = "run/server" }
+
         create("clientData") {
             clientData()
             programArgs("--mod", modId)
@@ -68,8 +71,10 @@ tasks {
 }
 
 val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
-    description = "Deletes game test results from previous runs."
+    description = "Deletes game test results and the scratch world from previous runs."
     delete(gameTestResultsDir)
+    delete(layout.projectDirectory.dir("run/gametest/gametestserver"))
+    delete(layout.projectDirectory.dir("run/gametest/world"))
 }
 
 tasks.named<JavaExec>("runGameTestServer") {

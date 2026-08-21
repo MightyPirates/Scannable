@@ -21,6 +21,9 @@ loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
     runs {
+        named("client") { runDir = "run/client" }
+        named("server") { runDir = "run/server" }
+
         create("data") {
             client()
             name("Data Generation")
@@ -32,8 +35,10 @@ loom {
             runDir("build/datagen")
         }
         named("gameTest") {
-            property("fabric-api.gametest.report-file",
-                gameTestResultsDir.get().file("fabric-game-tests.xml").asFile.absolutePath)
+            property(
+                "fabric-api.gametest.report-file",
+                gameTestResultsDir.get().file("fabric-game-tests.xml").asFile.absolutePath
+            )
         }
     }
 }
@@ -88,43 +93,16 @@ tasks {
 }
 
 val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
-    description = "Deletes game test results from previous runs."
+    description = "Deletes game test results and the scratch world from previous runs."
     delete(gameTestResultsDir)
+    delete(layout.buildDirectory.dir("run/gameTest/world"))
 }
 
-// Fabric seems to have a typo in their test result root node, missing the last s...
 val fixGameTestReport = tasks.register("fixGameTestReport") {
     val reportFile = gameTestResultsDir.map { it.file("fabric-game-tests.xml") }
     outputs.upToDateWhen { false }
-    onlyIf { reportFile.get().asFile.exists() }
     doLast {
-        val file = reportFile.get().asFile
-        val document = javax.xml.parsers.DocumentBuilderFactory.newInstance()
-            .newDocumentBuilder().parse(file)
-        val root = document.documentElement
-        var changed = false
-
-        if (root.tagName == "testsuite" && root.getElementsByTagName("testsuite").length > 0) {
-            document.renameNode(root, null, "testsuites")
-            changed = true
-        }
-
-        val suites = document.getElementsByTagName("testsuite")
-        for (i in 0 until suites.length) {
-            val suite = suites.item(i) as org.w3c.dom.Element
-            if (!suite.hasAttribute("name")) {
-                suite.setAttribute("name", "gameTest")
-                changed = true
-            }
-        }
-
-        if (changed) {
-            javax.xml.transform.TransformerFactory.newInstance().newTransformer()
-                .transform(
-                    javax.xml.transform.dom.DOMSource(document),
-                    javax.xml.transform.stream.StreamResult(file)
-                )
-        }
+        normalizeGameTestReport(reportFile.get().asFile)
     }
 }
 

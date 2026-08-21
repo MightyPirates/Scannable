@@ -87,7 +87,7 @@ subprojects {
 
     tasks {
         jar {
-            from("LICENSE") {
+            from(rootProject.file("LICENSE")) {
                 rename { "${it}_${modId}" }
             }
         }
@@ -157,6 +157,10 @@ for (platform in enabledPlatforms.split(',')) {
                 exclude("architectury.common.json")
                 configurations = listOf(shadowBundle)
                 archiveClassifier.set("dev-shadow")
+
+                from(rootProject.file("LICENSE")) {
+                    rename { "${it}_${modId}" }
+                }
             }
 
             withType<RemapJarTask> {
