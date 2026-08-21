@@ -13,13 +13,13 @@ import static li.cil.scannable.gametest.TestSupport.TEMPLATE;
 @PrefixGameTestTemplate(false)
 public final class RecipeTestsNeoForge {
     @GameTest(template = TEMPLATE)
-    public static void everyRecipeCraftsInCraftingTable(final GameTestHelper helper) {
-        RecipeTests.everyRecipeCraftsInCraftingTable(helper);
+    public static void everyModItemIsCraftable(final GameTestHelper helper) {
+        RecipeTests.everyModItemIsCraftable(helper);
     }
 
     @GameTest(template = TEMPLATE)
-    public static void everyModItemIsCraftable(final GameTestHelper helper) {
-        RecipeTests.everyModItemIsCraftable(helper);
+    public static void everyRecipeCraftsInCraftingTable(final GameTestHelper helper) {
+        RecipeTests.everyRecipeCraftsInCraftingTable(helper);
     }
 
     private RecipeTestsNeoForge() {

@@ -54,4 +54,9 @@ public final class DataGenerators {
         watchdog.setDaemon(true);
         watchdog.start();
     }
+
+    // --------------------------------------------------------------------- //
+
+    private DataGenerators() {
+    }
 }
