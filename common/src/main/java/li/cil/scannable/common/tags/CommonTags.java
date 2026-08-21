@@ -6,12 +6,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
-/**
- * Convention ("{@code c}") tags shared by Fabric and NeoForge.
- * <p>
- * As of MC 1.21 both loaders use the same {@code c} namespace and the same tag
- * names, so these no longer need a per-platform implementation.
- */
 public final class CommonTags {
     public static final String NAMESPACE = "c";
 

@@ -1,52 +1,49 @@
 {
-    "schemaVersion": 1,
-    "id": "scannable",
-    "version": "${version}",
-    "name": "Scannable",
-    "description": "Scan the area for points of interest.",
-    "authors": [
-        "Sangar",
-        "embeddedt"
+  "schemaVersion": 1,
+  "id": "scannable",
+  "version": "${version}",
+  "name": "Scannable",
+  "description": "Scan the area for points of interest.",
+  "authors": [
+    "Sangar",
+    "embeddedt"
+  ],
+  "contact": {
+    "sources": "https://github.com/MightyPirates/Scannable"
+  },
+  "mixins": [
+    "scannable.mixins.json"
+  ],
+  "license": "MIT",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "li.cil.scannable.common.fabric.CommonSetupFabric"
     ],
-    "contact": {
-        "sources": "https://github.com/MightyPirates/Scannable"
-    },
-    "mixins": [
-        "scannable.mixins.json"
-    ],
-    "license": "MIT",
-    "icon": "logo.png",
-    "environment": "*",
-    "entrypoints": {
-        "main": [
-            "li.cil.scannable.common.fabric.CommonSetupFabric"
-        ],
-        "client": [
-            "li.cil.scannable.client.fabric.ClientSetupFabric"
-        ],
-        "fabric-datagen": [
-            "li.cil.scannable.data.fabric.DataGenerators"
-        ]
-    },
-    "depends": {
-        "fabric-api": ">=${fabricApiVersion}",
-        "forgeconfigapiport": ">=${forgeConfigPortVersion}",
-        "architectury": ">=${architecturyVersion}",
-        "minecraft": "${minecraftVersion}",
-        "java": ">=21"
-    },
-    "recommends": {
-        "tooltipfix": "*"
-    },
-    "custom": {
-        "mc-publish": {
-            "modrinth": "YqFnwJHf",
-            "curseforge": 266784,
-            "dependencies": [
-                "fabric-api@>=${fabricApiVersion}(required){modrinth:P7dR8mSH}{curseforge:306612}",
-                "forgeconfigapiport@>=${forgeConfigPortVersion}(required){modrinth:ohNO6lps}{curseforge:547434}",
-                "architectury@>=${architecturyVersion}(required){modrinth:lhGA9TYQ}{curseforge:419699}"
-            ]
-        }
+    "client": [
+      "li.cil.scannable.client.fabric.ClientSetupFabric"
+    ]
+  },
+  "depends": {
+    "fabric-api": ">=${fabricApiVersion}",
+    "forgeconfigapiport": ">=${forgeConfigPortVersion}",
+    "architectury": ">=${architecturyVersion}",
+    "minecraft": "${minecraftVersion}",
+    "java": ">=21"
+  },
+  "recommends": {
+    "tooltipfix": "*"
+  },
+  "custom": {
+    "mc-publish": {
+      "modrinth": "YqFnwJHf",
+      "curseforge": 266784,
+      "dependencies": [
+        "fabric-api@>=${fabricApiVersion}(required){modrinth:P7dR8mSH}{curseforge:306612}",
+        "forgeconfigapiport@>=${forgeConfigPortVersion}(required){modrinth:ohNO6lps}{curseforge:547434}",
+        "architectury@>=${architecturyVersion}(required){modrinth:lhGA9TYQ}{curseforge:419699}"
+      ]
     }
+  }
 }

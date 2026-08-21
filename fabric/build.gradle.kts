@@ -19,16 +19,6 @@ loom {
             vmArg("-ea")
         }
 
-        create("data") {
-            client()
-            name("Data Generation")
-            vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}")
-            vmArg("-Dfabric-api.datagen.modid=${modId}")
-            vmArg("-Dfabric-api.datagen.strict-validation")
-
-            runDir("build/datagen")
-        }
     }
 }
 

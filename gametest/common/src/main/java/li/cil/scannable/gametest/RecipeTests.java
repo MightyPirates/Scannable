@@ -2,7 +2,9 @@ package li.cil.scannable.gametest;
 
 import li.cil.scannable.api.API;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.ContainerLevelAccess;
@@ -14,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static li.cil.scannable.gametest.TestSupport.*;
 
@@ -25,7 +28,52 @@ public final class RecipeTests {
     // CraftingMenu holds the result in slot 0 and the crafting grid in the slots right after it.
     private static final int FIRST_GRID_SLOT = 1;
 
+    private static final Set<String> ITEMS_WITHOUT_RECIPE = Set.of();
+
     // --------------------------------------------------------------------- //
+
+    public static void everyModItemIsCraftable(final GameTestHelper helper) {
+        final ServerLevel level = helper.getLevel();
+        final RecipeManager recipes = level.getServer().getRecipeManager();
+
+        final List<Item> modItems = BuiltInRegistries.ITEM.entrySet().stream()
+            .filter(entry -> entry.getKey().location().getNamespace().equals(API.MOD_ID))
+            .map(java.util.Map.Entry::getValue)
+            .toList();
+
+        assertTrue(helper, "expected the mod to register items, found none", !modItems.isEmpty());
+
+        helper.setBlock(TABLE, Blocks.CRAFTING_TABLE);
+
+        final List<String> withoutRecipe = new ArrayList<>();
+        for (final Item item : modItems) {
+            final ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            if (ITEMS_WITHOUT_RECIPE.contains(id.getPath())) {
+                continue;
+            }
+
+            final List<RecipeHolder<?>> producing = recipes.getRecipes().stream()
+                .filter(holder -> holder.value() instanceof CraftingRecipe)
+                .filter(holder -> holder.value().getResultItem(level.registryAccess()).getItem() == item)
+                .toList();
+
+            if (producing.isEmpty()) {
+                withoutRecipe.add(id.getPath());
+                continue;
+            }
+
+            for (final RecipeHolder<?> holder : producing) {
+                craft(helper, level, holder);
+            }
+        }
+
+        if (!withoutRecipe.isEmpty()) {
+            throw failure(helper, "no crafting recipe for " + withoutRecipe
+                + "; add recipes, or list them in ITEMS_WITHOUT_RECIPE");
+        }
+
+        helper.succeed();
+    }
 
     public static void everyRecipeCraftsInCraftingTable(final GameTestHelper helper) {
         final ServerLevel level = helper.getLevel();
@@ -144,6 +192,8 @@ public final class RecipeTests {
     private static String describe(final List<ItemStack> inputs) {
         return inputs.stream().map(stack -> stack.isEmpty() ? "-" : stack.getItem().toString()).toList().toString();
     }
+
+    // --------------------------------------------------------------------- //
 
     private RecipeTests() {
     }

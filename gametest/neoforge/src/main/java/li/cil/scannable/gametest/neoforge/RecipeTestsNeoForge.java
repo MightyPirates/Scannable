@@ -17,6 +17,11 @@ public final class RecipeTestsNeoForge {
         RecipeTests.everyRecipeCraftsInCraftingTable(helper);
     }
 
+    @GameTest(template = TEMPLATE)
+    public static void everyModItemIsCraftable(final GameTestHelper helper) {
+        RecipeTests.everyModItemIsCraftable(helper);
+    }
+
     private RecipeTestsNeoForge() {
     }
 }
