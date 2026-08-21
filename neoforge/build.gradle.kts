@@ -4,10 +4,22 @@ val neoforgeVersion: String = libs.versions.neoforge.platform.get()
 val neoforgeLoaderVersion: String = libs.versions.neoforge.loader.get()
 val architecturyVersion: String = libs.versions.architectury.get()
 
+val gameTestRuntime: Configuration by configurations.creating
+val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
+
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
     runs {
+        create("gameTestServer") {
+            server()
+            runDir = "run/gametest"
+            property("neoforge.gameTestServer", "true")
+            property("neoforge.enabledGameTestNamespaces", "scannable_gametest")
+            property("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
+            vmArg("-ea")
+        }
+
         create("data") {
             data()
             programArgs("--all")
@@ -26,6 +38,28 @@ repositories {
 dependencies {
     neoForge(libs.neoforge.platform)
     modImplementation(libs.neoforge.architectury)
+
+    gameTestRuntime(project(":gametest-neoforge"))
+}
+
+val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
+    description = "Deletes game test results and the scratch world from previous runs."
+    delete(gameTestResultsDir)
+    delete(layout.projectDirectory.dir("run/gametest/world"))
+}
+
+val fixGameTestReport = tasks.register("fixGameTestReport") {
+    val reportFile = gameTestResultsDir.map { it.file("neoforge-game-tests.xml") }
+    outputs.upToDateWhen { false }
+    doLast {
+        normalizeGameTestReport(reportFile.get().asFile)
+    }
+}
+
+tasks.named<JavaExec>("runGameTestServer") {
+    dependsOn(cleanGameTestResults)
+    classpath += gameTestRuntime
+    finalizedBy(fixGameTestReport)
 }
 
 tasks {

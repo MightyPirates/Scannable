@@ -1,6 +1,7 @@
 package li.cil.scannable.common.neoforge.capabilities;
 
 import li.cil.scannable.api.API;
+import li.cil.scannable.common.config.CommonConfig;
 import li.cil.scannable.common.energy.neoforge.ScannerEnergyStorage;
 import li.cil.scannable.common.inventory.ScannerContainer;
 import li.cil.scannable.common.item.Items;
@@ -26,7 +27,8 @@ public final class Capabilities {
     public static void initialize(final RegisterCapabilitiesEvent event) {
         event.registerItem(ItemHandler.ITEM, (stack, context) -> new InvWrapper(ScannerContainer.of(stack)),
             Items.SCANNER.get());
-        event.registerItem(EnergyStorage.ITEM, (stack, context) -> ScannerEnergyStorage.of(stack),
+        event.registerItem(EnergyStorage.ITEM,
+            (stack, context) -> CommonConfig.useEnergy ? new ScannerEnergyStorage(stack) : null,
             Items.SCANNER.get());
         event.registerItem(ScannerModule.ITEM, (stack, context) -> ((ScannerModuleItem) stack.getItem()).getModule(),
             Items.RANGE_MODULE.get(),

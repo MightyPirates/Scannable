@@ -1,9 +1,7 @@
 package li.cil.scannable.common.energy.neoforge;
 
 import li.cil.scannable.common.config.CommonConfig;
-import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ModDataComponents;
-import li.cil.scannable.common.item.ScannerItem;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.energy.EnergyStorage;
@@ -18,23 +16,11 @@ public final class ScannerEnergyStorage extends EnergyStorage {
         this.energy = Mth.clamp(container.getOrDefault(ModDataComponents.ENERGY.get(), 0), 0, this.capacity);
     }
 
-    public static ScannerEnergyStorage of(final ItemStack container) {
-        if (container.getItem() instanceof ScannerItem) {
-            return new ScannerEnergyStorage(container);
-        } else {
-            return new ScannerEnergyStorage(new ItemStack(Items.SCANNER.get()));
-        }
-    }
-
     // --------------------------------------------------------------------- //
     // IEnergyStorage
 
     @Override
     public int receiveEnergy(final int maxReceive, final boolean simulate) {
-        if (!CommonConfig.useEnergy) {
-            return 0;
-        }
-
         final int energyReceived = super.receiveEnergy(maxReceive, simulate);
         if (!simulate && energyReceived != 0) {
             container.set(ModDataComponents.ENERGY.get(), energy);
@@ -45,10 +31,6 @@ public final class ScannerEnergyStorage extends EnergyStorage {
 
     @Override
     public int extractEnergy(final int maxExtract, final boolean simulate) {
-        if (!CommonConfig.useEnergy) {
-            return 0;
-        }
-
         final int energyExtracted = super.extractEnergy(maxExtract, simulate);
         if (!simulate && energyExtracted != 0) {
             container.set(ModDataComponents.ENERGY.get(), energy);
