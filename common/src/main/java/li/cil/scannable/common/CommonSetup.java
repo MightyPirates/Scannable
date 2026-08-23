@@ -32,7 +32,7 @@ public final class CommonSetup {
         Network.initialize();
 
         EnvExecutor.runInEnv(Env.CLIENT, () -> ScanResultProviders::initialize);
-        EnvExecutor.runInEnv(Env.CLIENT, () -> ProviderCacheManager::initialize);
+        ProviderCacheManager.initialize();
 
         RegistryUtils.finish();
 
