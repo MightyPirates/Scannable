@@ -161,5 +161,10 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         public AABB getRenderBounds() {
             return entity.getBoundingBoxForCulling();
         }
+
+        @Override
+        public boolean isValid() {
+            return entity.isAlive();
+        }
     }
 }
