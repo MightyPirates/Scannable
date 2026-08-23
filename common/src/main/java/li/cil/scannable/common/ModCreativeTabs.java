@@ -6,7 +6,7 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
 import li.cil.scannable.common.item.Items;
@@ -24,7 +24,7 @@ public final class ModCreativeTabs {
                 builder.icon(() -> new ItemStack(Items.SCANNER.get()));
                 builder.title(Strings.CREATIVE_TAB_TITLE);
                 builder.displayItems((parameters, output) -> {
-                    if (CommonConfig.useEnergy) {
+                    if (ServerConfig.useEnergy) {
                         final var stack = new ItemStack(Items.SCANNER.get());
                         ItemEnergyStorage.of(stack).ifPresent(energy -> {
                             energy.receiveEnergy(Integer.MAX_VALUE, false);

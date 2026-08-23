@@ -3,7 +3,7 @@
 package li.cil.scannable.common.fabric;
 
 import li.cil.scannable.common.CommonSetup;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.Items;
 import net.fabricmc.api.ModInitializer;
 import team.reborn.energy.api.EnergyStorage;
@@ -15,12 +15,12 @@ public final class CommonSetupFabric implements ModInitializer {
         CommonSetup.initialize();
 
         EnergyStorage.ITEM.registerForItems((stack, context) -> {
-            if (!CommonConfig.useEnergy) {
+            if (!ServerConfig.useEnergy) {
                 return null;
             }
 
             return SimpleEnergyItem.createStorage(context,
-                CommonConfig.energyCapacityScanner,
+                ServerConfig.energyCapacityScanner,
                 Long.MAX_VALUE,
                 Long.MAX_VALUE);
         }, Items.SCANNER.get());

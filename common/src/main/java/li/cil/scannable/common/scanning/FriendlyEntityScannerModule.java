@@ -6,7 +6,7 @@ import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.FriendlyEntityScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +19,13 @@ public enum FriendlyEntityScannerModule implements EntityScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleAnimal;
+        return ServerConfig.energyCostModuleAnimal;
+    }
+
+    @Environment(EnvType.CLIENT)
+    @Override
+    public float adjustLocalRange(final float range) {
+        return range * ServerConfig.rangeModifierModuleAnimal;
     }
 
     @Environment(EnvType.CLIENT)

@@ -7,7 +7,7 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.FluidTagScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -29,7 +29,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleFluid;
+        return ServerConfig.energyCostModuleFluid;
     }
 
     @Environment(EnvType.CLIENT)
@@ -41,7 +41,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
-        return range * CommonConfig.rangeModifierModuleFluid;
+        return range * ServerConfig.rangeModifierModuleFluid;
     }
 
     @Environment(EnvType.CLIENT)
@@ -59,7 +59,7 @@ public enum FluidBlockScannerModule implements BlockScannerModule {
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
         BuiltInRegistries.FLUID.getTagNames().forEach(tag -> {
-            if (!CommonConfig.ignoredFluidTags.contains(tag.location())) {
+            if (!ServerConfig.ignoredFluidTags.contains(tag.location())) {
                 filters.add(new FluidTagScanFilter(tag));
             }
         });

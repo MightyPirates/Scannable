@@ -8,7 +8,7 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,7 +31,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleOreCommon;
+        return ServerConfig.energyCostModuleOreCommon;
     }
 
     @Environment(EnvType.CLIENT)
@@ -43,7 +43,7 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
-        return range * CommonConfig.rangeModifierModuleOreCommon;
+        return range * ServerConfig.rangeModifierModuleOreCommon;
     }
 
     @Environment(EnvType.CLIENT)
@@ -60,12 +60,12 @@ public enum CommonOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final ResourceLocation location : CommonConfig.commonOreBlocks) {
+        for (final ResourceLocation location : ServerConfig.commonOreBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
         BuiltInRegistries.BLOCK.getTagNames().forEach(tag -> {
-            if (CommonConfig.commonOreBlockTags.contains(tag.location())) {
+            if (ServerConfig.commonOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
         });

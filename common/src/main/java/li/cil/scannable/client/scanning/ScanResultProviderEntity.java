@@ -30,8 +30,8 @@ import java.util.function.Predicate;
 
 @Environment(EnvType.CLIENT)
 public final class ScanResultProviderEntity extends AbstractScanResultProvider {
-    private final List<Predicate<Entity>> filters = new ArrayList<>();
-    private final Map<Predicate<Entity>, EntityScannerModule> filterToModule = new HashMap<>();
+    private final List<ModuleFilter> filters = new ArrayList<>();
+    private float maxSqRadius;
     private final ArrayList<Entity> entities = new ArrayList<>();
     private int currentEntityIndex, entitiesStep;
     private final List<ScanResultEntity> results = new ArrayList<>();
@@ -44,14 +44,15 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
         super.initialize(player, modules, center, radius, scanTicks);
 
         filters.clear();
-        filterToModule.clear();
+        maxSqRadius = 0;
         for (final ItemStack stack : modules) {
             final Optional<ScannerModule> capability = ScannerModuleItem.getModule(stack);
             capability.ifPresent(module -> {
                 if (module instanceof EntityScannerModule entityModule) {
-                    final Predicate<Entity> filter = entityModule.getFilter(stack);
-                    filters.add(filter);
-                    filterToModule.put(filter, entityModule);
+                    final float localRadius = entityModule.adjustLocalRange(radius);
+                    final float sqRadius = localRadius * localRadius;
+                    filters.add(new ModuleFilter(entityModule.getFilter(stack), entityModule, sqRadius));
+                    maxSqRadius = Math.max(maxSqRadius, sqRadius);
                 }
             });
         }
@@ -73,13 +74,14 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
             }
 
             final Vec3 position = entity.position();
-            if (center.distanceToSqr(position) < radius * radius) {
+            final double sqDistance = center.distanceToSqr(position);
+            if (sqDistance < maxSqRadius) {
                 ResourceLocation icon = API.ICON_INFO;
                 boolean hasMatch = false;
-                for (final Predicate<Entity> filter : filters) {
-                    if (filter.test(entity)) {
+                for (final ModuleFilter filter : filters) {
+                    if (sqDistance < filter.sqRadius() && filter.filter().test(entity)) {
                         hasMatch = true;
-                        final Optional<ResourceLocation> filterIcon = filterToModule.get(filter).getIcon(entity);
+                        final Optional<ResourceLocation> filterIcon = filter.module().getIcon(entity);
                         if (filterIcon.isPresent()) {
                             icon = filterIcon.get();
                             break;
@@ -135,7 +137,7 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     public void reset() {
         super.reset();
         filters.clear();
-        filterToModule.clear();
+        maxSqRadius = 0;
         currentEntityIndex = 0;
         entitiesStep = 0;
         entities.clear();
@@ -143,6 +145,9 @@ public final class ScanResultProviderEntity extends AbstractScanResultProvider {
     }
 
     // --------------------------------------------------------------------- //
+
+    private record ModuleFilter(Predicate<Entity> filter, EntityScannerModule module, float sqRadius) {
+    }
 
     private record ScanResultEntity(Entity entity, ResourceLocation icon) implements ScanResult {
         public ResourceLocation getIcon() {

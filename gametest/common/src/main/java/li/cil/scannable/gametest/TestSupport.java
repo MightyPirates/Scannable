@@ -2,7 +2,7 @@
 
 package li.cil.scannable.gametest;
 
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 
@@ -31,12 +31,12 @@ public final class TestSupport {
     }
 
     public static void withEnergy(final boolean enabled, final Runnable body) {
-        final boolean wasEnabled = CommonConfig.useEnergy;
-        CommonConfig.useEnergy = enabled;
+        final boolean wasEnabled = ServerConfig.useEnergy;
+        ServerConfig.useEnergy = enabled;
         try {
             body.run();
         } finally {
-            CommonConfig.useEnergy = wasEnabled;
+            ServerConfig.useEnergy = wasEnabled;
         }
     }
 

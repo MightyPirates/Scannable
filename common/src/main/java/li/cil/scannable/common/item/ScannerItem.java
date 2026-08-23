@@ -6,7 +6,7 @@ import dev.architectury.registry.menu.MenuRegistry;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.ScanManager;
 import li.cil.scannable.client.audio.SoundManager;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.config.Strings;
 import li.cil.scannable.common.container.ScannerContainerMenu;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
@@ -49,7 +49,7 @@ public final class ScannerItem extends ModItem {
     public void appendHoverText(final ItemStack stack, final Item.TooltipContext context, final List<Component> tooltip, final TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
 
-        if (CommonConfig.useEnergy) {
+        if (ServerConfig.useEnergy) {
             ItemEnergyStorage.of(stack).ifPresent(energy ->
                 tooltip.add(Strings.energyStorage(energy.getEnergyStored(), energy.getMaxEnergyStored())));
         }
@@ -57,7 +57,7 @@ public final class ScannerItem extends ModItem {
 
     @Override
     public boolean isBarVisible(final ItemStack stack) {
-        return CommonConfig.useEnergy;
+        return ServerConfig.useEnergy;
     }
 
     @Override
@@ -168,7 +168,7 @@ public final class ScannerItem extends ModItem {
     // --------------------------------------------------------------------- //
 
     private static float getRelativeEnergy(final ItemStack stack) {
-        if (!CommonConfig.useEnergy) {
+        if (!ServerConfig.useEnergy) {
             return 0;
         }
 
@@ -178,7 +178,7 @@ public final class ScannerItem extends ModItem {
     }
 
     private static boolean tryConsumeEnergy(final Player player, final ItemStack scanner, final List<ItemStack> modules, final boolean simulate) {
-        if (!CommonConfig.useEnergy) {
+        if (!ServerConfig.useEnergy) {
             return true;
         }
 

@@ -7,7 +7,7 @@ import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.HostileEntityScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +22,13 @@ public enum HostileEntityScannerModule implements EntityScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleMonster;
+        return ServerConfig.energyCostModuleMonster;
+    }
+
+    @Environment(EnvType.CLIENT)
+    @Override
+    public float adjustLocalRange(final float range) {
+        return range * ServerConfig.rangeModifierModuleMonster;
     }
 
     @Environment(EnvType.CLIENT)

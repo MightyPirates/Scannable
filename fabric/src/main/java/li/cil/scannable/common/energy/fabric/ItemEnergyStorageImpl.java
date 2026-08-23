@@ -2,7 +2,7 @@
 
 package li.cil.scannable.common.energy.fabric;
 
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.energy.ItemEnergyStorage;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.base.SingleStackStorage;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public final class ItemEnergyStorageImpl {
     public static Optional<ItemEnergyStorage> of(final ItemStack container) {
-        if (!CommonConfig.useEnergy) {
+        if (!ServerConfig.useEnergy) {
             return Optional.empty();
         }
 

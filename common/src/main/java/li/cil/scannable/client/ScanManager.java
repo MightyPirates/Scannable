@@ -11,7 +11,7 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -105,7 +105,7 @@ public final class ScanManager {
     public static void beginScan(final Player player, final List<ItemStack> stacks) {
         cancelScan();
 
-        float scanRadius = CommonConfig.baseScanRadius;
+        float scanRadius = ServerConfig.baseScanRadius;
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
@@ -196,7 +196,7 @@ public final class ScanManager {
 
         removeInvalidResults();
 
-        if (CommonConfig.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
+        if (ServerConfig.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
             pendingResults.forEach((provider, results) -> results.forEach(ScanResult::close));
             pendingResults.clear();
             synchronized (renderingResults) {

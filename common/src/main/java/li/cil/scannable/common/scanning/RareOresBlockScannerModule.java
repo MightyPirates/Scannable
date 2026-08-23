@@ -8,7 +8,7 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import li.cil.scannable.common.tags.CommonTags;
 import net.fabricmc.api.EnvType;
@@ -35,7 +35,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleOreRare;
+        return ServerConfig.energyCostModuleOreRare;
     }
 
     @Environment(EnvType.CLIENT)
@@ -47,7 +47,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
     @Environment(EnvType.CLIENT)
     @Override
     public float adjustLocalRange(final float range) {
-        return range * CommonConfig.rangeModifierModuleOreRare;
+        return range * ServerConfig.rangeModifierModuleOreRare;
     }
 
     @Environment(EnvType.CLIENT)
@@ -64,12 +64,12 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final ResourceLocation location : CommonConfig.rareOreBlocks) {
+        for (final ResourceLocation location : ServerConfig.rareOreBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
         BuiltInRegistries.BLOCK.getTagNames().forEach(tag -> {
-            if (CommonConfig.rareOreBlockTags.contains(tag.location())) {
+            if (ServerConfig.rareOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
         });

@@ -2,7 +2,7 @@
 
 package li.cil.scannable.common.energy.neoforge;
 
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.ModDataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -12,7 +12,7 @@ public final class ScannerEnergyStorage extends EnergyStorage {
     private final ItemStack container;
 
     public ScannerEnergyStorage(final ItemStack container) {
-        super(CommonConfig.energyCapacityScanner);
+        super(ServerConfig.energyCapacityScanner);
         this.container = container;
 
         this.energy = Mth.clamp(container.getOrDefault(ModDataComponents.ENERGY.get(), 0), 0, this.capacity);

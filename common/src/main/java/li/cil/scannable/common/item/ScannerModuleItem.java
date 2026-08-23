@@ -4,7 +4,7 @@ package li.cil.scannable.common.item;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.config.Strings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -39,7 +39,7 @@ public class ScannerModuleItem extends ModItem {
     }
 
     public static int getModuleEnergyCost(final ItemStack stack) {
-        if (!CommonConfig.useEnergy) {
+        if (!ServerConfig.useEnergy) {
             return 0;
         }
 

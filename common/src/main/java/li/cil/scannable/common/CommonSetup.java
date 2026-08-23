@@ -7,7 +7,7 @@ import dev.architectury.utils.EnvExecutor;
 import li.cil.scannable.api.API;
 import li.cil.scannable.client.ClientConfig;
 import li.cil.scannable.client.scanning.ScanResultProviders;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.container.Containers;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ModDataComponents;
@@ -19,7 +19,7 @@ import li.cil.scannable.util.RegistryUtils;
 
 public final class CommonSetup {
     public static void initialize() {
-        ConfigManager.add(CommonConfig::new);
+        ConfigManager.add(ServerConfig::new);
         ConfigManager.add(ClientConfig::new);
         ConfigManager.initialize();
 
