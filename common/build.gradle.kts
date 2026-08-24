@@ -6,7 +6,10 @@ architectury {
 }
 
 sourceSets.main {
-    resources.srcDir("src/generated/resources")
+    // The client and server datagen passes are separate processes, and each prunes anything in its
+    // output directory it did not write, so they cannot share one.
+    resources.srcDir("src/generated/client")
+    resources.srcDir("src/generated/server")
     resources.exclude(".cache/**")
 }
 

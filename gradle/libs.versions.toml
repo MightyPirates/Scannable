@@ -10,6 +10,7 @@ fabric-loader = "0.19.3"
 fabric-api = "0.141.6+1.21.11"
 
 fabric-forgeConfigPort = "21.11.1"
+fabric-energy = "4.2.0"
 
 neoforge-platform = "21.11.45"
 neoforge-loader = "1"
@@ -33,7 +34,7 @@ fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.r
 fabric-architectury = { group = "dev.architectury", name = "architectury-fabric", version.ref = "architectury" }
 
 fabric-forgeConfigPort = { group = "fuzs.forgeconfigapiport", name = "forgeconfigapiport-fabric", version.ref = "fabric-forgeConfigPort" }
-fabric-energy = { group = "teamreborn", name = "energy", version = "4.2.0" }
+fabric-energy = { group = "teamreborn", name = "energy", version.ref = "fabric-energy" }
 
 jei-fabric = { group = "mezz.jei", name = "jei-1.21.11-fabric", version.ref = "jei" }
 jei-neoforge = { group = "mezz.jei", name = "jei-1.21.11-neoforge", version.ref = "jei" }

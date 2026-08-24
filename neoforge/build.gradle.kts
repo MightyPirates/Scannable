@@ -19,7 +19,7 @@ loom {
         create("clientData") {
             clientData()
             programArgs("--mod", modId)
-            programArgs("--output", project(":common").file("src/generated/resources").absolutePath)
+            programArgs("--output", project(":common").file("src/generated/client").absolutePath)
             programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
             programArgs("--existing", file("src/main/resources").absolutePath)
         }
@@ -35,7 +35,7 @@ loom {
         create("serverData") {
             serverData()
             programArgs("--mod", modId)
-            programArgs("--output", project(":common").file("src/generated/resources").absolutePath)
+            programArgs("--output", project(":common").file("src/generated/server").absolutePath)
             programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
             programArgs("--existing", file("src/main/resources").absolutePath)
         }
