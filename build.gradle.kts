@@ -194,4 +194,4 @@ tasks.named("build") {
 registerGameTestTask()
 registerLintTask()
 registerApiJarTask(minecraftVersion)
-configureMavenPublishing(minecraftVersion, "https://github.com/fnuecke/Scannable")
+configureMavenPublishing(minecraftVersion, "https://github.com/MightyPirates/Scannable")

@@ -38,3 +38,4 @@ forge*changelog.txt
 # minecraft
 run/
 logs/
+.architectury-transformer/
