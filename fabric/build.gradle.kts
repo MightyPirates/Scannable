@@ -59,6 +59,9 @@ dependencies {
 
 tasks {
     processResources {
+        from(project(":neoforge").file("src/generated/client"))
+        from(project(":neoforge").file("src/generated/server"))
+
         val properties = mapOf(
             "version" to project.version,
             "minecraftVersion" to minecraftVersion,
