@@ -1,10 +1,13 @@
 val modId: String by project
-val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
 val minecraftVersion: String = libs.versions.minecraft.get()
 val neoforgeVersion: String = libs.versions.neoforge.platform.get()
 val neoforgeLoaderVersion: String = libs.versions.neoforge.loader.get()
 val architecturyVersion: String = libs.versions.architectury.get()
+
 val gameTestRuntime: Configuration by configurations.creating
+val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
+val devOnlyMods: Configuration by configurations.creating
+val devOnlyModNames = provider { devOnlyMods.resolvedConfiguration.resolvedArtifacts.map { it.moduleVersion.id.name } }
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
@@ -43,11 +46,16 @@ repositories {
     maven("https://maven.neoforged.net/releases")
 }
 
+configurations.named("modRuntimeOnly") { extendsFrom(devOnlyMods) }
+
 dependencies {
     neoForge(libs.neoforge.platform)
     modImplementation(libs.neoforge.architectury)
 
     gameTestRuntime(project(":gametest-neoforge"))
+
+    // Not used by mod, just for dev convenience.
+    devOnlyMods(libs.jei.neoforge)
 }
 
 tasks {
@@ -80,4 +88,5 @@ val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
 tasks.named<JavaExec>("runGameTestServer") {
     dependsOn(cleanGameTestResults)
     classpath += gameTestRuntime
+    classpath = classpath.filter { file -> devOnlyModNames.get().none { file.name.startsWith("${it}-") } }
 }
