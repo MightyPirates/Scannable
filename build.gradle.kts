@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.task.RemapJarTask
-import java.util.concurrent.Callable
 
 plugins {
     java
@@ -17,20 +16,13 @@ val mavenGroup: String by project
 val enabledPlatforms: String by project
 val minecraftVersion: String = libs.versions.minecraft.get()
 
-fun getGitRef(): String {
-    return providers.exec {
-        commandLine("git", "rev-parse", "--short", "HEAD")
-        isIgnoreExitValue = true
-    }.standardOutput.asText.get().trim()
-}
-
 subprojects {
     apply(plugin = "java")
     apply(plugin = "pmd")
     apply(plugin = rootProject.libs.plugins.architectury.get().pluginId)
     apply(plugin = rootProject.libs.plugins.loom.get().pluginId)
 
-    version = "${modVersion}+${getGitRef()}"
+    version = "${modVersion}+${gitRef()}"
     group = mavenGroup
     base.archivesName.set("${modId}-MC${minecraftVersion}-${project.name}")
 
@@ -48,10 +40,6 @@ subprojects {
             filter { includeGroupByRegex("org\\.parchmentmc.*") }
         }
         exclusiveContent {
-            forRepository { maven("https://api.modrinth.com/maven") }
-            filter { includeGroup("maven.modrinth") }
-        }
-        exclusiveContent {
             forRepository { maven("https://maven.blamejared.com") }
             filter { includeGroup("mezz.jei") }
         }
@@ -67,54 +55,10 @@ subprojects {
         "compileOnly"("com.google.code.findbugs:jsr305:3.0.2")
     }
 
-    java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    configure<PmdExtension> {
-        toolVersion = "7.26.0"
-        ruleSets = emptyList()
-        ruleSetFiles = rootProject.files("config/pmd/ruleset.xml")
-        isConsoleOutput = true
-        isIgnoreFailures = false
-    }
-
-    tasks.withType<Pmd>().configureEach {
-        exclude("**/mixin/**")
-        reports {
-            xml.required.set(false)
-            html.required.set(true)
-        }
-    }
-
-    tasks {
-        jar {
-            from(rootProject.file("LICENSE")) {
-                rename { "${it}_${modId}" }
-            }
-        }
-
-        withType<JavaCompile>().configureEach {
-            options.encoding = "utf-8"
-            options.release.set(21)
-            options.compilerArgs.addAll(
-                listOf(
-                    "-Xlint:all,-processing,-serial,-classfile,-this-escape",
-                    "-Xmaxwarns", "1000",
-                )
-            )
-        }
-    }
-
-    idea {
-        module {
-            for (exclude in arrayOf("out", "logs")) {
-                excludeDirs.add(file(exclude))
-            }
-        }
-    }
+    configureJava()
+    configurePmd()
+    embedLicenses()
+    configureIdeaExcludes()
 }
 
 val projectConfigurations = mapOf(
@@ -161,10 +105,6 @@ for (platform in enabledPlatforms.split(',')) {
                 exclude("architectury.common.json")
                 configurations = listOf(shadowBundle)
                 archiveClassifier.set("dev-shadow")
-
-                from(rootProject.file("LICENSE")) {
-                    rename { "${it}_${modId}" }
-                }
             }
 
             withType<RemapJarTask> {
@@ -229,49 +169,11 @@ for (platform in enabledPlatforms.split(',')) {
     }
 }
 
-tasks.register("gameTest") {
-    group = "verification"
-    description = "Runs the game tests on all enabled platforms."
-    dependsOn(enabledPlatforms.split(',').map { platform ->
-        when (platform) {
-            "fabric" -> ":fabric:runGameTest"
-            "neoforge" -> ":neoforge:runGameTestServer"
-            else -> throw GradleException("No game test run configured for platform '${platform}'.")
-        }
-    })
-}
-
-tasks.register<Jar>("apiJar") {
-    group = "build"
-    description = "Assembles a jar of the public API of every module."
-    archiveBaseName.set("${modId}-MC${minecraftVersion}")
-    archiveVersion.set("${modVersion}+${getGitRef()}")
-    archiveClassifier.set("api")
-
-    for (name in listOf("common") + enabledPlatforms.split(',')) {
-        val module = project(":$name")
-        dependsOn("${module.path}:classes")
-        from(Callable { module.the<SourceSetContainer>()["main"].allSource })
-        from(Callable { module.the<SourceSetContainer>()["main"].output })
-    }
-
-    include("li/cil/${modId}/api/**")
-}
-
-tasks.named("build") {
-    dependsOn("apiJar")
-}
-
-tasks.register("lint") {
-    group = "verification"
-    description = "Runs Spotless and PMD across all modules."
-    dependsOn("spotlessCheck")
-    dependsOn(subprojects.map { "${it.path}:pmdMain" })
-}
-
 spotless {
     java {
-        target("*/src/*/java/li/cil/**/*.java", "*/*/src/*/java/li/cil/**/*.java")
+        target("**/src/*/java/li/cil/**/*.java")
+
+        licenseHeader("/* SPDX-License-Identifier: MIT */\n\n")
 
         endWithNewline()
         trimTrailingWhitespace()
@@ -280,3 +182,12 @@ spotless {
         importOrder("", "javax|java", "\\#")
     }
 }
+
+tasks.named("build") {
+    dependsOn("apiJar", "apiSourcesJar")
+}
+
+registerGameTestTask()
+registerLintTask()
+registerApiJarTask(minecraftVersion)
+configureMavenPublishing(minecraftVersion, "https://github.com/fnuecke/Scannable")

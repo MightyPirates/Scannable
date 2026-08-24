@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.gametest;
 
 import li.cil.scannable.common.energy.ItemEnergyStorage;

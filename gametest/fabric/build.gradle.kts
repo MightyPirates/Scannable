@@ -1,7 +1,7 @@
 dependencies {
     modImplementation(libs.fabric.loader)
-    modApi(libs.fabric.api)
-    modApi(libs.fabric.architectury)
+    modImplementation(libs.fabric.api)
+    modImplementation(libs.fabric.architectury)
 
     modCompileOnly(libs.fabric.energy.get().toString()) {
         exclude(group = "net.fabricmc.fabric-api")

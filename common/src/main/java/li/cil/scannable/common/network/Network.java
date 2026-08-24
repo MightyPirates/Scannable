@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.network;
 
 import dev.architectury.networking.NetworkManager;

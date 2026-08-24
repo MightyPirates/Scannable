@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.scanning;
 
 import li.cil.scannable.api.scanning.BlockScannerModule;
@@ -6,7 +8,7 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -29,7 +31,7 @@ public enum ChestScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleChest;
+        return ServerConfig.energyCostModuleChest;
     }
 
     @Override
@@ -39,7 +41,7 @@ public enum ChestScannerModule implements BlockScannerModule {
 
     @Override
     public float adjustLocalRange(final float range) {
-        return range * CommonConfig.rangeModifierModuleChest;
+        return range * ServerConfig.rangeModifierModuleChest;
     }
 
     @Override
@@ -54,13 +56,13 @@ public enum ChestScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final Identifier location : CommonConfig.commonChestBlocks) {
+        for (final Identifier location : ServerConfig.commonChestBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
         BuiltInRegistries.BLOCK.getTags().forEach(namedTag -> {
             final TagKey<Block> tag = namedTag.key();
-            if (CommonConfig.commonChestTags.contains(tag.location())) {
+            if (ServerConfig.commonChestTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
         });

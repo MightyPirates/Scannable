@@ -1,6 +1,8 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.scanning.filter;
 
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -32,13 +34,13 @@ public enum IgnoredBlocks {
         }
 
         final Set<Block> ignoredBlocks = new HashSet<>();
-        for (final Identifier location : CommonConfig.ignoredBlocks) {
+        for (final Identifier location : ServerConfig.ignoredBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(ignoredBlocks::add);
         }
 
         final List<TagKey<Block>> ignoredTags = new ArrayList<>();
         BuiltInRegistries.BLOCK.getTags().forEach(namedTag -> {
-            if (CommonConfig.ignoredBlockTags.contains(namedTag.key().location())) {
+            if (ServerConfig.ignoredBlockTags.contains(namedTag.key().location())) {
                 ignoredTags.add(namedTag.key());
             }
         });

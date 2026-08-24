@@ -23,9 +23,6 @@
         ],
         "client": [
             "li.cil.scannable.client.fabric.ClientSetupFabric"
-        ],
-        "fabric-datagen": [
-            "li.cil.scannable.data.fabric.DataGenerators"
         ]
     },
     "depends": {

@@ -1,15 +1,21 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.gametest;
 
 import li.cil.scannable.api.API;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -21,6 +27,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static li.cil.scannable.gametest.TestSupport.assertEquals;
 import static li.cil.scannable.gametest.TestSupport.assertTrue;
@@ -31,7 +39,53 @@ public final class RecipeTests {
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 
+    private static final Set<String> ITEMS_WITHOUT_RECIPE = Set.of();
+
     // --------------------------------------------------------------------- //
+
+    public static void everyModItemIsCraftable(final GameTestHelper helper) {
+        final ServerLevel level = helper.getLevel();
+        final RecipeManager recipes = level.getServer().getRecipeManager();
+        final ContextMap displayContext = SlotDisplayContext.fromLevel(level);
+
+        final List<Item> modItems = BuiltInRegistries.ITEM.entrySet().stream()
+            .filter(entry -> entry.getKey().identifier().getNamespace().equals(API.MOD_ID))
+            .map(Map.Entry::getValue)
+            .toList();
+
+        assertTrue(helper, "expected the mod to register items, found none", !modItems.isEmpty());
+
+        helper.setBlock(TABLE, Blocks.CRAFTING_TABLE);
+
+        final List<String> withoutRecipe = new ArrayList<>();
+        for (final Item item : modItems) {
+            final Identifier id = BuiltInRegistries.ITEM.getKey(item);
+            if (ITEMS_WITHOUT_RECIPE.contains(id.getPath())) {
+                continue;
+            }
+
+            final List<RecipeHolder<?>> producing = recipes.getRecipes().stream()
+                .filter(holder -> holder.value() instanceof CraftingRecipe)
+                .filter(holder -> produces(holder, displayContext, item))
+                .toList();
+
+            if (producing.isEmpty()) {
+                withoutRecipe.add(id.getPath());
+                continue;
+            }
+
+            for (final RecipeHolder<?> holder : producing) {
+                craft(helper, level, displayContext, holder);
+            }
+        }
+
+        if (!withoutRecipe.isEmpty()) {
+            throw failure(helper, "no crafting recipe for " + withoutRecipe
+                + "; add recipes, or list them in ITEMS_WITHOUT_RECIPE");
+        }
+
+        helper.succeed();
+    }
 
     public static void everyRecipeCraftsInCraftingTable(final GameTestHelper helper) {
         final ServerLevel level = helper.getLevel();
@@ -54,6 +108,11 @@ public final class RecipeTests {
     }
 
     // --------------------------------------------------------------------- //
+
+    private static boolean produces(final RecipeHolder<?> holder, final ContextMap displayContext, final Item item) {
+        return holder.value().display().stream()
+            .anyMatch(display -> display.result().resolveForFirstStack(displayContext).getItem() == item);
+    }
 
     private static void craft(final GameTestHelper helper, final ServerLevel level, final ContextMap displayContext, final RecipeHolder<?> holder) {
         final String id = holder.id().identifier().toString();
@@ -143,6 +202,8 @@ public final class RecipeTests {
     private static String describe(final List<ItemStack> inputs) {
         return inputs.stream().map(stack -> stack.isEmpty() ? "-" : stack.getItem().toString()).toList().toString();
     }
+
+    // --------------------------------------------------------------------- //
 
     private RecipeTests() {
     }

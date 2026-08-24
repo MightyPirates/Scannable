@@ -9,17 +9,6 @@ val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
 val devOnlyMods: Configuration by configurations.creating
 val devOnlyModNames = provider { devOnlyMods.resolvedConfiguration.resolvedArtifacts.map { it.moduleVersion.id.name } }
 
-fabricApi {
-    configureTests {
-        createSourceSet = false
-        modId = "scannable_gametest"
-        enableGameTests = true
-        enableClientGameTests = false
-        eula = true
-        clearRunDirectory = true
-    }
-}
-
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
@@ -27,21 +16,15 @@ loom {
         named("client") { runDir = "run/client" }
         named("server") { runDir = "run/server" }
 
-        create("data") {
-            client()
-            name("Data Generation")
-            vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}")
-            vmArg("-Dfabric-api.datagen.modid=${modId}")
-            vmArg("-Dfabric-api.datagen.strict-validation")
-
-            runDir("build/datagen")
-        }
-        named("gameTest") {
+        create("gameTest") {
+            server()
+            runDir = "run/gametest"
+            property("fabric-api.gametest")
             property(
                 "fabric-api.gametest.report-file",
                 gameTestResultsDir.get().file("fabric-game-tests.xml").asFile.absolutePath
             )
+            vmArg("-ea")
         }
     }
 }
@@ -59,6 +42,9 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modApi(libs.fabric.api)
     modApi(libs.fabric.architectury)
+
+    // Allows `remapSourcesJar` to resolve `@ExpectPlatform` in the common sources it bundles.
+    compileOnly(libs.architectury.injectables)
 
     modImplementation(libs.fabric.forgeConfigPort)
     include(modApi(libs.fabric.energy.get().toString()) {
@@ -94,7 +80,7 @@ tasks {
 val cleanGameTestResults = tasks.register<Delete>("cleanGameTestResults") {
     description = "Deletes game test results and the scratch world from previous runs."
     delete(gameTestResultsDir)
-    delete(layout.buildDirectory.dir("run/gameTest/world"))
+    delete(layout.projectDirectory.dir("run/gametest/world"))
 }
 
 val fixGameTestReport = tasks.register("fixGameTestReport") {
@@ -110,8 +96,4 @@ tasks.named<JavaExec>("runGameTest") {
     classpath += gameTestRuntime
     classpath = classpath.filter { file -> devOnlyModNames.get().none { file.name.startsWith("${it}-") } }
     finalizedBy(fixGameTestReport)
-}
-
-tasks.named("test") {
-    setDependsOn(dependsOn.filterNot { "runGameTest" in it.toString() })
 }

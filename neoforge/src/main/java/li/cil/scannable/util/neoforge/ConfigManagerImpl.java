@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.util.neoforge;
 
 import li.cil.scannable.api.API;

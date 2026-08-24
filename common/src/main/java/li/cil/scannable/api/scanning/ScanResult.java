@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.api.scanning;
 
 import net.minecraft.world.phys.AABB;
@@ -30,6 +32,18 @@ public interface ScanResult extends Closeable {
      */
     @Nullable
     AABB getRenderBounds();
+
+    /**
+     * Whether this result still represents something worth rendering.
+     * <p>
+     * Called once per client tick while the result is being rendered. Results
+     * that report <code>false</code> are dropped and {@link #close()}d.
+     *
+     * @return <code>true</code> if the result should be kept; <code>false</code> otherwise.
+     */
+    default boolean isValid() {
+        return true;
+    }
 
     /**
      * Called when results are disposed to allow freeing non-managed resources

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client.shader;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.scanning;
 
 import li.cil.scannable.api.API;
@@ -5,7 +7,7 @@ import li.cil.scannable.api.scanning.EntityScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.HostileEntityScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +20,12 @@ public enum HostileEntityScannerModule implements EntityScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleMonster;
+        return ServerConfig.energyCostModuleMonster;
+    }
+
+    @Override
+    public float adjustLocalRange(final float range) {
+        return range * ServerConfig.rangeModifierModuleMonster;
     }
 
     @Override

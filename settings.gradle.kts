@@ -22,7 +22,6 @@ pluginManagement {
                 includeGroup("de.oceanlabs.mcp")
             }
         }
-        mavenCentral()
         gradlePluginPortal()
     }
 }

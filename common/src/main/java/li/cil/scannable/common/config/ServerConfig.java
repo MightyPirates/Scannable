@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.config;
 
 import li.cil.scannable.common.tags.CommonTags;
@@ -10,7 +12,8 @@ import net.minecraft.world.level.block.Blocks;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class CommonConfig {
+@Type(ConfigType.SERVER)
+public final class ServerConfig {
     @Path("energy") @WorldRestart
     @Comment("Whether to consume energy when performing a scan. Will make the scanner a chargeable item.")
     public static boolean useEnergy = true;
@@ -79,13 +82,25 @@ public final class CommonConfig {
     @Comment("Relative effective range of the chest module.")
     public static float rangeModifierModuleChest = 0.25f;
 
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the animal module.")
+    public static float rangeModifierModuleAnimal = 1.0f;
+
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the monster module.")
+    public static float rangeModifierModuleMonster = 1.0f;
+
+    @Path("range") @WorldRestart @Min(0) @Max(1)
+    @Comment("Relative effective range of the entity module.")
+    public static float rangeModifierModuleEntity = 1.0f;
+
     // TODO Migrate to range category in next major version.
     @Path("general") @WorldRestart @Min(16) @Max(128)
     @Comment("The basic scan radius without range modules. Higher values mean more computational\n" +
         "overhead and thus potentially worse performance while scanning.")
     public static int baseScanRadius = 64;
 
-    @Path("general") @WorldRestart @Min(1000) @Max(60000 * 5)
+    @Path("general") @Min(1000) @Max(60000 * 5)
     @Comment("How long the results from a scan should remain visible, in milliseconds.")
     public static int scanStayDuration = 10000;
 

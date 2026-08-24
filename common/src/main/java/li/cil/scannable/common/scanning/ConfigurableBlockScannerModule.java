@@ -1,10 +1,12 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.scanning;
 
 import li.cil.scannable.api.scanning.BlockScannerModule;
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.ConfigurableBlockScannerModuleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -18,7 +20,7 @@ public enum ConfigurableBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleBlock;
+        return ServerConfig.energyCostModuleBlock;
     }
 
     @Override
@@ -28,7 +30,7 @@ public enum ConfigurableBlockScannerModule implements BlockScannerModule {
 
     @Override
     public float adjustLocalRange(final float range) {
-        return range * CommonConfig.rangeModifierModuleBlock;
+        return range * ServerConfig.rangeModifierModuleBlock;
     }
 
     @Override

@@ -1,8 +1,10 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.scanning;
 
 import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScannerModule;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -13,7 +15,7 @@ public enum RangeScannerModule implements ScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleRange;
+        return ServerConfig.energyCostModuleRange;
     }
 
     @Override
@@ -29,6 +31,6 @@ public enum RangeScannerModule implements ScannerModule {
 
     @Override
     public float adjustGlobalRange(final float range) {
-        return range + Mth.ceil(CommonConfig.baseScanRadius * CommonConfig.rangeModifierModuleRange);
+        return range + Mth.ceil(ServerConfig.baseScanRadius * ServerConfig.rangeModifierModuleRange);
     }
 }

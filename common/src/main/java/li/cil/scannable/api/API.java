@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.api;
 
 import net.minecraft.resources.Identifier;

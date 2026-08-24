@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.gametest.neoforge;
 
 import li.cil.scannable.gametest.RecipeTests;
@@ -9,6 +11,13 @@ import net.neoforged.testframework.gametest.GameTest;
 
 @ForEachTest(groups = "recipes")
 public final class RecipeTestsNeoForge {
+    @GameTest
+    @EmptyTemplate
+    @TestHolder(description = "Every item the mod ships has a recipe.")
+    public static void everyModItemIsCraftable(final GameTestHelper helper) {
+        RecipeTests.everyModItemIsCraftable(helper);
+    }
+
     @GameTest
     @EmptyTemplate
     @TestHolder(description = "Every recipe the mod ships can be crafted in a crafting table.")

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.gametest.fabric;
 
 import li.cil.scannable.gametest.RecipeTests;
@@ -11,6 +13,11 @@ import net.minecraft.gametest.framework.GameTestHelper;
  * is only insurance against one side drifting.
  */
 public final class RecipeTestsFabric {
+    @GameTest
+    public void everyModItemIsCraftable(final GameTestHelper helper) {
+        RecipeTests.everyModItemIsCraftable(helper);
+    }
+
     @GameTest
     public void everyRecipeCraftsInCraftingTable(final GameTestHelper helper) {
         RecipeTests.everyRecipeCraftsInCraftingTable(helper);

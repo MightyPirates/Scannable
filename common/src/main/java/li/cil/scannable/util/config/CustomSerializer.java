@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.util.config;
 
 import java.lang.annotation.Retention;

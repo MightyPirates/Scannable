@@ -33,8 +33,9 @@ classes/
 forge*changelog.txt
 
 # generated resources
-**/src/generated/
+**/src/generated/resources/.cache/
 
 # minecraft
 run/
 logs/
+.architectury-transformer/

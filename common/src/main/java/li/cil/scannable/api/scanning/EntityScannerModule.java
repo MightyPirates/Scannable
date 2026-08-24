@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.api.scanning;
 
 import li.cil.scannable.api.API;
@@ -18,6 +20,17 @@ import java.util.function.Predicate;
  * </pre>
  */
 public interface EntityScannerModule extends ScannerModule {
+    /**
+     * Modifies the local range of the scan. Modules can boost or reduce the range
+     * for only their own filtering via {@link #getFilter(ItemStack)}.
+     *
+     * @param range the input range.
+     * @return the adjusted range.
+     */
+    default float adjustLocalRange(final float range) {
+        return range;
+    }
+
     /**
      * The icon to display for the specified entity if it is included in a scan result.
      * <p>

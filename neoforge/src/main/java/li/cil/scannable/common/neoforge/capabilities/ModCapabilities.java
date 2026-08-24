@@ -1,7 +1,9 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.neoforge.capabilities;
 
 import li.cil.scannable.api.API;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.inventory.ScannerContainer;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ModDataComponents;
@@ -21,8 +23,8 @@ public final class ModCapabilities {
             (stack, context) -> VanillaContainerWrapper.of(ScannerContainer.of(stack)),
             Items.SCANNER.get());
         event.registerItem(Capabilities.Energy.ITEM,
-            (stack, access) -> CommonConfig.useEnergy
-                ? new ItemAccessEnergyHandler(access, ModDataComponents.ENERGY.get(), CommonConfig.energyCapacityScanner)
+            (stack, access) -> ServerConfig.useEnergy
+                ? new ItemAccessEnergyHandler(access, ModDataComponents.ENERGY.get(), ServerConfig.energyCapacityScanner)
                 : null,
             Items.SCANNER.get());
         event.registerItem(li.cil.scannable.api.neoforge.Capabilities.SCANNER_MODULE,

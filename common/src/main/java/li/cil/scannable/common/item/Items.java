@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.item;
 
 import dev.architectury.registry.registries.DeferredRegister;

@@ -1,6 +1,8 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.gametest.neoforge;
 
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ModDataComponents;
 import li.cil.scannable.gametest.TestSupport;
@@ -76,7 +78,7 @@ public final class EnergyCapabilityTestsNeoForge {
     // --------------------------------------------------------------------- //
 
     private static EnergyHandler slotEnergy(final GameTestHelper helper, final SimpleContainer container) {
-        assertTrue(helper, "energy handling must be enabled for this test", CommonConfig.useEnergy);
+        assertTrue(helper, "energy handling must be enabled for this test", ServerConfig.useEnergy);
 
         final ResourceHandler<ItemResource> handler = VanillaContainerWrapper.of(container);
         final ItemAccess access = ItemAccess.forHandlerIndex(handler, SLOT);

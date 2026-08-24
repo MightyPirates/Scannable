@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.mixin.fabric;
 
 import li.cil.scannable.common.item.ScannerItem;

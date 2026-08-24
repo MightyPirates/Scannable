@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client;
 
 import com.mojang.blaze3d.ProjectionType;
@@ -9,7 +11,7 @@ import li.cil.scannable.api.scanning.ScanResultProvider;
 import li.cil.scannable.api.scanning.ScanResultRenderContext;
 import li.cil.scannable.api.scanning.ScannerModule;
 import li.cil.scannable.client.renderer.ScannerRenderer;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -20,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -92,6 +95,7 @@ public final class ScanManager {
 
     private static int scanningTicks = -1;
     private static long currentStart = -1;
+    @Nullable private static Level lastScanLevel;
     @Nullable private static Vec3 lastScanCenter;
 
     private static PoseStack worldViewModelStack = new PoseStack();
@@ -102,7 +106,7 @@ public final class ScanManager {
     public static void beginScan(final Player player, final List<ItemStack> stacks) {
         cancelScan();
 
-        float scanRadius = CommonConfig.baseScanRadius;
+        float scanRadius = ServerConfig.baseScanRadius;
 
         final List<ScannerModule> modules = new ArrayList<>();
         for (final ItemStack stack : stacks) {
@@ -121,6 +125,8 @@ public final class ScanManager {
         if (collectingProviders.isEmpty()) {
             return;
         }
+
+        lastScanLevel = player.level();
 
         final Vec3 center = player.position();
         for (final ScanResultProvider provider : collectingProviders) {
@@ -158,6 +164,7 @@ public final class ScanManager {
 
         clear();
 
+        lastScanLevel = entity.level();
         lastScanCenter = Objects.requireNonNull(entity.position());
         currentStart = System.currentTimeMillis();
 
@@ -170,17 +177,27 @@ public final class ScanManager {
     }
 
     public static void cancelScan() {
+        collectingProviders.forEach(ScanResultProvider::reset);
         collectingProviders.clear();
         collectingResults.clear();
         scanningTicks = 0;
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public static void tick() {
+        if (lastScanLevel != null && lastScanLevel != Minecraft.getInstance().level) {
+            cancelScan();
+            clear();
+            return;
+        }
+
         if (lastScanCenter == null || currentStart < 0) {
             return;
         }
 
-        if (CommonConfig.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
+        removeInvalidResults();
+
+        if (ServerConfig.scanStayDuration < (int) (System.currentTimeMillis() - currentStart)) {
             pendingResults.forEach((provider, results) -> results.forEach(ScanResult::close));
             pendingResults.clear();
             synchronized (renderingResults) {
@@ -222,6 +239,10 @@ public final class ScanManager {
                 final Vec3 position = results.get(index).getPosition();
                 if (lastScanCenter.distanceToSqr(position) <= sqRadius) {
                     final ScanResult result = results.remove(index);
+                    if (!result.isValid()) {
+                        result.close();
+                        continue;
+                    }
                     synchronized (renderingResults) {
                         renderingResults.computeIfAbsent(provider, p -> new ArrayList<>()).add(result);
                     }
@@ -338,7 +359,23 @@ public final class ScanManager {
             renderingResults.clear();
         }
 
+        lastScanLevel = null;
         lastScanCenter = null;
         currentStart = -1;
+    }
+
+    private static void removeInvalidResults() {
+        synchronized (renderingResults) {
+            renderingResults.values().removeIf(results -> {
+                results.removeIf(result -> {
+                    if (result.isValid()) {
+                        return false;
+                    }
+                    result.close();
+                    return true;
+                });
+                return results.isEmpty();
+            });
+        }
     }
 }

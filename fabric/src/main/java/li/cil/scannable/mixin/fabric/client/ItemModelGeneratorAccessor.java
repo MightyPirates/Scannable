@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.mixin.fabric.client;
 
 import net.minecraft.client.data.models.ItemModelGenerators;

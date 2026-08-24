@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.client.scanning.filter;
 
 import net.minecraft.world.entity.Entity;

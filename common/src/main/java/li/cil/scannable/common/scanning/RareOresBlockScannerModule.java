@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.scanning;
 
 import li.cil.scannable.api.scanning.BlockScannerModule;
@@ -6,7 +8,7 @@ import li.cil.scannable.client.scanning.ScanResultProviders;
 import li.cil.scannable.client.scanning.filter.BlockCacheScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockScanFilter;
 import li.cil.scannable.client.scanning.filter.BlockTagScanFilter;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.scanning.filter.IgnoredBlocks;
 import li.cil.scannable.common.tags.CommonTags;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,7 +33,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public int getEnergyCost(final ItemStack module) {
-        return CommonConfig.energyCostModuleOreRare;
+        return ServerConfig.energyCostModuleOreRare;
     }
 
     @Override
@@ -41,7 +43,7 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
 
     @Override
     public float adjustLocalRange(final float range) {
-        return range * CommonConfig.rangeModifierModuleOreRare;
+        return range * ServerConfig.rangeModifierModuleOreRare;
     }
 
     @Override
@@ -56,13 +58,13 @@ public enum RareOresBlockScannerModule implements BlockScannerModule {
         }
 
         final List<Predicate<BlockState>> filters = new ArrayList<>();
-        for (final Identifier location : CommonConfig.rareOreBlocks) {
+        for (final Identifier location : ServerConfig.rareOreBlocks) {
             BuiltInRegistries.BLOCK.getOptional(location).ifPresent(block ->
                 filters.add(new BlockScanFilter(block)));
         }
         BuiltInRegistries.BLOCK.getTags().forEach(namedTag -> {
             final TagKey<Block> tag = namedTag.key();
-            if (CommonConfig.rareOreBlockTags.contains(tag.location())) {
+            if (ServerConfig.rareOreBlockTags.contains(tag.location())) {
                 filters.add(new BlockTagScanFilter(tag));
             }
         });

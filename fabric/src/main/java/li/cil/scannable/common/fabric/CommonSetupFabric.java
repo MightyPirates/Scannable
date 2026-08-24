@@ -1,8 +1,10 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.fabric;
 
 import li.cil.scannable.api.fabric.Lookups;
 import li.cil.scannable.common.CommonSetup;
-import li.cil.scannable.common.config.CommonConfig;
+import li.cil.scannable.common.config.ServerConfig;
 import li.cil.scannable.common.item.Items;
 import li.cil.scannable.common.item.ScannerModuleItem;
 import net.fabricmc.api.ModInitializer;
@@ -15,12 +17,12 @@ public final class CommonSetupFabric implements ModInitializer {
         CommonSetup.initialize();
 
         EnergyStorage.ITEM.registerForItems((stack, context) -> {
-            if (!CommonConfig.useEnergy) {
+            if (!ServerConfig.useEnergy) {
                 return null;
             }
 
             return SimpleEnergyItem.createStorage(context,
-                CommonConfig.energyCapacityScanner,
+                ServerConfig.energyCapacityScanner,
                 Long.MAX_VALUE,
                 Long.MAX_VALUE);
         }, Items.SCANNER.get());

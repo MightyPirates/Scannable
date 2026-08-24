@@ -19,7 +19,7 @@ loom {
         create("clientData") {
             clientData()
             programArgs("--mod", modId)
-            programArgs("--output", file("src/generated/resources/").absolutePath)
+            programArgs("--output", project(":common").file("src/generated/resources").absolutePath)
             programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
             programArgs("--existing", file("src/main/resources").absolutePath)
         }
@@ -28,14 +28,14 @@ loom {
             name("Game Test Server")
             mainClass.set("net.neoforged.fml.startup.GameTestServer")
             runDir = "run/gametest"
-            programArgs("--tests", "scannable_gametest:*")
+            programArgs("--tests", "${modId}_gametest:*")
             property("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
             vmArg("-ea")
         }
         create("serverData") {
             serverData()
             programArgs("--mod", modId)
-            programArgs("--output", file("src/generated/resources/").absolutePath)
+            programArgs("--output", project(":common").file("src/generated/resources").absolutePath)
             programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
             programArgs("--existing", file("src/main/resources").absolutePath)
         }
@@ -51,6 +51,9 @@ configurations.named("modRuntimeOnly") { extendsFrom(devOnlyMods) }
 dependencies {
     neoForge(libs.neoforge.platform)
     modImplementation(libs.neoforge.architectury)
+
+    // Allows `remapSourcesJar` to resolve `@ExpectPlatform` in the common sources it bundles.
+    compileOnly(libs.architectury.injectables)
 
     gameTestRuntime(project(":gametest-neoforge"))
 

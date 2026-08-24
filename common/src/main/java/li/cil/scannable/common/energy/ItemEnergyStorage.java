@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 package li.cil.scannable.common.energy;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;

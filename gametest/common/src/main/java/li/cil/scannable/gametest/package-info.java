@@ -1,4 +1,4 @@
 @ParametersAreNonnullByDefault
-package li.cil.scannable.data.fabric;
+package li.cil.scannable.gametest;
 
 import javax.annotation.ParametersAreNonnullByDefault;
