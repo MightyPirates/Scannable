@@ -191,6 +191,7 @@ tasks.named("build") {
     dependsOn("apiJar", "apiSourcesJar")
 }
 
+serializeArchitecturyTransforms()
 registerGameTestTask()
 registerLintTask()
 registerApiJarTask(minecraftVersion)
