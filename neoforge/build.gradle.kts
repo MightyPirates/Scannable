@@ -15,20 +15,20 @@ loom {
     runs {
         create("gameTestServer") {
             server()
-            runDir = "run/gametest"
-            property("neoforge.gameTestServer", "true")
-            property("neoforge.enabledGameTestNamespaces", "scannable_gametest")
-            property("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
-            vmArg("-ea")
+            runDirectory.set(file("run/gametest"))
+            systemProperties.put("neoforge.gameTestServer", "true")
+            systemProperties.put("neoforge.enabledGameTestNamespaces", "scannable_gametest")
+            systemProperties.put("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
+            jvmArguments.add("-ea")
         }
 
         create("data") {
             data()
-            programArgs("--all")
-            programArgs("--mod", modId)
-            programArgs("--output", project(":common").file("src/generated/resources").absolutePath)
-            programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
-            programArgs("--existing", file("src/main/resources").absolutePath)
+            programArguments.add("--all")
+            programArguments.addAll("--mod", modId)
+            programArguments.addAll("--output", project(":common").file("src/generated/resources").absolutePath)
+            programArguments.addAll("--existing", project(":common").file("src/main/resources").absolutePath)
+            programArguments.addAll("--existing", file("src/main/resources").absolutePath)
         }
     }
 }

@@ -15,10 +15,10 @@ loom {
     runs {
         create("gameTest") {
             server()
-            runDir = "run/gametest"
-            vmArg("-Dfabric-api.gametest")
-            vmArg("-Dfabric-api.gametest.report-file=${gameTestResultsDir.get().asFile.absolutePath}/fabric-game-tests.xml")
-            vmArg("-ea")
+            runDirectory.set(file("run/gametest"))
+            jvmArguments.add("-Dfabric-api.gametest")
+            jvmArguments.add("-Dfabric-api.gametest.report-file=${gameTestResultsDir.get().asFile.absolutePath}/fabric-game-tests.xml")
+            jvmArguments.add("-ea")
         }
 
     }
