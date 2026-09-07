@@ -58,7 +58,7 @@ import java.util.function.Predicate;
 
 @Environment(EnvType.CLIENT)
 public final class ScanResultProviderBlock extends AbstractScanResultProvider {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(ScanResultProviderBlock.class);
 
     // Sanity performance check. Maybe some day I'll do some research on how to
     // do the clustering more efficiently, but for now this is good enough. We
