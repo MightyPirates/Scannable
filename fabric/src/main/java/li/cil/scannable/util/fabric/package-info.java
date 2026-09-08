@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 package li.cil.scannable.util.fabric;

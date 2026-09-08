@@ -2,7 +2,7 @@
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package li.cil.scannable.common.network;
+package li.cil.scannable.client.fabric;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 
