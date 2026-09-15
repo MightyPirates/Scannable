@@ -73,7 +73,7 @@ public final class Shaders implements ResourceManagerReloadListener {
     }
 
     private static final class ShaderReference {
-        private static final Logger LOGGER = LogManager.getLogger();
+        private static final Logger LOGGER = LogManager.getLogger(ShaderReference.class);
 
         private final String name;
         private final VertexFormat format;
