@@ -34,8 +34,9 @@ public final class ConfigManagerImpl extends ConfigManager {
     }
 
     public static void initialize() {
-        NeoForgeModConfigEvents.loading(API.MOD_ID).register(ConfigManagerImpl::handleModConfigEvent);
-        NeoForgeModConfigEvents.reloading(API.MOD_ID).register(ConfigManagerImpl::handleModConfigEvent);
+        NeoForgeModConfigEvents.loading(API.MOD_ID).register(config -> handleModConfigEvent(config, false));
+        NeoForgeModConfigEvents.reloading(API.MOD_ID).register(config -> handleModConfigEvent(config, false));
+        NeoForgeModConfigEvents.unloading(API.MOD_ID).register(config -> handleModConfigEvent(config, true));
 
         CONFIGS.forEach((spec, config) -> {
             final Type typeAnnotation = config.instance().getClass().getAnnotation(Type.class);
@@ -51,11 +52,15 @@ public final class ConfigManagerImpl extends ConfigManager {
 
     // --------------------------------------------------------------------- //
 
-    private static void handleModConfigEvent(final ModConfig eventConfig) {
-        if (!eventConfig.getModId().equals(API.MOD_ID))
-            return;
+    private static void handleModConfigEvent(final ModConfig eventConfig, final boolean isUnloading) {
         final ConfigDefinition config = CONFIGS.get(eventConfig.getSpec());
-        if (config != null) {
+        if (config == null) {
+            return;
+        }
+
+        if (isUnloading) {
+            config.applyDefaults();
+        } else {
             config.apply();
         }
     }
@@ -81,9 +86,7 @@ public final class ConfigManagerImpl extends ConfigManager {
 
         @Override
         public Builder translation(@Nullable final String translationKey) {
-            if (translationKey != null) {
-                builder.translation(translationKey);
-            }
+            builder.translation(translationKey);
             return this;
         }
 
@@ -98,6 +101,11 @@ public final class ConfigManagerImpl extends ConfigManager {
         @Override
         public T get() {
             return value().get();
+        }
+
+        @Override
+        public T getDefault() {
+            return value().getDefault();
         }
     }
 }

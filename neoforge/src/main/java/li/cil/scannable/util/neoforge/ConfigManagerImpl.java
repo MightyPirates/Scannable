@@ -51,7 +51,13 @@ public final class ConfigManagerImpl extends ConfigManager {
 
     private static void handleModConfigEvent(final ModConfigEvent event) {
         final ConfigDefinition config = CONFIGS.get(event.getConfig().getSpec());
-        if (config != null) {
+        if (config == null) {
+            return;
+        }
+
+        if (event instanceof ModConfigEvent.Unloading) {
+            config.applyDefaults();
+        } else {
             config.apply();
         }
     }
@@ -77,9 +83,7 @@ public final class ConfigManagerImpl extends ConfigManager {
 
         @Override
         public Builder translation(@Nullable final String translationKey) {
-            if (translationKey != null) {
-                builder.translation(translationKey);
-            }
+            builder.translation(translationKey);
             return this;
         }
 
@@ -94,6 +98,11 @@ public final class ConfigManagerImpl extends ConfigManager {
         @Override
         public T get() {
             return value().get();
+        }
+
+        @Override
+        public T getDefault() {
+            return value().getDefault();
         }
     }
 }

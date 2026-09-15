@@ -11,6 +11,7 @@ public final class ProviderCacheManagerImpl {
     public static void initialize() {
         NeoForgeModConfigEvents.loading(API.MOD_ID).register(cfg -> ProviderCacheManager.clearCache());
         NeoForgeModConfigEvents.reloading(API.MOD_ID).register(cfg -> ProviderCacheManager.clearCache());
+        NeoForgeModConfigEvents.unloading(API.MOD_ID).register(cfg -> ProviderCacheManager.clearCache());
         CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> ProviderCacheManager.clearCache());
     }
 }
