@@ -86,9 +86,7 @@ public final class ConfigManagerImpl extends ConfigManager {
 
         @Override
         public Builder translation(@Nullable final String translationKey) {
-            if (translationKey != null) {
-                builder.translation(translationKey);
-            }
+            builder.translation(translationKey);
             return this;
         }
 

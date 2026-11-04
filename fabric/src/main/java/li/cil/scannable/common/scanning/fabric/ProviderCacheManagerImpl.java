@@ -11,6 +11,7 @@ public final class ProviderCacheManagerImpl {
     public static void initialize() {
         ModConfigEvents.loading(API.MOD_ID).register(cfg -> ProviderCacheManager.clearCache());
         ModConfigEvents.reloading(API.MOD_ID).register(cfg -> ProviderCacheManager.clearCache());
+        ModConfigEvents.unloading(API.MOD_ID).register(cfg -> ProviderCacheManager.clearCache());
         CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> ProviderCacheManager.clearCache());
     }
 }

@@ -53,8 +53,6 @@ public final class ConfigManagerImpl extends ConfigManager {
     // --------------------------------------------------------------------- //
 
     private static void handleModConfigEvent(final ModConfig eventConfig, final boolean isUnloading) {
-        if (!eventConfig.getModId().equals(API.MOD_ID))
-            return;
         final ConfigDefinition config = CONFIGS.get(eventConfig.getSpec());
         if (config == null) {
             return;
@@ -88,9 +86,7 @@ public final class ConfigManagerImpl extends ConfigManager {
 
         @Override
         public Builder translation(@Nullable final String translationKey) {
-            if (translationKey != null) {
-                builder.translation(translationKey);
-            }
+            builder.translation(translationKey);
             return this;
         }
 

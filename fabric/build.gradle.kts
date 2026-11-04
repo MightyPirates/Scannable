@@ -1,30 +1,27 @@
-val modId: String by project
+val modId = providers.gradleProperty("modId").get()
 val minecraftVersion: String = libs.versions.minecraft.get()
 val fabricApiVersion: String = libs.versions.fabric.api.get()
 val architecturyVersion: String = libs.versions.architectury.get()
 val forgeConfigPortVersion: String = libs.versions.fabric.forgeConfigPort.get()
 
-val gameTestRuntime: Configuration by configurations.creating
+val gameTestRuntime = configurations.create("gameTestRuntime")
 val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
-val devOnlyMods: Configuration by configurations.creating
+val devOnlyMods = configurations.create("devOnlyMods")
 val devOnlyModNames = provider { devOnlyMods.resolvedConfiguration.resolvedArtifacts.map { it.moduleVersion.id.name } }
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
     runs {
-        named("client") { runDir = "run/client" }
-        named("server") { runDir = "run/server" }
+        named("client") { runDirectory.set(file("run/client")) }
+        named("server") { runDirectory.set(file("run/server")) }
 
         create("gameTest") {
             server()
-            runDir = "run/gametest"
-            property("fabric-api.gametest")
-            property(
-                "fabric-api.gametest.report-file",
-                gameTestResultsDir.get().file("fabric-game-tests.xml").asFile.absolutePath
-            )
-            vmArg("-ea")
+            runDirectory.set(file("run/gametest"))
+            systemProperties.put("fabric-api.gametest", "true")
+            systemProperties.put("fabric-api.gametest.report-file", gameTestResultsDir.get().file("fabric-game-tests.xml").asFile.absolutePath)
+            jvmArguments.add("-ea")
         }
     }
 }

@@ -1,4 +1,11 @@
 # Scannable
+
+[![build](https://img.shields.io/github/actions/workflow/status/MightyPirates/Scannable/build.yml?label=build)](https://github.com/MightyPirates/Scannable/actions/workflows/build.yml)
+[![game tests](https://img.shields.io/github/actions/workflow/status/MightyPirates/Scannable/test-report.yml?label=game%20tests)](https://github.com/MightyPirates/Scannable/actions/workflows/test-report.yml)
+[![curseforge](https://img.shields.io/curseforge/dt/266784?label=curseforge&color=f16436&logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/scannable)
+[![modrinth](https://img.shields.io/modrinth/dt/scannable?label=modrinth&color=1bd96a&logo=modrinth&logoColor=white)](https://modrinth.com/mod/scannable)
+![loaders](https://img.shields.io/badge/loaders-Fabric%20%7C%20NeoForge-blueviolet)
+
 Scannable is a Minecraft mod that adds a single scanner item and a couple of scanner modules. Using the scanner will bring up a couple of overlays highlighting nearby points of interest, such as animals, monsters and ores, depending on the installed modules.
 
 ## License / Use in Modpacks

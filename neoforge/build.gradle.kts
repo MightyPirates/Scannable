@@ -1,12 +1,12 @@
-val modId: String by project
+val modId = providers.gradleProperty("modId").get()
 val minecraftVersion: String = libs.versions.minecraft.get()
 val neoforgeVersion: String = libs.versions.neoforge.platform.get()
 val neoforgeLoaderVersion: String = libs.versions.neoforge.loader.get()
 val architecturyVersion: String = libs.versions.architectury.get()
 
-val gameTestRuntime: Configuration by configurations.creating
+val gameTestRuntime = configurations.create("gameTestRuntime")
 val gameTestResultsDir = layout.buildDirectory.dir("test-results/gameTest")
-val devOnlyMods: Configuration by configurations.creating
+val devOnlyMods = configurations.create("devOnlyMods")
 val devOnlyModNames = provider { devOnlyMods.resolvedConfiguration.resolvedArtifacts.map { it.moduleVersion.id.name } }
 
 sourceSets.main {
@@ -19,31 +19,31 @@ loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
     runs {
-        named("client") { runDir = "run/client" }
-        named("server") { runDir = "run/server" }
+        named("client") { runDirectory.set(file("run/client")) }
+        named("server") { runDirectory.set(file("run/server")) }
 
         create("clientData") {
             clientData()
-            programArgs("--mod", modId)
-            programArgs("--output", file("src/generated/client").absolutePath)
-            programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
-            programArgs("--existing", file("src/main/resources").absolutePath)
+            programArguments.addAll("--mod", modId)
+            programArguments.addAll("--output", file("src/generated/client").absolutePath)
+            programArguments.addAll("--existing", project(":common").file("src/main/resources").absolutePath)
+            programArguments.addAll("--existing", file("src/main/resources").absolutePath)
         }
         create("gameTestServer") {
             server()
             name("Game Test Server")
             mainClass.set("net.neoforged.fml.startup.GameTestServer")
-            runDir = "run/gametest"
-            programArgs("--tests", "${modId}_gametest:*")
-            property("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
-            vmArg("-ea")
+            runDirectory.set(file("run/gametest"))
+            programArguments.addAll("--tests", "${modId}_gametest:*")
+            systemProperties.put("scannable.gameTest.junitDir", gameTestResultsDir.get().asFile.absolutePath)
+            jvmArguments.add("-ea")
         }
         create("serverData") {
             serverData()
-            programArgs("--mod", modId)
-            programArgs("--output", file("src/generated/server").absolutePath)
-            programArgs("--existing", project(":common").file("src/main/resources").absolutePath)
-            programArgs("--existing", file("src/main/resources").absolutePath)
+            programArguments.addAll("--mod", modId)
+            programArguments.addAll("--output", file("src/generated/server").absolutePath)
+            programArguments.addAll("--existing", project(":common").file("src/main/resources").absolutePath)
+            programArguments.addAll("--existing", file("src/main/resources").absolutePath)
         }
     }
 }
